@@ -28,13 +28,15 @@
 </nav>
 
 <script>
-  document.addEventListener('turbo:load', () => {
+  document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-controller="dropdown"]').forEach((dropdown) => {
       const button = dropdown.querySelector('[data-action]')
       const menu = dropdown.querySelector('[data-dropdown-target="menu"]')
-      button.addEventListener('click', () => {
-        menu.classList.toggle('hidden')
-      })
+      if (button && menu) {
+        button.addEventListener('click', () => {
+          menu.classList.toggle('hidden')
+        })
+      }
     })
   })
 </script>
