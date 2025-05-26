@@ -1,0 +1,59 @@
+<h1 class="text-2xl font-bold mb-6">Resumo de <%= @period %></h1>
+
+<div class="flex items-center gap-4 mb-6">
+  <%= link_to "← #{@prev_period}", overview_index_path(period: @prev_period), class: "text-blue-600 hover:underline" %>
+  <%= link_to "Hoje", overview_index_path(period: Date.today.strftime('%Y-%m')), class: "text-blue-600 hover:underline" %>
+  <%= link_to "#{@next_period} →", overview_index_path(period: @next_period), class: "text-blue-600 hover:underline" %>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded shadow-sm">
+    <p class="text-sm text-green-700 font-medium">Receitas</p>
+    <p class="text-xl font-bold text-green-900">R$ <%= sprintf('%.2f', @income_total) %></p>
+  </div>
+  <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
+    <p class="text-sm text-red-700 font-medium">Despesas</p>
+    <p class="text-xl font-bold text-red-900">R$ <%= sprintf('%.2f', @expense_total) %></p>
+  </div>
+  <div class="bg-gray-50 border-l-4 border-gray-500 p-4 rounded shadow-sm">
+    <p class="text-sm text-gray-700 font-medium">Saldo</p>
+    <p class="text-xl font-bold text-gray-900">R$ <%= sprintf('%.2f', @balance) %></p>
+  </div>
+</div>
+
+<p class="text-sm text-gray-600 mb-6">Total de transações no período: <strong><%= @transactions.count %></strong></p>
+
+<h2 class="text-lg font-semibold mb-2">Totais por categoria</h2>
+<div class="bg-white shadow rounded p-4 mb-8">
+  <ul class="text-sm space-y-1">
+    <% @category_totals.each do |name, total| %>
+      <li><span class="font-medium"><%= name %>:</span> R$ <%= sprintf('%.2f', total) %></li>
+    <% end %>
+  </ul>
+</div>
+
+<h2 class="text-lg font-semibold mb-2">Últimos lançamentos</h2>
+<table class="w-full bg-white shadow rounded text-sm">
+  <thead class="bg-gray-100 text-gray-600">
+    <tr>
+      <th class="p-2 text-left">Data</th>
+      <th class="p-2 text-left">Descrição</th>
+      <th class="p-2 text-left">Conta</th>
+      <th class="p-2 text-left">Categoria</th>
+      <th class="p-2 text-right">Valor</th>
+      <th class="p-2 text-left">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @transactions.each do |tx| %>
+      <tr class="border-t hover:bg-gray-50">
+        <td class="p-2"><%= l(tx.date, format: :short) %></td>
+        <td class="p-2"><%= tx.description %></td>
+        <td class="p-2"><%= tx.from_account.name %></td>
+        <td class="p-2"><%= tx.category.name %></td>
+        <td class="p-2 text-right"><%= number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.') %></td>
+        <td class="p-2"><%= tx.status.capitalize %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

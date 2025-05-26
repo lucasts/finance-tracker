@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Setup",
+      "type": "shell",
+      "command": "./bin/setup",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Testes",
+      "type": "shell",
+      "command": "rails test",
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}

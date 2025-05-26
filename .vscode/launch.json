@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Rails Server",
+      "type": "pwa-node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "bin/rails",
+      "runtimeArgs": ["server", "-b", "0.0.0.0"],
+      "console": "integratedTerminal"
+    }
+  ]
+}

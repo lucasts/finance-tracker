@@ -1,0 +1,16 @@
+/log/*
+!/log/.keep
+/tmp
+/.bundle
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/vendor/bundle
+.byebug_history
+.env
+node_modules
+public/assets
+storage/*
+config/master.key
+
+/app/assets/builds/*
+!/app/assets/builds/.keep
