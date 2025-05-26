@@ -1,11 +1,40 @@
-<nav class="border-b border-gray-200 px-6 py-4 flex justify-between items-center text-sm">
-  <div class="flex space-x-4">
-    <%= link_to 'Visão Geral', overview_index_path, class: "font-semibold text-black hover:text-blue-600" %>
-    <%= link_to 'Transações', transactions_path, class: "text-gray-600 hover:text-blue-600" %>
-    <%= link_to 'Contas', accounts_path, class: "text-gray-600 hover:text-blue-600" %>
-    <%= link_to 'Categorias', categories_path, class: "text-gray-600 hover:text-blue-600" %>
-  </div>
+<nav class="border-b border-gray-200 px-4 py-4 bg-white shadow-sm">
+  <div class="flex flex-wrap justify-between items-center max-w-7xl mx-auto">
+    <div class="flex items-center space-x-4">
+      <%= link_to 'Visão Geral', overview_index_path, class: "font-semibold text-gray-800 hover:text-blue-600" %>
+      <%= link_to 'Lançamentos', transactions_path, class: "text-gray-600 hover:text-blue-600" %>
+
+      <div class="relative" data-controller="dropdown">
+        <button data-action="click->dropdown#toggle" class="text-gray-600 hover:text-blue-600 focus:outline-none">
+          Configurações ▾
+        </button>
+        <div data-dropdown-target="menu" class="hidden absolute z-10 bg-white border mt-2 rounded shadow-lg min-w-[160px]">
+          <%= link_to 'Contas', accounts_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+          <%= link_to 'Categorias', categories_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+          <%= link_to 'Tipos de Conta', account_types_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+          <%= link_to 'Grupos de Categoria', category_groups_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+          <%= link_to 'Grupos de Transação', transaction_groups_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+        </div>
+      </div>
+    </div>
+
     <% if defined?(destroy_user_session_path) %>
-        <div class="text-gray-600">usuario@example.com <%= link_to 'Sair', destroy_user_session_path, method: :delete, class: "ml-2 text-blue-600 hover:underline" %></div>
+      <div class="mt-4 md:mt-0 text-gray-600 text-sm">
+        usuario@example.com
+        <%= link_to 'Sair', destroy_user_session_path, method: :delete, class: "ml-2 text-blue-600 hover:underline" %>
+      </div>
     <% end %>
+  </div>
 </nav>
+
+<script>
+  document.addEventListener('turbo:load', () => {
+    document.querySelectorAll('[data-controller="dropdown"]').forEach((dropdown) => {
+      const button = dropdown.querySelector('[data-action]')
+      const menu = dropdown.querySelector('[data-dropdown-target="menu"]')
+      button.addEventListener('click', () => {
+        menu.classList.toggle('hidden')
+      })
+    })
+  })
+</script>
