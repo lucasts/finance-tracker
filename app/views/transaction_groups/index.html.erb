@@ -1,0 +1,25 @@
+<!-- app/views/transaction_groups/index.html.erb -->
+<h1 class="text-2xl font-bold mb-6">Grupos de Transação</h1>
+<p class="text-sm text-gray-600 mb-4">Agrupe transações relacionadas, como parcelamentos ou transferências.</p>
+<%= link_to 'Novo Grupo de Transação', new_transaction_group_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4 inline-block" %>
+
+<table class="w-full bg-white shadow rounded text-sm">
+  <thead class="bg-gray-100 text-gray-600">
+    <tr>
+      <th class="p-2 text-left">Nome</th>
+      <th class="p-2 text-left">Tipo</th>
+      <th class="p-2 text-right">Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @transaction_groups.each do |group| %>
+      <tr class="border-t hover:bg-gray-50">
+        <td class="p-2"><%= group.name %></td>
+        <td class="p-2"><%= group.group_type %></td>
+        <td class="p-2 text-right">
+          <%= link_to 'Editar', edit_transaction_group_path(group), class: "text-blue-600 hover:underline" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

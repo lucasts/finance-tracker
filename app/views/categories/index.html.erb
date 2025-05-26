@@ -1,0 +1,26 @@
+<h1 class="text-2xl font-bold mb-6">Categorias</h1>
+
+<div class="flex justify-between items-center mb-4">
+  <%= link_to 'Nova Categoria', new_category_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+</div>
+
+<table class="w-full bg-white shadow rounded text-sm">
+  <thead class="bg-gray-100 text-gray-600">
+    <tr>
+      <th class="p-2 text-left">Nome</th>
+      <th class="p-2 text-left">Grupo</th>
+      <th class="p-2 text-right">Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @categories.each do |cat| %>
+      <tr class="border-t hover:bg-gray-50">
+        <td class="p-2"><%= cat.name %></td>
+        <td class="p-2"><%= cat.category_group.name %></td>
+        <td class="p-2 text-right">
+          <%= link_to 'Editar', edit_category_path(cat), class: "text-blue-600 hover:underline" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
