@@ -4,13 +4,16 @@ module UiHelper
     options[:class] = [classes, options[:class]].compact.join(" ")
     content_tag(:button, label, options)
   end
-
   
-  def form_group(form, field, type: :text_field, label: nil, **options)
+  def form_group(form, field, type: :text_field, label: nil, choices: nil, **options)
     label ||= field.to_s.humanize
     content_tag(:div, class: "space-y-1") do
       form.label(field, label, class: "block text-sm font-medium text-gray-700") +
-      form.send(type, field, class: "mt-1 block w-full rounded border-gray-300 shadow-sm", **options)
+        if type == :select
+          form.select(field, choices, {}, class: "mt-1 block w-full rounded border-gray-300 shadow-sm", **options)
+        else
+          form.send(type, field, class: "mt-1 block w-full rounded border-gray-300 shadow-sm", **options)
+        end
     end
   end
 

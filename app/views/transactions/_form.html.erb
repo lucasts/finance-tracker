@@ -6,8 +6,8 @@
     <%= form_group(form, :period) %>
     <%= form_select_group(form, :from_account_id, Account.all, :id, :name, label: "Conta de Origem") %>
     <%= form_select_group(form, :to_account_id, Account.all, :id, :name, label: "Conta de Destino") %>
-    <%= form_select_group(form, :category_id, Category.all, :id, :name, label: "Categoria") %>
-    <%= form_group(form, :transaction_type, type: :select, options: options_for_select(["income", "expense"], selected: transaction.transaction_type)) %>
+    <%= form_select_group(form, :category_id, Category.all, :id, :name, label: "Categoria") %>    
+    <%= form_group(form, :transaction_type, type: :select, choices: [["Receita", "income"], ["Despesa", "expense"]] ) %>
 
     <div>
       <%= check_box_tag :show_parcelamento, "1", transaction.transaction_group_id.present?, data: { controller: "toggle" } %>
