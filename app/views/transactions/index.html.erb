@@ -4,33 +4,98 @@
   <%= link_to 'Novo lançamento', new_transaction_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
 </div>
 
-<table class="w-full bg-white shadow rounded text-sm">
-  <thead class="bg-gray-100 text-gray-600">
-    <tr>
-      <th class="p-2 text-left">Data</th>
-      <th class="p-2 text-left">Descrição</th>
-      <th class="p-2 text-left">Conta Origem</th>
-      <th class="p-2 text-left">Conta Destino</th>
-      <th class="p-2 text-left">Categoria</th>
-      <th class="p-2 text-right">Valor</th>
-      <th class="p-2">Ações</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @transactions.each do |tx| %>
-      <tr class="border-t hover:bg-gray-50">
-        <td class="p-2"><%= l(tx.date, format: :short) %></td>
-        <td class="p-2"><%= tx.description %></td>
-        <td class="p-2"><%= tx.from_account.name %></td>
-        <td class="p-2"><%= tx.to_account&.name %></td>
-        <td class="p-2"><%= tx.category.name %></td>
-        <td class="p-2 text-right font-semibold <%= tx.transaction_type == 'income' ? 'text-green-600' : 'text-red-600' %>">
-          <%= number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.') %>
-        </td>
-        <td class="p-2 text-right">
-          <%= link_to 'Editar', edit_transaction_path(tx), class: "text-blue-600 hover:underline" %>
-        </td>
+<% if @transactions.any? %>
+  <% income_total = @transactions.select { |t| t.transaction_type == 'income' }.sum(&:amount) %>
+  <% expense_total = @transactions.select { |t| t.transaction_type == 'expense' }.sum(&:amount) %>
+  <% balance = income_total - expense_total %>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded shadow-sm">
+      <p class="text-sm text-green-700 font-medium">Receitas</p>
+      <p class="text-xl font-bold text-green-900">R$ <%= number_with_precision(income_total, precision: 2, separator: ",") %></p>
+    </div>
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
+      <p class="text-sm text-red-700 font-medium">Despesas</p>
+      <p class="text-xl font-bold text-red-900">R$ <%= number_with_precision(expense_total, precision: 2, separator: ",") %></p>
+    </div>
+    <div class="bg-gray-50 border-l-4 border-gray-500 p-4 rounded shadow-sm">
+      <p class="text-sm text-gray-700 font-medium">Saldo</p>
+      <p class="text-xl font-bold text-gray-900">R$ <%= number_with_precision(balance, precision: 2, separator: ",") %></p>
+    </div>
+  </div>
+<% end %>
+
+<div class="mb-6 bg-white shadow rounded p-4">
+  <%= form_with url: transactions_path, method: :get, local: true do |f| %>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <%= label_tag :account_id, "Conta" %>
+        <%= select_tag :account_id, options_from_collection_for_select(Account.all, :id, :name, params[:account_id]), prompt: "Todas", class: "w-full border rounded px-2 py-1" %>
+      </div>
+      <div>
+        <%= label_tag :transaction_type, "Tipo" %>
+        <%= select_tag :transaction_type, options_for_select([['Todas', nil], ['Receita', 'income'], ['Despesa', 'expense']], params[:transaction_type]), class: "w-full border rounded px-2 py-1" %>
+      </div>
+      <div>
+        <%= label_tag :period, "Período" %>
+        <%= text_field_tag :period, params[:period], class: "w-full border rounded px-2 py-1", placeholder: "AAAA-MM" %>
+      </div>
+      <div class="flex items-end space-x-2">
+        <%= submit_tag "Filtrar", class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+        <%= link_to "Limpar", transactions_path, class: "text-sm text-gray-600 hover:underline self-center" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% grouped = @transactions.group_by(&:transaction_group) %>
+<% grouped.each do |group, transactions| %>
+  <% if group.present? %>
+    <h2 class="text-md font-semibold text-gray-700 mb-2 mt-6">💳 Parcelamento: <%= group.name %></h2>
+  <% end %>
+
+  <% running_balance = 0 %>
+  <table class="w-full bg-white shadow rounded text-sm mb-6">
+    <thead class="bg-gray-100 text-gray-600">
+      <tr>
+        <th class="p-2 text-left">Data</th>
+        <th class="p-2 text-left">Descrição</th>
+        <th class="p-2 text-left">Conta Origem</th>
+        <th class="p-2 text-left">Conta Destino</th>
+        <th class="p-2 text-left">Categoria</th>
+        <th class="p-2 text-right">Valor</th>
+        <th class="p-2 text-right">Parcela</th>
+        <th class="p-2 text-right">Saldo Acum.</th>
+        <th class="p-2 text-right">Ações</th>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% transactions.each_with_index do |tx, idx| %>
+        <% delta = tx.transaction_type == 'income' ? tx.amount : -tx.amount %>
+        <% running_balance += delta %>
+        <tr class="border-t hover:bg-gray-50">
+          <td class="p-2"><%= l(tx.date, format: :short) %></td>
+          <td class="p-2"><%= tx.description %></td>
+          <td class="p-2"><%= tx.from_account.name %></td>
+          <td class="p-2"><%= tx.to_account&.name %></td>
+          <td class="p-2"><%= tx.category.name %></td>
+          <td class="p-2 text-right font-semibold <%= tx.transaction_type == 'income' ? 'text-green-600' : 'text-red-600' %>">
+            <%= number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.') %>
+          </td>
+          <td class="p-2 text-right">
+            <% if group.present? %>
+              <%= tx.installment || "-" %> / <%= transactions.size %>
+            <% else %>
+              —
+            <% end %>
+          </td>
+          <td class="p-2 text-right text-gray-700">
+            <%= number_to_currency(running_balance, unit: 'R$', separator: ',', delimiter: '.') %>
+          </td>
+          <td class="p-2 text-right">
+            <%= link_to 'Editar', edit_transaction_path(tx), class: "text-blue-600 hover:underline" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
