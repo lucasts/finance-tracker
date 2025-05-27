@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_26_043950) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_27_173051) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -49,6 +49,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_26_043950) do
     t.string "group_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "installment_count", default: 1
+    t.date "starts_on"
   end
 
   create_table "transactions", force: :cascade do |t|

@@ -83,7 +83,7 @@
           </td>
           <td class="p-2 text-right">
             <% if group.present? %>
-              <%= tx.installment || "-" %> / <%= transactions.size %>
+              <%= "#{tx.installment}/#{tx.transaction_group.installment_count}" %>
             <% else %>
               —
             <% end %>

@@ -33,6 +33,18 @@ class TransactionGroupsController < ApplicationController
     redirect_to transaction_groups_path, notice: "Grupo de transação removido."
   end
 
+  def show
+    @group = TransactionGroup.find(params[:id])
+    @transactions = @group.transactions.sort_by { |t| -t.installment.to_i }
+
+    @paid = @transactions.select { |t| t.status == "confirmed" }
+    @unpaid = @transactions.reject { |t| t.status == "confirmed" }
+
+    @total_paid = @paid.sum(&:amount)
+    @total_due = @unpaid.sum(&:amount)
+    @total_value = @transactions.sum(&:amount)
+  end
+
   private
 
   def set_transaction_group

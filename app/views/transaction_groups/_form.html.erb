@@ -1,7 +1,7 @@
 <%= form_with(model: transaction_group, local: true) do |form| %>
   <div class="space-y-4">
     <%= form_group(form, :name) %>
-    <%= form_group(form, :group_type, type: :select, options: options_for_select(["installment", "loan", "transfer"], selected: transaction_group.group_type)) %>
+    <%= form_group(form, :group_type, type: :select, choices: ["installment", "loan", "transfer"]) %>
     <%= primary_button("Salvar") %>
   </div>
 <% end %>
