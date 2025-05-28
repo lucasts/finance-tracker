@@ -1,7 +1,8 @@
 {
   "name": "Fin tracker Dev Container",
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
+    "context": ".."
   },
   "forwardPorts": [3000],
   "postCreateCommand": "bundle install && yarn install",
