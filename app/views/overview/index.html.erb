@@ -1,9 +1,9 @@
-<h1 class="text-2xl font-bold mb-6">Resumo de <%= @period %></h1>
+<h1 class="text-2xl font-bold mb-6">Resumo de <%= @month %></h1>
 
 <div class="flex items-center gap-4 mb-6">
-  <%= link_to "← #{@prev_period}", overview_index_path(period: @prev_period), class: "text-blue-600 hover:underline" %>
-  <%= link_to "Hoje", overview_index_path(period: Date.today.strftime('%Y-%m')), class: "text-blue-600 hover:underline" %>
-  <%= link_to "#{@next_period} →", overview_index_path(period: @next_period), class: "text-blue-600 hover:underline" %>
+  <%= link_to "← #{@prev_month}", overview_index_path(month: @prev_month), class: "text-blue-600 hover:underline" %>
+  <%= link_to "Hoje", overview_index_path(month: Date.today.strftime('%Y-%m')), class: "text-blue-600 hover:underline" %>
+  <%= link_to "#{@next_month} →", overview_index_path(month: @next_month), class: "text-blue-600 hover:underline" %>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -36,7 +36,8 @@
 <table class="w-full bg-white shadow rounded text-sm">
   <thead class="bg-gray-100 text-gray-600">
     <tr>
-      <th class="p-2 text-left">Data</th>
+      <th class="p-2 text-left">Data do evento (competência)</th>
+      <th class="p-2 text-left">Data de pagamento (caixa)</th>
       <th class="p-2 text-left">Descrição</th>
       <th class="p-2 text-left">Conta</th>
       <th class="p-2 text-left">Categoria</th>
@@ -47,7 +48,8 @@
   <tbody>
     <% @transactions.each do |tx| %>
       <tr class="border-t hover:bg-gray-50">
-        <td class="p-2"><%= l(tx.date, format: :short) %></td>
+        <td class="p-2"><%= l(tx.event_date, format: :short) if tx.event_date %></td>
+        <td class="p-2"><%= l(tx.payment_date, format: :short) if tx.payment_date %></td>
         <td class="p-2"><%= tx.description %></td>
         <td class="p-2"><%= tx.from_account.name %></td>
         <td class="p-2"><%= tx.category.name %></td>

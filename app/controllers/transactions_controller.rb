@@ -1,6 +1,7 @@
 class TransactionsController < ApplicationController
   def index
-    @transactions = Transaction.includes(:category, :from_account, :to_account).all
+    month = params[:month] || Date.today.strftime('%Y-%m')
+    @transactions = Transaction.in_competence_month(month).order(event_date: :desc)
   end
 
   def new
@@ -38,7 +39,10 @@ class TransactionsController < ApplicationController
   private
 
   def transaction_params
-    params.require(:transaction).permit(:description, :amount, :type, :date, :period,
-      :from_account_id, :to_account_id, :category_id, :installment, :status, :transaction_group_id)
+    params.require(:transaction).permit(
+      :description, :amount, :transaction_type, :event_date, :payment_date,
+      :from_account_id, :to_account_id, :category_id, :installment,
+      :transaction_group_id, :status
+    )
   end
 end

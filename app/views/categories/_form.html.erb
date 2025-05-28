@@ -1,7 +1,6 @@
 <%= form_with(model: category, local: true) do |form| %>
   <div class="space-y-4">
     <%= form_group(form, :name) %>
-    <%= form_select_group(form, :category_group_id, CategoryGroup.all.map { |cg| ["#{cg.code} - #{cg.name}", cg.id] }, :second, :first, label: "Grupo de Categoria") %>
     <%= primary_button("Salvar") %>
   </div>
 <% end %>

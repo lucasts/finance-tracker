@@ -2,7 +2,7 @@ class CategoriesController < ApplicationController
   before_action :set_category, only: [:edit, :update, :destroy]
 
   def index
-    @categories = Category.includes(:category_group).order(:name)
+    @categories = Category.order(:name)
   end
 
   def new
@@ -40,6 +40,6 @@ class CategoriesController < ApplicationController
   end
 
   def category_params
-    params.require(:category).permit(:name, :category_group_id)
+    params.require(:category).permit(:name)
   end
 end

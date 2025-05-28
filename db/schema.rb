@@ -30,18 +30,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_28_003408) do
 
   create_table "categories", force: :cascade do |t|
     t.string "name"
-    t.integer "category_group_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["category_group_id"], name: "index_categories_on_category_group_id"
-  end
-
-  create_table "category_groups", force: :cascade do |t|
-    t.string "code"
-    t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["code"], name: "index_category_groups_on_code", unique: true
   end
 
   create_table "transaction_groups", force: :cascade do |t|
@@ -58,12 +48,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_28_003408) do
     t.decimal "amount"
     t.string "transaction_type"
     t.date "event_date"
-    t.string "payment_period"
     t.integer "from_account_id", null: false
     t.integer "to_account_id"
     t.integer "category_id", null: false
-    t.string "installment"
-    t.string "status"
+    t.integer "installment"
+    t.integer "status", default: 0
+    t.integer "recurrence_type", default: 0
     t.integer "transaction_group_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -75,7 +65,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_28_003408) do
   end
 
   add_foreign_key "accounts", "account_types"
-  add_foreign_key "categories", "category_groups"
   add_foreign_key "transactions", "accounts", column: "from_account_id"
   add_foreign_key "transactions", "accounts", column: "to_account_id"
   add_foreign_key "transactions", "categories"

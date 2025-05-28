@@ -2,8 +2,6 @@
 
 one:
   name: MyString
-  category_group: one
 
 two:
   name: MyString
-  category_group: two

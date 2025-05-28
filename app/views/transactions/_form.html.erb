@@ -2,8 +2,8 @@
   <div class="space-y-4">
     <%= form_group(form, :description) %>
     <%= form_group(form, :amount, type: :number_field, step: 0.01) %>
-    <%= form_group(form, :date, type: :date_field) %>
-    <%= form_group(form, :period) %>
+    <%= form_group(form, :event_date, label: "Data do evento (competência)") %>
+    <%= form_group(form, :payment_date, label: "Data de pagamento (caixa)", type: :date_field) %>
     <%= form_select_group(form, :from_account_id, Account.all, :id, :name, label: "Conta de Origem") %>
     <%= form_select_group(form, :to_account_id, Account.all, :id, :name, label: "Conta de Destino") %>
     <%= form_select_group(form, :category_id, Category.all, :id, :name, label: "Categoria") %>    

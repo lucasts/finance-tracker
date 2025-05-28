@@ -19,7 +19,8 @@
   <thead class="bg-gray-100 text-gray-600">
     <tr>
       <th class="p-2 text-left">Parcela</th>
-      <th class="p-2 text-left">Data</th>
+      <th class="p-2 text-left">Data do evento (competência)</th>
+      <th class="p-2 text-left">Data de pagamento (caixa)</th>
       <th class="p-2 text-left">Valor</th>
       <th class="p-2 text-left">Status</th>
     </tr>
@@ -28,7 +29,8 @@
     <% @transactions.each do |tx| %>
       <tr class="border-t hover:bg-gray-50">
         <td class="p-2"> <%= tx.installment %> / <%= @group.installment_count %></td>
-        <td class="p-2"> <%= l(tx.date, format: :short) %></td>
+        <td class="p-2"><%= l(tx.event_date, format: :long) if tx.event_date %></td>
+        <td class="p-2"><%= l(tx.payment_date, format: :long) if tx.payment_date %></td>
         <td class="p-2"> <%= number_to_currency(tx.amount, unit: "R$", separator: ",", delimiter: ".") %></td>
         <td class="p-2">
           <% status_color = tx.status == "confirmed" ? "text-green-700" : "text-red-600" %>
