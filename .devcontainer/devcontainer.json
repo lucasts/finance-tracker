@@ -1,0 +1,19 @@
+{
+  "name": "Fin tracker Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "forwardPorts": [3000],
+  "postCreateCommand": "bundle install && yarn install",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      },
+      "extensions": [
+        "rebornix.Ruby",
+        "castwide.solargraph"
+      ]
+    }
+  }
+}
