@@ -1,41 +1,27 @@
-<nav class="border-b border-gray-200 px-4 py-4 bg-white shadow-sm">
-  <div class="flex flex-wrap justify-between items-center max-w-7xl mx-auto">
-    <div class="flex items-center space-x-4">
-      <%= link_to 'Visão Geral', overview_index_path, class: "font-semibold text-gray-800 hover:text-blue-600" %>
-      <%= link_to 'Lançamentos', transactions_path, class: "text-gray-600 hover:text-blue-600" %>
-
-      <div class="relative" data-controller="dropdown">
-        <button data-action="click->dropdown#toggle" class="text-gray-600 hover:text-blue-600 focus:outline-none">
-          Configurações ▾
-        </button>
-        <div data-dropdown-target="menu" class="hidden absolute z-10 bg-white border mt-2 rounded shadow-lg min-w-[160px]">
-          <%= link_to 'Contas', accounts_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
-          <%= link_to 'Categorias', categories_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
-          <%= link_to 'Tipos de Conta', account_types_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
-          <%= link_to 'Grupos de Transação', transaction_groups_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
-        </div>
-      </div>
-    </div>
-
-    <% if defined?(destroy_user_session_path) %>
-      <div class="mt-4 md:mt-0 text-gray-600 text-sm">
-        usuario@example.com
-        <%= link_to 'Sair', destroy_user_session_path, method: :delete, class: "ml-2 text-blue-600 hover:underline" %>
-      </div>
-    <% end %>
+<nav class="navbar bg-base-100 px-4 shadow-md">
+  <div class="flex-1">
+    <%= link_to 'Finance Tracker', overview_index_path, class: "btn btn-ghost normal-case text-xl" %>
+  </div>
+  <div class="flex-none">
+    <ul class="menu menu-horizontal px-1">
+      <li><%= link_to 'Visão Geral', overview_index_path %></li>
+      <li><%= link_to 'Lançamentos', transactions_path %></li>
+      <li data-controller="dropdown">
+        <details data-dropdown-target="menu" class="dropdown">
+          <summary class="cursor-pointer">Configurações</summary>
+          <ul class="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52 border border-base-300 mt-1">
+            <li><%= link_to 'Contas', accounts_path %></li>
+            <li><%= link_to 'Categorias', categories_path %></li>
+            <li><%= link_to 'Tipos de Conta', account_types_path %></li>
+            <li><%= link_to 'Grupos de Transação', transaction_groups_path %></li>
+          </ul>
+        </details>
+      </li>
+      <li><%= link_to 'Relatórios', '/reports_path' %></li>
+      <li><%= link_to 'Faturas', '/credit_statements_path' %></li>
+      <li>
+        <%= link_to 'Nova Transação', new_transaction_path, class: "btn btn-primary btn-sm ml-2" %>
+      </li>
+    </ul>
   </div>
 </nav>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-controller="dropdown"]').forEach((dropdown) => {
-      const button = dropdown.querySelector('[data-action]')
-      const menu = dropdown.querySelector('[data-dropdown-target="menu"]')
-      if (button && menu) {
-        button.addEventListener('click', () => {
-          menu.classList.toggle('hidden')
-        })
-      }
-    })
-  })
-</script>
