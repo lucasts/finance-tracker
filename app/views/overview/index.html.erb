@@ -1,61 +1,104 @@
-<h1 class="text-2xl font-bold mb-6">Resumo de <%= @month %></h1>
+<!-- Dashboard Main View (ERB + DaisyUI) -->
 
-<div class="flex items-center gap-4 mb-6">
-  <%= link_to "← #{@prev_month}", overview_index_path(month: @prev_month), class: "text-blue-600 hover:underline" %>
-  <%= link_to "Hoje", overview_index_path(month: Date.today.strftime('%Y-%m')), class: "text-blue-600 hover:underline" %>
-  <%= link_to "#{@next_month} →", overview_index_path(month: @next_month), class: "text-blue-600 hover:underline" %>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-  <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded shadow-sm">
-    <p class="text-sm text-green-700 font-medium">Receitas</p>
-    <p class="text-xl font-bold text-green-900">R$ <%= sprintf('%.2f', @income_total) %></p>
-  </div>
-  <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
-    <p class="text-sm text-red-700 font-medium">Despesas</p>
-    <p class="text-xl font-bold text-red-900">R$ <%= sprintf('%.2f', @expense_total) %></p>
-  </div>
-  <div class="bg-gray-50 border-l-4 border-gray-500 p-4 rounded shadow-sm">
-    <p class="text-sm text-gray-700 font-medium">Saldo</p>
-    <p class="text-xl font-bold text-gray-900">R$ <%= sprintf('%.2f', @balance) %></p>
+<!-- Top bar: month navigation, regime toggle, quick actions -->
+<div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+  <div class="flex items-center gap-2">
+    <%= link_to '<', overview_index_path(month: @prev_month), class: "btn btn-sm btn-ghost" %>
+    <span class="text-lg font-bold"> <%= @selected_month_long %> </span>
+    <%= link_to '>', overview_index_path(month: @next_month), class: "btn btn-sm btn-ghost" %>
   </div>
 </div>
 
-<p class="text-sm text-gray-600 mb-6">Total de transações no período: <strong><%= @transactions.count %></strong></p>
-
-<h2 class="text-lg font-semibold mb-2">Totais por categoria</h2>
-<div class="bg-white shadow rounded p-4 mb-8">
-  <ul class="text-sm space-y-1">
-    <% @category_totals.each do |name, total| %>
-      <li><span class="font-medium"><%= name %>:</span> R$ <%= sprintf('%.2f', total) %></li>
-    <% end %>
-  </ul>
+<!-- Summary cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-4">
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body">
+      <h2 class="card-title text-success">Receitas</h2>
+      <p class="text-2xl font-bold">R$ <%= number_with_precision(@income_total, precision: 2, delimiter: ".") %></p>
+    </div>
+  </div>
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body">
+      <h2 class="card-title text-error">Despesas</h2>
+      <p class="text-2xl font-bold">R$ <%= number_with_precision(@expense_total, precision: 2, delimiter: ".") %></p>
+    </div>
+  </div>
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body">
+      <h2 class="card-title text-info">Saldo atual</h2>
+      <p class="text-2xl font-bold">R$ <%= number_with_precision(@balance, precision: 2, delimiter: ".") %></p>
+    </div>
+  </div>
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body">              
+      <h2 class="card-title">Fatura do cartão <span class="badge badge-sm badge-outline ml-1"><%= @statement_month_label %></span></h2>
+      <p class="text-2xl font-bold">R$ <%= number_with_precision(@credit_statement.total, precision: 2, delimiter: ".") %></p>
+      <span class="text-xs text-gray-400">Venc. <%= l(@credit_statement.due_date) if @credit_statement.due_date %></span>
+    </div>
+  </div>
 </div>
 
-<h2 class="text-lg font-semibold mb-2">Últimos lançamentos</h2>
-<table class="w-full bg-white shadow rounded text-sm">
-  <thead class="bg-gray-100 text-gray-600">
-    <tr>
-      <th class="p-2 text-left">Data do evento (competência)</th>
-      <th class="p-2 text-left">Data de pagamento (caixa)</th>
-      <th class="p-2 text-left">Descrição</th>
-      <th class="p-2 text-left">Conta</th>
-      <th class="p-2 text-left">Categoria</th>
-      <th class="p-2 text-right">Valor</th>
-      <th class="p-2 text-left">Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @transactions.each do |tx| %>
-      <tr class="border-t hover:bg-gray-50">
-        <td class="p-2"><%= l(tx.event_date, format: :short) if tx.event_date %></td>
-        <td class="p-2"><%= l(tx.payment_date, format: :short) if tx.payment_date %></td>
-        <td class="p-2"><%= tx.description %></td>
-        <td class="p-2"><%= tx.from_account.name %></td>
-        <td class="p-2"><%= tx.category.name %></td>
-        <td class="p-2 text-right"><%= number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.') %></td>
-        <td class="p-2"><%= tx.status.capitalize %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<!-- Monthly balance evolution: collapsible chart -->
+<div class="collapse collapse-arrow bg-base-200 mt-4 mb-2">
+  <input type="checkbox" id="collapse-hist" />
+  <div class="collapse-title text-md font-medium">
+    Evolução do saldo nos últimos 12 meses
+  </div>
+  <div class="collapse-content">
+    <canvas id="saldoHist" class="w-full h-40"></canvas>
+    <!-- (Plug your Chart.js or similar here, fed by @monthly_balances) -->
+  </div>
+</div>
+  <!-- Seções paralelas -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+    <div>
+      <!-- Upcoming commitments -->
+      <div class="card bg-base-100 shadow mt-4 mb-2">
+        <div class="card-body py-3">
+          <h3 class="card-title mb-2">Próximos compromissos</h3>
+          <ul>
+            <% @upcoming.each do |item| %>
+              <li class="flex justify-between">
+                <span><%= item.description %> <span class="badge badge-outline badge-sm ml-1"><%= l(item.event_date, format: :short) %></span></span>
+                <span class="font-bold text-error">R$ <%= number_with_precision(item.amount, precision: 2) %></span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div>
+    <!-- Category spending ranking -->
+    <div class="overflow-x-auto mt-6 mb-2">
+      <table class="table table-zebra w-full">
+        <thead>
+          <tr>
+            <th>Categoria</th>
+            <th class="text-right">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @category_ranking.each do |cat, val| %>
+            <tr>
+              <td><%= cat.name %></td>
+              <td class="text-right">R$ <%= number_with_precision(val, precision: 2, delimiter: ".") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    </div>
+  </div>
+
+
+<!-- Projected balance and alert -->
+<% if @projected_balance.present? %>
+  <div class="alert alert-info mt-3">
+    <span>
+      Saldo estimado até <%= l(@month_end, format: :short) %>: <b>R$ <%= number_with_precision(@projected_balance, precision: 2, delimiter: ".") %></b>
+      <% if @alert.present? %>
+        <span class="badge badge-warning ml-2"><%= @alert %></span>
+      <% end %>
+    </span>
+  </div>
+<% end %>

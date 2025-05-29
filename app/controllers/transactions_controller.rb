@@ -35,6 +35,16 @@ class TransactionsController < ApplicationController
     @transaction.destroy
     redirect_to transactions_path
   end
+  
+  def suggested_period_for(date:, from_account:)
+    if from_account&.account_type&.role == "credit" && from_account&.due_day
+      cutoff = Date.new(date.year, date.month, from_account.due_day)
+      ref = (date <= cutoff) ? date : date + 1.month
+      ref.strftime("%Y-%m")
+    else
+      date.strftime("%Y-%m")
+    end
+  end
 
   private
 

@@ -4,7 +4,7 @@ require 'date'
 
 accounts = {
   itau:      Account.create!(name: "Itaú", account_type: AccountType.find_by(code: "BANK")),
-  nubank:    Account.create!(name: "Nubank", account_type: AccountType.find_by(code: "CREDIT")),
+  nubank:    Account.create!(name: "Nubank", account_type: AccountType.find_by(code: "CREDIT"), closing_day: 28, due_day: 5),
   carteira:  Account.create!(name: "Carteira", account_type: AccountType.find_by(code: "CASH")),
   poupanca:  Account.create!(name: "Poupança Inter", account_type: AccountType.find_by(code: "SAVINGS")),
   zaffari:   Account.create!(name: "Zaffari", account_type: AccountType.find_by(code: "EXPENSE")),

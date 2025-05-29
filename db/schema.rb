@@ -22,6 +22,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_28_003408) do
 
   create_table "accounts", force: :cascade do |t|
     t.string "name"
+    t.integer "due_day"
+    t.integer "closing_day"
     t.integer "account_type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

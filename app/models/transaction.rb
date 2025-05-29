@@ -9,6 +9,7 @@ class Transaction < ApplicationRecord
 
   scope :income, -> { where transaction_type: :income }
   scope :expense, -> { where transaction_type: :expense }
+  scope :pending, -> { where status: :pending }
   scope :in_competence_month, ->(ym) { where("strftime('%Y-%m', event_date) = ?", ym) }
   scope :in_payment_month, ->(ym) { where("strftime('%Y-%m', payment_date) = ?", ym) }
 
