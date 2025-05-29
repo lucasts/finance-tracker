@@ -16,5 +16,8 @@
         "castwide.solargraph"
       ]
     }
-  }
+  },
+  "mounts": [
+    "source=finance-sqlite-db,target=/workspace/storage/sqlite,type=volume"
+  ]
 }
