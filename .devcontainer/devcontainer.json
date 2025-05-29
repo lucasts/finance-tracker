@@ -4,8 +4,8 @@
     "dockerfile": "Dockerfile",
     "context": ".."
   },
-  "forwardPorts": [3000],
-  "postCreateCommand": "bundle install && yarn install",
+  "forwardPorts": [3000],  
+  "postCreateCommand": "bundle install && yarn install && ./.devcontainer/setup-git.sh",
   "customizations": {
     "vscode": {
       "settings": {
