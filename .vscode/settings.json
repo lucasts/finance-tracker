@@ -1,0 +1,7 @@
+{
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.splitCwd": "workspaceRoot",
+  "terminal.integrated.tabs.enabled": true,
+  "terminal.integrated.defaultLocation": "editor",
+  "terminal.integrated.startupTasks": ["Start Dev Server"]
+}
