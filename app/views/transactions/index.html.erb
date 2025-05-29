@@ -1,7 +1,7 @@
 <h1 class="text-2xl font-bold mb-6">Lançamentos</h1>
 
 <div class="flex justify-between items-center mb-4">
-  <%= link_to 'Novo lançamento', new_transaction_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+  <%= link_to 'Novo lançamento', new_transaction_path, class: "btn btn-primary" %>
 </div>
 
 <% if @transactions.any? %>
@@ -9,39 +9,53 @@
   <% expense_total = @transactions.select { |t| t.transaction_type == 'expense' }.sum(&:amount) %>
   <% balance = income_total - expense_total %>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded shadow-sm">
-      <p class="text-sm text-green-700 font-medium">Receitas</p>
-      <p class="text-xl font-bold text-green-900">R$ <%= number_with_precision(income_total, precision: 2, separator: ",") %></p>
+    <div class="alert alert-success">
+      <div class="flex-1">
+        <label class="label-text">Receitas</label>
+        <p class="text-xl font-bold">R$ <%= number_with_precision(income_total, precision: 2, separator: ",") %></p>
+      </div>
     </div>
-    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
-      <p class="text-sm text-red-700 font-medium">Despesas</p>
-      <p class="text-xl font-bold text-red-900">R$ <%= number_with_precision(expense_total, precision: 2, separator: ",") %></p>
+    <div class="alert alert-error">
+      <div class="flex-1">
+        <label class="label-text">Despesas</label>
+        <p class="text-xl font-bold">R$ <%= number_with_precision(expense_total, precision: 2, separator: ",") %></p>
+      </div>
     </div>
-    <div class="bg-gray-50 border-l-4 border-gray-500 p-4 rounded shadow-sm">
-      <p class="text-sm text-gray-700 font-medium">Saldo</p>
-      <p class="text-xl font-bold text-gray-900">R$ <%= number_with_precision(balance, precision: 2, separator: ",") %></p>
+    <div class="alert alert-info">
+      <div class="flex-1">
+        <label class="label-text">Saldo</label>
+        <p class="text-xl font-bold">R$ <%= number_with_precision(balance, precision: 2, separator: ",") %></p>
+      </div>
     </div>
   </div>
 <% end %>
 
-<div class="mb-6 bg-white shadow rounded p-4">
+<div class="mb-6 bg-base-100 p-4 rounded-box shadow">
   <%= form_with url: transactions_path, method: :get, local: true do |f| %>
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div>
-        <%= label_tag :account_id, "Conta" %>
-        <%= select_tag :account_id, options_from_collection_for_select(Account.all, :id, :name, params[:account_id]), prompt: "Todas", class: "w-full border rounded px-2 py-1" %>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Conta</span>
+        </label>
+        <%= select_tag :account_id, options_from_collection_for_select(Account.all, :id, :name, params[:account_id]), prompt: "Todas", class: "select select-bordered w-full" %>
       </div>
-      <div>
-        <%= label_tag :transaction_type, "Tipo" %>
-        <%= select_tag :transaction_type, options_for_select([['Todas', nil], ['Receita', 'income'], ['Despesa', 'expense']], params[:transaction_type]), class: "w-full border rounded px-2 py-1" %>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Tipo</span>
+        </label>
+        <%= select_tag :transaction_type, options_for_select([["Todas", nil], ["Receita", "income"], ["Despesa", "expense"]], params[:transaction_type]), class: "select select-bordered w-full" %>
       </div>
-      <div>
-        <%= label_tag :month, "Mês" %>
-        <%= text_field_tag :month, params[:month], class: "w-full border rounded px-2 py-1", placeholder: "AAAA-MM" %>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Mês</span>
+        </label>
+        <%= text_field_tag :month, params[:month], class: "input input-bordered w-full", placeholder: "AAAA-MM" %>
       </div>
-      <div class="flex items-end space-x-2">
-        <%= submit_tag "Filtrar", class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
-        <%= link_to "Limpar", transactions_path, class: "text-sm text-gray-600 hover:underline self-center" %>
+      <div class="form-control justify-end">
+        <div class="flex space-x-2">
+          <%= submit_tag "Filtrar", class: "btn btn-primary" %>
+          <%= link_to "Limpar", transactions_path, class: "btn btn-ghost" %>
+        </div>
       </div>
     </div>
   <% end %>
@@ -54,50 +68,52 @@
   <% end %>
 
   <% running_balance = 0 %>
-  <table class="w-full bg-white shadow rounded text-sm mb-6">
-    <thead class="bg-gray-100 text-gray-600">
-      <tr>
-        <th class="p-2 text-left">Data do evento (competência)</th>
-        <th class="p-2 text-left">Data de pagamento (caixa)</th>
-        <th class="p-2 text-left">Descrição</th>
-        <th class="p-2 text-left">Conta Origem</th>
-        <th class="p-2 text-left">Conta Destino</th>
-        <th class="p-2 text-left">Categoria</th>
-        <th class="p-2 text-right">Valor</th>
-        <th class="p-2 text-right">Parcela</th>
-        <th class="p-2 text-right">Saldo Acum.</th>
-        <th class="p-2 text-right">Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% transactions.each_with_index do |tx, idx| %>
-        <% delta = tx.transaction_type == 'income' ? tx.amount : -tx.amount %>
-        <% running_balance += delta %>
-        <tr class="border-t hover:bg-gray-50">
-          <td class="p-2"><%= l(tx.event_date, format: :short) if tx.event_date %></td>
-          <td class="p-2"><%= l(tx.payment_date, format: :short) if tx.payment_date %></td>
-          <td class="p-2"><%= tx.description %></td>
-          <td class="p-2"><%= tx.from_account.name %></td>
-          <td class="p-2"><%= tx.to_account&.name %></td>
-          <td class="p-2"><%= tx.category.name %></td>
-          <td class="p-2 text-right font-semibold <%= tx.transaction_type == 'income' ? 'text-green-600' : 'text-red-600' %>">
-            <%= number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.') %>
-          </td>
-          <td class="p-2 text-right">
-            <% if group.present? %>
-              <%= "#{tx.installment}/#{tx.transaction_group.installment_count}" %>
-            <% else %>
-              —
-            <% end %>
-          </td>
-          <td class="p-2 text-right text-gray-700">
-            <%= number_to_currency(running_balance, unit: 'R$', separator: ',', delimiter: '.') %>
-          </td>
-          <td class="p-2 text-right">
-            <%= link_to 'Editar', edit_transaction_path(tx), class: "text-blue-600 hover:underline" %>
-          </td>
+  <div class="overflow-x-auto">
+    <table class="table table-zebra w-full text-sm">
+      <thead class="bg-base-200">
+        <tr>
+          <th>Evento</th>
+          <th>Pagamento</th>
+          <th>Descrição</th>
+          <th>Origem</th>
+          <th>Destino</th>
+          <th>Categoria</th>
+          <th class="text-right">Valor</th>
+          <th class="text-right">Parcela</th>
+          <th class="text-right">Saldo Acum.</th>
+          <th class="text-right">Ações</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% transactions.each do |tx| %>
+          <% delta = tx.transaction_type == 'income' ? tx.amount : -tx.amount %>
+          <% running_balance += delta %>
+          <tr>
+            <td><%= l(tx.event_date, format: :short) if tx.event_date %></td>
+            <td><%= l(tx.payment_date, format: :short) if tx.payment_date %></td>
+            <td><%= tx.description %></td>
+            <td><%= tx.from_account.name %></td>
+            <td><%= tx.to_account&.name %></td>
+            <td><%= tx.category.name %></td>
+            <td class="text-right <%= tx.transaction_type == 'income' ? 'text-green-600' : 'text-red-600' %>">
+              <%= number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.') %>
+            </td>
+            <td class="text-right">
+              <% if group.present? %>
+                <%= "#{tx.installment}/#{tx.transaction_group.installment_count}" %>
+              <% else %>
+                —
+              <% end %>
+            </td>
+            <td class="text-right text-gray-700">
+              <%= number_to_currency(running_balance, unit: 'R$', separator: ',', delimiter: '.') %>
+            </td>
+            <td class="text-right">
+              <%= link_to 'Editar', edit_transaction_path(tx), class: "link link-primary" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 <% end %>
