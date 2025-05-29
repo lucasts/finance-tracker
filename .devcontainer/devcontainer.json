@@ -18,6 +18,8 @@
     }
   },
   "mounts": [
-    "source=finance-sqlite-db,target=/workspace/storage/sqlite,type=volume"
+    "source=finance-sqlite-db,target=/workspace/storage/sqlite,type=volume",
+    "type=volume,source=finance-bundle,target=/usr/local/bundle", 
+    "type=volume,source=finance-node,target=/usr/local/share/.cache/yarn/v6"
   ]
 }
