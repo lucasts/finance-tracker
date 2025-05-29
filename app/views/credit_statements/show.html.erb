@@ -1,0 +1,21 @@
+<div class="p-4 max-w-3xl mx-auto">
+  <h1 class="text-2xl font-bold mb-6">Detalhes da Fatura</h1>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <p><strong>Cartão:</strong> <%= @credit_statement.account.name %></p>
+        <p><strong>Mês:</strong> <%= @credit_statement.month %></p>
+        <p><strong>Valor Total:</strong> R$ <%= number_with_precision(@credit_statement.amount_due, precision: 2, separator: ",") %></p>
+        <p><strong>Valor Pago:</strong> R$ <%= number_with_precision(@credit_statement.amount_paid, precision: 2, separator: ",") %></p>
+        <p><strong>Saldo Restante:</strong> R$ <%= number_with_precision(@credit_statement.remaining_balance, precision: 2, separator: ",") %></p>
+        <p><strong>Status:</strong> <%= @credit_statement.status.titleize %></p>
+        <p><strong>Data de Fechamento:</strong> <%= l(@credit_statement.closed_on, format: :short) if @credit_statement.closed_on %></p>
+        <p><strong>Data de Vencimento:</strong> <%= l(@credit_statement.due_on, format: :short) if @credit_statement.due_on %></p>
+        <p><strong>Data de Pagamento:</strong> <%= l(@credit_statement.paid_on, format: :short) if @credit_statement.paid_on %></p>
+        <div class="mt-4 flex gap-2">
+          <%= link_to 'Voltar', credit_statements_path, class: "btn btn-sm" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

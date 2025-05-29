@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_28_003408) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_29_110401) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -34,6 +34,21 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_28_003408) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "credit_statements", force: :cascade do |t|
+    t.integer "account_id", null: false
+    t.string "month", null: false
+    t.decimal "amount_due", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "amount_paid", precision: 12, scale: 2, default: "0.0", null: false
+    t.integer "status", default: 0, null: false
+    t.date "closed_on"
+    t.date "due_on"
+    t.date "paid_on"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "month"], name: "index_credit_statements_on_account_id_and_month", unique: true
+    t.index ["account_id"], name: "index_credit_statements_on_account_id"
   end
 
   create_table "transaction_groups", force: :cascade do |t|
@@ -67,6 +82,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_28_003408) do
   end
 
   add_foreign_key "accounts", "account_types"
+  add_foreign_key "credit_statements", "accounts"
   add_foreign_key "transactions", "accounts", column: "from_account_id"
   add_foreign_key "transactions", "accounts", column: "to_account_id"
   add_foreign_key "transactions", "categories"

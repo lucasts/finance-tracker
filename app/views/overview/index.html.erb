@@ -32,8 +32,16 @@
   <div class="card bg-base-100 shadow-md">
     <div class="card-body">              
       <h2 class="card-title">Fatura do cartão <span class="badge badge-sm badge-outline ml-1"><%= @statement_month_label %></span></h2>
-      <p class="text-2xl font-bold">R$ <%= number_with_precision(@credit_statement.total, precision: 2, delimiter: ".") %></p>
-      <span class="text-xs text-gray-400">Venc. <%= l(@credit_statement.due_date) if @credit_statement.due_date %></span>
+      <% if @credit_statement %>
+        <p class="text-2xl font-bold">R$ <%= number_with_precision(@credit_statement.amount_due, precision: 2, delimiter: ".") %></p>
+        <span class="text-xs text-gray-400">Venc. <%= l(@credit_statement.due_on) if @credit_statement.due_on %></span>
+        <span class="text-xs ml-2">Status: <span class="badge badge-<%= @credit_statement.status == "paid" ? "success" : @credit_statement.status == "overdue" ? "error" : "info" %>"><%= t("activerecord.attributes.credit_statement.statuses.#{@credit_statement.status}") %></span></span>
+        <% if @credit_statement.amount_paid > 0 %>
+          <div class="text-xs mt-1">Pago: R$ <%= number_with_precision(@credit_statement.amount_paid, precision: 2, delimiter: ".") %></div>
+        <% end %>
+      <% else %>
+        <p class="text-2xl font-bold text-gray-400">Sem fatura</p>
+      <% end %>
     </div>
   </div>
 </div>

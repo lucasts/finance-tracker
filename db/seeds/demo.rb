@@ -191,5 +191,61 @@ Transaction.create!(
   status: "confirmed"
 )
 
+# === Faturas de cartão de crédito (CreditStatement) ===
+# Cria faturas Nubank para março, abril e maio de 2025
+statements = {}
+[3, 4, 5].each do |month|
+  year_month = "2025-#{format('%02d', month)}"
+  closed_on = Date.new(2025, month, accounts[:nubank].closing_day)
+  due_on = Date.new(2025, month + 1, accounts[:nubank].due_day)
+  # Inicialmente, amount_due será atualizado depois
+  statements[month] = CreditStatement.create!(
+    account: accounts[:nubank],
+    month: year_month,
+    amount_due: 0,
+    amount_paid: month == 3 ? 0 : 0, # só será atualizado depois
+    status: month == 3 ? :paid : (month == 4 ? :overdue : :open),
+    closed_on: closed_on,
+    due_on: due_on,
+    paid_on: (month == 3 ? due_on : nil)
+  )
+end
+
+# Associa despesas Nubank às faturas corretas e soma valores
+statement_sums = {3 => 0, 4 => 0, 5 => 0}
+Transaction.where(from_account: accounts[:nubank]).find_each do |tx|
+  month = tx.event_date.month
+  if statements[month]
+    # Se existir credit_statement_id, associe aqui
+    if tx.respond_to?(:credit_statement_id)
+      tx.update!(credit_statement_id: statements[month].id)
+    end
+    statement_sums[month] += tx.amount
+  end
+end
+
+# Atualiza o amount_due de cada fatura e amount_paid para a de março
+statements.each do |month, statement|
+  statement.update!(
+    amount_due: statement_sums[month],
+    amount_paid: (month == 3 ? statement_sums[month] : 0)
+  )
+end
+
+# Exemplo: pagamento da fatura de março (status: paid)
+Transaction.create!(
+  description: "Pagamento fatura Nubank Março",
+  amount: statements[3].amount_due,
+  transaction_type: "expense",
+  event_date: statements[3].due_on,
+  payment_date: statements[3].due_on,
+  from_account: accounts[:itau],
+  to_account: accounts[:nubank],
+  category: categories["Pagamentos"] || categories.values.sample,
+  recurrence_type: "single",
+  status: "confirmed"
+)
+
 puts "Parcelamentos criados."
+puts "Faturas de cartão criadas."
 puts "Demo seed finalizado com sucesso."

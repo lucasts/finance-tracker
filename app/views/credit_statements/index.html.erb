@@ -1,0 +1,35 @@
+<div class="p-4">
+  <h1 class="text-2xl font-bold mb-6">Faturas do Cartão</h1>
+  <div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+      <thead>
+        <tr>
+          <th>Cartão</th>
+          <th>Mês</th>
+          <th>Valor Total</th>
+          <th>Valor Pago</th>
+          <th>Status</th>
+          <th>Fechamento</th>
+          <th>Vencimento</th>
+          <th>Pagamento</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @credit_statements.each do |cs| %>
+          <tr>
+            <td><%= cs.account.name %></td>
+            <td><%= cs.month %></td>
+            <td>R$ <%= number_with_precision(cs.amount_due, precision: 2, separator: ",") %></td>
+            <td>R$ <%= number_with_precision(cs.amount_paid, precision: 2, separator: ",") %></td>
+            <td><%= cs.status.titleize %></td>
+            <td><%= l(cs.closed_on, format: :short) if cs.closed_on %></td>
+            <td><%= l(cs.due_on, format: :short) if cs.due_on %></td>
+            <td><%= l(cs.paid_on, format: :short) if cs.paid_on %></td>
+            <td><%= link_to 'Detalhes', credit_statement_path(cs), class: "btn btn-sm btn-outline" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

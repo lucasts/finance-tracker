@@ -1,33 +1,34 @@
-# app/models/credit_statement.rb
-class CreditStatement
-  attr_reader :month, :card, :transactions
+class CreditStatement < ApplicationRecord
+  belongs_to :account
 
-  def initialize(card:, date:)
-    @card = card
-    @date = date
-    @transactions = Transaction
-      .confirmed
-      .where(from_account: card)
-      .in_payment_month(date.strftime('%Y-%m'))
+  enum status: { open: 0, paid: 1, overdue: 2 }
+
+  validates :month, presence: true, format: { with: /\A\d{4}-\d{2}\z/ }
+  validates :amount_due, :amount_paid, presence: true
+  validate :account_must_be_credit_card
+  
+  before_save :auto_update_status
+
+  def remaining_balance
+    amount_due - amount_paid
   end
 
-  def total
-    transactions.sum(&:amount)
+  private
+
+  def account_must_be_credit_card
+    if account&.account_type&.code != "CREDIT"
+      errors.add(:account, "deve ser uma conta do tipo cartão de crédito")
+    end
   end
 
-  def due_date
-    Date.new(@date.year, @date.month, card.due_day)
-  end
-
-  def closing_date
-    Date.new(@date.year, @date.month, card.closing_day)
-  end
-
-  def label
-    I18n.l(due_date, format: "%B de %Y")
-  end
-
-  def any?
-    transactions.any?
+  def auto_update_status
+    if amount_paid >= amount_due
+      self.status = :paid
+      self.paid_on ||= Date.today
+    elsif due_on.present? && due_on < Date.today && amount_paid < 0
+      self.status = :overdue
+    else
+      self.status = :open
+    end
   end
 end

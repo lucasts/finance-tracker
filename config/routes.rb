@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :credit_statements, only: [:index, :show]  
   resources :transactions      
   resources :overview, only: [:index]  
   resources :accounts
