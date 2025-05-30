@@ -1,35 +1,52 @@
-<div class="p-4">
-  <h1 class="text-2xl font-bold mb-6">Faturas do Cartão</h1>
-  <div class="overflow-x-auto">
-    <table class="table table-zebra w-full">
-      <thead>
-        <tr>
-          <th>Cartão</th>
-          <th>Mês</th>
-          <th>Valor Total</th>
-          <th>Valor Pago</th>
-          <th>Status</th>
-          <th>Fechamento</th>
-          <th>Vencimento</th>
-          <th>Pagamento</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @credit_statements.each do |cs| %>
+<h1 class="text-3xl font-bold mb-6">Faturas do Cartão</h1>
+
+<% if @credit_statements.any? %>
+  <div class="bg-base-100 rounded-box shadow overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="table table-zebra w-full">
+        <thead class="bg-base-200">
           <tr>
-            <td><%= cs.account.name %></td>
-            <td><%= cs.month %></td>
-            <td>R$ <%= number_with_precision(cs.amount_due, precision: 2, separator: ",") %></td>
-            <td>R$ <%= number_with_precision(cs.amount_paid, precision: 2, separator: ",") %></td>
-            <td><%= cs.status.titleize %></td>
-            <td><%= l(cs.closed_on, format: :short) if cs.closed_on %></td>
-            <td><%= l(cs.due_on, format: :short) if cs.due_on %></td>
-            <td><%= l(cs.paid_on, format: :short) if cs.paid_on %></td>
-            <td><%= link_to 'Detalhes', credit_statement_path(cs), class: "btn btn-sm btn-outline" %></td>
+            <th>Cartão</th>
+            <th>Mês</th>
+            <th class="text-right">Valor Total</th>
+            <th class="text-right">Valor Pago</th>
+            <th>Status</th>
+            <th>Fechamento</th>
+            <th>Vencimento</th>
+            <th>Pagamento</th>
+            <th class="text-right">Ações</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% @credit_statements.each do |cs| %>
+            <tr>
+              <td class="font-medium"><%= cs.account.name %></td>
+              <td><%= cs.month %></td>
+              <td class="text-right font-semibold">R$ <%= number_with_precision(cs.amount_due, precision: 2, separator: ",") %></td>
+              <td class="text-right">R$ <%= number_with_precision(cs.amount_paid, precision: 2, separator: ",") %></td>
+              <td>
+                <span class="badge badge-<%= cs.status == 'paid' ? 'success' : cs.status == 'overdue' ? 'error' : 'warning' %>">
+                  <%= t("activerecord.attributes.credit_statement.statuses.#{cs.status}") rescue cs.status.titleize %>
+                </span>
+              </td>
+              <td class="text-sm"><%= l(cs.closed_on, format: :short) if cs.closed_on %></td>
+              <td class="text-sm"><%= l(cs.due_on, format: :short) if cs.due_on %></td>
+              <td class="text-sm"><%= l(cs.paid_on, format: :short) if cs.paid_on %></td>
+              <td class="text-right">
+                <%= link_to 'Detalhes', credit_statement_path(cs), class: "link link-primary" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
+<% else %>
+  <div class="bg-base-100 rounded-box shadow p-8 text-center">
+    <div class="text-6xl mb-4">💳</div>
+    <h3 class="text-xl font-semibold mb-2">Nenhuma fatura encontrada</h3>
+    <p class="text-base-content/60 mb-4">
+      As faturas do cartão são geradas automaticamente pelo sistema.
+    </p>
+  </div>
+<% end %>

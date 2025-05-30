@@ -4,6 +4,11 @@ class TransactionsController < ApplicationController
     @transactions = Transaction.in_competence_month(month).order(event_date: :desc)
   end
 
+  def show
+    @transaction = Transaction.find(params[:id])
+    render partial: 'transaction_details', locals: { transaction: @transaction }
+  end
+
   def new
     @transaction = Transaction.new
   end

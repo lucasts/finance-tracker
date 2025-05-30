@@ -1,25 +1,166 @@
-<!-- app/views/transaction_groups/index.html.erb -->
-<h1 class="text-2xl font-bold mb-6">Grupos de Transação</h1>
-<p class="text-sm text-gray-600 mb-4">Agrupe transações relacionadas, como parcelamentos ou transferências.</p>
-<%= link_to 'Novo Grupo de Transação', new_transaction_group_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4 inline-block" %>
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-3xl font-bold flex items-center gap-2">
+      💳 Parcelamentos e Grupos
+    </h1>
+    <p class="text-base-content/60 mt-2">Gerencie parcelamentos de cartão de crédito, empréstimos e transferências agrupadas.</p>
+  </div>
+  <%= link_to new_transaction_group_path, class: "btn btn-primary" do %>
+    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+    </svg>
+    Novo Grupo
+  <% end %>
+</div>
 
-<table class="w-full bg-white shadow rounded text-sm">
-  <thead class="bg-gray-100 text-gray-600">
-    <tr>
-      <th class="p-2 text-left">Nome</th>
-      <th class="p-2 text-left">Tipo</th>
-      <th class="p-2 text-right">Ações</th>
-    </tr>
-  </thead>
-  <tbody>
+<% if @transaction_groups.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <% @transaction_groups.each do |group| %>
-      <tr class="border-t hover:bg-gray-50">
-        <td class="p-2"><%= group.name %></td>
-        <td class="p-2"><%= group.group_type %></td>
-        <td class="p-2 text-right">
-          <%= link_to 'Editar', edit_transaction_group_path(group), class: "text-blue-600 hover:underline" %>
-        </td>
-      </tr>
+      <% 
+        transactions = group.transactions
+        total_value = transactions.sum(&:amount)
+        paid_count = transactions.select { |t| t.status == "confirmed" }.count
+        total_count = transactions.count
+        completion_percentage = total_count > 0 ? (paid_count.to_f / total_count * 100).round : 0
+      %>
+      <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-200">
+        <div class="card-body">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <div class="avatar placeholder">
+                <div class="bg-<%= case group.group_type
+                                  when 'installment' then 'primary'
+                                  when 'loan' then 'secondary'
+                                  when 'transfer' then 'accent'
+                                  else 'neutral'
+                                  end %> text-<%= case group.group_type
+                                                  when 'installment' then 'primary'
+                                                  when 'loan' then 'secondary'
+                                                  when 'transfer' then 'accent'
+                                                  else 'neutral'
+                                                  end %>-content rounded-full w-10 h-10">
+                  <span class="text-lg">
+                    <%= case group.group_type
+                        when 'installment' then '💳'
+                        when 'loan' then '🏦'
+                        when 'transfer' then '↔️'
+                        else '📊'
+                        end %>
+                  </span>
+                </div>
+              </div>
+              <div>
+                <%= link_to transaction_group_path(group), class: "card-title link link-primary hover:link-hover text-base" do %>
+                  <%= group.name %>
+                <% end %>
+                <div class="flex items-center gap-2 mt-1">
+                  <div class="badge <%= case group.group_type
+                                        when 'installment' then 'badge-primary'
+                                        when 'loan' then 'badge-secondary'
+                                        when 'transfer' then 'badge-accent'
+                                        else 'badge-neutral'
+                                        end %> badge-sm">
+                    <%= case group.group_type
+                        when 'installment' then 'Parcelamento'
+                        when 'loan' then 'Empréstimo'
+                        when 'transfer' then 'Transferência'
+                        else group.group_type.titleize
+                        end %>
+                  </div>
+                  <% if group.group_type == 'installment' && group.installment_count.present? %>
+                    <span class="text-xs text-base-content/60">
+                      <%= pluralize(group.installment_count, 'parcela') %>
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                </svg>
+              </div>
+              <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <li>
+                  <%= link_to transaction_group_path(group) do %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    Ver Detalhes
+                  <% end %>
+                </li>
+                <li>
+                  <%= link_to edit_transaction_group_path(group) do %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Editar
+                  <% end %>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="stats stats-vertical shadow bg-base-200/50 mt-3">
+            <div class="stat py-2">
+              <div class="stat-title text-xs">Transações</div>
+              <div class="stat-value text-sm">
+                <% if total_count > 0 %>
+                  <%= paid_count %>/<%= total_count %>
+                <% else %>
+                  —
+                <% end %>
+              </div>
+              <div class="stat-desc text-xs">concluídas</div>
+            </div>
+            
+            <div class="stat py-2">
+              <div class="stat-title text-xs">Valor Total</div>
+              <div class="stat-value text-sm">
+                <% if total_value > 0 %>
+                  R$ <%= number_with_precision(total_value, precision: 2, separator: ",", delimiter: ".") %>
+                <% else %>
+                  —
+                <% end %>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-3">
+            <% if total_count > 0 %>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium">
+                  <%= completion_percentage %>% completo
+                </span>
+                <% if completion_percentage == 100 %>
+                  <div class="badge badge-success badge-sm">✓ Finalizado</div>
+                <% elsif completion_percentage > 0 %>
+                  <div class="badge badge-warning badge-sm">⏳ Em andamento</div>
+                <% else %>
+                  <div class="badge badge-ghost badge-sm">⭕ Pendente</div>
+                <% end %>
+              </div>
+              <progress class="progress progress-<%= completion_percentage == 100 ? 'success' : completion_percentage > 0 ? 'warning' : 'base-200' %> w-full" 
+                        value="<%= completion_percentage %>" max="100"></progress>
+            <% else %>
+              <div class="text-center py-2">
+                <span class="text-base-content/40 text-sm">Nenhuma transação</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
     <% end %>
-  </tbody>
-</table>
+  </div>
+<% else %>
+  <div class="bg-base-100 rounded-box shadow p-8 text-center">
+    <div class="text-6xl mb-4">💳</div>
+    <h3 class="text-xl font-semibold mb-2">Nenhum grupo encontrado</h3>
+    <p class="text-base-content/60 mb-4">
+      Crie grupos para organizar parcelamentos, empréstimos e transferências relacionadas.
+    </p>
+    <%= link_to 'Novo Grupo de Transação', new_transaction_group_path, class: "btn btn-primary" %>
+  </div>
+<% end %>

@@ -1,8 +1,8 @@
 <%= form_with(model: account_type, local: true) do |form| %>
   <div class="space-y-4">
     <%= form_group(form, :code) %>
-    <%= form_group(form, :role, type: :select, options: options_for_select(["asset", "income", "expense"], selected: account_type.role)) %>
     <%= form_group(form, :name) %>
+    <%= form_group(form, :role, type: :select, choices: options_for_select([["Ativo", "asset"], ["Receita", "income"], ["Despesa", "expense"]], selected: account_type.role)) %>
     <%= primary_button("Salvar") %>
   </div>
 <% end %>

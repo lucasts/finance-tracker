@@ -1,0 +1,8 @@
+pt-BR:
+  activerecord:
+    attributes:
+      credit_statement:
+        statuses:
+          open: "Em aberto"
+          paid: "Pago"
+          overdue: "Em atraso"

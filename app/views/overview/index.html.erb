@@ -1,56 +1,56 @@
-<!-- Dashboard Main View (ERB + DaisyUI) -->
+<h1 class="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
 
 <!-- Top bar: month navigation, regime toggle, quick actions -->
-<div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+<div class="flex flex-wrap justify-between items-center mb-6 gap-2">
   <div class="flex items-center gap-2">
     <%= link_to '<', overview_index_path(month: @prev_month), class: "btn btn-sm btn-ghost" %>
-    <span class="text-lg font-bold"> <%= @selected_month_long %> </span>
+    <span class="text-xl font-bold"><%= @selected_month_long %></span>
     <%= link_to '>', overview_index_path(month: @next_month), class: "btn btn-sm btn-ghost" %>
   </div>
 </div>
 
 <!-- Summary cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-4">
-  <div class="card bg-base-100 shadow-md">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  <div class="card bg-base-100 shadow">
     <div class="card-body">
       <h2 class="card-title text-success">Receitas</h2>
       <p class="text-2xl font-bold">R$ <%= number_with_precision(@income_total, precision: 2, delimiter: ".") %></p>
     </div>
   </div>
-  <div class="card bg-base-100 shadow-md">
+  <div class="card bg-base-100 shadow">
     <div class="card-body">
       <h2 class="card-title text-error">Despesas</h2>
       <p class="text-2xl font-bold">R$ <%= number_with_precision(@expense_total, precision: 2, delimiter: ".") %></p>
     </div>
   </div>
-  <div class="card bg-base-100 shadow-md">
+  <div class="card bg-base-100 shadow">
     <div class="card-body">
       <h2 class="card-title text-info">Saldo atual</h2>
       <p class="text-2xl font-bold">R$ <%= number_with_precision(@balance, precision: 2, delimiter: ".") %></p>
     </div>
   </div>
-  <div class="card bg-base-100 shadow-md">
+  <div class="card bg-base-100 shadow">
     <div class="card-body">              
       <h2 class="card-title">Fatura do cartão <span class="badge badge-sm badge-outline ml-1"><%= @statement_month_label %></span></h2>
       <% if @credit_statement %>
         <p class="text-2xl font-bold">R$ <%= number_with_precision(@credit_statement.amount_due, precision: 2, delimiter: ".") %></p>
-        <span class="text-xs text-gray-400">Venc. <%= l(@credit_statement.due_on) if @credit_statement.due_on %></span>
+        <span class="text-xs text-base-content/60">Venc. <%= l(@credit_statement.due_on) if @credit_statement.due_on %></span>
         <span class="text-xs ml-2">Status: <span class="badge badge-<%= @credit_statement.status == "paid" ? "success" : @credit_statement.status == "overdue" ? "error" : "info" %>"><%= t("activerecord.attributes.credit_statement.statuses.#{@credit_statement.status}") %></span></span>
         <% if @credit_statement.amount_paid > 0 %>
           <div class="text-xs mt-1">Pago: R$ <%= number_with_precision(@credit_statement.amount_paid, precision: 2, delimiter: ".") %></div>
         <% end %>
       <% else %>
-        <p class="text-2xl font-bold text-gray-400">Sem fatura</p>
+        <p class="text-2xl font-bold text-base-content/40">Sem fatura</p>
       <% end %>
     </div>
   </div>
 </div>
 
 <!-- Monthly balance evolution: collapsible chart -->
-<div class="collapse collapse-arrow bg-base-200 mt-4 mb-2">
+<div class="collapse collapse-arrow bg-base-100 rounded-box shadow mb-6">
   <input type="checkbox" id="collapse-hist" />
-  <div class="collapse-title text-md font-medium">
-    Evolução do saldo nos últimos 12 meses
+  <div class="collapse-title text-lg font-medium">
+    📈 Evolução do saldo nos últimos 12 meses
   </div>
   <div class="collapse-content">
     <canvas id="saldoHist" class="w-full h-40"></canvas>
@@ -58,55 +58,81 @@
   </div>
 </div>
   <!-- Seções paralelas -->
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
     <div>
       <!-- Upcoming commitments -->
-      <div class="card bg-base-100 shadow mt-4 mb-2">
-        <div class="card-body py-3">
-          <h3 class="card-title mb-2">Próximos compromissos</h3>
-          <ul>
-            <% @upcoming.each do |item| %>
-              <li class="flex justify-between">
-                <span><%= item.description %> <span class="badge badge-outline badge-sm ml-1"><%= l(item.event_date, format: :short) %></span></span>
-                <span class="font-bold text-error">R$ <%= number_with_precision(item.amount, precision: 2) %></span>
-              </li>
-            <% end %>
-          </ul>
+      <div class="card bg-base-100 shadow">
+        <div class="card-body">
+          <h3 class="card-title mb-4">📅 Próximos compromissos</h3>
+          <% if @upcoming.any? %>
+            <ul class="space-y-2">
+              <% @upcoming.each do |item| %>
+                <li class="flex justify-between items-center p-2 bg-base-200 rounded">
+                  <span class="flex items-center gap-2">
+                    <%= item.description %> 
+                    <span class="badge badge-outline badge-sm"><%= l(item.event_date, format: :short) %></span>
+                  </span>
+                  <span class="font-bold text-error">R$ <%= number_with_precision(item.amount, precision: 2) %></span>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <div class="text-center text-base-content/60 py-4">
+              <div class="text-4xl mb-2">📋</div>
+              <p>Nenhum compromisso próximo</p>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>
     <div>
-    <!-- Category spending ranking -->
-    <div class="overflow-x-auto mt-6 mb-2">
-      <table class="table table-zebra w-full">
-        <thead>
-          <tr>
-            <th>Categoria</th>
-            <th class="text-right">Valor</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @category_ranking.each do |cat, val| %>
-            <tr>
-              <td><%= cat.name %></td>
-              <td class="text-right">R$ <%= number_with_precision(val, precision: 2, delimiter: ".") %></td>
-            </tr>
+      <!-- Category spending ranking -->
+      <div class="card bg-base-100 shadow">
+        <div class="card-body">
+          <h3 class="card-title mb-4">📊 Gastos por categoria</h3>
+          <% if @category_ranking.any? %>
+            <div class="overflow-x-auto">
+              <table class="table table-zebra w-full">
+                <thead>
+                  <tr>
+                    <th>Categoria</th>
+                    <th class="text-right">Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @category_ranking.each do |cat, val| %>
+                    <tr>
+                      <td><%= cat.name %></td>
+                      <td class="text-right font-semibold">R$ <%= number_with_precision(val, precision: 2, delimiter: ".") %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center text-base-content/60 py-4">
+              <div class="text-4xl mb-2">📊</div>
+              <p>Nenhuma despesa no período</p>
+            </div>
           <% end %>
-        </tbody>
-      </table>
-    </div>
+        </div>
+      </div>
     </div>
   </div>
 
 
 <!-- Projected balance and alert -->
 <% if @projected_balance.present? %>
-  <div class="alert alert-info mt-3">
-    <span>
-      Saldo estimado até <%= l(@month_end, format: :short) %>: <b>R$ <%= number_with_precision(@projected_balance, precision: 2, delimiter: ".") %></b>
-      <% if @alert.present? %>
-        <span class="badge badge-warning ml-2"><%= @alert %></span>
-      <% end %>
-    </span>
+  <div class="alert alert-info mt-6">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    <div>
+      <h3 class="font-bold">Projeção de Saldo</h3>
+      <div class="text-sm">
+        Saldo estimado até <%= l(@month_end, format: :short) %>: <strong>R$ <%= number_with_precision(@projected_balance, precision: 2, delimiter: ".") %></strong>
+        <% if @alert.present? %>
+          <span class="badge badge-warning ml-2"><%= @alert %></span>
+        <% end %>
+      </div>
+    </div>
   </div>
 <% end %>
