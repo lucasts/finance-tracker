@@ -20,6 +20,7 @@
   "mounts": [
     "source=finance-sqlite-db,target=/workspace/storage/sqlite,type=volume",
     "type=volume,source=finance-bundle,target=/usr/local/bundle", 
-    "type=volume,source=finance-node,target=/usr/local/share/.cache/yarn/v6"
+    "type=volume,source=finance-node,target=/usr/local/share/.cache/yarn/v6",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
   ]
 }
