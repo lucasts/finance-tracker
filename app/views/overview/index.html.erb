@@ -46,15 +46,21 @@
   </div>
 </div>
 
-<!-- Monthly balance evolution: collapsible chart -->
-<div class="collapse collapse-arrow bg-base-100 rounded-box shadow mb-6">
-  <input type="checkbox" id="collapse-hist" />
-  <div class="collapse-title text-lg font-medium">
-    📈 Evolução do saldo nos últimos 12 meses
-  </div>
-  <div class="collapse-content">
-    <canvas id="saldoHist" class="w-full h-40"></canvas>
-    <!-- (Plug your Chart.js or similar here, fed by @monthly_balances) -->
+<!-- Monthly balance evolution chart -->
+<div class="card bg-base-100 shadow mb-6">
+  <div class="card-body">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="card-title">📈 Evolução Financeira - Últimos 12 Meses</h2>
+    </div>
+    <div class="text-sm text-base-content/70 mb-4">
+      Visualize a evolução das suas receitas, despesas e saldo acumulado ao longo do tempo
+    </div>
+    <div
+      data-controller="chart"
+      data-chart-options-value="<%= @chart_options.to_json %>"
+      class="w-full"
+      style="min-height: 350px;"
+    ></div>
   </div>
 </div>
   <!-- Seções paralelas -->
