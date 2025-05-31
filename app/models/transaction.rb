@@ -3,6 +3,7 @@ class Transaction < ApplicationRecord
   belongs_to :to_account, class_name: "Account", optional: true
   belongs_to :category
   belongs_to :transaction_group, optional: true
+  belongs_to :credit_statement, optional: true
 
   validates :description, :amount, :event_date, :payment_date, :transaction_type, presence: true
   validates :transaction_type, inclusion: { in: %w[income expense] }
@@ -24,12 +25,12 @@ class Transaction < ApplicationRecord
     where(payment_date: month_start..month_end)
   }
   
-  # Scope para próximos compromissos
-  scope :upcoming_payments, ->(limit = 5) {
-    where(status: :pending)
-      .where('payment_date >= ?', Date.current)
-      .order(:payment_date)
-      .limit(limit)
+  scope :upcoming_payments, ->(limit = 10) {
+  where(status: ['pending', 'confirmed'])
+    .where('event_date > ?', Date.current)
+    .where('event_date <= ?', 1.months.from_now)
+    .order(:event_date)
+    .limit(limit)
   }
 
   enum :status, { pending: 0, confirmed: 1, cancelled: 2 }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_29_110401) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_31_143924) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -75,7 +75,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_110401) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "payment_date"
+    t.integer "credit_statement_id"
     t.index ["category_id"], name: "index_transactions_on_category_id"
+    t.index ["credit_statement_id"], name: "index_transactions_on_credit_statement_id"
     t.index ["from_account_id"], name: "index_transactions_on_from_account_id"
     t.index ["to_account_id"], name: "index_transactions_on_to_account_id"
     t.index ["transaction_group_id"], name: "index_transactions_on_transaction_group_id"
@@ -86,5 +88,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_110401) do
   add_foreign_key "transactions", "accounts", column: "from_account_id"
   add_foreign_key "transactions", "accounts", column: "to_account_id"
   add_foreign_key "transactions", "categories"
+  add_foreign_key "transactions", "credit_statements"
   add_foreign_key "transactions", "transaction_groups"
 end

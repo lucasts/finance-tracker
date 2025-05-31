@@ -59,6 +59,82 @@ end
 
 categories = Category.all.index_by(&:name)
 
+# === FATURAS DE CARTÃO DE CRÉDITO (CRIAR ANTES DAS TRANSAÇÕES) ===
+puts "Criando faturas de cartão..."
+
+statements = {}
+
+# Gerar faturas para os últimos 12 meses
+(-11..0).each do |offset|
+  mes_fatura = Date.today.beginning_of_month + offset.months
+  
+  # Fatura Nubank - João
+  statements[:nubank_pai] ||= {}
+  statements[:nubank_pai][offset] = CreditStatement.create!(
+    account: accounts[:nubank_pai],
+    month: mes_fatura.strftime('%Y-%m'),
+    amount_due: 0,
+    amount_paid: 0,
+    status: offset < -1 ? :paid : (offset == -1 ? :overdue : :open),
+    closed_on: Date.new(mes_fatura.year, mes_fatura.month, 15),
+    due_on: (mes_fatura + 1.month).change(day: 5),
+    paid_on: offset < -1 ? (mes_fatura + 1.month).change(day: 6) : nil
+  )
+  
+  # Fatura Inter - Maria
+  statements[:inter_mae] ||= {}
+  statements[:inter_mae][offset] = CreditStatement.create!(
+    account: accounts[:inter_mae],
+    month: mes_fatura.strftime('%Y-%m'),
+    amount_due: 0,
+    amount_paid: 0,
+    status: offset < -1 ? :paid : (offset == -1 ? :overdue : :open),
+    closed_on: Date.new(mes_fatura.year, mes_fatura.month, 20),
+    due_on: (mes_fatura + 1.month).change(day: 10),
+    paid_on: offset < -1 ? (mes_fatura + 1.month).change(day: 11) : nil
+  )
+  
+  # Fatura Santander - Família
+  statements[:santander] ||= {}
+  statements[:santander][offset] = CreditStatement.create!(
+    account: accounts[:santander],
+    month: mes_fatura.strftime('%Y-%m'),
+    amount_due: 0,
+    amount_paid: 0,
+    status: offset < -1 ? :paid : (offset == -1 ? :overdue : :open),
+    closed_on: Date.new(mes_fatura.year, mes_fatura.month, 25),
+    due_on: (mes_fatura + 1.month).change(day: 15),
+    paid_on: offset < -1 ? (mes_fatura + 1.month).change(day: 16) : nil
+  )
+end
+
+# Função helper para associar transação de cartão à fatura correta
+def associar_com_fatura(transaction, statements, accounts)
+  return unless transaction.from_account&.account_type&.code == "CREDIT"
+  
+  # Determina qual mês da fatura baseado na data de fechamento
+  closing_day = transaction.from_account.closing_day
+  event_date = transaction.event_date
+  
+  # Se comprou antes do fechamento, vai para fatura do mesmo mês
+  # Se comprou depois do fechamento, vai para fatura do mês seguinte
+  cutoff = Date.new(event_date.year, event_date.month, closing_day)
+  fatura_mes = (event_date <= cutoff) ? event_date : event_date + 1.month
+  
+  # Encontra a fatura correspondente
+  account_key = case transaction.from_account
+  when accounts[:nubank_pai] then :nubank_pai
+  when accounts[:inter_mae] then :inter_mae
+  when accounts[:santander] then :santander
+  end
+  
+  if account_key && statements[account_key]
+    offset = ((fatura_mes.year - Date.today.year) * 12) + (fatura_mes.month - Date.today.month)
+    fatura = statements[account_key][offset]
+    transaction.update!(credit_statement: fatura) if fatura
+  end
+end
+
 # === GERAÇÃO DE TRANSAÇÕES REALISTAS ===
 puts "Gerando transações para 12 meses..."
 
@@ -205,7 +281,7 @@ meses_gerados = []
     
     mercados = ["Zaffari", "Big", "Carrefour", "Extra", "Walmart"]
     
-    Transaction.create!(
+    transaction = Transaction.create!(
       description: "Supermercado #{mercados.sample} - Compras família",
       amount: valor_compra,
       transaction_type: "expense",
@@ -217,6 +293,9 @@ meses_gerados = []
       recurrence_type: "single",
       status: "confirmed"
     )
+    
+    # Associar com fatura se for cartão de crédito
+    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === COMBUSTÍVEL (2-3 VEZES POR MÊS) ===
@@ -229,7 +308,7 @@ meses_gerados = []
     
     postos = ["Ipiranga", "Shell", "Petrobras", "Texaco"]
     
-    Transaction.create!(
+    transaction = Transaction.create!(
       description: "Combustível - Posto #{postos.sample}",
       amount: valor_combustivel,
       transaction_type: "expense",
@@ -241,6 +320,9 @@ meses_gerados = []
       recurrence_type: "single",
       status: "confirmed"
     )
+    
+    # Associar com fatura se for cartão de crédito
+    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === FARMÁCIA (1-2 VEZES POR MÊS) ===
@@ -249,7 +331,7 @@ meses_gerados = []
     valor_farmacia = rand(45..250)
     farmacias = ["Panvel", "Droga Raia", "Drogasil", "Pague Menos"]
     
-    Transaction.create!(
+    transaction = Transaction.create!(
       description: "Farmácia #{farmacias.sample} - Medicamentos",
       amount: valor_farmacia,
       transaction_type: "expense",
@@ -261,6 +343,9 @@ meses_gerados = []
       recurrence_type: "single",
       status: "confirmed"
     )
+    
+    # Associar com fatura se for cartão de crédito
+    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === RESTAURANTES E DELIVERY (6-10 VEZES POR MÊS) ===
@@ -273,7 +358,7 @@ meses_gerados = []
       "Açaí família", "Churrascaria", "iFood - Burguer King", "Sorveteria"
     ]
     
-    Transaction.create!(
+    transaction = Transaction.create!(
       description: opcoes_delivery.sample,
       amount: valor_refeicao,
       transaction_type: "expense",
@@ -285,6 +370,9 @@ meses_gerados = []
       recurrence_type: "single",
       status: "confirmed"
     )
+    
+    # Associar com fatura se for cartão de crédito
+    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === TRANSPORTE URBANO ===
@@ -293,7 +381,7 @@ meses_gerados = []
     valor_transporte = rand(15..85)
     tipos_transporte = ["Uber", "99", "Táxi", "Ônibus", "Estacionamento"]
     
-    Transaction.create!(
+    transaction = Transaction.create!(
       description: "Transporte - #{tipos_transporte.sample}",
       amount: valor_transporte,
       transaction_type: "expense",
@@ -305,6 +393,9 @@ meses_gerados = []
       recurrence_type: "single",
       status: "confirmed"
     )
+    
+    # Associar com fatura se for cartão de crédito
+    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === LAZER E ENTRETENIMENTO ===
@@ -317,7 +408,7 @@ meses_gerados = []
       "Boliche", "Escape room", "Netflix", "Spotify", "Amazon Prime"
     ]
     
-    Transaction.create!(
+    transaction = Transaction.create!(
       description: atividades.sample,
       amount: valor_lazer,
       transaction_type: "expense",
@@ -329,6 +420,9 @@ meses_gerados = []
       recurrence_type: "single",
       status: "confirmed"
     )
+    
+    # Associar com fatura se for cartão de crédito
+    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === ROUPAS E CALÇADOS (OCASIONAL) ===
@@ -338,7 +432,7 @@ meses_gerados = []
       valor_roupa = rand(120..450)
       lojas = ["C&A", "Renner", "Riachuelo", "Zara", "Nike", "Adidas", "Centauro"]
       
-      Transaction.create!(
+      transaction = Transaction.create!(
         description: "Roupas - #{lojas.sample}",
         amount: valor_roupa,
         transaction_type: "expense",
@@ -350,6 +444,9 @@ meses_gerados = []
         recurrence_type: "single",
         status: "confirmed"
       )
+      
+      # Associar com fatura se for cartão de crédito
+      associar_com_fatura(transaction, statements, accounts)
     end
   end
   
@@ -530,59 +627,12 @@ emprestimo_group = TransactionGroup.create!(
   )
 end
 
-# === FATURAS DE CARTÃO DE CRÉDITO ===
-puts "Criando faturas de cartão..."
+# === ATUALIZAR VALORES DAS FATURAS ===
+puts "Atualizando valores das faturas..."
 
-# Gerar faturas para os últimos 6 meses
-(-5..0).each do |offset|
-  mes_fatura = Date.today.beginning_of_month + offset.months
-  
-  # Fatura Nubank - João
-  fatura_nubank = CreditStatement.create!(
-    account: accounts[:nubank_pai],
-    month: mes_fatura.strftime('%Y-%m'),
-    amount_due: 0,
-    amount_paid: 0,
-    status: offset < -1 ? :paid : (offset == -1 ? :overdue : :open),
-    closed_on: Date.new(mes_fatura.year, mes_fatura.month, 15),
-    due_on: (mes_fatura + 1.month).change(day: 5),
-    paid_on: offset < -1 ? (mes_fatura + 1.month).change(day: 6) : nil
-  )
-  
-  # Fatura Inter - Maria
-  fatura_inter = CreditStatement.create!(
-    account: accounts[:inter_mae],
-    month: mes_fatura.strftime('%Y-%m'),
-    amount_due: 0,
-    amount_paid: 0,
-    status: offset < -1 ? :paid : (offset == -1 ? :overdue : :open),
-    closed_on: Date.new(mes_fatura.year, mes_fatura.month, 20),
-    due_on: (mes_fatura + 1.month).change(day: 10),
-    paid_on: offset < -1 ? (mes_fatura + 1.month).change(day: 11) : nil
-  )
-  
-  # Fatura Santander - Família
-  fatura_santander = CreditStatement.create!(
-    account: accounts[:santander],
-    month: mes_fatura.strftime('%Y-%m'),
-    amount_due: 0,
-    amount_paid: 0,
-    status: offset < -1 ? :paid : (offset == -1 ? :overdue : :open),
-    closed_on: Date.new(mes_fatura.year, mes_fatura.month, 25),
-    due_on: (mes_fatura + 1.month).change(day: 15),
-    paid_on: offset < -1 ? (mes_fatura + 1.month).change(day: 16) : nil
-  )
-end
-
-# Atualizar valores das faturas baseado nas transações de cartão
+# Atualizar valores das faturas baseado nas transações de cartão já associadas
 CreditStatement.all.each do |fatura|
-  mes_fatura_date = Date.strptime(fatura.month, '%Y-%m')
-  
-  total_fatura = Transaction
-    .where(from_account: fatura.account)
-    .in_competence_month(mes_fatura_date)
-    .sum(:amount)
-  
+  total_fatura = fatura.transactions.sum(:amount)
   valor_pago = fatura.status == 'paid' ? total_fatura : 0
   
   fatura.update!(
@@ -676,7 +726,7 @@ end
 
 # Viagem de família (1x nos últimos 12 meses)
 data_viagem = Date.today - rand(90..300).days
-Transaction.create!(
+transaction = Transaction.create!(
   description: "Viagem família - Gramado/RS",
   amount: 2800.00,
   transaction_type: "expense",
@@ -689,9 +739,12 @@ Transaction.create!(
   status: "confirmed"
 )
 
+# Associar com fatura se for cartão de crédito
+associar_com_fatura(transaction, statements, accounts)
+
 # Alguns gastos de emergência que deixaram o mês negativo
 mes_negativo_1 = Date.today - 4.months
-Transaction.create!(
+transaction = Transaction.create!(
   description: "Troca de geladeira - emergência",
   amount: 2400.00,
   transaction_type: "expense",
@@ -704,8 +757,11 @@ Transaction.create!(
   status: "confirmed"
 )
 
+# Associar com fatura se for cartão de crédito
+associar_com_fatura(transaction, statements, accounts)
+
 mes_negativo_2 = Date.today - 7.months
-Transaction.create!(
+transaction = Transaction.create!(
   description: "Dentista emergência - tratamento canal",
   amount: 1800.00,
   transaction_type: "expense",
@@ -717,6 +773,9 @@ Transaction.create!(
   recurrence_type: "single",
   status: "confirmed"
 )
+
+# Associar com fatura se for cartão de crédito
+associar_com_fatura(transaction, statements, accounts)
 
 # === TRANSAÇÕES FUTURAS (PENDENTES) ===
 puts "Criando compromissos futuros..."

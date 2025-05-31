@@ -1,5 +1,6 @@
 class CreditStatement < ApplicationRecord
   belongs_to :account
+  has_many :transactions, dependent: :nullify
 
   enum status: { open: 0, paid: 1, overdue: 2 }
 
@@ -8,6 +9,7 @@ class CreditStatement < ApplicationRecord
   validate :account_must_be_credit_card
   
   before_save :auto_update_status
+  after_save :update_amount_due
 
   def remaining_balance
     amount_due - amount_paid
@@ -30,5 +32,10 @@ class CreditStatement < ApplicationRecord
     else
       self.status = :open
     end
+  end
+
+  def update_amount_due
+    total = transactions.sum(:amount)
+    update_column(:amount_due, total) if total != amount_due
   end
 end

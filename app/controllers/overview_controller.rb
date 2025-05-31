@@ -16,21 +16,25 @@ class OverviewController < ApplicationController
     @next_month = (current_date >> 1).strftime("%Y-%m")
     @selected_month_long = I18n.l(current_date, format: "%B de %Y")
 
-    # Busca a conta de cartão de crédito
-    @credit_card_account = Account.find_by(account_type: AccountType.find_by(code: "CREDIT"))
-    # Busca a fatura do mês
-    @credit_statement = CreditStatement.find_by(account: @credit_card_account, month: @month)
+    # === FATURAS DE CARTÃO DE CRÉDITO ===
+    load_credit_statements(month_date)
 
-    @statement_due = @credit_statement&.due_on
-    @statement_month_label = current_date.strftime("%B")
-
-    @upcoming = Transaction.upcoming_payments(5)
-    @category_ranking = category_ranking month_date
-    @projected_balance = projected_balance @balance, @month
-    @balance_alert = balance_alert @projected_balance
+    # === PRÓXIMOS COMPROMISSOS ===
+    @upcoming = Transaction.upcoming_payments(10)
+    
+    # === ANÁLISES E PROJEÇÕES ===
+    @category_ranking = category_ranking(month_date)
+    @projected_balance = projected_balance(@balance, @month)
+    @balance_alert = balance_alert(@projected_balance)
+    
+    # === DADOS PARA GRÁFICOS ===
     today = Date.today
     @month_end = Date.new(today.year, today.month, -1)
     @chart_options = chart_options
+    
+    # === ESTATÍSTICAS ADICIONAIS ===
+    @monthly_stats = monthly_statistics(month_date)
+    @savings_rate = calculate_savings_rate(@income_total, @expense_total)
   end
 end
 
@@ -142,6 +146,61 @@ end
 
 private
 
+def load_credit_statements(month_date)
+  # Buscar todas as faturas de cartão para o mês atual
+  @credit_statements = CreditStatement.includes(:account)
+                                    .where(month: month_date.strftime('%Y-%m'))
+                                    .order('accounts.name')
+  
+  # Estatísticas das faturas
+  @credit_stats = {
+    total_due: @credit_statements.sum(:amount_due),
+    total_paid: @credit_statements.sum(:amount_paid),
+    pending_count: @credit_statements.where(status: ['open', 'overdue']).count,
+    overdue_count: @credit_statements.where(status: 'overdue').count
+  }
+  
+  # Próximas faturas a vencer (próximos 30 dias)
+  @upcoming_statements = CreditStatement.includes(:account)
+                                       .where(due_on: Date.today..30.days.from_now)
+                                       .where.not(status: 'paid')
+                                       .order(:due_on)
+                                       .limit(5)
+end
+
+def monthly_statistics(month_date)
+  prev_month = month_date - 1.month
+  
+  # Dados do mês anterior para comparação
+  prev_income = Transaction.income.confirmed.in_competence_month(prev_month).sum(:amount)
+  prev_expense = Transaction.expense.confirmed.in_competence_month(prev_month).sum(:amount)
+  
+  {
+    income_growth: calculate_growth(@income_total, prev_income),
+    expense_growth: calculate_growth(@expense_total, prev_expense),
+    largest_expense: largest_expense_this_month(month_date),
+    transaction_count: @transactions.confirmed.count,
+    avg_transaction: @transactions.confirmed.average(:amount)&.to_f || 0
+  }
+end
+
+def calculate_savings_rate(income, expense)
+  return 0 if income == 0
+  ((income - expense) / income * 100).round(1)
+end
+
+def calculate_growth(current, previous)
+  return 0 if previous == 0
+  ((current - previous) / previous * 100).round(1)
+end
+
+def largest_expense_this_month(month_date)
+  Transaction.expense.confirmed
+             .in_competence_month(month_date)
+             .order(amount: :desc)
+             .first
+end
+
 def generate_chart_data
   # Gera dados para os últimos 12 meses
   end_date = Date.today
@@ -194,20 +253,53 @@ def category_ranking(month_date = nil)
     .map { |cat_id, amount| [Category.find(cat_id), amount] }
 end
 
-def projected_balance(current_balance, month = nil)
-  today = Date.today
-  month ||= today.strftime('%Y-%m')
-  month_end = Date.new(today.year, today.month, -1)
+# ...existing code...
 
-  # Some todos os lançamentos futuros até fim do mês
-  future_transactions = Transaction
-    .where("event_date > ?", today)
-    .where("event_date <= ?", month_end)
-    .confirmed
-    .sum("CASE WHEN transaction_type = 'income' THEN amount ELSE -amount END")
+private
 
-  current_balance + future_transactions
+def projected_balance(current_balance, month)
+  # Saldo atual do mês
+  base_balance = current_balance
+  
+  # Buscar transações futuras pendentes até o final do mês
+  month_date = Date.strptime(month, "%Y-%m")
+  end_of_month = month_date.end_of_month
+  
+  # Transações pendentes/futuras do mês atual
+  future_income = Transaction.where(
+    transaction_type: "income",
+    status: ["pending", "confirmed"],
+    event_date: month_date.beginning_of_month..end_of_month
+  ).where("event_date > ?", Date.current).sum(:amount)
+  
+  future_expenses = Transaction.where(
+    transaction_type: "expense", 
+    status: ["pending", "confirmed"],
+    event_date: month_date.beginning_of_month..end_of_month
+  ).where("event_date > ?", Date.current).sum(:amount)
+  
+  # Transações recorrentes que ainda vão acontecer no mês
+  recurrent_income = Transaction.where(
+    transaction_type: "income",
+    recurrence_type: ["monthly", "weekly"],
+    status: "confirmed"
+  ).where("event_date <= ?", end_of_month)
+   .where("event_date > ?", Date.current).sum(:amount)
+  
+  recurrent_expenses = Transaction.where(
+    transaction_type: "expense", 
+    recurrence_type: ["monthly", "weekly"],
+    status: "confirmed"
+  ).where("event_date <= ?", end_of_month)
+   .where("event_date > ?", Date.current).sum(:amount)
+  
+  # Calcular projeção
+  projected = base_balance + future_income + recurrent_income - future_expenses - recurrent_expenses
+  
+  projected
 end
+
+# ...existing code...
 
 def balance_alert(projected_balance)
   if projected_balance < 0

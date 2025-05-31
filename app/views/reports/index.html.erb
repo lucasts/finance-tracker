@@ -1,0 +1,293 @@
+<h1 class="text-3xl font-bold mb-6">📊 Relatórios Financeiros</h1>
+
+<!-- Month navigation -->
+<div class="flex items-center justify-between mb-6">
+  <div class="flex items-center gap-2">
+    <%= link_to '<', reports_path(month: @prev_month), class: "btn btn-sm btn-ghost" %>
+    <span class="text-xl font-bold"><%= @selected_month_long %></span>
+    <%= link_to '>', reports_path(month: @next_month), class: "btn btn-sm btn-ghost" %>
+  </div>
+  
+  <div class="flex gap-2">
+    <%= link_to "📈 Dashboard", overview_index_path, class: "btn btn-sm btn-outline" %>
+    <%= link_to "💳 Faturas", credit_statements_path, class: "btn btn-sm btn-outline" %>
+  </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+  <!-- Total Transactions -->
+  <div class="card bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+    <div class="card-body">
+      <h2 class="card-title text-primary">📝 Transações</h2>
+      <p class="text-2xl font-bold"><%= @total_transactions %></p>
+      <div class="text-xs text-base-content/60">
+        <span class="text-success"><%= @income_count %> receitas</span> • 
+        <span class="text-error"><%= @expense_count %> despesas</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Income -->
+  <div class="card bg-gradient-to-br from-success/10 to-success/5 border border-success/20">
+    <div class="card-body">
+      <h2 class="card-title text-success">💰 Receitas</h2>
+      <p class="text-2xl font-bold">R$ <%= number_with_precision(@income_total, precision: 2, delimiter: ".") %></p>
+    </div>
+  </div>
+
+  <!-- Expenses -->
+  <div class="card bg-gradient-to-br from-error/10 to-error/5 border border-error/20">
+    <div class="card-body">
+      <h2 class="card-title text-error">💸 Despesas</h2>
+      <p class="text-2xl font-bold">R$ <%= number_with_precision(@expense_total, precision: 2, delimiter: ".") %></p>
+    </div>
+  </div>
+
+  <!-- Savings Rate -->
+  <div class="card bg-gradient-to-br from-info/10 to-info/5 border border-info/20">
+    <div class="card-body">
+      <h2 class="card-title text-info">💎 Taxa de Poupança</h2>
+      <p class="text-2xl font-bold <%= @savings_rate >= 0 ? 'text-success' : 'text-error' %>"><%= @savings_rate %>%</p>
+      <div class="text-xs text-base-content/60">
+        Média 6m: <span class="font-semibold"><%= @avg_savings_rate %>%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+  
+  <!-- Category Analysis -->
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h3 class="card-title mb-4">🏷️ Análise por Categoria</h3>
+      
+      <% if @category_percentages.any? %>
+        <div class="space-y-3">
+          <% @category_percentages.each do |category, amount, percentage| %>
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-sm font-medium"><%= category %></span>
+                  <span class="text-sm text-base-content/70"><%= percentage %>%</span>
+                </div>
+                <div class="w-full bg-base-300 rounded-full h-2">
+                  <div class="bg-primary h-2 rounded-full transition-all duration-300" 
+                       style="width: <%= percentage %>%"></div>
+                </div>
+              </div>
+              <div class="ml-4 text-right">
+                <div class="font-semibold">R$ <%= number_with_precision(amount, precision: 2, delimiter: ".") %></div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center text-base-content/60 py-8">
+          <div class="text-4xl mb-2">📊</div>
+          <p>Nenhuma despesa categorizada no período</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Monthly Trends -->
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h3 class="card-title mb-4">📈 Tendências (6 Meses)</h3>
+      
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th>Mês</th>
+              <th class="text-right">Receitas</th>
+              <th class="text-right">Despesas</th>
+              <th class="text-right">Saldo</th>
+              <th class="text-right">Taxa Poupança</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @monthly_trends.each do |trend| %>
+              <tr class="<%= trend[:month] == @start_date ? 'bg-primary/10' : '' %>">
+                <td class="font-medium">
+                  <%= trend[:month_label] %>
+                  <% if trend[:month] == @start_date %>
+                    <span class="badge badge-primary badge-xs ml-1">atual</span>
+                  <% end %>
+                </td>
+                <td class="text-right text-success">
+                  R$ <%= number_with_precision(trend[:income], precision: 0, delimiter: ".") %>
+                </td>
+                <td class="text-right text-error">
+                  R$ <%= number_with_precision(trend[:expenses], precision: 0, delimiter: ".") %>
+                </td>
+                <td class="text-right font-semibold <%= trend[:balance] >= 0 ? 'text-success' : 'text-error' %>">
+                  R$ <%= number_with_precision(trend[:balance], precision: 0, delimiter: ".") %>
+                </td>
+                <td class="text-right font-semibold <%= trend[:savings_rate] >= 0 ? 'text-success' : 'text-error' %>">
+                  <%= trend[:savings_rate] %>%
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Insights -->
+      <div class="mt-4 p-4 bg-base-200 rounded-lg">
+        <h4 class="font-semibold mb-2">💡 Insights</h4>
+        <div class="text-sm space-y-1">
+          <div>
+            <span class="font-medium text-success">Melhor mês:</span> 
+            <%= @best_month[:month_label] %> (<%= @best_month[:savings_rate] %>% poupança)
+          </div>
+          <div>
+            <span class="font-medium text-error">Pior mês:</span> 
+            <%= @worst_month[:month_label] %> (<%= @worst_month[:savings_rate] %>% poupança)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Credit Card Analysis -->
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h3 class="card-title mb-4">💳 Análise Cartão de Crédito</h3>
+      
+      <% if @credit_statements.any? %>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div class="stat">
+            <div class="stat-title">Total a Pagar</div>
+            <div class="stat-value text-error text-lg">R$ <%= number_with_precision(@cc_total_due, precision: 2, delimiter: ".") %></div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">Total Pago</div>
+            <div class="stat-value text-success text-lg">R$ <%= number_with_precision(@cc_total_paid, precision: 2, delimiter: ".") %></div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">Pendente</div>
+            <div class="stat-value text-warning text-lg">R$ <%= number_with_precision(@cc_pending, precision: 2, delimiter: ".") %></div>
+          </div>
+        </div>
+
+        <!-- Status breakdown -->
+        <div class="mb-4">
+          <h4 class="font-semibold mb-2">Status das Faturas</h4>
+          <div class="flex gap-2 flex-wrap">
+            <% @cc_status_breakdown.each do |status, count| %>
+              <div class="badge <%= status == 'paid' ? 'badge-success' : 
+                                   status == 'overdue' ? 'badge-error' : 
+                                   'badge-warning' %>">
+                <%= status.humanize %>: <%= count %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Individual statements -->
+        <div class="space-y-2">
+          <% @credit_statements.each do |statement| %>
+            <div class="flex items-center justify-between p-3 bg-base-200 rounded">
+              <div>
+                <div class="font-medium"><%= statement.credit_card_name %></div>
+                <div class="text-sm text-base-content/70">
+                  <%= l(statement.period_start, format: :short) %> - <%= l(statement.period_end, format: :short) %>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-semibold">R$ <%= number_with_precision(statement.amount_due, precision: 2, delimiter: ".") %></div>
+                <div class="badge badge-xs <%= statement.status == 'paid' ? 'badge-success' : 
+                                               statement.status == 'overdue' ? 'badge-error' : 
+                                               'badge-warning' %>">
+                  <%= statement.status.humanize %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center text-base-content/60 py-8">
+          <div class="text-4xl mb-2">💳</div>
+          <p>Nenhuma fatura de cartão no período</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Financial Health Summary -->
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h3 class="card-title mb-4">🏥 Saúde Financeira</h3>
+      
+      <div class="space-y-4">
+        <!-- Savings Rate Health -->
+        <div class="flex items-center justify-between p-3 bg-base-200 rounded">
+          <div>
+            <div class="font-medium">Taxa de Poupança</div>
+            <div class="text-sm text-base-content/70">Recomendado: 20%+</div>
+          </div>
+          <div class="text-right">
+            <div class="font-bold text-2xl <%= @savings_rate >= 20 ? 'text-success' : @savings_rate >= 10 ? 'text-warning' : 'text-error' %>">
+              <%= @savings_rate %>%
+            </div>
+            <div class="text-xs">
+              <%= if @savings_rate >= 20
+                    '✅ Excelente'
+                  elsif @savings_rate >= 10
+                    '⚠️ Razoável'
+                  else
+                    '❌ Atenção'
+                  end %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monthly Balance Health -->
+        <div class="flex items-center justify-between p-3 bg-base-200 rounded">
+          <div>
+            <div class="font-medium">Saldo Mensal</div>
+            <div class="text-sm text-base-content/70">Positivo é saudável</div>
+          </div>
+          <div class="text-right">
+            <div class="font-bold text-2xl <%= @balance >= 0 ? 'text-success' : 'text-error' %>">
+              R$ <%= number_with_precision(@balance, precision: 0, delimiter: ".") %>
+            </div>
+            <div class="text-xs">
+              <%= @balance >= 0 ? '✅ Positivo' : '❌ Negativo' %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Credit Card Health -->
+        <div class="flex items-center justify-between p-3 bg-base-200 rounded">
+          <div>
+            <div class="font-medium">Cartões de Crédito</div>
+            <div class="text-sm text-base-content/70">Faturas em dia</div>
+          </div>
+          <div class="text-right">
+            <div class="font-bold text-2xl <%= @cc_pending == 0 ? 'text-success' : 'text-warning' %>">
+              <%= @cc_status_breakdown['paid'] || 0 %>/<%= @credit_statements.count %>
+            </div>
+            <div class="text-xs">
+              <%= @cc_pending == 0 ? '✅ Em dia' : '⚠️ Pendências' %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mt-6">
+        <h4 class="font-semibold mb-2">🚀 Ações Rápidas</h4>
+        <div class="flex gap-2 flex-wrap">
+          <%= link_to "Ver Transações", transactions_path, class: "btn btn-xs btn-outline" %>
+          <%= link_to "Ver Faturas", credit_statements_path, class: "btn btn-xs btn-outline" %>
+          <%= link_to "Dashboard", overview_index_path, class: "btn btn-xs btn-primary" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

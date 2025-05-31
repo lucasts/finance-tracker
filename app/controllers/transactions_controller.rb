@@ -1,7 +1,12 @@
 class TransactionsController < ApplicationController
   def index
-    month = params[:month] || Date.today.strftime('%Y-%m')
-    @transactions = Transaction.in_competence_month(month).order(event_date: :desc)
+    begin
+      selected_month = Date.strptime(params[:month], "%Y-%m")
+    rescue TypeError, ArgumentError
+      selected_month = Date.today
+    end
+
+    @transactions = Transaction.in_competence_month(selected_month).order(event_date: :desc)
   end
 
   def show
@@ -15,6 +20,12 @@ class TransactionsController < ApplicationController
 
   def create
     @transaction = Transaction.new(transaction_params)
+    
+    # Auto-associar com fatura se for cartão de crédito
+    if @transaction.from_account&.account_type&.code == "CREDIT"
+      associate_with_credit_statement(@transaction)
+    end
+    
     if @transaction.save
       redirect_to transactions_path
     else
@@ -28,6 +39,12 @@ class TransactionsController < ApplicationController
 
   def update
     @transaction = Transaction.find(params[:id])
+    
+    # Reasociar com fatura se mudou conta ou data
+    if @transaction.from_account&.account_type&.code == "CREDIT"
+      associate_with_credit_statement(@transaction)
+    end
+    
     if @transaction.update(transaction_params)
       redirect_to transactions_path
     else
@@ -41,9 +58,11 @@ class TransactionsController < ApplicationController
     redirect_to transactions_path
   end
   
+  private
+
   def suggested_period_for(date:, from_account:)
-    if from_account&.account_type&.role == "credit" && from_account&.due_day
-      cutoff = Date.new(date.year, date.month, from_account.due_day)
+    if from_account&.account_type&.code == "CREDIT" && from_account&.closing_day
+      cutoff = Date.new(date.year, date.month, from_account.closing_day)
       ref = (date <= cutoff) ? date : date + 1.month
       ref.strftime("%Y-%m")
     else
@@ -51,13 +70,22 @@ class TransactionsController < ApplicationController
     end
   end
 
-  private
+  def associate_with_credit_statement(transaction)
+    return unless transaction.from_account&.account_type&.code == "CREDIT"
+    
+    period = suggested_period_for(date: transaction.event_date, from_account: transaction.from_account)
+    statement = CreditStatement.find_by(account: transaction.from_account, month: period)
+    
+    if statement
+      transaction.credit_statement = statement
+    end
+  end
 
   def transaction_params
     params.require(:transaction).permit(
       :description, :amount, :transaction_type, :event_date, :payment_date,
       :from_account_id, :to_account_id, :category_id, :installment,
-      :transaction_group_id, :status
+      :transaction_group_id, :status, :credit_statement_id
     )
   end
 end

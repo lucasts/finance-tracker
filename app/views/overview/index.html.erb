@@ -9,39 +9,82 @@
   </div>
 </div>
 
-<!-- Summary cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-  <div class="card bg-base-100 shadow">
+<!-- Enhanced Summary cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+  <!-- Receitas -->
+  <div class="card bg-gradient-to-br from-success/10 to-success/5 border border-success/20">
     <div class="card-body">
-      <h2 class="card-title text-success">Receitas</h2>
-      <p class="text-2xl font-bold">R$ <%= number_with_precision(@income_total, precision: 2, delimiter: ".") %></p>
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="card-title text-success">💰 Receitas</h2>
+          <p class="text-2xl font-bold">R$ <%= number_with_precision(@income_total, precision: 2, delimiter: ".") %></p>
+          <% if @monthly_stats[:income_growth] != 0 %>
+            <div class="flex items-center gap-1 text-xs mt-1">
+              <span class="<%= @monthly_stats[:income_growth] > 0 ? 'text-success' : 'text-error' %>">
+                <%= @monthly_stats[:income_growth] > 0 ? '↗️' : '↘️' %> <%= @monthly_stats[:income_growth].abs %>%
+              </span>
+              <span class="text-base-content/60">vs mês anterior</span>
+            </div>
+          <% end %>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="card bg-base-100 shadow">
+
+  <!-- Despesas -->
+  <div class="card bg-gradient-to-br from-error/10 to-error/5 border border-error/20">
     <div class="card-body">
-      <h2 class="card-title text-error">Despesas</h2>
-      <p class="text-2xl font-bold">R$ <%= number_with_precision(@expense_total, precision: 2, delimiter: ".") %></p>
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="card-title text-error">💸 Despesas</h2>
+          <p class="text-2xl font-bold">R$ <%= number_with_precision(@expense_total, precision: 2, delimiter: ".") %></p>
+          <% if @monthly_stats[:expense_growth] != 0 %>
+            <div class="flex items-center gap-1 text-xs mt-1">
+              <span class="<%= @monthly_stats[:expense_growth] > 0 ? 'text-error' : 'text-success' %>">
+                <%= @monthly_stats[:expense_growth] > 0 ? '↗️' : '↘️' %> <%= @monthly_stats[:expense_growth].abs %>%
+              </span>
+              <span class="text-base-content/60">vs mês anterior</span>
+            </div>
+          <% end %>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="card bg-base-100 shadow">
+
+  <!-- Saldo -->
+  <div class="card bg-gradient-to-br from-info/10 to-info/5 border border-info/20">
     <div class="card-body">
-      <h2 class="card-title text-info">Saldo atual</h2>
-      <p class="text-2xl font-bold">R$ <%= number_with_precision(@balance, precision: 2, delimiter: ".") %></p>
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="card-title text-info">💳 Saldo</h2>
+          <p class="text-2xl font-bold <%= @balance >= 0 ? 'text-success' : 'text-error' %>">
+            R$ <%= number_with_precision(@balance, precision: 2, delimiter: ".") %>
+          </p>
+          <div class="text-xs text-base-content/60 mt-1">
+            Taxa de poupança: <span class="font-semibold <%= @savings_rate >= 0 ? 'text-success' : 'text-error' %>"><%= @savings_rate %>%</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="card bg-base-100 shadow">
-    <div class="card-body">              
-      <h2 class="card-title">Fatura do cartão <span class="badge badge-sm badge-outline ml-1"><%= @statement_month_label %></span></h2>
-      <% if @credit_statement %>
-        <p class="text-2xl font-bold">R$ <%= number_with_precision(@credit_statement.amount_due, precision: 2, delimiter: ".") %></p>
-        <span class="text-xs text-base-content/60">Venc. <%= l(@credit_statement.due_on) if @credit_statement.due_on %></span>
-        <span class="text-xs ml-2">Status: <span class="badge badge-<%= @credit_statement.status == "paid" ? "success" : @credit_statement.status == "overdue" ? "error" : "info" %>"><%= t("activerecord.attributes.credit_statement.statuses.#{@credit_statement.status}") %></span></span>
-        <% if @credit_statement.amount_paid > 0 %>
-          <div class="text-xs mt-1">Pago: R$ <%= number_with_precision(@credit_statement.amount_paid, precision: 2, delimiter: ".") %></div>
-        <% end %>
-      <% else %>
-        <p class="text-2xl font-bold text-base-content/40">Sem fatura</p>
-      <% end %>
+
+  <!-- Saldo Projetado -->
+  <div class="card bg-gradient-to-br from-warning/10 to-warning/5 border border-warning/20">
+    <div class="card-body">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="card-title text-warning">🔮 Projeção</h2>
+          <p class="text-2xl font-bold <%= @projected_balance >= 0 ? 'text-success' : 'text-error' %>">
+            R$ <%= number_with_precision(@projected_balance, precision: 2, delimiter: ".") %>
+          </p>
+          <div class="text-xs text-base-content/60 mt-1">
+            Até <%= l(@month_end, format: :short) %>
+          </div>
+          <% if @balance_alert %>
+            <div class="badge badge-warning badge-xs mt-1">⚠️ Alerta</div>
+          <% end %>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -126,19 +169,74 @@
     </div>
   </div>
 
-
-<!-- Projected balance and alert -->
-<% if @projected_balance.present? %>
-  <div class="alert alert-info mt-6">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-    <div>
-      <h3 class="font-bold">Projeção de Saldo</h3>
-      <div class="text-sm">
-        Saldo estimado até <%= l(@month_end, format: :short) %>: <strong>R$ <%= number_with_precision(@projected_balance, precision: 2, delimiter: ".") %></strong>
-        <% if @alert.present? %>
-          <span class="badge badge-warning ml-2"><%= @alert %></span>
+<!-- Credit Card Statements Section -->
+<div class="card bg-base-100 shadow mt-6">
+  <div class="card-body">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="card-title">💳 Faturas do Cartão de Crédito</h3>
+      <%= link_to "Ver todas", credit_statements_path, class: "btn btn-sm btn-outline" %>
+    </div>
+    
+    <% if @credit_statements.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <% @credit_statements.each do |statement| %>
+          <div class="card bg-base-200 border border-base-300">
+            <div class="card-body">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-semibold text-lg"><%= statement.account.name %></h4>
+                <div class="badge <%= statement.status == 'paid' ? 'badge-success' : 
+                                     statement.status == 'overdue' ? 'badge-error' : 
+                                     'badge-warning' %>">
+                  <%= statement.status.humanize %>
+                </div>
+              </div>
+              
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-base-content/70">Valor da fatura:</span>
+                  <span class="font-semibold">R$ <%= number_with_precision(statement.amount_due, precision: 2, delimiter: ".") %></span>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-base-content/70">Pago:</span>
+                  <span class="font-semibold">R$ <%= number_with_precision(statement.amount_paid, precision: 2, delimiter: ".") %></span>
+                </div>
+                
+                <% if statement.amount_due > statement.amount_paid %>
+                  <div class="flex justify-between">
+                    <span class="text-base-content/70">Restante:</span>
+                    <span class="font-semibold text-error">R$ <%= number_with_precision(statement.amount_due - statement.amount_paid, precision: 2, delimiter: ".") %></span>
+                  </div>
+                <% end %>
+                
+                <div class="flex justify-between">
+                  <span class="text-base-content/70">Vencimento:</span>
+                  <span class="font-semibold <%= statement.due_on < Date.current ? 'text-error' : 'text-base-content' %>">
+                    <%= l(statement.due_on, format: :short) %>
+                  </span>
+                </div>
+                
+                <% if statement.transactions.any? %>
+                  <div class="flex justify-between">
+                    <span class="text-base-content/70">Transações:</span>
+                    <span class="font-semibold"><%= statement.transactions.count %></span>
+                  </div>
+                <% end %>
+              </div>
+              
+              <div class="card-actions justify-end mt-4">
+                <%= link_to "Ver detalhes", credit_statement_path(statement), class: "btn btn-xs btn-primary" %>
+              </div>
+            </div>
+          </div>
         <% end %>
       </div>
-    </div>
+    <% else %>
+      <div class="text-center text-base-content/60 py-8">
+        <div class="text-4xl mb-2">💳</div>
+        <p>Nenhuma fatura de cartão de crédito para este mês</p>
+        <p class="text-sm mt-2">As faturas são geradas automaticamente a partir dos lançamentos do cartão</p>
+      </div>
+    <% end %>
   </div>
-<% end %>
+</div>
