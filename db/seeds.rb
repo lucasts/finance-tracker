@@ -1,1 +1,2 @@
-# Seeds would go here, converted from Go seed_demo
+# Load setup seeds (basic structure)
+load Rails.root.join('db', 'seeds', 'setup.rb')
