@@ -10,8 +10,27 @@ class Transaction < ApplicationRecord
   scope :income, -> { where transaction_type: :income }
   scope :expense, -> { where transaction_type: :expense }
   scope :pending, -> { where status: :pending }
-  scope :in_competence_month, ->(ym) { where("strftime('%Y-%m', event_date) = ?", ym) }
-  scope :in_payment_month, ->(ym) { where("strftime('%Y-%m', payment_date) = ?", ym) }
+  scope :confirmed, -> { where status: :confirmed }
+  
+  # Scopes que trabalham com Date usando ranges (mais eficiente)
+  scope :in_competence_month, ->(date) { 
+    month_start = date.beginning_of_month
+    month_end = date.end_of_month
+    where(event_date: month_start..month_end)
+  }
+  scope :in_payment_month, ->(date) { 
+    month_start = date.beginning_of_month
+    month_end = date.end_of_month
+    where(payment_date: month_start..month_end)
+  }
+  
+  # Scope para próximos compromissos
+  scope :upcoming_payments, ->(limit = 5) {
+    where(status: :pending)
+      .where('payment_date >= ?', Date.current)
+      .order(:payment_date)
+      .limit(limit)
+  }
 
   enum :status, { pending: 0, confirmed: 1, cancelled: 2 }
   enum :recurrence_type, { single: 0, fixed: 1, recurring: 2 }

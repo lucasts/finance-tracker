@@ -1,15 +1,17 @@
 class OverviewController < ApplicationController
   def index
     @month = params[:month] || Date.today.strftime('%Y-%m')
-    @transactions = Transaction.in_competence_month(@month)
-    @income_total = Transaction.in_competence_month(@month).income.sum(:amount)
-    @expense_total = Transaction.in_competence_month(@month).expense.sum(:amount)
+    month_date = Date.strptime(@month, "%Y-%m")
+    
+    @transactions = Transaction.in_competence_month(month_date)
+    @income_total = Transaction.in_competence_month(month_date).income.sum(:amount)
+    @expense_total = Transaction.in_competence_month(month_date).expense.sum(:amount)
 
     @balance = @income_total - @expense_total
 
     @category_totals = @transactions.joins(:category).group("categories.name").sum(:amount)
 
-    current_date = Date.strptime(@month, "%Y-%m")
+    current_date = month_date
     @prev_month = (current_date << 1).strftime("%Y-%m")
     @next_month = (current_date >> 1).strftime("%Y-%m")
     @selected_month_long = I18n.l(current_date, format: "%B de %Y")
@@ -22,8 +24,8 @@ class OverviewController < ApplicationController
     @statement_due = @credit_statement&.due_on
     @statement_month_label = current_date.strftime("%B")
 
-    @upcoming = Transaction.pending.in_payment_month(@month).limit(5)
-    @category_ranking = category_ranking @month
+    @upcoming = Transaction.upcoming_payments(5)
+    @category_ranking = category_ranking month_date
     @projected_balance = projected_balance @balance, @month
     @balance_alert = balance_alert @projected_balance
     today = Date.today
@@ -157,8 +159,8 @@ def generate_chart_data
     month_label = I18n.l(month_date, format: '%b/%y')
     
     # Calcula receitas e despesas do mês
-    income = Transaction.income.confirmed.in_competence_month(month_str).sum(:amount)
-    expense = Transaction.expense.confirmed.in_competence_month(month_str).sum(:amount)
+    income = Transaction.income.confirmed.in_competence_month(month_date).sum(:amount)
+    expense = Transaction.expense.confirmed.in_competence_month(month_date).sum(:amount)
     
     # Calcula saldo do mês
     monthly_balance = income - expense
@@ -179,11 +181,11 @@ def generate_chart_data
 end
 
 
-def category_ranking(month = nil)
-  month ||= Date.today.strftime('%Y-%m')
+def category_ranking(month_date = nil)
+  month_date ||= Date.today
   Transaction
     .expense
-    .in_competence_month(month)
+    .in_competence_month(month_date)
     .confirmed
     .group(:category_id)
     .sum(:amount)

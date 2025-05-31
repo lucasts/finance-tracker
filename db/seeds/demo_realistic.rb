@@ -580,7 +580,7 @@ CreditStatement.all.each do |fatura|
   
   total_fatura = Transaction
     .where(from_account: fatura.account)
-    .in_competence_month(fatura.month)
+    .in_competence_month(mes_fatura_date)
     .sum(:amount)
   
   valor_pago = fatura.status == 'paid' ? total_fatura : 0
@@ -759,12 +759,13 @@ puts "Faturas de cartão: #{CreditStatement.count}"
 
 # Estatísticas por mês
 puts "\n=== RESUMO POR MÊS ==="
-meses_gerados.each do |mes|
-  receitas = Transaction.income.confirmed.in_competence_month(mes).sum(:amount)
-  despesas = Transaction.expense.confirmed.in_competence_month(mes).sum(:amount)
+meses_gerados.each do |mes_str|
+  mes_date = Date.strptime(mes_str, '%Y-%m')
+  receitas = Transaction.income.confirmed.in_competence_month(mes_date).sum(:amount)
+  despesas = Transaction.expense.confirmed.in_competence_month(mes_date).sum(:amount)
   saldo = receitas - despesas
   
-  puts "#{mes}: Receitas R$ #{receitas.to_i} | Despesas R$ #{despesas.to_i} | Saldo R$ #{saldo.to_i}"
+  puts "#{mes_str}: Receitas R$ #{receitas.to_i} | Despesas R$ #{despesas.to_i} | Saldo R$ #{saldo.to_i}"
 end
 
 puts "\nSeed realista finalizado com sucesso! 🎉"
