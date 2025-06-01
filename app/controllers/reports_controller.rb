@@ -21,16 +21,16 @@ class ReportsController < ApplicationController
 
   def load_transactions_data
     # Base query for selected month
-    @transactions = Transaction.where(transaction_date: @start_date..@end_date)
+    @transactions = Transaction.where(event_date: @start_date..@end_date)
     
-    # Income and expense totals
-    @income_total = @transactions.where(amount: 0..).sum(:amount)
-    @expense_total = @transactions.where(amount: ...0).sum(:amount).abs
+    # Income and expense totals using transaction_type
+    @income_total = @transactions.where(transaction_type: "income").sum(:amount)
+    @expense_total = @transactions.where(transaction_type: "expense").sum(:amount)
     @balance = @income_total - @expense_total
     
     # Transaction counts
-    @income_count = @transactions.where(amount: 0..).count
-    @expense_count = @transactions.where(amount: ...0).count
+    @income_count = @transactions.where(transaction_type: "income").count
+    @expense_count = @transactions.where(transaction_type: "expense").count
     @total_transactions = @transactions.count
   end
 
@@ -38,10 +38,9 @@ class ReportsController < ApplicationController
     # Category spending breakdown (only expenses)
     @category_breakdown = @transactions
       .joins(:category)
-      .where(amount: ...0)
+      .where(transaction_type: "expense")
       .group('categories.name')
       .sum(:amount)
-      .transform_values(&:abs)
       .sort_by { |_category, amount| -amount }
       .first(10)
 
@@ -56,12 +55,9 @@ class ReportsController < ApplicationController
   end
 
   def load_credit_card_analysis
-    # Credit card statements for the month
-    @credit_statements = CreditStatement.where(
-      period_start: @start_date..@end_date
-    ).or(
-      CreditStatement.where(period_end: @start_date..@end_date)
-    ).includes(:transactions)
+    # Credit card statements for the month (using month string format YYYY-MM)
+    selected_month = @start_date.strftime("%Y-%m")
+    @credit_statements = CreditStatement.where(month: selected_month).includes(:transactions)
 
     # Credit card spending summary
     @cc_total_due = @credit_statements.sum(:amount_due)
@@ -80,9 +76,9 @@ class ReportsController < ApplicationController
       month_start = month.beginning_of_month
       month_end = month.end_of_month
       
-      month_transactions = Transaction.where(transaction_date: month_start..month_end)
-      income = month_transactions.where(amount: 0..).sum(:amount)
-      expenses = month_transactions.where(amount: ...0).sum(:amount).abs
+      month_transactions = Transaction.where(event_date: month_start..month_end)
+      income = month_transactions.where(transaction_type: "income").sum(:amount)
+      expenses = month_transactions.where(transaction_type: "expense").sum(:amount)
       
       {
         month: month,

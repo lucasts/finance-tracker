@@ -261,40 +261,22 @@ def projected_balance(current_balance, month)
   # Saldo atual do mês
   base_balance = current_balance
   
-  # Buscar transações futuras pendentes até o final do mês
+  # Buscar transações futuras até o final do mês
   month_date = Date.strptime(month, "%Y-%m")
   end_of_month = month_date.end_of_month
   
-  # Transações pendentes/futuras do mês atual
-  future_income = Transaction.where(
-    transaction_type: "income",
+  # Transações futuras do mês atual (depois de hoje)
+  future_transactions = Transaction.where(
     status: ["pending", "confirmed"],
-    event_date: month_date.beginning_of_month..end_of_month
-  ).where("event_date > ?", Date.current).sum(:amount)
+    event_date: (Date.current + 1.day)..end_of_month
+  )
   
-  future_expenses = Transaction.where(
-    transaction_type: "expense", 
-    status: ["pending", "confirmed"],
-    event_date: month_date.beginning_of_month..end_of_month
-  ).where("event_date > ?", Date.current).sum(:amount)
-  
-  # Transações recorrentes que ainda vão acontecer no mês
-  recurrent_income = Transaction.where(
-    transaction_type: "income",
-    recurrence_type: ["monthly", "weekly"],
-    status: "confirmed"
-  ).where("event_date <= ?", end_of_month)
-   .where("event_date > ?", Date.current).sum(:amount)
-  
-  recurrent_expenses = Transaction.where(
-    transaction_type: "expense", 
-    recurrence_type: ["monthly", "weekly"],
-    status: "confirmed"
-  ).where("event_date <= ?", end_of_month)
-   .where("event_date > ?", Date.current).sum(:amount)
+  # Separar receitas e despesas usando transaction_type
+  future_income = future_transactions.where(transaction_type: "income").sum(:amount)
+  future_expenses = future_transactions.where(transaction_type: "expense").sum(:amount)
   
   # Calcular projeção
-  projected = base_balance + future_income + recurrent_income - future_expenses - recurrent_expenses
+  projected = base_balance + future_income - future_expenses
   
   projected
 end

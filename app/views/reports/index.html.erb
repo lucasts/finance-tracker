@@ -193,9 +193,12 @@
           <% @credit_statements.each do |statement| %>
             <div class="flex items-center justify-between p-3 bg-base-200 rounded">
               <div>
-                <div class="font-medium"><%= statement.credit_card_name %></div>
+                <div class="font-medium"><%= statement.account.name %></div>
                 <div class="text-sm text-base-content/70">
-                  <%= l(statement.period_start, format: :short) %> - <%= l(statement.period_end, format: :short) %>
+                  Fatura de <%= statement.month %>
+                  <% if statement.due_on %>
+                    • Vence em <%= l(statement.due_on, format: :short) %>
+                  <% end %>
                 </div>
               </div>
               <div class="text-right">
