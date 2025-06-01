@@ -1,4 +1,4 @@
-<h1 class="text-3xl font-bold mb-6">Faturas do Cartão</h1>
+<h1 class="text-3xl font-bold mb-6"><%= t('ui.navigation.credit_statements') %></h1>
 
 <% if @credit_statements.any? %>
   <div class="bg-base-100 rounded-box shadow overflow-hidden">
@@ -6,15 +6,15 @@
       <table class="table table-zebra w-full">
         <thead class="bg-base-200">
           <tr>
-            <th>Cartão</th>
-            <th>Mês</th>
-            <th class="text-right">Valor Total</th>
-            <th class="text-right">Valor Pago</th>
-            <th>Status</th>
-            <th>Fechamento</th>
-            <th>Vencimento</th>
-            <th>Pagamento</th>
-            <th class="text-right">Ações</th>
+            <th><%= t('activerecord.models.account.one') %></th>
+            <th><%= t('ui.credit_statement.table.month') %></th>
+            <th class="text-right"><%= t('ui.credit_statement.table.total_amount') %></th>
+            <th class="text-right"><%= t('ui.credit_statement.table.paid_amount') %></th>
+            <th><%= t('activerecord.attributes.credit_statement.status') %></th>
+            <th><%= t('ui.credit_statement.table.closing') %></th>
+            <th><%= t('ui.credit_statement.table.due_date') %></th>
+            <th><%= t('ui.credit_statement.table.payment_date') %></th>
+            <th class="text-right"><%= t('ui.actions.title') %></th>
           </tr>
         </thead>
         <tbody>
@@ -22,18 +22,18 @@
             <tr>
               <td class="font-medium"><%= cs.account.name %></td>
               <td><%= cs.month %></td>
-              <td class="text-right font-semibold">R$ <%= number_with_precision(cs.amount_due, precision: 2, separator: ",") %></td>
-              <td class="text-right">R$ <%= number_with_precision(cs.amount_paid, precision: 2, separator: ",") %></td>
+              <td class="text-right font-semibold"><%= number_to_currency(cs.amount_due) %></td>
+              <td class="text-right"><%= number_to_currency(cs.amount_paid) %></td>
               <td>
                 <span class="badge badge-<%= cs.status == 'paid' ? 'success' : cs.status == 'overdue' ? 'error' : 'warning' %>">
-                  <%= t("activerecord.attributes.credit_statement.statuses.#{cs.status}") rescue cs.status.titleize %>
+                  <%= t("activerecord.attributes.credit_statement.statuses.#{cs.status}") %>
                 </span>
               </td>
-              <td class="text-sm"><%= l(cs.closed_on, format: :short) if cs.closed_on %></td>
-              <td class="text-sm"><%= l(cs.due_on, format: :short) if cs.due_on %></td>
-              <td class="text-sm"><%= l(cs.paid_on, format: :short) if cs.paid_on %></td>
+              <td class="text-sm"><%= l(cs.closed_on) if cs.closed_on %></td>
+              <td class="text-sm"><%= l(cs.due_on) if cs.due_on %></td>
+              <td class="text-sm"><%= l(cs.paid_on) if cs.paid_on %></td>
               <td class="text-right">
-                <%= link_to 'Detalhes', credit_statement_path(cs), class: "link link-primary" %>
+                <%= link_to t('ui.actions.show'), credit_statement_path(cs), class: "link link-primary" %>
               </td>
             </tr>
           <% end %>
@@ -44,9 +44,9 @@
 <% else %>
   <div class="bg-base-100 rounded-box shadow p-8 text-center">
     <div class="text-6xl mb-4">💳</div>
-    <h3 class="text-xl font-semibold mb-2">Nenhuma fatura encontrada</h3>
+    <h3 class="text-xl font-semibold mb-2"><%= t('ui.credit_statement.empty.title') %></h3>
     <p class="text-base-content/60 mb-4">
-      As faturas do cartão são geradas automaticamente pelo sistema.
+      <%= t('ui.credit_statement.empty.description') %>
     </p>
   </div>
 <% end %>

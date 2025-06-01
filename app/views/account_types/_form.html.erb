@@ -2,7 +2,7 @@
   <div class="space-y-4">
     <%= form_group(form, :code) %>
     <%= form_group(form, :name) %>
-    <%= form_group(form, :role, type: :select, choices: options_for_select([["Ativo", "asset"], ["Receita", "income"], ["Despesa", "expense"]], selected: account_type.role)) %>
-    <%= primary_button("Salvar") %>
+    <%= form_group(form, :role, type: :select, choices: options_for_select([[t('ui.account_type.roles.asset'), "asset"], [t('ui.account_type.roles.income'), "income"], [t('ui.account_type.roles.expense'), "expense"]], selected: account_type.role)) %>
+    <%= primary_button(t('ui.actions.save')) %>
   </div>
 <% end %>

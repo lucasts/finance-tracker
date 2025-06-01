@@ -1,8 +1,395 @@
 pt-BR:
+  # Modelos
   activerecord:
-    attributes:
+    errors:
+      messages:
+        record_invalid: "A validação falhou: %{errors}"
+        restrict_dependent_destroy:
+          has_one: "Não é possível excluir o registro pois existe um %{record} dependente"
+          has_many: "Não é possível excluir o registro pois existem %{record} dependentes"
+    
+    models:
+      transaction:
+        one: "Lançamento"
+        other: "Lançamentos"
+      transaction_group:
+        one: "Grupo de Lançamentos"
+        other: "Grupos de Lançamentos"
+      account:
+        one: "Conta"
+        other: "Contas"
+      account_type:
+        one: "Tipo de Conta"
+        other: "Tipos de Conta"
+      category:
+        one: "Categoria"
+        other: "Categorias"
       credit_statement:
+        one: "Fatura"
+        other: "Faturas"
+    
+    attributes:
+      transaction:
+        description: "Descrição"
+        amount: "Valor"
+        transaction_type: "Tipo"
+        event_date: "Data do Evento"
+        payment_date: "Data de Pagamento"
+        from_account: "Conta de Origem"
+        to_account: "Conta de Destino"
+        category: "Categoria"
+        status: "Status"
+        recurrence_type: "Tipo de Recorrência"
+        installment: "Parcela"
+        transaction_group: "Grupo"
+        created_at: "Criado em"
+        updated_at: "Atualizado em"
+      
+      transaction_group:
+        name: "Nome"
+        group_type: "Tipo"
+        total_amount: "Valor Total"
+        installments_count: "Número de Parcelas"
+        created_at: "Criado em"
+        updated_at: "Atualizado em"
+      
+      account_type:
+        code: "Código"
+        name: "Nome"
+        role: "Papel"
+        created_at: "Criado em"
+        updated_at: "Atualizado em"
+      
+      account:
+        name: "Nome"
+        account_type: "Tipo de Conta"
+        initial_balance: "Saldo Inicial"
+        closing_day: "Dia de Fechamento"
+        due_day: "Dia de Vencimento"
+        credit_limit: "Limite de Crédito"
+        created_at: "Criado em"
+        updated_at: "Atualizado em"
+      
+      category:
+        name: "Nome"
+        description: "Descrição"
+        created_at: "Criado em"
+        updated_at: "Atualizado em"
+      
+      credit_statement:
+        status: "Status"
+        month: "Mês"
+        amount_due: "Valor da Fatura"
+        amount_paid: "Valor Pago"
+        closed_on: "Data de Fechamento"
+        due_on: "Data de Vencimento"
+        paid_on: "Data de Pagamento"
         statuses:
           open: "Em aberto"
           paid: "Pago"
           overdue: "Em atraso"
+
+  # Interface do usuário
+  ui:
+    app:
+      name: "Controle Financeiro"
+      
+    navigation:
+      overview: "Visão Geral"
+      transactions: "Lançamentos"
+      accounts: "Contas"
+      categories: "Categorias"
+      account_types: "Tipos de Conta"
+      transaction_groups: "Grupos de Lançamento"
+      reports: "Relatórios Financeiros"
+      credit_statements: "Faturas"
+      settings: "Configurações"
+    
+    actions:
+      title: "Ações"
+      new: "Novo"
+      edit: "Editar"
+      show: "Visualizar"
+      delete: "Excluir"
+      save: "Salvar"
+      cancel: "Cancelar"
+      create: "Criar"
+      update: "Atualizar"
+      back: "Voltar"
+      confirm: "Confirmar"
+      search: "Pesquisar"
+      filter: "Filtrar"
+      clear: "Limpar"
+      export: "Exportar"
+      import: "Importar"
+    
+    transaction:
+      types:
+        income: "Receita"
+        expense: "Despesa"
+        transfer: "Transferência"
+      
+      status:
+        pending: "Pendente"
+        confirmed: "Confirmado"
+        cancelled: "Cancelado"
+      
+      recurrence:
+        single: "Única"
+        fixed: "Fixa"
+        recurring: "Recorrente"
+      
+      table:
+        event: "Evento"
+        payment: "Pagamento"
+        origin: "Origem"
+        destination: "Destino"
+        accumulated_balance: "Saldo Acum."
+      
+      installments:
+        title: "Parcelamento"
+        current: "Parcela atual"
+        total: "Total de parcelas"
+        remaining: "Restante"
+      
+      new:
+        subtitle: "Crie uma nova entrada de receita ou despesa"
+      
+      edit:
+        subtitle: "Modificar \"%{description}\""
+      
+      empty:
+        title: "Nenhum lançamento encontrado"
+        filtered: "Nenhum lançamento corresponde aos filtros aplicados."
+        first_time: "Comece criando seu primeiro lançamento financeiro."
+      
+      form:
+        basic_info: "Informações Básicas"
+        accounts: "Contas"
+        categorization: "Categorização"
+        installments: "Parcelamento"
+        advanced_options: "Opções Avançadas"
+        amount_placeholder: "0,00"
+        description_placeholder: "Ex: Supermercado Zaffari, Salário, Freelance..."
+        from_account_label: "Conta de Origem"
+        to_account_label: "Conta de Destino"
+        from_account_helper: "De onde sai o dinheiro"
+        to_account_helper: "Para onde vai o dinheiro"
+        payment_date_helper: "Quando o dinheiro realmente sai/entra na conta"
+        amount_helper: "Digite o valor do lançamento"
+        event_date_label: "Data do Evento"
+        event_date_helper: "(Competência)"
+        payment_date_label: "Data de Pagamento"
+        payment_date_helper_caixa: "(Caixa)"
+      
+      installments:
+        title: "Parcelamento"
+        enable: "Parcelar este lançamento?"
+        automatic: "Parcelamento Automático"
+        automatic_description: "Informe quantas parcelas mensais deseja. O sistema usará o valor já informado acima e criará automaticamente todos os lançamentos."
+        installments_count: "Número de Parcelas"
+        installments_count_helper: "Entre 2 e 60 parcelas mensais"
+        preview_title: "Prévia do Parcelamento"
+        value_per_installment: "Valor por parcela"
+        first_installment: "Primeira parcela"
+        last_installment: "Última parcela"
+        existing_info: "Lançamento Parcelado"
+        view_all: "Ver todas as parcelas"
+        updated: "Atualizado"
+      
+      credit_card:
+        title: "Lançamento de Cartão de Crédito"
+        auto_association: "Este lançamento será automaticamente associado à fatura apropriada."
+      
+      suggestions:
+        title: "Sugestões baseadas na descrição:"
+    
+    account:
+      types:
+        checking: "Conta Corrente"
+        savings: "Poupança"
+        credit: "Cartão de Crédito"
+        investment: "Investimento"
+        cash: "Dinheiro"
+    
+    account_type:
+      index:
+        description: "Gerencie os tipos de conta disponíveis no sistema."
+      
+      roles:
+        asset: "Ativo"
+        income: "Receita"
+        expense: "Despesa"
+    
+    transaction_group:
+      index:
+        description: "Gerencie parcelamentos de cartão de crédito, empréstimos e transferências agrupadas."
+    
+    credit_statement:
+      table:
+        month: "Mês"
+        total_amount: "Valor Total"
+        paid_amount: "Valor Pago"
+        closing: "Fechamento"
+        due_date: "Vencimento"
+        payment_date: "Pagamento"
+      
+      empty:
+        title: "Nenhuma fatura encontrada"
+        description: "As faturas do cartão são geradas automaticamente pelo sistema."
+    
+    messages:
+      created: "%{model} criado com sucesso!"
+      updated: "%{model} atualizado com sucesso!"
+      deleted: "%{model} excluído com sucesso!"
+      not_found: "%{model} não encontrado."
+      invalid: "Dados inválidos."
+      installments_created: "Parcelamento criado com sucesso! %{count} parcelas de %{amount} foram criadas."
+      installments_error: "Erro ao criar parcelamento: %{error}"
+      installments_invalid: "Dados de parcelamento inválidos!"
+    
+    filters:
+      title: "Filtros"
+      active: "Ativo"
+      month: "Mês"
+      clear_filters: "Limpar filtros"
+      all: "Todos"
+      this_month: "Este mês"
+      last_month: "Mês passado"
+      this_year: "Este ano"
+      date_range: "Período"
+      by_category: "Por categoria"
+      by_account: "Por conta"
+      by_type: "Por tipo"
+      by_status: "Por status"
+      balance: "Saldo"
+
+  # Mensagens específicas do sistema
+  messages:
+    transaction:
+      created: "Lançamento criado com sucesso!"
+      updated: "Lançamento atualizado com sucesso!"
+      deleted: "Lançamento removido com sucesso!"
+      installments_created: "Parcelamento criado com sucesso! %{count} parcelas de %{amount} foram criadas."
+      invalid_installment_data: "Dados de parcelamento inválidos!"
+      installment_error: "Erro ao criar parcelamento: %{error}"
+
+  # Formatação de datas e números
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      short: "%d %b"
+      long: "%d de %B de %Y"
+      month_year: "%B de %Y"
+    
+    day_names:
+      - "Domingo"
+      - "Segunda-feira"
+      - "Terça-feira"
+      - "Quarta-feira"
+      - "Quinta-feira"
+      - "Sexta-feira"
+      - "Sábado"
+    
+    abbr_day_names:
+      - "Dom"
+      - "Seg"
+      - "Ter"
+      - "Qua"
+      - "Qui"
+      - "Sex"
+      - "Sáb"
+    
+    month_names:
+      - ~
+      - "Janeiro"
+      - "Fevereiro"
+      - "Março"
+      - "Abril"
+      - "Maio"
+      - "Junho"
+      - "Julho"
+      - "Agosto"
+      - "Setembro"
+      - "Outubro"
+      - "Novembro"
+      - "Dezembro"
+    
+    abbr_month_names:
+      - ~
+      - "Jan"
+      - "Fev"
+      - "Mar"
+      - "Abr"
+      - "Mai"
+      - "Jun"
+      - "Jul"
+      - "Ago"
+      - "Set"
+      - "Out"
+      - "Nov"
+      - "Dez"
+    
+    order:
+      - :day
+      - :month
+      - :year
+  
+  time:
+    formats:
+      default: "%d/%m/%Y às %H:%M"
+      short: "%d %b %H:%M"
+      long: "%d de %B de %Y às %H:%M"
+    
+    am: "AM"
+    pm: "PM"
+  
+  number:
+    currency:
+      format:
+        delimiter: "."
+        separator: ","
+        precision: 2
+        unit: "R$ "
+        format: "%u%n"
+    
+    format:
+      delimiter: "."
+      separator: ","
+      precision: 3
+    
+    percentage:
+      format:
+        delimiter: "."
+        separator: ","
+    
+    precision:
+      format:
+        delimiter: "."
+        separator: ","
+    
+    human:
+      format:
+        delimiter: "."
+        separator: ","
+        precision: 1
+      storage_units:
+        format: "%n %u"
+        units:
+          byte:
+            one: "Byte"
+            other: "Bytes"
+          kb: "KB"
+          mb: "MB"
+          gb: "GB"
+          tb: "TB"
+
+  # Traduções de helpers do Rails
+  helpers:
+    select:
+      prompt: "Por favor selecione"
+    
+    submit:
+      create: "Criar %{model}"
+      submit: "Salvar %{model}"
+      update: "Atualizar %{model}"

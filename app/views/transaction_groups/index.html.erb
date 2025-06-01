@@ -1,15 +1,15 @@
 <div class="flex items-center justify-between mb-6">
   <div>
     <h1 class="text-3xl font-bold flex items-center gap-2">
-      💳 Parcelamentos e Grupos
+      💳 <%= t('ui.navigation.transaction_groups') %>
     </h1>
-    <p class="text-base-content/60 mt-2">Gerencie parcelamentos de cartão de crédito, empréstimos e transferências agrupadas.</p>
+    <p class="text-base-content/60 mt-2"><%= t('ui.transaction_group.index.description') %></p>
   </div>
   <%= link_to new_transaction_group_path, class: "btn btn-primary" do %>
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
     </svg>
-    Novo Grupo
+    <%= t('ui.actions.new') %> <%= t('activerecord.models.transaction_group.one') %>
   <% end %>
 </div>
 

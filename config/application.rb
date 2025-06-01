@@ -23,5 +23,12 @@ module FinanceTracker
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Set default locale to Brazilian Portuguese
+    config.i18n.default_locale = :'pt-BR'
+    config.i18n.available_locales = [:'pt-BR', :en]
+    
+    # Set time zone to São Paulo
+    config.time_zone = 'America/Sao_Paulo'
   end
 end

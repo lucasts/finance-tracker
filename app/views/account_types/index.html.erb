@@ -1,7 +1,7 @@
-<h1 class="text-3xl font-bold mb-6">Tipos de Conta</h1>
-<p class="text-sm text-base-content/60 mb-4">Gerencie os tipos de conta disponíveis no sistema.</p>
+<h1 class="text-3xl font-bold mb-6"><%= t('activerecord.models.account_type.other') %></h1>
+<p class="text-sm text-base-content/60 mb-4"><%= t('ui.account_type.index.description') %></p>
 
-<div class="flex justify-between items-center mb-4">  <%= link_to 'Novo Tipo de Conta', new_account_type_path, class: "btn btn-primary" %>
+<div class="flex justify-between items-center mb-4">  <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.account_type.one'), new_account_type_path, class: "btn btn-primary" %>
 </div>
 
 <div class="bg-base-100 rounded-box shadow overflow-hidden">
@@ -9,10 +9,10 @@
     <table class="table table-zebra w-full">
       <thead class="bg-base-200">
         <tr>
-          <th>Código</th>
-          <th>Nome</th>
-          <th>Papel</th>
-          <th class="text-right">Ações</th>
+          <th><%= t('activerecord.attributes.account_type.code') %></th>
+          <th><%= t('activerecord.attributes.account_type.name') %></th>
+          <th><%= t('activerecord.attributes.account_type.role') %></th>
+          <th class="text-right"><%= t('ui.actions.title') %></th>
         </tr>
       </thead>
       <tbody>

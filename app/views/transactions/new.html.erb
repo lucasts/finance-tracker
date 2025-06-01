@@ -1,14 +1,14 @@
 <div class="flex items-center justify-between mb-6">
   <div>
-    <h1 class="text-3xl font-bold">✨ Nova Transação</h1>
-    <p class="text-base-content/60 mt-1">Crie uma nova entrada de receita ou despesa</p>
+    <h1 class="text-3xl font-bold">✨ <%= t('ui.actions.new') %> <%= t('activerecord.models.transaction.one') %></h1>
+    <p class="text-base-content/60 mt-1"><%= t('ui.transaction.new.subtitle') %></p>
   </div>
   
   <%= link_to transactions_path, class: "btn btn-ghost btn-sm" do %>
     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
     </svg>
-    Voltar
+    <%= t('ui.actions.back') %>
   <% end %>
 </div>
 

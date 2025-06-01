@@ -1,26 +1,26 @@
 <nav class="navbar bg-base-100 px-4 shadow-md">
   <div class="flex-1">
-    <%= link_to 'Finance Tracker', overview_index_path, class: "btn btn-ghost normal-case text-xl" %>
+    <%= link_to t('ui.app.name'), overview_index_path, class: "btn btn-ghost normal-case text-xl" %>
   </div>
   <div class="flex-none">
     <ul class="menu menu-horizontal px-1">
-      <li><%= link_to 'Visão Geral', overview_index_path %></li>
-      <li><%= link_to 'Lançamentos', transactions_path %></li>
+      <li><%= link_to t('ui.navigation.overview'), overview_index_path %></li>
+      <li><%= link_to t('ui.navigation.transactions'), transactions_path %></li>
       <li data-controller="dropdown">
         <details data-dropdown-target="menu" class="dropdown">
-          <summary class="cursor-pointer">Configurações</summary>
+          <summary class="cursor-pointer"><%= t('ui.navigation.settings') %></summary>
           <ul class="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52 border border-base-300 mt-1">
-            <li><%= link_to 'Contas', accounts_path %></li>
-            <li><%= link_to 'Categorias', categories_path %></li>
-            <li><%= link_to 'Tipos de Conta', account_types_path %></li>
-            <li><%= link_to 'Grupos de Transação', transaction_groups_path %></li>
+            <li><%= link_to t('ui.navigation.accounts'), accounts_path %></li>
+            <li><%= link_to t('ui.navigation.categories'), categories_path %></li>
+            <li><%= link_to t('ui.navigation.account_types'), account_types_path %></li>
+            <li><%= link_to t('ui.navigation.transaction_groups'), transaction_groups_path %></li>
           </ul>
         </details>
       </li>
-      <li><%= link_to 'Relatórios', reports_path %></li>
-      <li><%= link_to 'Faturas', credit_statements_path %></li>
+      <li><%= link_to t('ui.navigation.reports'), reports_path %></li>
+      <li><%= link_to t('ui.navigation.credit_statements'), credit_statements_path %></li>
       <li>
-        <%= link_to 'Nova Transação', new_transaction_path, class: "btn btn-primary btn-sm ml-2" %>
+        <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one'), new_transaction_path, class: "btn btn-primary btn-sm ml-2" %>
       </li>
     </ul>
   </div>

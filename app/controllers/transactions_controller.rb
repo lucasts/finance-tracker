@@ -48,7 +48,7 @@ class TransactionsController < ApplicationController
       end
       
       if @transaction.save
-        redirect_to transactions_path, notice: 'Transação criada com sucesso!'
+        redirect_to transactions_path, notice: t('messages.transaction.created')
       else
         render :new, status: :unprocessable_entity
       end
@@ -64,7 +64,7 @@ class TransactionsController < ApplicationController
     end
     
     if @transaction.update(transaction_params)
-      redirect_to transactions_path, notice: 'Transação atualizada com sucesso!'
+      redirect_to transactions_path, notice: t('messages.transaction.updated')
     else
       render :edit, status: :unprocessable_entity
     end
@@ -72,7 +72,7 @@ class TransactionsController < ApplicationController
 
   def destroy
     @transaction.destroy
-    redirect_to transactions_path, notice: 'Transação removida com sucesso!'
+    redirect_to transactions_path, notice: t('messages.transaction.deleted')
   end
   
   private
@@ -173,7 +173,7 @@ class TransactionsController < ApplicationController
       
       # Validações básicas
       if total_amount <= 0 || installments_count < 2 || installments_count > 60
-        redirect_to new_transaction_path, alert: 'Dados de parcelamento inválidos!'
+        redirect_to new_transaction_path, alert: t('messages.transaction.invalid_installment_data')
         return
       end
 
@@ -223,10 +223,12 @@ class TransactionsController < ApplicationController
         end
       end
 
-      redirect_to transactions_path, notice: "Parcelamento criado com sucesso! #{installments_count} parcelas de #{number_to_currency(installment_value)} foram criadas."
+      redirect_to transactions_path, notice: t('messages.transaction.installments_created', 
+                                               count: installments_count, 
+                                               amount: number_to_currency(installment_value))
       
     rescue JSON::ParserError, ActiveRecord::RecordInvalid => e
-      redirect_to new_transaction_path, alert: "Erro ao criar parcelamento: #{e.message}"
+      redirect_to new_transaction_path, alert: t('messages.transaction.installment_error', error: e.message)
     end
   end
 end

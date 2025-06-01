@@ -1,7 +1,7 @@
-<h1 class="text-3xl font-bold mb-6">Contas</h1>
+<h1 class="text-3xl font-bold mb-6"><%= t('activerecord.models.account.other') %></h1>
 
 <div class="flex justify-between items-center mb-4">
-  <%= link_to 'Nova Conta', new_account_path, class: "btn btn-primary" %>
+  <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.account.one'), new_account_path, class: "btn btn-primary" %>
 </div>
 
 <div class="bg-base-100 rounded-box shadow overflow-hidden">
@@ -9,9 +9,9 @@
     <table class="table table-zebra w-full">
       <thead class="bg-base-200">
         <tr>
-          <th>Nome</th>
-          <th>Tipo</th>
-          <th class="text-right">Ações</th>
+          <th><%= t('activerecord.attributes.account.name') %></th>
+          <th><%= t('activerecord.attributes.account.account_type') %></th>
+          <th class="text-right"><%= t('ui.actions.title') %></th>
         </tr>
       </thead>
       <tbody>

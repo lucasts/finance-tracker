@@ -1,6 +1,6 @@
-<h1 class="text-3xl font-bold mb-6">Categorias</h1>
+<h1 class="text-3xl font-bold mb-6"><%= t('activerecord.models.category.other') %></h1>
 
-<div class="flex justify-between items-center mb-4">  <%= link_to 'Nova Categoria', new_category_path, class: "btn btn-primary" %>
+<div class="flex justify-between items-center mb-4">  <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.category.one'), new_category_path, class: "btn btn-primary" %>
 </div>
 
 <div class="bg-base-100 rounded-box shadow overflow-hidden">
@@ -8,8 +8,8 @@
     <table class="table table-zebra w-full">
       <thead class="bg-base-200">
         <tr>
-          <th>Nome</th>
-          <th class="text-right">Ações</th>
+          <th><%= t('activerecord.attributes.category.name') %></th>
+          <th class="text-right"><%= t('ui.actions.title') %></th>
         </tr>
       </thead>
       <tbody>
@@ -17,7 +17,7 @@
           <tr>
             <td><%= cat.name %></td>
             <td class="text-right">
-              <%= link_to 'Editar', edit_category_path(cat), class: "link link-primary" %>
+              <%= link_to t('ui.actions.edit'), edit_category_path(cat), class: "link link-primary" %>
             </td>
           </tr>
         <% end %>

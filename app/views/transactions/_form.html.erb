@@ -4,7 +4,7 @@
     <!-- Transaction Type Selection (moved to top for better UX) -->
     <div class="card bg-base-100 shadow-sm border border-base-300">
       <div class="card-body py-4">
-        <h3 class="card-title text-lg mb-3">💰 Tipo de Transação</h3>
+        <h3 class="card-title text-lg mb-3">💰 <%= t('activerecord.attributes.transaction.transaction_type') %></h3>
         <div class="flex gap-4">
           <%= form.radio_button :transaction_type, "income", 
                 class: "radio radio-success", 
@@ -12,7 +12,7 @@
                   transaction_form_target: "transactionType",
                   action: "change->transaction-form#handleTypeChange" 
                 } %>
-          <%= form.label :transaction_type_income, "📈 Receita", class: "cursor-pointer flex items-center gap-2" %>
+          <%= form.label :transaction_type_income, "📈 #{t('ui.transaction.types.income')}", class: "cursor-pointer flex items-center gap-2" %>
           
           <%= form.radio_button :transaction_type, "expense", 
                 class: "radio radio-error ml-6", 
@@ -20,7 +20,7 @@
                   transaction_form_target: "transactionType",
                   action: "change->transaction-form#handleTypeChange" 
                 } %>
-          <%= form.label :transaction_type_expense, "📉 Despesa", class: "cursor-pointer flex items-center gap-2" %>
+          <%= form.label :transaction_type_expense, "📉 #{t('ui.transaction.types.expense')}", class: "cursor-pointer flex items-center gap-2" %>
         </div>
       </div>
     </div>
@@ -28,11 +28,10 @@
     <!-- Basic Information -->
     <div class="card bg-base-100 shadow-sm border border-base-300">
       <div class="card-body">
-        <h3 class="card-title text-lg mb-4">📝 Informações Básicas</h3>
+        <h3 class="card-title text-lg mb-4">📝 <%= t('ui.transaction.form.basic_info') %></h3>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="lg:col-span-2">
-            <%= form_group(form, :description, 
-                  placeholder: "Ex: Supermercado Zaffari, Salário, Freelance...",
+          <div class="lg:col-span-2">            <%= form_group(form, :description, 
+                  placeholder: t('ui.transaction.form.description_placeholder'),
                   data: { 
                     transaction_form_target: "description",
                     action: "input->transaction-form#handleDescriptionChange"
@@ -41,28 +40,28 @@
           
           <div class="form-control">
             <label class="label">
-              <span class="label-text">💵 Valor</span>
+              <span class="label-text">💵 <%= t('activerecord.attributes.transaction.amount') %></span>
             </label>
             <%= form.number_field :amount, 
                   class: "input input-bordered w-full text-lg font-bold", 
                   step: 0.01, 
                   min: 0.01,
-                  placeholder: "0,00",
-                  data: { 
+                  placeholder: t('ui.transaction.form.amount_placeholder'),
+                  data: {
                     transaction_form_target: "amount",
                     action: "input->transaction-form#handleAmountChange"
                   } %>
             <label class="label">
               <span class="label-text-alt text-base-content/60" data-transaction-form-target="amountHelper">
-                Digite o valor da transação
+                <%= t('ui.transaction.form.amount_helper') %>
               </span>
             </label>
           </div>
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text">📅 Data do Evento</span>
-              <span class="label-text-alt text-base-content/60">(Competência)</span>
+              <span class="label-text">📅 <%= t('ui.transaction.form.event_date_label') %></span>
+              <span class="label-text-alt text-base-content/60"><%= t('ui.transaction.form.event_date_helper') %></span>
             </label>
             <%= form.date_field :event_date, 
                   class: "input input-bordered w-full", 
@@ -80,13 +79,13 @@
     <div class="card bg-base-100 shadow-sm border border-base-300">
       <div class="card-body">
         <h3 class="card-title text-lg mb-4">
-          <span data-transaction-form-target="accountsTitle">🏦 Contas</span>
+          <span data-transaction-form-target="accountsTitle">🏦 <%= t('ui.transaction.form.accounts') %></span>
         </h3>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="form-control">
             <label class="label">
               <span class="label-text" data-transaction-form-target="fromAccountLabel">
-                Conta de Origem
+                <%= t('ui.transaction.form.from_account_label') %>
               </span>
             </label>
             <%= form.collection_select :from_account_id, 
@@ -103,7 +102,7 @@
                   } %>
             <label class="label">
               <span class="label-text-alt" data-transaction-form-target="fromAccountHelper">
-                De onde sai o dinheiro
+                <%= t('ui.transaction.form.from_account_helper') %>
               </span>
             </label>
           </div>
@@ -111,7 +110,7 @@
           <div class="form-control">
             <label class="label">
               <span class="label-text" data-transaction-form-target="toAccountLabel">
-                Conta de Destino
+                <%= t('ui.transaction.form.to_account_label') %>
               </span>
             </label>
             <%= form.collection_select :to_account_id, 
@@ -128,7 +127,7 @@
                   } %>
             <label class="label">
               <span class="label-text-alt" data-transaction-form-target="toAccountHelper">
-                Para onde vai o dinheiro
+                <%= t('ui.transaction.form.to_account_helper') %>
               </span>
             </label>
           </div>
@@ -137,15 +136,15 @@
         <!-- Payment Date (conditional) -->
         <div data-transaction-form-target="paymentDateSection" class="form-control mt-4">
           <label class="label">
-            <span class="label-text">💳 Data de Pagamento</span>
-            <span class="label-text-alt text-base-content/60">(Caixa)</span>
+            <span class="label-text">💳 <%= t('ui.transaction.form.payment_date_label') %></span>
+            <span class="label-text-alt text-base-content/60"><%= t('ui.transaction.form.payment_date_helper_caixa') %></span>
           </label>
           <%= form.date_field :payment_date, 
                 class: "input input-bordered w-full", 
                 data: { transaction_form_target: "paymentDate" } %>
           <label class="label">
             <span class="label-text-alt" data-transaction-form-target="paymentDateHelper">
-              Quando o dinheiro realmente sai/entra na conta
+              <%= t('ui.transaction.form.payment_date_helper') %>
             </span>
           </label>
         </div>
@@ -155,9 +154,9 @@
           <div class="alert alert-info mt-4">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <div>
-              <h4 class="font-bold">Transação de Cartão de Crédito</h4>
+              <h4 class="font-bold"><%= t('ui.transaction.credit_card.title') %></h4>
               <div class="text-sm" data-transaction-form-target="creditCardDetails">
-                Esta transação será automaticamente associada à fatura apropriada.
+                <%= t('ui.transaction.credit_card.auto_association') %>
               </div>
             </div>
           </div>
@@ -168,14 +167,14 @@
     <!-- Category and Classification -->
     <div class="card bg-base-100 shadow-sm border border-base-300">
       <div class="card-body">
-        <h3 class="card-title text-lg mb-4">🏷️ Categorização</h3>
+        <h3 class="card-title text-lg mb-4">🏷️ <%= t('ui.transaction.form.categorization') %></h3>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="lg:col-span-2">
             <%= form_select_group(form, :category_id, 
                   Category.order(:name), 
                   :id, 
                   :name, 
-                  label: "Categoria",
+                  label: t('activerecord.attributes.transaction.category'),
                   data: { 
                     transaction_form_target: "category",
                     action: "change->transaction-form#handleCategoryChange"
@@ -185,7 +184,7 @@
 
         <!-- Category suggestions -->
         <div data-transaction-form-target="categorySuggestions" class="hidden mt-3">
-          <div class="text-sm text-base-content/60 mb-2">💡 Sugestões baseadas na descrição:</div>
+          <div class="text-sm text-base-content/60 mb-2">💡 <%= t('ui.transaction.suggestions.title') %></div>
           <div class="flex flex-wrap gap-2" data-transaction-form-target="suggestionButtons">
             <!-- Suggestions will be populated by JavaScript -->
           </div>
@@ -196,7 +195,7 @@
     <!-- Installments Section -->
     <div class="card bg-base-100 shadow-sm border border-base-300" data-controller="parceling">
       <div class="card-body">
-        <h3 class="card-title text-lg mb-4">📊 Parcelamento</h3>
+        <h3 class="card-title text-lg mb-4">📊 <%= t('ui.transaction.installments.title') %></h3>
         
         <% if transaction.transaction_group_id.present? %>
           <!-- Exibir informações do parcelamento existente -->
@@ -205,16 +204,18 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <div>
-              <h4 class="font-bold">Transação Parcelada</h4>
+              <h4 class="font-bold"><%= t('ui.transaction.installments.existing_info') %></h4>
               <div class="text-sm">
                 <%= transaction.description %> - 
-                Parcela <%= transaction.installment || 'N/A' %> de <%= transaction.transaction_group.installments_count || transaction.transaction_group.transactions.count %>
+                <%= t('ui.transaction.installments.existing_description', 
+                      current: transaction.installment || 'N/A', 
+                      total: transaction.transaction_group.installments_count || transaction.transaction_group.transactions.count) %>
                 <% if transaction.transaction_group.total_amount.present? %>
-                  <br>Valor total: <%= number_to_currency(transaction.transaction_group.total_amount) %>
+                  <br><%= t('ui.transaction.installments.total_value', amount: number_to_currency(transaction.transaction_group.total_amount)) %>
                 <% end %>
               </div>
               <div class="mt-2">
-                <%= link_to "Ver todas as parcelas", transactions_path(group: transaction.transaction_group_id), 
+                <%= link_to t('ui.transaction.installments.view_all'), transactions_path(group: transaction.transaction_group_id), 
                       class: "btn btn-sm btn-outline btn-primary" %>
               </div>
             </div>
@@ -229,7 +230,7 @@
                       parceling_target: "toggle", 
                       action: "change->parceling#toggle" 
                     } %>
-              <span class="label-text">Parcelar esta transação?</span>
+              <span class="label-text"><%= t('ui.transaction.installments.enable') %></span>
             </label>
           </div>
         <% end %>
@@ -239,16 +240,16 @@
             <div class="alert alert-info">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               <div>
-                <h4 class="font-bold">Parcelamento Automático</h4>
+                <h4 class="font-bold"><%= t('ui.transaction.installments.automatic') %></h4>
                 <div class="text-sm">
-                  Informe quantas parcelas mensais deseja. O sistema usará o valor já informado acima e criará automaticamente todas as transações.
+                  <%= t('ui.transaction.installments.automatic_description') %>
                 </div>
               </div>
             </div>
 
             <div class="form-control max-w-sm">
               <label class="label">
-                <span class="label-text">📅 Número de Parcelas</span>
+                <span class="label-text">📅 <%= t('ui.transaction.installments.installments_count') %></span>
               </label>
               <%= number_field_tag :installments_count, "", 
                     placeholder: "Ex: 10", 
@@ -260,7 +261,7 @@
                       action: "input->parceling#calculateInstallment keyup->parceling#calculateInstallment"
                     } %>
               <label class="label">
-                <span class="label-text-alt">Entre 2 e 60 parcelas mensais</span>
+                <span class="label-text-alt"><%= t('ui.transaction.installments.installments_count_helper') %></span>
               </label>
             </div>
 
