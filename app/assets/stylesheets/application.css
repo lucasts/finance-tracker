@@ -13,3 +13,60 @@
  *= require_tree .
  *= require_self
  */
+
+/* Custom styles for transaction form */
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card hover effects */
+.transaction-form-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.transaction-form-card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Suggestion buttons */
+.suggestion-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.suggestion-button:hover {
+  transform: scale(1.05);
+}
+
+/* Form transitions */
+.form-section {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Loading states */
+.btn-loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Transaction type selections */
+.transaction-type-income {
+  border-color: #10b981;
+  background-color: #d1fae5;
+}
+
+.transaction-type-expense {
+  border-color: #ef4444;
+  background-color: #fee2e2;
+}

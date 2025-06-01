@@ -8,6 +8,14 @@ export default class extends Controller {
   }
 
   toggle() {
-    this.sectionTarget.classList.toggle("hidden", !this.toggleTarget.checked)
+    const isChecked = this.toggleTarget.checked
+    
+    if (isChecked) {
+      this.sectionTarget.classList.remove("hidden")
+      this.sectionTarget.classList.add("animate-fade-in")
+    } else {
+      this.sectionTarget.classList.add("hidden")
+      this.sectionTarget.classList.remove("animate-fade-in")
+    }
   }
 }

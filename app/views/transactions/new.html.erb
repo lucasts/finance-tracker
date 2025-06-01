@@ -1,5 +1,27 @@
-<h1 class="text-3xl font-bold mb-6">Nova Transação</h1>
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-3xl font-bold">✨ Nova Transação</h1>
+    <p class="text-base-content/60 mt-1">Crie uma nova entrada de receita ou despesa</p>
+  </div>
+  
+  <%= link_to transactions_path, class: "btn btn-ghost btn-sm" do %>
+    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+    Voltar
+  <% end %>
+</div>
 
-<div class="bg-base-100 p-6 rounded-box shadow">
+<!-- Progress indicator -->
+<div class="flex items-center justify-center mb-6">
+  <div class="steps steps-horizontal">
+    <div class="step step-primary">Tipo</div>
+    <div class="step">Detalhes</div>
+    <div class="step">Contas</div>
+    <div class="step">Finalizar</div>
+  </div>
+</div>
+
+<div class="max-w-4xl mx-auto">
   <%= render 'form', transaction: @transaction %>
 </div>
