@@ -1,4 +1,6 @@
 class TransactionsController < ApplicationController
+  include ActionView::Helpers::NumberHelper
+  
   before_action :set_transaction, only: [:show, :edit, :update, :destroy]
   
   def index
@@ -9,6 +11,12 @@ class TransactionsController < ApplicationController
     end
 
     @transactions = Transaction.in_competence_month(selected_month).order(event_date: :desc)
+    
+    # Filtrar por grupo se especificado
+    if params[:group].present?
+      @transactions = @transactions.where(transaction_group_id: params[:group])
+      @transaction_group = TransactionGroup.find_by(id: params[:group])
+    end
   end
 
   def show
@@ -25,20 +33,25 @@ class TransactionsController < ApplicationController
   end
 
   def create
-    @transaction = Transaction.new(transaction_params)
-    
-    # Apply intelligent defaults and validations
-    apply_intelligent_defaults(@transaction)
-    
-    # Auto-associar com fatura se for cartão de crédito
-    if @transaction.from_account&.account_type&.code == "CREDIT"
-      associate_with_credit_statement(@transaction)
-    end
-    
-    if @transaction.save
-      redirect_to transactions_path, notice: 'Transação criada com sucesso!'
+    # Verifica se é parcelamento automático
+    if params[:create_installments].present?
+      create_installment_transactions
     else
-      render :new, status: :unprocessable_entity
+      @transaction = Transaction.new(transaction_params)
+      
+      # Apply intelligent defaults and validations
+      apply_intelligent_defaults(@transaction)
+      
+      # Auto-associar com fatura se for cartão de crédito
+      if @transaction.from_account&.account_type&.code == "CREDIT"
+        associate_with_credit_statement(@transaction)
+      end
+      
+      if @transaction.save
+        redirect_to transactions_path, notice: 'Transação criada com sucesso!'
+      else
+        render :new, status: :unprocessable_entity
+      end
     end
   end
 
@@ -148,5 +161,72 @@ class TransactionsController < ApplicationController
       :from_account_id, :to_account_id, :category_id, :installment,
       :transaction_group_id, :status, :recurrence_type, :credit_statement_id
     )
+  end
+
+  def create_installment_transactions
+    begin
+      installment_data = JSON.parse(params[:create_installments])
+      total_amount = installment_data['total_amount'].to_f
+      installments_count = installment_data['installments_count'].to_i
+      installment_value = installment_data['installment_value'].to_f
+      start_date = Date.parse(installment_data['start_date'])
+      
+      # Validações básicas
+      if total_amount <= 0 || installments_count < 2 || installments_count > 60
+        redirect_to new_transaction_path, alert: 'Dados de parcelamento inválidos!'
+        return
+      end
+
+      ActiveRecord::Base.transaction do
+        # Cria o grupo de transações
+        transaction_group = TransactionGroup.create!(
+          name: "#{transaction_params[:description]} (#{installments_count}x)",
+          group_type: 'installment',
+          total_amount: total_amount,
+          installments_count: installments_count
+        )
+
+        # Cria cada parcela
+        installments_count.times do |i|
+          installment_date = start_date + i.months
+          
+          # Ajusta o valor da última parcela para compensar arredondamentos
+          amount = if i == installments_count - 1
+                    total_amount - (installment_value * (installments_count - 1))
+                  else
+                    installment_value
+                  end
+
+          transaction = Transaction.new(
+            description: "#{transaction_params[:description]} (#{i + 1}/#{installments_count})",
+            amount: amount.round(2),
+            transaction_type: transaction_params[:transaction_type],
+            event_date: installment_date,
+            payment_date: installment_date, # Usa a mesma data para evento e pagamento em parcelamentos
+            from_account_id: transaction_params[:from_account_id],
+            to_account_id: transaction_params[:to_account_id],
+            category_id: transaction_params[:category_id],
+            installment: i + 1,
+            transaction_group: transaction_group,
+            status: transaction_params[:status] || 'confirmed',
+            recurrence_type: 'single'
+          )
+
+          apply_intelligent_defaults(transaction)
+          
+          # Auto-associar com fatura se for cartão de crédito
+          if transaction.from_account&.account_type&.code == "CREDIT"
+            associate_with_credit_statement(transaction)
+          end
+
+          transaction.save!
+        end
+      end
+
+      redirect_to transactions_path, notice: "Parcelamento criado com sucesso! #{installments_count} parcelas de #{number_to_currency(installment_value)} foram criadas."
+      
+    rescue JSON::ParserError, ActiveRecord::RecordInvalid => e
+      redirect_to new_transaction_path, alert: "Erro ao criar parcelamento: #{e.message}"
+    end
   end
 end

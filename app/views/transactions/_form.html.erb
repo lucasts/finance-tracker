@@ -198,43 +198,97 @@
       <div class="card-body">
         <h3 class="card-title text-lg mb-4">📊 Parcelamento</h3>
         
-        <div class="form-control">
-          <label class="cursor-pointer label justify-start gap-3">
-            <%= check_box_tag :show_parcelamento, "1", 
-                  transaction.transaction_group_id.present?, 
-                  class: "checkbox checkbox-primary",
-                  data: { 
-                    parceling_target: "toggle", 
-                    action: "change->parceling#toggle" 
-                  } %>
-            <span class="label-text">Parcelar esta transação?</span>
-          </label>
-        </div>
-
-        <div data-parceling-target="section" class="space-y-4 mt-4 <%= transaction.transaction_group_id.present? ? '' : 'hidden' %>">
-          <div class="alert alert-warning">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.88-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+        <% if transaction.transaction_group_id.present? %>
+          <!-- Exibir informações do parcelamento existente -->
+          <div class="alert alert-info">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
             <div>
-              <h4 class="font-bold">Parcelamento</h4>
+              <h4 class="font-bold">Transação Parcelada</h4>
               <div class="text-sm">
-                Use esta opção para transações que serão divididas em várias parcelas.
+                <%= transaction.description %> - 
+                Parcela <%= transaction.installment || 'N/A' %> de <%= transaction.transaction_group.installments_count || transaction.transaction_group.transactions.count %>
+                <% if transaction.transaction_group.total_amount.present? %>
+                  <br>Valor total: <%= number_to_currency(transaction.transaction_group.total_amount) %>
+                <% end %>
+              </div>
+              <div class="mt-2">
+                <%= link_to "Ver todas as parcelas", transactions_path(group: transaction.transaction_group_id), 
+                      class: "btn btn-sm btn-outline btn-primary" %>
               </div>
             </div>
           </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <%= form_group(form, :installment, 
-                  type: :number_field, 
-                  label: "Número da Parcela", 
-                  placeholder: "Ex: 1 (para 1/12)",
-                  min: 1) %>
-            <%= form_select_group(form, :transaction_group_id, 
-                  TransactionGroup.order(:name), 
-                  :id, 
-                  :name, 
-                  label: "Grupo de Parcelamento") %>
+        <% else %>
+          <!-- Interface para novo parcelamento -->
+          <div class="form-control">
+            <label class="cursor-pointer label justify-start gap-3">
+              <%= check_box_tag :is_installment, "1", false, 
+                    class: "checkbox checkbox-primary",
+                    data: { 
+                      parceling_target: "toggle", 
+                      action: "change->parceling#toggle" 
+                    } %>
+              <span class="label-text">Parcelar esta transação?</span>
+            </label>
           </div>
-        </div>
+        <% end %>
+
+        <% unless transaction.transaction_group_id.present? %>
+          <div data-parceling-target="section" class="space-y-4 mt-4 hidden">
+            <div class="alert alert-info">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div>
+                <h4 class="font-bold">Parcelamento Automático</h4>
+                <div class="text-sm">
+                  Informe quantas parcelas mensais deseja. O sistema usará o valor já informado acima e criará automaticamente todas as transações.
+                </div>
+              </div>
+            </div>
+
+            <div class="form-control max-w-sm">
+              <label class="label">
+                <span class="label-text">📅 Número de Parcelas</span>
+              </label>
+              <%= number_field_tag :installments_count, "", 
+                    placeholder: "Ex: 10", 
+                    min: 2,
+                    max: 60,
+                    class: "input input-bordered w-full",
+                    data: { 
+                      parceling_target: "installmentsCount",
+                      action: "input->parceling#calculateInstallment keyup->parceling#calculateInstallment"
+                    } %>
+              <label class="label">
+                <span class="label-text-alt">Entre 2 e 60 parcelas mensais</span>
+              </label>
+            </div>
+
+            <!-- Preview das parcelas -->
+            <div data-parceling-target="preview" class="hidden">
+              <div class="divider">📋 Prévia do Parcelamento</div>
+              <div class="bg-base-200 rounded-lg p-4 transition-all duration-300">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div class="text-2xl font-bold text-primary" data-parceling-target="installmentValue">R$ 0,00</div>
+                    <div class="text-sm text-base-content/60">Valor por parcela</div>
+                  </div>
+                  <div>
+                    <div class="text-2xl font-bold text-secondary" data-parceling-target="firstDate">-</div>
+                    <div class="text-sm text-base-content/60">Primeira parcela</div>
+                  </div>
+                  <div>
+                    <div class="text-2xl font-bold text-accent" data-parceling-target="lastDate">-</div>
+                    <div class="text-sm text-base-content/60">Última parcela</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Input hidden para o backend -->
+            <%= hidden_field_tag :create_installments, "", data: { parceling_target: "createInstallments" } %>
+          </div>
+        <% end %>
       </div>
     </div>
 
