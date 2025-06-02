@@ -133,11 +133,24 @@ pt-BR:
         pending: "Pendente"
         confirmed: "Confirmado"
         cancelled: "Cancelado"
+        descriptions:
+          pending: "Prevista, agendada, futura - ainda não aconteceu"
+          confirmed: "Efetivada, já ocorreu, consolidada"
+          cancelled: "Cancelada, anulada, não vai mais acontecer"
+        explanations:
+          pending_examples: "Parcelas futuras, gastos agendados, faturas não quitadas"
+          confirmed_examples: "Compras confirmadas, salário recebido, débitos efetivados"
+          cancelled_examples: "Compras estornadas, despesas canceladas"
       
       recurrence:
         single: "Única"
         fixed: "Fixa"
         recurring: "Recorrente"
+        descriptions:
+          single: "Acontece apenas uma vez"
+          fixed: "Repete mensalmente com valor fixo"
+          recurring: "Padrão de repetição personalizado"
+        label: "Tipo de Recorrência"
       
       table:
         event: "Evento"
@@ -169,6 +182,8 @@ pt-BR:
         categorization: "Categorização"
         installments: "Parcelamento"
         advanced_options: "Opções Avançadas"
+        advanced_info: "Configurações adicionais e controles do sistema"
+        recurrence_info: "Define como esta transação se repete"
         amount_placeholder: "0,00"
         description_placeholder: "Ex: Supermercado Zaffari, Salário, Freelance..."
         from_account_label: "Conta de Origem"

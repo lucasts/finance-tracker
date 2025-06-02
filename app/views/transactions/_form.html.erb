@@ -298,41 +298,42 @@
       <div class="card-body">
         <div class="cursor-pointer" data-action="click->collapsible#toggle">
           <h3 class="card-title text-lg">
-            ⚙️ Opções Avançadas
+            ⚙️ <%= t('ui.transaction.form.advanced_options') %>
             <svg data-collapsible-target="icon" class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </h3>
+          <p class="text-sm text-base-content/60 mt-1"><%= t('ui.transaction.form.advanced_info') %></p>
         </div>
         
-        <div data-collapsible-target="content" class="hidden mt-4 space-y-4">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Status da Transação</span>
-            </label>
-            <%= form.select :status, 
-                  options_for_select([
-                    ["Pendente", "pending"], 
-                    ["Confirmada", "confirmed"], 
-                    ["Cancelada", "cancelled"]
-                  ], transaction.status || "confirmed"), 
-                  {}, 
-                  { class: "select select-bordered w-full" } %>
-          </div>
+        <div data-collapsible-target="content" class="hidden mt-4 space-y-6">
+          
 
+
+          <!-- Recurrence Type -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text">Tipo de Recorrência</span>
+              <span class="label-text">📅 <%= t('ui.transaction.recurrence.label') %></span>
+              <span class="label-text-alt text-base-content/60"><%= t('ui.transaction.form.recurrence_info') %></span>
             </label>
             <%= form.select :recurrence_type, 
                   options_for_select([
-                    ["Única", "single"], 
-                    ["Fixa (mensalmente)", "fixed"], 
-                    ["Recorrente", "recurring"]
+                    [t('ui.transaction.recurrence.single'), "single"], 
+                    [t('ui.transaction.recurrence.fixed'), "fixed"], 
+                    [t('ui.transaction.recurrence.recurring'), "recurring"]
                   ], transaction.recurrence_type || "single"), 
                   {}, 
                   { class: "select select-bordered w-full" } %>
+            
+            <div class="mt-2 space-y-1 text-xs text-base-content/60">
+              <div>• <strong><%= t('ui.transaction.recurrence.single') %>:</strong> <%= t('ui.transaction.recurrence.descriptions.single') %></div>
+              <div>• <strong><%= t('ui.transaction.recurrence.fixed') %>:</strong> <%= t('ui.transaction.recurrence.descriptions.fixed') %></div>
+              <div>• <strong><%= t('ui.transaction.recurrence.recurring') %>:</strong> <%= t('ui.transaction.recurrence.descriptions.recurring') %></div>
+            </div>
           </div>
+          
+          <!-- Hidden field to preserve status -->
+          <%= form.hidden_field :status, value: transaction.status || "confirmed" %>
         </div>
       </div>
     </div>

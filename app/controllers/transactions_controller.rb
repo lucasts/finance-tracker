@@ -28,8 +28,8 @@ class TransactionsController < ApplicationController
     # Set intelligent defaults
     @transaction.event_date = Date.current
     @transaction.payment_date = Date.current
-    @transaction.status = 'confirmed'
     @transaction.recurrence_type = 'single'
+    # Status será determinado automaticamente baseado nas datas
   end
 
   def create
@@ -63,7 +63,13 @@ class TransactionsController < ApplicationController
       associate_with_credit_statement(@transaction)
     end
     
-    if @transaction.update(transaction_params)
+    # Apply updated params
+    @transaction.assign_attributes(transaction_params)
+    
+    # Reaplica defaults inteligentes após mudanças
+    apply_intelligent_defaults(@transaction)
+    
+    if @transaction.save
       redirect_to transactions_path, notice: t('messages.transaction.updated')
     else
       render :edit, status: :unprocessable_entity
@@ -85,6 +91,9 @@ class TransactionsController < ApplicationController
     # Se não especificou payment_date, usa event_date
     transaction.payment_date ||= transaction.event_date
     
+    # Determina status automaticamente baseado nas regras de negócio
+    transaction.status = determine_automatic_status(transaction) if transaction.status.blank?
+    
     # Para cartões de crédito, ajusta payment_date automaticamente
     if transaction.from_account&.account_type&.code == "CREDIT" && transaction.from_account.due_day.present?
       # Payment date é no vencimento da fatura (próximo mês)
@@ -105,6 +114,22 @@ class TransactionsController < ApplicationController
     if transaction.category_id.blank? && transaction.description.present?
       suggested_category = suggest_category_from_description(transaction.description)
       transaction.category_id = suggested_category&.id if suggested_category
+    end
+  end
+
+  def determine_automatic_status(transaction)
+    current_date = Date.current
+    payment_date = transaction.payment_date || transaction.event_date
+    
+    # Regras para determinar status automaticamente:
+    # 1. Se a data de pagamento for futura -> pending
+    # 2. Se for hoje ou passado -> confirmed (assumindo que aconteceu)
+    # 3. Para parcelamentos: primeiras parcelas confirmed, futuras pending
+    
+    if payment_date > current_date
+      'pending'  # Transação futura
+    else
+      'confirmed'  # Transação atual ou passada (assumindo que aconteceu)
     end
   end
 
@@ -159,7 +184,8 @@ class TransactionsController < ApplicationController
     params.require(:transaction).permit(
       :description, :amount, :transaction_type, :event_date, :payment_date,
       :from_account_id, :to_account_id, :category_id, :installment,
-      :transaction_group_id, :status, :recurrence_type, :credit_statement_id
+      :transaction_group_id, :recurrence_type, :credit_statement_id
+      # status removido - será controlado automaticamente
     )
   end
 
@@ -208,8 +234,8 @@ class TransactionsController < ApplicationController
             category_id: transaction_params[:category_id],
             installment: i + 1,
             transaction_group: transaction_group,
-            status: transaction_params[:status] || 'confirmed',
             recurrence_type: 'single'
+            # Status será determinado automaticamente pelo apply_intelligent_defaults
           )
 
           apply_intelligent_defaults(transaction)

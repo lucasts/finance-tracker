@@ -7,11 +7,17 @@ class Transaction < ApplicationRecord
 
   validates :description, :amount, :event_date, :payment_date, :transaction_type, presence: true
   validates :transaction_type, inclusion: { in: %w[income expense] }
-
+  validates :status, inclusion: { in: %w[pending confirmed cancelled] }
+  
+  # Callbacks para automação do status
+  before_validation :set_default_status, if: :new_record?
+  before_save :auto_update_status_if_needed
+  
   scope :income, -> { where transaction_type: :income }
   scope :expense, -> { where transaction_type: :expense }
   scope :pending, -> { where status: :pending }
   scope :confirmed, -> { where status: :confirmed }
+  scope :cancelled, -> { where status: :cancelled }
   
   # Scopes que trabalham com Date usando ranges (mais eficiente)
   scope :in_competence_month, ->(date) { 
@@ -44,5 +50,50 @@ class Transaction < ApplicationRecord
   # # Deriva o mês do pagamento (padrão: payment_date, fallback para event_date)
   def payment_month
     (payment_date || event_date)&.strftime('%Y-%m')
+  end
+  
+  # Método para determinar se a transação é futura
+  def future_transaction?
+    payment_date && payment_date > Date.current
+  end
+  
+  # Método para verificar se deveria estar pendente
+  def should_be_pending?
+    future_transaction? && !cancelled?
+  end
+  
+  # Método para verificar se deveria estar confirmada
+  def should_be_confirmed?
+    !future_transaction? && !cancelled?
+  end
+  
+  private
+  
+  def set_default_status
+    return if status.present?
+    
+    self.status = determine_automatic_status
+  end
+  
+  def auto_update_status_if_needed
+    # Só atualiza automaticamente se não foi explicitamente cancelada
+    return if cancelled?
+    
+    # Se as datas mudaram, recalcula o status
+    if payment_date_changed? || event_date_changed?
+      new_status = determine_automatic_status
+      self.status = new_status unless status == 'cancelled'
+    end
+  end
+  
+  def determine_automatic_status
+    current_date = Date.current
+    check_date = payment_date || event_date
+    
+    if check_date && check_date > current_date
+      'pending'    # Transação futura
+    else
+      'confirmed'  # Transação atual ou passada
+    end
   end
 end
