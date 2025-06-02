@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_01_204531) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_02_141128) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -51,6 +51,36 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_01_204531) do
     t.index ["account_id"], name: "index_credit_statements_on_account_id"
   end
 
+  create_table "installment_plans", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "installment_count", null: false
+    t.string "recurrence_frequency", default: "monthly", null: false
+    t.date "starts_on", null: false
+    t.integer "status", default: 0, null: false
+    t.text "notes"
+    t.decimal "total_amount", precision: 15, scale: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["recurrence_frequency"], name: "index_installment_plans_on_recurrence_frequency"
+    t.index ["status"], name: "index_installment_plans_on_status"
+  end
+
+  create_table "recurring_commitments", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "category_id", null: false
+    t.decimal "default_amount", precision: 15, scale: 2
+    t.string "recurrence_frequency", default: "monthly", null: false
+    t.date "start_date", null: false
+    t.date "end_date"
+    t.integer "status", default: 0, null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_recurring_commitments_on_category_id"
+    t.index ["recurrence_frequency"], name: "index_recurring_commitments_on_recurrence_frequency"
+    t.index ["status"], name: "index_recurring_commitments_on_status"
+  end
+
   create_table "transaction_groups", force: :cascade do |t|
     t.string "name"
     t.string "group_type"
@@ -78,18 +108,30 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_01_204531) do
     t.datetime "updated_at", null: false
     t.date "payment_date"
     t.integer "credit_statement_id"
+    t.integer "recurring_commitment_id"
+    t.integer "installment_plan_id"
+    t.string "recurrence_pattern"
+    t.string "recurrence_frequency"
+    t.integer "installment_number"
     t.index ["category_id"], name: "index_transactions_on_category_id"
     t.index ["credit_statement_id"], name: "index_transactions_on_credit_statement_id"
     t.index ["from_account_id"], name: "index_transactions_on_from_account_id"
+    t.index ["installment_number"], name: "index_transactions_on_installment_number"
+    t.index ["installment_plan_id"], name: "index_transactions_on_installment_plan_id"
+    t.index ["recurrence_pattern"], name: "index_transactions_on_recurrence_pattern"
+    t.index ["recurring_commitment_id"], name: "index_transactions_on_recurring_commitment_id"
     t.index ["to_account_id"], name: "index_transactions_on_to_account_id"
     t.index ["transaction_group_id"], name: "index_transactions_on_transaction_group_id"
   end
 
   add_foreign_key "accounts", "account_types"
   add_foreign_key "credit_statements", "accounts"
+  add_foreign_key "recurring_commitments", "categories"
   add_foreign_key "transactions", "accounts", column: "from_account_id"
   add_foreign_key "transactions", "accounts", column: "to_account_id"
   add_foreign_key "transactions", "categories"
   add_foreign_key "transactions", "credit_statements"
+  add_foreign_key "transactions", "installment_plans"
+  add_foreign_key "transactions", "recurring_commitments"
   add_foreign_key "transactions", "transaction_groups"
 end

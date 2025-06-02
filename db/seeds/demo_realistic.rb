@@ -4,7 +4,8 @@ require 'date'
 
 # Limpa dados existentes de demo
 Transaction.destroy_all
-TransactionGroup.destroy_all
+InstallmentPlan.destroy_all
+RecurringCommitment.destroy_all
 CreditStatement.destroy_all
 Account.destroy_all
 
@@ -159,7 +160,7 @@ meses_gerados = []
     from_account: accounts[:empresa_pai],
     to_account: accounts[:itau_pai],
     category: categories["Salário"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
   
@@ -173,7 +174,7 @@ meses_gerados = []
     from_account: accounts[:empresa_mae],
     to_account: accounts[:bradesco_mae],
     category: categories["Salário"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
   
@@ -206,7 +207,7 @@ meses_gerados = []
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:escola],
     category: categories["Educação"] || categories["Escola"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
   
@@ -220,7 +221,7 @@ meses_gerados = []
     from_account: accounts[:itau_pai],
     to_account: accounts[:saude],
     category: categories["Plano Saúde"] || categories["Saúde"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
   
@@ -234,7 +235,7 @@ meses_gerados = []
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:banco],
     category: categories["Aluguel"] || categories["Habitação"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
   
@@ -248,7 +249,7 @@ meses_gerados = []
     from_account: accounts[:itau_pai],
     to_account: accounts[:casa],
     category: categories["Internet"] || categories["Assinatura"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
   
@@ -262,7 +263,7 @@ meses_gerados = []
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:casa],
     category: categories["Telefonia"] || categories["Assinatura"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
   
@@ -464,7 +465,7 @@ meses_gerados = []
     from_account: accounts[:itau_pai],
     to_account: accounts[:casa],
     category: categories["Energia"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
   
@@ -479,7 +480,7 @@ meses_gerados = []
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:casa],
     category: categories["Habitação"] || categories["Energia"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
   
@@ -493,7 +494,7 @@ meses_gerados = []
     from_account: accounts[:itau_pai],
     to_account: accounts[:saude],
     category: categories["Academia"] || categories["Saúde"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
   
@@ -506,7 +507,7 @@ meses_gerados = []
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:saude],
     category: categories["Academia"] || categories["Saúde"],
-    recurrence_type: "fixed",
+    recurrence_type: "single",
     status: "confirmed"
   )
 end
@@ -515,15 +516,18 @@ end
 puts "Criando parcelamentos..."
 
 # TV 65" - 10x de R$ 380 (6 meses atrás)
-tv_group = TransactionGroup.create!(
+tv_plan = InstallmentPlan.create!(
   name: "Smart TV 65 polegadas",
-  group_type: "installment",
   installment_count: 10,
-  starts_on: 6.months.ago.beginning_of_month + 15.days
+  recurrence_frequency: "monthly",
+  starts_on: 6.months.ago.beginning_of_month + 15.days,
+  total_amount: 3800.00,
+  status: "active",
+  notes: "Smart TV Samsung 65\" comprada na Black Friday"
 )
 
 10.times do |i|
-  data_parcela = tv_group.starts_on + i.months
+  data_parcela = tv_plan.starts_on + i.months
   status = data_parcela <= Date.today ? "confirmed" : "pending"
   
   Transaction.create!(
@@ -535,23 +539,25 @@ tv_group = TransactionGroup.create!(
     from_account: accounts[:santander],
     to_account: accounts[:casa],
     category: categories["Compras"],
-    recurrence_type: "fixed",
-    installment: i + 1,
-    transaction_group: tv_group,
+    recurrence_type: "installment",
+    installment_plan: tv_plan,
     status: status
   )
 end
 
 # Carro usado - 48x de R$ 890 (financiamento que começou 8 meses atrás)
-carro_group = TransactionGroup.create!(
+carro_plan = InstallmentPlan.create!(
   name: "Financiamento Civic 2019",
-  group_type: "installment",
   installment_count: 48,
-  starts_on: 8.months.ago.beginning_of_month + 10.days
+  recurrence_frequency: "monthly",
+  starts_on: 8.months.ago.beginning_of_month + 10.days,
+  total_amount: 42720.00,
+  status: "active",
+  notes: "Financiamento Honda Civic 2019 usado - 48 parcelas"
 )
 
 48.times do |i|
-  data_parcela = carro_group.starts_on + i.months
+  data_parcela = carro_plan.starts_on + i.months
   next if data_parcela > 3.years.from_now
   status = data_parcela <= Date.today ? "confirmed" : "pending"
   
@@ -564,23 +570,25 @@ carro_group = TransactionGroup.create!(
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:banco],
     category: categories["Empréstimo"] || categories["Transporte"],
-    recurrence_type: "fixed",
-    installment: i + 1,
-    transaction_group: carro_group,
+    recurrence_type: "installment",
+    installment_plan: carro_plan,
     status: status
   )
 end
 
 # Móveis planejados - 24x de R$ 520 (começou 3 meses atrás)
-moveis_group = TransactionGroup.create!(
+moveis_plan = InstallmentPlan.create!(
   name: "Móveis planejados cozinha",
-  group_type: "installment",
   installment_count: 24,
-  starts_on: 3.months.ago.beginning_of_month + 20.days
+  recurrence_frequency: "monthly",
+  starts_on: 3.months.ago.beginning_of_month + 20.days,
+  total_amount: 12480.00,
+  status: "active",
+  notes: "Móveis planejados da cozinha e área de serviço"
 )
 
 24.times do |i|
-  data_parcela = moveis_group.starts_on + i.months
+  data_parcela = moveis_plan.starts_on + i.months
   status = data_parcela <= Date.today ? "confirmed" : "pending"
   
   Transaction.create!(
@@ -592,23 +600,25 @@ moveis_group = TransactionGroup.create!(
     from_account: accounts[:inter_mae],
     to_account: accounts[:casa],
     category: categories["Decoração"] || categories["Casa"],
-    recurrence_type: "fixed",
-    installment: i + 1,
-    transaction_group: moveis_group,
+    recurrence_type: "installment",
+    installment_plan: moveis_plan,
     status: status
   )
 end
 
 # Empréstimo pessoal para emergência - 36x de R$ 450 (começou 10 meses atrás)
-emprestimo_group = TransactionGroup.create!(
+emprestimo_plan = InstallmentPlan.create!(
   name: "Empréstimo pessoal Banco do Brasil",
-  group_type: "installment",
   installment_count: 36,
-  starts_on: 10.months.ago.beginning_of_month + 5.days
+  recurrence_frequency: "monthly",
+  starts_on: 10.months.ago.beginning_of_month + 5.days,
+  total_amount: 16200.00,
+  status: "active",
+  notes: "Empréstimo pessoal para emergência médica da família"
 )
 
 36.times do |i|
-  data_parcela = emprestimo_group.starts_on + i.months
+  data_parcela = emprestimo_plan.starts_on + i.months
   status = data_parcela <= Date.today ? "confirmed" : "pending"
   
   Transaction.create!(
@@ -620,12 +630,148 @@ emprestimo_group = TransactionGroup.create!(
     from_account: accounts[:itau_pai],
     to_account: accounts[:banco],
     category: categories["Empréstimo"],
-    recurrence_type: "fixed",
-    installment: i + 1,
-    transaction_group: emprestimo_group,
+    recurrence_type: "installment",
+    installment_plan: emprestimo_plan,
     status: status
   )
 end
+
+# === COMPROMISSOS RECORRENTES ===
+puts "Criando compromissos recorrentes..."
+
+# Salário João - todo dia 5 do mês
+salario_joao = RecurringCommitment.create!(
+  name: "Salário João - Empresa ABC",
+  default_amount: 8500.00,
+  recurrence_frequency: "monthly",
+  start_date: 12.months.ago.beginning_of_month + 5.days,
+  status: "active",
+  category: categories["Salário"] || categories.values.sample,
+  notes: "Salário mensal como Gerente de TI"
+)
+
+# Salário Maria - todo dia 10 do mês
+salario_maria = RecurringCommitment.create!(
+  name: "Salário Maria - Consultoria XYZ",
+  default_amount: 6800.00,
+  recurrence_frequency: "monthly",
+  start_date: 12.months.ago.beginning_of_month + 10.days,
+  status: "active",
+  category: categories["Salário"] || categories.values.sample,
+  notes: "Salário mensal como Consultora de RH"
+)
+
+# Aluguel - todo dia 10 do mês
+aluguel = RecurringCommitment.create!(
+  name: "Aluguel do apartamento",
+  default_amount: 2800.00,
+  recurrence_frequency: "monthly",
+  start_date: 12.months.ago.beginning_of_month + 10.days,
+  status: "active",
+  category: categories["Habitação"] || categories.values.sample,
+  notes: "Aluguel mensal do apartamento de 3 quartos"
+)
+
+# Escola dos filhos - todo dia 15
+escola_filhos = RecurringCommitment.create!(
+  name: "Mensalidade escola particular",
+  default_amount: 1200.00,
+  recurrence_frequency: "monthly",
+  start_date: 12.months.ago.beginning_of_month + 15.days,
+  status: "active",
+  category: categories["Educação"],
+  notes: "Mensalidade dos dois filhos na escola particular"
+)
+
+# Internet e TV - todo dia 20
+internet_tv = RecurringCommitment.create!(
+  name: "Internet e TV por assinatura",
+  default_amount: 180.00,
+  recurrence_frequency: "monthly",
+  start_date: 12.months.ago.beginning_of_month + 20.days,
+  status: "active",
+  category: categories["Internet"] || categories.values.sample,
+  notes: "Plano 300MB + canais premium"
+)
+
+# Academia casal - todo dia 8
+academia = RecurringCommitment.create!(
+  name: "Academia Smart Fit - Casal",
+  default_amount: 140.00,
+  recurrence_frequency: "monthly",
+  start_date: 12.months.ago.beginning_of_month + 8.days,
+  status: "active",
+  category: categories["Academia"] || categories["Saúde"],
+  notes: "Plano casal na academia Smart Fit"
+)
+
+# Freelance João - toda sexta-feira
+freelance_joao = RecurringCommitment.create!(
+  name: "Consultoria TI - Freelance",
+  default_amount: 1500.00,
+  recurrence_frequency: "monthly",
+  start_date: 6.months.ago.beginning_of_month + 25.days,
+  status: "active",
+  category: categories["Freelance"] || categories.values.sample,
+  notes: "Consultoria em desenvolvimento de sistemas"
+)
+
+puts "Compromissos recorrentes criados: #{RecurringCommitment.count}"
+
+# === GERAR TRANSAÇÕES MANUAIS DOS COMPROMISSOS ===
+puts "Gerando algumas transações baseadas nos compromissos..."
+
+# Gerar algumas transações de salário para os últimos meses
+3.times do |i|
+  mes_passado = i.months.ago.beginning_of_month
+  
+  # Salário João (associado ao compromisso recorrente)
+  Transaction.create!(
+    description: "Salário João - #{mes_passado.strftime('%m/%Y')}",
+    amount: 8500.00,
+    transaction_type: "income",
+    event_date: mes_passado + 5.days,
+    payment_date: mes_passado + 5.days,
+    from_account: accounts[:empresa_pai],
+    to_account: accounts[:itau_pai],
+    category: categories["Salário"] || categories.values.sample,
+    recurrence_type: "recurring",
+    recurring_commitment: salario_joao,
+    status: "confirmed"
+  )
+  
+  # Salário Maria (associado ao compromisso recorrente)
+  Transaction.create!(
+    description: "Salário Maria - #{mes_passado.strftime('%m/%Y')}",
+    amount: 6800.00,
+    transaction_type: "income",
+    event_date: mes_passado + 10.days,
+    payment_date: mes_passado + 10.days,
+    from_account: accounts[:empresa_mae],
+    to_account: accounts[:bradesco_mae],
+    category: categories["Salário"] || categories.values.sample,
+    recurrence_type: "recurring",
+    recurring_commitment: salario_maria,
+    status: "confirmed"
+  )
+  
+  # Aluguel (associado ao compromisso recorrente)
+  Transaction.create!(
+    description: "Aluguel - #{mes_passado.strftime('%m/%Y')}",
+    amount: 2800.00,
+    transaction_type: "expense",
+    event_date: mes_passado + 10.days,
+    payment_date: mes_passado + 10.days,
+    from_account: accounts[:itau_pai],
+    to_account: accounts[:casa],
+    category: categories["Habitação"] || categories.values.sample,
+    recurrence_type: "recurring",
+    recurring_commitment: aluguel,
+    status: "confirmed"
+  )
+end
+
+puts "Transações de exemplo geradas!"
 
 # === ATUALIZAR VALORES DAS FATURAS ===
 puts "Atualizando valores das faturas..."
@@ -813,8 +959,16 @@ puts "\n=== RESUMO DOS DADOS GERADOS ==="
 puts "Total de transações: #{Transaction.count}"
 puts "Receitas confirmadas: #{Transaction.income.confirmed.count}"
 puts "Despesas confirmadas: #{Transaction.expense.confirmed.count}"
-puts "Parcelamentos criados: #{TransactionGroup.count}"
+puts "Parcelamentos criados: #{InstallmentPlan.count}"
+puts "Compromissos recorrentes: #{RecurringCommitment.count}"
 puts "Faturas de cartão: #{CreditStatement.count}"
+
+# Análise dos novos modelos
+puts "\n=== ANÁLISE DOS NOVOS MODELOS ==="
+puts "Planos de parcelamento ativos: #{InstallmentPlan.active.count}"
+puts "Valor total dos parcelamentos: R$ #{InstallmentPlan.sum(:total_amount).to_i}"
+puts "Compromissos recorrentes ativos: #{RecurringCommitment.active.count}"
+puts "Valor mensal total dos compromissos: R$ #{RecurringCommitment.active.with_default_amount.sum(:default_amount).to_i}"
 
 # Estatísticas por mês
 puts "\n=== RESUMO POR MÊS ==="

@@ -80,79 +80,54 @@
   </div>
 </div>
 
-<% grouped = @transactions.group_by(&:transaction_group) %>
-<% grouped.each do |group, transactions| %>
-  <% if group.present? %>
-    <div class="alert alert-info mt-6 mb-4">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-      <div>
-        <h3 class="font-bold">💳 <%= t('ui.transaction.installments.title') %></h3>
-        <div class="text-xs"><%= group.name %></div>
-      </div>
-    </div>
-  <% end %>
+<!-- Transactions grouped by type -->
 
-  <% running_balance = 0 %>
-  <div class="bg-base-100 rounded-box shadow overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="table table-zebra w-full text-sm">
-        <thead class="bg-base-200">
-          <tr>
-            <th><%= t('ui.transaction.table.event') %></th>
-            <th><%= t('ui.transaction.table.payment') %></th>
-            <th><%= t('activerecord.attributes.transaction.description') %></th>
-            <th><%= t('ui.transaction.table.origin') %></th>
-            <th><%= t('ui.transaction.table.destination') %></th>
-            <th><%= t('activerecord.attributes.transaction.category') %></th>
-            <th class="text-right"><%= t('activerecord.attributes.transaction.amount') %></th>
-            <th class="text-right"><%= t('activerecord.attributes.transaction.installment') %></th>
-            <th class="text-right"><%= t('ui.transaction.table.accumulated_balance') %></th>
-            <th class="text-right"><%= t('ui.actions.title') %></th>
-          </tr>
-        </thead>
-      <tbody>
-        <% transactions.each do |tx| %>
-          <% delta = tx.transaction_type == 'income' ? tx.amount : -tx.amount %>
-          <% running_balance += delta %>
-          <tr>
-            <td><%= l(tx.event_date) if tx.event_date %></td>
-            <td><%= l(tx.payment_date) if tx.payment_date %></td>
-            <td><%= tx.description %></td>
-            <td><%= tx.from_account.name %></td>
-            <td><%= tx.to_account&.name %></td>
-            <td><%= tx.category.name %></td>
-            <td class="text-right <%= tx.transaction_type == 'income' ? 'text-success' : 'text-error' %>">
-              <%= number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.') %>
-            </td>
-            <td class="text-right">
-              <% if group.present? %>
-                <%= "#{tx.installment}/#{tx.transaction_group.installment_count}" %>
-              <% else %>
-                —
-              <% end %>
-            </td>
-            <td class="text-right text-base-content/60">
-              <%= number_to_currency(running_balance, unit: 'R$', separator: ',', delimiter: '.') %>
-            </td>
-            <td class="text-right">
-              <div class="flex gap-1 justify-end">
-                <button class="btn btn-ghost btn-xs" 
-                        data-action="click->modal#show" 
-                        data-url="<%= transaction_path(tx) %>"
-                        title="<%= t('ui.actions.show') %>">
-                  👁️
-                </button>
-                <%= link_to edit_transaction_path(tx), class: "btn btn-ghost btn-xs", title: t('ui.actions.edit') do %>
-                  ✏️
-                <% end %>
-              </div>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+<!-- Installment Plan Transactions -->
+<% installment_plans = @transactions.select(&:installment_plan).group_by(&:installment_plan) %>
+<% installment_plans.each do |plan, transactions| %>
+  <div class="alert alert-info mt-6 mb-4">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <div>
+      <h3 class="font-bold">💳 <%= t('ui.transaction.installments.title') %></h3>
+      <div class="text-xs"><%= plan.name %></div>
+    </div>
   </div>
-</div>
+
+  <%= render 'transactions_table', transactions: transactions, show_installment_info: true %>
+<% end %>
+
+<!-- Recurring Commitment Transactions -->
+<% recurring_commitments = @transactions.select(&:recurring_commitment).group_by(&:recurring_commitment) %>
+<% recurring_commitments.each do |commitment, transactions| %>
+  <div class="alert alert-success mt-6 mb-4">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+    </svg>
+    <div>
+      <h3 class="font-bold">🔄 <%= t('ui.transaction.recurring.title') %></h3>
+      <div class="text-xs"><%= commitment.name %></div>
+    </div>
+  </div>
+
+  <%= render 'transactions_table', transactions: transactions, show_installment_info: false %>
+<% end %>
+
+<!-- Single Transactions -->
+<% single_transactions = @transactions.select { |t| t.installment_plan.nil? && t.recurring_commitment.nil? } %>
+<% unless single_transactions.empty? %>
+  <div class="alert mt-6 mb-4">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+    </svg>
+    <div>
+      <h3 class="font-bold">📄 <%= t('ui.transaction.single.title') %></h3>
+      <div class="text-xs"><%= t('ui.transaction.single.description') %></div>
+    </div>
+  </div>
+
+  <%= render 'transactions_table', transactions: single_transactions, show_installment_info: false %>
 <% end %>
 
 <% if @transactions.empty? %>

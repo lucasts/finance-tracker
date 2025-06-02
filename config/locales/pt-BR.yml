@@ -12,9 +12,6 @@ pt-BR:
       transaction:
         one: "Lançamento"
         other: "Lançamentos"
-      transaction_group:
-        one: "Grupo de Lançamentos"
-        other: "Grupos de Lançamentos"
       account:
         one: "Conta"
         other: "Contas"
@@ -27,6 +24,12 @@ pt-BR:
       credit_statement:
         one: "Fatura"
         other: "Faturas"
+      installment_plan:
+        one: "Plano de Parcelamento"
+        other: "Planos de Parcelamento"
+      recurring_commitment:
+        one: "Compromisso Recorrente"
+        other: "Compromissos Recorrentes"
     
     attributes:
       transaction:
@@ -41,15 +44,24 @@ pt-BR:
         status: "Status"
         recurrence_type: "Tipo de Recorrência"
         installment: "Parcela"
-        transaction_group: "Grupo"
         created_at: "Criado em"
         updated_at: "Atualizado em"
       
-      transaction_group:
-        name: "Nome"
-        group_type: "Tipo"
+      installment_plan:
+        description: "Descrição"
         total_amount: "Valor Total"
-        installments_count: "Número de Parcelas"
+        installment_count: "Número de Parcelas"
+        amount_per_installment: "Valor por Parcela"
+        active: "Ativo"
+        created_at: "Criado em"
+        updated_at: "Atualizado em"
+      
+      recurring_commitment:
+        description: "Descrição"
+        amount: "Valor"
+        frequency: "Frequência"
+        active: "Ativo"
+        amount_type: "Tipo de Valor"
         created_at: "Criado em"
         updated_at: "Atualizado em"
       
@@ -100,7 +112,8 @@ pt-BR:
       accounts: "Contas"
       categories: "Categorias"
       account_types: "Tipos de Conta"
-      transaction_groups: "Grupos de Lançamento"
+      installment_plans: "Planos de Parcelamento"
+      recurring_commitments: "Compromissos Recorrentes"
       reports: "Relatórios Financeiros"
       credit_statements: "Faturas"
       settings: "Configurações"
@@ -143,22 +156,32 @@ pt-BR:
           cancelled_examples: "Compras estornadas, despesas canceladas"
       
       recurrence:
+        title: "Tipo de Recorrência"
+        type_label: "Como esta transação se repete?"
         single: "Única"
-        fixed: "Fixa"
         recurring: "Recorrente"
+        installment: "Parcelamento"
         descriptions:
-          single: "Acontece apenas uma vez"
-          fixed: "Repete mensalmente com valor fixo"
-          recurring: "Padrão de repetição personalizado"
-        label: "Tipo de Recorrência"
+          single: "Transação única, sem repetição"
+          recurring: "Compromisso que se repete (ex: aluguel, assinatura)"
+          installment: "Compra dividida em parcelas fixas"
       
-      table:
-        event: "Evento"
-        payment: "Pagamento"
-        origin: "Origem"
-        destination: "Destino"
-        accumulated_balance: "Saldo Acum."
-      
+      recurring:
+        title: "Compromisso Recorrente"
+        description: "Esta transação criará um compromisso recorrente que gerará automaticamente lançamentos futuros."
+        frequency_label: "Frequência"
+        frequency_prompt: "Selecione a frequência"
+        frequencies:
+          monthly: "Mensal"
+          weekly: "Semanal"
+          yearly: "Anual"
+        amount_type_label: "Tipo de Valor"
+        amount_types:
+          fixed: "Valor Fixo"
+          variable: "Valor Variável"
+        variable_amount_title: "Valor Variável Selecionado"
+        variable_amount_description: "O valor informado será usado como base, mas você poderá ajustar cada lançamento futuro conforme necessário."
+
       installments:
         title: "Parcelamento"
         current: "Parcela atual"
@@ -196,6 +219,8 @@ pt-BR:
         event_date_helper: "(Competência)"
         payment_date_label: "Data de Pagamento"
         payment_date_helper_caixa: "(Caixa)"
+        notes_label: "Observações"
+        notes_placeholder: "Informações adicionais sobre esta transação..."
       
       installments:
         title: "Parcelamento"
@@ -208,9 +233,9 @@ pt-BR:
         value_per_installment: "Valor por parcela"
         first_installment: "Primeira parcela"
         last_installment: "Última parcela"
-        existing_info: "Lançamento Parcelado"
-        view_all: "Ver todas as parcelas"
-        updated: "Atualizado"
+        existing_plan: "Plano de Parcelamento Existente"
+        
+        # ...existing code...
       
       credit_card:
         title: "Lançamento de Cartão de Crédito"
@@ -236,9 +261,13 @@ pt-BR:
         income: "Receita"
         expense: "Despesa"
     
-    transaction_group:
+    installment_plan:
       index:
-        description: "Gerencie parcelamentos de cartão de crédito, empréstimos e transferências agrupadas."
+        description: "Gerencie planos de parcelamento criados no sistema."
+      
+    recurring_commitment:
+      index:
+        description: "Gerencie compromissos financeiros que se repetem periodicamente."
     
     credit_statement:
       table:
@@ -285,7 +314,8 @@ pt-BR:
       created: "Lançamento criado com sucesso!"
       updated: "Lançamento atualizado com sucesso!"
       deleted: "Lançamento removido com sucesso!"
-      installments_created: "Parcelamento criado com sucesso! %{count} parcelas de %{amount} foram criadas."
+      recurring_created: "Compromisso recorrente criado com sucesso! Primeira transação registrada."
+      installments_created: "Parcelamento criado com sucesso! %{count} parcelas foram criadas."
       invalid_installment_data: "Dados de parcelamento inválidos!"
       installment_error: "Erro ao criar parcelamento: %{error}"
 

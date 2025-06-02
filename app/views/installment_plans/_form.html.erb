@@ -1,0 +1,268 @@
+<%= form_with(model: installment_plan, local: true, data: { controller: "installment-plan-form" }) do |form| %>
+  <% if installment_plan.errors.any? %>
+    <div class="alert alert-error mb-6">
+      <div>
+        <h3 class="font-bold">Erro ao salvar parcelamento:</h3>
+        <ul class="list-disc list-inside mt-2">
+          <% installment_plan.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Left Column -->
+    <div class="space-y-6">
+      <!-- Basic Information -->
+      <div class="card bg-base-200">
+        <div class="card-body">
+          <h3 class="card-title text-lg mb-4">📝 Informações Básicas</h3>
+          
+          <div class="form-control">
+            <%= form.label :name, "Nome do Parcelamento", class: "label label-text font-semibold" %>
+            <%= form.text_field :name, class: "input input-bordered w-full", 
+                                placeholder: "Ex: Notebook Dell, Sofá da Sala...", required: true %>
+          </div>
+
+          <div class="form-control">
+            <%= form.label :notes, "Observações (opcional)", class: "label label-text font-semibold" %>
+            <%= form.text_area :notes, class: "textarea textarea-bordered w-full", 
+                               rows: 3, placeholder: "Informações adicionais sobre este parcelamento..." %>
+          </div>
+
+          <div class="form-control">
+            <label class="label cursor-pointer justify-start gap-3">
+              <%= form.check_box :active, class: "checkbox checkbox-primary" %>
+              <span class="label-text font-semibold">Parcelamento Ativo</span>
+            </label>
+            <div class="text-sm text-base-content/70 mt-1">
+              Parcelamentos inativos não geram novas parcelas automaticamente
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account and Category -->
+      <div class="card bg-base-200">
+        <div class="card-body">
+          <h3 class="card-title text-lg mb-4">🏦 Conta e Categoria</h3>
+          
+          <div class="form-control">
+            <%= form.label :account_id, "Conta", class: "label label-text font-semibold" %>
+            <%= form.select :account_id, 
+                            options_from_collection_for_select(@accounts, :id, :name, installment_plan.account_id),
+                            { prompt: "Selecione uma conta" },
+                            { class: "select select-bordered w-full", required: true } %>
+          </div>
+
+          <div class="form-control">
+            <%= form.label :category_id, "Categoria", class: "label label-text font-semibold" %>
+            <%= form.select :category_id, 
+                            options_from_collection_for_select(@categories, :id, :name, installment_plan.category_id),
+                            { prompt: "Selecione uma categoria" },
+                            { class: "select select-bordered w-full", required: true } %>
+          </div>
+
+          <div class="form-control">
+            <%= form.label :transaction_type, "Tipo de Transação", class: "label label-text font-semibold" %>
+            <%= form.select :transaction_type, 
+                            options_for_select([
+                              ['Despesa', 'expense'],
+                              ['Receita', 'income']
+                            ], installment_plan.transaction_type),
+                            { prompt: "Selecione o tipo" },
+                            { class: "select select-bordered w-full", required: true } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="space-y-6">
+      <!-- Financial Information -->
+      <div class="card bg-base-200">
+        <div class="card-body">
+          <h3 class="card-title text-lg mb-4">💰 Informações Financeiras</h3>
+          
+          <div class="form-control">
+            <%= form.label :total_amount, "Valor Total", class: "label label-text font-semibold" %>
+            <div class="input-group">
+              <span class="bg-base-300 px-3 flex items-center">R$</span>
+              <%= form.number_field :total_amount, class: "input input-bordered w-full", 
+                                    step: 0.01, min: 0.01, required: true,
+                                    data: { action: "input->installment-plan-form#calculateInstallmentAmount" } %>
+            </div>
+          </div>
+
+          <div class="form-control">
+            <%= form.label :installment_count, "Número de Parcelas", class: "label label-text font-semibold" %>
+            <%= form.number_field :installment_count, class: "input input-bordered w-full", 
+                                  min: 1, max: 999, required: true,
+                                  data: { action: "input->installment-plan-form#calculateInstallmentAmount" } %>
+          </div>
+
+          <div class="form-control">
+            <%= form.label :installment_amount, "Valor por Parcela", class: "label label-text font-semibold" %>
+            <div class="input-group">
+              <span class="bg-base-300 px-3 flex items-center">R$</span>
+              <%= form.number_field :installment_amount, class: "input input-bordered w-full", 
+                                    step: 0.01, min: 0.01, readonly: true,
+                                    data: { installment_plan_form_target: "installmentAmount" } %>
+            </div>
+            <div class="text-sm text-base-content/70 mt-1">
+              Calculado automaticamente com base no valor total e número de parcelas
+            </div>
+          </div>
+
+          <!-- Calculation Summary -->
+          <div class="alert alert-info mt-4" data-installment-plan-form-target="summary" style="display: none;">
+            <div>
+              <h4 class="font-bold">Resumo do Parcelamento:</h4>
+              <ul class="text-sm mt-2">
+                <li>• <span data-installment-plan-form-target="summaryInstallments"></span> parcelas de <span data-installment-plan-form-target="summaryAmount"></span></li>
+                <li>• Valor total: <span data-installment-plan-form-target="summaryTotal"></span></li>
+                <li>• Frequência: <span data-installment-plan-form-target="summaryFrequency"></span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule Information -->
+      <div class="card bg-base-200">
+        <div class="card-body">
+          <h3 class="card-title text-lg mb-4">📅 Cronograma</h3>
+          
+          <div class="form-control">
+            <%= form.label :starts_on, "Data da Primeira Parcela", class: "label label-text font-semibold" %>
+            <%= form.date_field :starts_on, class: "input input-bordered w-full", 
+                                required: true, value: installment_plan.starts_on || Date.current,
+                                data: { action: "change->installment-plan-form#updateSummary" } %>
+          </div>
+
+          <div class="form-control">
+            <%= form.label :recurrence_frequency, "Frequência das Parcelas", class: "label label-text font-semibold" %>
+            <%= form.select :recurrence_frequency,
+                            options_for_select([
+                              ['Mensal', 'monthly'],
+                              ['Semanal', 'weekly'],
+                              ['Diária', 'daily']
+                            ], installment_plan.recurrence_frequency || 'monthly'),
+                            {},
+                            { class: "select select-bordered w-full", required: true,
+                              data: { action: "change->installment-plan-form#updateSummary" } } %>
+          </div>
+          </div>
+
+          <!-- Schedule Preview -->
+          <div class="mt-4" data-installment-plan-form-target="schedulePreview" style="display: none;">
+            <h4 class="font-semibold mb-2">📋 Próximas Parcelas:</h4>
+            <div class="space-y-1 text-sm" data-installment-plan-form-target="scheduleList">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-base-200">
+    <%= link_to 'Cancelar', installment_plan.persisted? ? installment_plan_path(installment_plan) : installment_plans_path, 
+                class: "btn btn-ghost" %>
+    <%= form.submit installment_plan.persisted? ? 'Atualizar Parcelamento' : 'Criar Parcelamento', 
+                    class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+<!-- Stimulus Controller for Dynamic Form Behavior -->
+<script data-turbo-track="reload">
+(() => {
+  const application = window.Stimulus;
+  
+  application.register("installment-plan-form", class extends application.Controller {
+    static targets = ["installmentAmount", "summary", "summaryInstallments", "summaryAmount", 
+                     "summaryTotal", "summaryFrequency", "schedulePreview", "scheduleList"];
+    
+    connect() {
+      this.calculateInstallmentAmount();
+      this.updateSummary();
+    }
+    
+    calculateInstallmentAmount() {
+      const totalAmount = parseFloat(this.element.querySelector('[name="installment_plan[total_amount]"]').value) || 0;
+      const totalInstallments = parseInt(this.element.querySelector('[name="installment_plan[installment_count]"]').value) || 1;
+      
+      if (totalAmount > 0 && totalInstallments > 0) {
+        const installmentAmount = totalAmount / totalInstallments;
+        this.installmentAmountTarget.value = installmentAmount.toFixed(2);
+        this.updateSummary();
+      }
+    }
+    
+    updateSummary() {
+      const totalAmount = parseFloat(this.element.querySelector('[name="installment_plan[total_amount]"]').value) || 0;
+      const totalInstallments = parseInt(this.element.querySelector('[name="installment_plan[installment_count]"]').value) || 0;
+      const installmentAmount = parseFloat(this.installmentAmountTarget.value) || 0;
+      const frequency = this.element.querySelector('[name="installment_plan[recurrence_frequency]"]').value;
+      const firstDate = this.element.querySelector('[name="installment_plan[starts_on]"]').value;
+      
+      if (totalAmount > 0 && totalInstallments > 0 && installmentAmount > 0) {
+        this.summaryTarget.style.display = 'block';
+        this.summaryInstallmentsTarget.textContent = totalInstallments;
+        this.summaryAmountTarget.textContent = `R$ ${installmentAmount.toFixed(2).replace('.', ',')}`;
+        this.summaryTotalTarget.textContent = `R$ ${totalAmount.toFixed(2).replace('.', ',')}`;
+        
+        const frequencyNames = {
+          'monthly': 'Mensalmente',
+          'weekly': 'Semanalmente', 
+          'daily': 'Diariamente'
+        };
+        this.summaryFrequencyTarget.textContent = frequencyNames[frequency] || frequency;
+        
+        if (firstDate) {
+          this.updateSchedulePreview(firstDate, frequency, totalInstallments, installmentAmount);
+        }
+      } else {
+        this.summaryTarget.style.display = 'none';
+        this.schedulePreviewTarget.style.display = 'none';
+      }
+    }
+    
+    updateSchedulePreview(firstDateStr, frequency, totalInstallments, installmentAmount) {
+      const firstDate = new Date(firstDateStr);
+      const maxPreview = Math.min(totalInstallments, 5);
+      
+      let html = '';
+      for (let i = 0; i < maxPreview; i++) {
+        let date = new Date(firstDate);
+        
+        switch (frequency) {
+          case 'monthly':
+            date.setMonth(date.getMonth() + i);
+            break;
+          case 'weekly':
+            date.setDate(date.getDate() + (i * 7));
+            break;
+          case 'daily':
+            date.setDate(date.getDate() + i);
+            break;
+        }
+        
+        html += `<div class="flex justify-between">
+          <span>Parcela ${i + 1}:</span>
+          <span>${date.toLocaleDateString('pt-BR')} - R$ ${installmentAmount.toFixed(2).replace('.', ',')}</span>
+        </div>`;
+      }
+      
+      if (totalInstallments > 5) {
+        html += `<div class="text-center text-base-content/70">... e mais ${totalInstallments - 5} parcelas</div>`;
+      }
+      
+      this.scheduleListTarget.innerHTML = html;
+      this.schedulePreviewTarget.style.display = 'block';
+    }
+  });
+})();
+</script>

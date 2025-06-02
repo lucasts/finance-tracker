@@ -13,12 +13,14 @@
             <li><%= link_to t('ui.navigation.accounts'), accounts_path %></li>
             <li><%= link_to t('ui.navigation.categories'), categories_path %></li>
             <li><%= link_to t('ui.navigation.account_types'), account_types_path %></li>
-            <li><%= link_to t('ui.navigation.transaction_groups'), transaction_groups_path %></li>
+            <li><%= link_to t('ui.navigation.installment_plans'), installment_plans_path %></li>
+            <li><%= link_to t('ui.navigation.recurring_commitments'), recurring_commitments_path %></li>
           </ul>
         </details>
       </li>
       <li><%= link_to t('ui.navigation.reports'), reports_path %></li>
       <li><%= link_to t('ui.navigation.credit_statements'), credit_statements_path %></li>
+      <li><%= link_to "🤖 Automação", automation_index_path %></li>
       <li>
         <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one'), new_transaction_path, class: "btn btn-primary btn-sm ml-2" %>
       </li>

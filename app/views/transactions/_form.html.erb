@@ -192,64 +192,137 @@
       </div>
     </div>
 
-    <!-- Installments Section -->
-    <div class="card bg-base-100 shadow-sm border border-base-300" data-controller="parceling">
+    <!-- Recurrence Type Selection -->
+    <div class="card bg-base-100 shadow-sm border border-base-300" data-controller="recurrence">
       <div class="card-body">
-        <h3 class="card-title text-lg mb-4">📊 <%= t('ui.transaction.installments.title') %></h3>
+        <h3 class="card-title text-lg mb-4">🔄 Configurações de Repetição</h3>
         
-        <% if transaction.transaction_group_id.present? %>
-          <!-- Exibir informações do parcelamento existente -->
+        <!-- Checkbox para ativar repetição -->
+        <div class="form-control">
+          <label class="label cursor-pointer justify-start gap-3">
+            <input type="checkbox" 
+                   class="checkbox checkbox-primary" 
+                   data-recurrence-target="repeatCheckbox"
+                   data-action="change->recurrence#handleRepeatToggle">
+            <span class="label-text text-lg">📅 Repetir este lançamento?</span>
+          </label>
+          <div class="text-sm text-base-content/60 ml-8 mt-1">
+            Marque esta opção para gastos recorrentes ou parcelamentos
+          </div>
+        </div>
+
+        <!-- Opções de repetição (aparecem quando checkbox marcado) -->
+        <div data-recurrence-target="repeatOptions" class="hidden mt-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Compromisso Recorrente -->
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-3 p-4 border border-base-300 rounded-lg hover:bg-base-50 transition-colors">
+                <input type="radio" 
+                       name="repeat_type" 
+                       value="recurring" 
+                       class="radio radio-primary" 
+                       data-recurrence-target="repeatType"
+                       data-action="change->recurrence#handleTypeChange">
+                <div>
+                  <div class="font-semibold">🔄 Compromisso Recorrente</div>
+                  <div class="text-sm text-base-content/60">Gastos que se repetem regularmente como aluguel, assinaturas</div>
+                </div>
+              </label>
+            </div>
+
+            <!-- Parcelamento -->
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-3 p-4 border border-base-300 rounded-lg hover:bg-base-50 transition-colors">
+                <input type="radio" 
+                       name="repeat_type" 
+                       value="installment" 
+                       class="radio radio-primary" 
+                       data-recurrence-target="repeatType"
+                       data-action="change->recurrence#handleTypeChange">
+                <div>
+                  <div class="font-semibold">📊 Parcelamento</div>
+                  <div class="text-sm text-base-content/60">Compras divididas em parcelas fixas</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campo hidden para manter compatibilidade -->
+        <%= form.hidden_field :recurrence_type, value: "single", data: { recurrence_target: "hiddenType" } %>
+
+        <!-- Recurring Commitment Section -->
+        <div data-recurrence-target="recurringSection" class="space-y-4 mt-6 hidden">
           <div class="alert alert-info">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <div>
-              <h4 class="font-bold"><%= t('ui.transaction.installments.existing_info') %></h4>
+              <h4 class="font-bold">🔄 Compromisso Recorrente</h4>
               <div class="text-sm">
-                <%= transaction.description %> - 
-                <%= t('ui.transaction.installments.existing_description', 
-                      current: transaction.installment || 'N/A', 
-                      total: transaction.transaction_group.installments_count || transaction.transaction_group.transactions.count) %>
-                <% if transaction.transaction_group.total_amount.present? %>
-                  <br><%= t('ui.transaction.installments.total_value', amount: number_to_currency(transaction.transaction_group.total_amount)) %>
-                <% end %>
-              </div>
-              <div class="mt-2">
-                <%= link_to t('ui.transaction.installments.view_all'), transactions_path(group: transaction.transaction_group_id), 
-                      class: "btn btn-sm btn-outline btn-primary" %>
+                Esta transação criará um compromisso recorrente que gerará automaticamente lançamentos futuros com valor fixo.
               </div>
             </div>
           </div>
-        <% else %>
-          <!-- Interface para novo parcelamento -->
-          <div class="form-control">
-            <label class="cursor-pointer label justify-start gap-3">
-              <%= check_box_tag :is_installment, "1", false, 
-                    class: "checkbox checkbox-primary",
-                    data: { 
-                      parceling_target: "toggle", 
-                      action: "change->parceling#toggle" 
-                    } %>
-              <span class="label-text"><%= t('ui.transaction.installments.enable') %></span>
-            </label>
-          </div>
-        <% end %>
 
-        <% unless transaction.transaction_group_id.present? %>
-          <div data-parceling-target="section" class="space-y-4 mt-4 hidden">
+          <div class="form-control max-w-sm">
+            <label class="label">
+              <span class="label-text">📊 Frequência de repetição</span>
+            </label>
+            <%= form.select :recurrence_frequency, 
+                  options_for_select([
+                    ["Mensal", "monthly"],
+                    ["Semanal", "weekly"],
+                    ["Anual", "yearly"]
+                  ]), 
+                  { prompt: "Selecione a frequência" }, 
+                  { 
+                    class: "select select-bordered w-full",
+                    data: { recurrence_target: "frequency" }
+                  } %>
+          </div>
+
+          <!-- Hidden fields for recurring commitment -->
+          <%= hidden_field_tag :create_recurring_commitment, "", data: { recurrence_target: "createRecurring" } %>
+        </div>
+
+        <!-- Installment Plan Section -->
+        <div data-recurrence-target="installmentSection" class="space-y-4 mt-6 hidden">
+          <% if transaction.installment_plan_id.present? %>
+            <!-- Existing installment plan info -->
             <div class="alert alert-info">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
               <div>
-                <h4 class="font-bold"><%= t('ui.transaction.installments.automatic') %></h4>
+                <h4 class="font-bold"><%= t('ui.transaction.installments.existing_plan') %></h4>
                 <div class="text-sm">
-                  <%= t('ui.transaction.installments.automatic_description') %>
+                  <%= t('ui.transaction.installments.existing_description', 
+                        current: transaction.installment_number || 1, 
+                        total: transaction.installment_plan&.installment_count || 1) %>
+                  <% if transaction.installment_plan&.total_amount.present? %>
+                    <br><%= t('ui.transaction.installments.total_value', amount: number_to_currency(transaction.installment_plan.total_amount)) %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <!-- New installment plan creation -->
+            <div class="alert alert-info">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div>
+                <h4 class="font-bold">📊 Criação de Parcelamento</h4>
+                <div class="text-sm">
+                  O valor total será dividido automaticamente em parcelas mensais iguais a partir da data do evento.
                 </div>
               </div>
             </div>
 
             <div class="form-control max-w-sm">
               <label class="label">
-                <span class="label-text">📅 <%= t('ui.transaction.installments.installments_count') %></span>
+                <span class="label-text">📅 Número de parcelas</span>
               </label>
               <%= number_field_tag :installments_count, "", 
                     placeholder: "Ex: 10", 
@@ -257,39 +330,39 @@
                     max: 60,
                     class: "input input-bordered w-full",
                     data: { 
-                      parceling_target: "installmentsCount",
-                      action: "input->parceling#calculateInstallment keyup->parceling#calculateInstallment"
+                      recurrence_target: "installmentsCount",
+                      action: "input->recurrence#calculateInstallment keyup->recurrence#calculateInstallment"
                     } %>
               <label class="label">
-                <span class="label-text-alt"><%= t('ui.transaction.installments.installments_count_helper') %></span>
+                <span class="label-text-alt">Entre 2 e 60 parcelas</span>
               </label>
             </div>
 
             <!-- Preview das parcelas -->
-            <div data-parceling-target="preview" class="hidden">
-              <div class="divider">📋 Prévia do Parcelamento</div>
+            <div data-recurrence-target="installmentPreview" class="hidden">
+              <div class="divider">📋 Resumo do Parcelamento</div>
               <div class="bg-base-200 rounded-lg p-4 transition-all duration-300">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                   <div>
-                    <div class="text-2xl font-bold text-primary" data-parceling-target="installmentValue">R$ 0,00</div>
+                    <div class="text-2xl font-bold text-primary" data-recurrence-target="installmentValue">R$ 0,00</div>
                     <div class="text-sm text-base-content/60">Valor por parcela</div>
                   </div>
                   <div>
-                    <div class="text-2xl font-bold text-secondary" data-parceling-target="firstDate">-</div>
+                    <div class="text-2xl font-bold text-secondary" data-recurrence-target="firstDate">-</div>
                     <div class="text-sm text-base-content/60">Primeira parcela</div>
                   </div>
                   <div>
-                    <div class="text-2xl font-bold text-accent" data-parceling-target="lastDate">-</div>
+                    <div class="text-2xl font-bold text-accent" data-recurrence-target="lastDate">-</div>
                     <div class="text-sm text-base-content/60">Última parcela</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Input hidden para o backend -->
-            <%= hidden_field_tag :create_installments, "", data: { parceling_target: "createInstallments" } %>
-          </div>
-        <% end %>
+            <!-- Hidden fields for installment plan -->
+            <%= hidden_field_tag :create_installment_plan, "", data: { recurrence_target: "createInstallment" } %>
+          <% end %>
+        </div>
       </div>
     </div>
 
@@ -307,29 +380,15 @@
         </div>
         
         <div data-collapsible-target="content" class="hidden mt-4 space-y-6">
-          
-
-
-          <!-- Recurrence Type -->
+          <!-- Additional Notes -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text">📅 <%= t('ui.transaction.recurrence.label') %></span>
-              <span class="label-text-alt text-base-content/60"><%= t('ui.transaction.form.recurrence_info') %></span>
+              <span class="label-text">📝 <%= t('ui.transaction.form.notes_label') %></span>
             </label>
-            <%= form.select :recurrence_type, 
-                  options_for_select([
-                    [t('ui.transaction.recurrence.single'), "single"], 
-                    [t('ui.transaction.recurrence.fixed'), "fixed"], 
-                    [t('ui.transaction.recurrence.recurring'), "recurring"]
-                  ], transaction.recurrence_type || "single"), 
-                  {}, 
-                  { class: "select select-bordered w-full" } %>
-            
-            <div class="mt-2 space-y-1 text-xs text-base-content/60">
-              <div>• <strong><%= t('ui.transaction.recurrence.single') %>:</strong> <%= t('ui.transaction.recurrence.descriptions.single') %></div>
-              <div>• <strong><%= t('ui.transaction.recurrence.fixed') %>:</strong> <%= t('ui.transaction.recurrence.descriptions.fixed') %></div>
-              <div>• <strong><%= t('ui.transaction.recurrence.recurring') %>:</strong> <%= t('ui.transaction.recurrence.descriptions.recurring') %></div>
-            </div>
+            <%= form.text_area :notes, 
+                  class: "textarea textarea-bordered w-full", 
+                  rows: 3,
+                  placeholder: t('ui.transaction.form.notes_placeholder') %>
           </div>
           
           <!-- Hidden field to preserve status -->

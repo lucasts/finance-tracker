@@ -1,0 +1,153 @@
+<% content_for :title, t('ui.navigation.recurring_commitments') %>
+
+<div class="container mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-base-content"><%= t('ui.navigation.recurring_commitments') %></h1>
+      <p class="text-base-content/70 mt-1"><%= t('ui.recurring_commitment.index.description') %></p>
+    </div>
+    
+    <%= link_to new_recurring_commitment_path, class: "btn btn-primary" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+      <%= t('ui.actions.new') %> <%= t('activerecord.models.recurring_commitment.one') %>
+    <% end %>
+  </div>
+
+  <% if @commitment_summaries.any? %>
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="stat bg-primary text-primary-content rounded-lg">
+        <div class="stat-title text-primary-content/70">Compromissos Ativos</div>
+        <div class="stat-value"><%= @commitment_summaries.count %></div>
+      </div>
+      
+      <div class="stat bg-secondary text-secondary-content rounded-lg">
+        <div class="stat-title text-secondary-content/70">Valor Total Mensal</div>
+        <div class="stat-value text-2xl">
+          R$ <%= number_with_precision(@commitment_summaries.sum { |s| s[:commitment].default_amount || 0 }, precision: 2, delimiter: '.', separator: ',') %>
+        </div>
+      </div>
+      
+      <div class="stat bg-accent text-accent-content rounded-lg">
+        <div class="stat-title text-accent-content/70">Próximo Vencimento</div>
+        <div class="stat-value text-xl">
+          <%= @commitment_summaries.map { |s| s[:next_occurrence] }.compact.min&.strftime('%d/%m') || 'N/A' %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Commitments List -->
+    <div class="grid gap-4">
+      <% @commitment_summaries.each do |summary| %>
+        <% commitment = summary[:commitment] %>
+        <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+          <div class="card-body">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <h3 class="card-title text-lg">
+                    <%= commitment.name %>
+                  </h3>
+                  
+                  <!-- Status Badge -->
+                  <div class="badge <%= commitment.active? ? 'badge-success' : 'badge-warning' %>">
+                    <%= commitment.active? ? '✓ Ativo' : '⏸ Pausado' %>
+                  </div>
+                  
+                  <!-- Frequency Badge -->
+                  <div class="badge badge-outline">
+                    <%= t("ui.transaction.recurring.frequencies.#{commitment.recurrence_frequency}") %>
+                  </div>
+                </div>
+                
+                <div class="text-base-content/70 mb-3">
+                  <span class="font-medium">Categoria:</span> <%= commitment.category.name %>
+                </div>
+                
+                <!-- Amount and Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span class="font-medium text-primary">Valor Padrão:</span><br>
+                    <span class="text-xl font-bold">
+                      R$ <%= number_with_precision(commitment.default_amount || 0, precision: 2, delimiter: '.', separator: ',') %>
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <span class="font-medium text-secondary">Total Gasto:</span><br>
+                    <span class="text-lg">
+                      R$ <%= number_with_precision(summary[:total_spent] || 0, precision: 2, delimiter: '.', separator: ',') %>
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <span class="font-medium text-accent">Próximo Vencimento:</span><br>
+                    <span class="text-lg">
+                      <%= summary[:next_occurrence]&.strftime('%d/%m/%Y') || 'N/A' %>
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <span class="font-medium">Transações:</span><br>
+                    <span class="text-lg"><%= summary[:transaction_count] %></span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Action Buttons -->
+              <div class="flex flex-col gap-2 ml-4">
+                <%= link_to recurring_commitment_path(commitment), class: "btn btn-sm btn-primary" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  Ver
+                <% end %>
+                
+                <%= link_to edit_recurring_commitment_path(commitment), class: "btn btn-sm btn-outline" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  Editar
+                <% end %>
+                
+                <%= link_to toggle_active_recurring_commitment_path(commitment), 
+                          method: :patch, 
+                          class: "btn btn-sm #{ commitment.active? ? 'btn-warning' : 'btn-success' }",
+                          data: { 
+                            confirm: "Tem certeza que deseja #{commitment.active? ? 'pausar' : 'ativar'} este compromisso?" 
+                          } do %>
+                  <%= commitment.active? ? '⏸ Pausar' : '▶ Ativar' %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <!-- Empty State -->
+    <div class="text-center py-12">
+      <div class="mx-auto w-24 h-24 bg-base-200 rounded-full flex items-center justify-center mb-4">
+        <svg class="w-12 h-12 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      
+      <h3 class="text-xl font-semibold text-base-content mb-2">Nenhum compromisso recorrente</h3>
+      <p class="text-base-content/70 mb-4">
+        Compromissos recorrentes ajudam a automatizar gastos fixos como aluguel, assinaturas e contas mensais.
+      </p>
+      
+      <%= link_to new_recurring_commitment_path, class: "btn btn-primary" do %>
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Criar Primeiro Compromisso
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,123 @@
+<h1 class="text-3xl font-bold mb-6">📊 Planos de Parcelamento</h1>
+
+<div class="flex justify-between items-center mb-6">
+  <%= link_to 'Novo Plano', new_installment_plan_path, class: "btn btn-primary" %>
+  
+  <div class="flex gap-2">
+    <%= link_to "📈 Relatórios", reports_path, class: "btn btn-sm btn-outline" %>
+    <%= link_to "💰 Transações", transactions_path, class: "btn btn-sm btn-outline" %>
+  </div>
+</div>
+
+<% if @installment_plans.any? %>
+  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    <% @plan_summaries.each do |summary| %>
+      <% plan = summary[:plan] %>
+      <div class="card bg-base-100 shadow">
+        <div class="card-body">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="card-title text-lg"><%= plan.name %></h3>
+            <div class="badge <%= plan.active? ? 'badge-success' : 'badge-error' %>">
+              <%= plan.active? ? 'Ativo' : 'Inativo' %>
+            </div>
+          </div>
+          
+          <!-- Progress Bar -->
+          <div class="mb-4">
+            <div class="flex justify-between text-sm mb-1">
+              <span>Progresso</span>
+              <span><%= summary[:progress_percentage] %>%</span>
+            </div>
+            <progress class="progress progress-primary w-full" value="<%= summary[:progress_percentage] %>" max="100"></progress>
+            <div class="text-xs text-base-content/70 mt-1">
+              <%= summary[:paid_installments] %>/<%= plan.installment_count %> parcelas pagas
+            </div>
+          </div>
+          
+          <!-- Financial Summary -->
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="stat bg-base-200 rounded p-3">
+              <div class="stat-title text-xs">Valor Total</div>
+              <div class="stat-value text-sm">R$ <%= number_with_precision(plan.total_amount, precision: 2, delimiter: ".") %></div>
+            </div>
+            <div class="stat bg-base-200 rounded p-3">
+              <div class="stat-title text-xs">Por Parcela</div>
+              <div class="stat-value text-sm">R$ <%= number_with_precision(plan.installment_amount, precision: 2, delimiter: ".") %></div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="stat bg-success/10 rounded p-3">
+              <div class="stat-title text-xs text-success">Pago</div>
+              <div class="stat-value text-sm text-success">R$ <%= number_with_precision(summary[:total_paid], precision: 2, delimiter: ".") %></div>
+            </div>
+            <div class="stat bg-warning/10 rounded p-3">
+              <div class="stat-title text-xs text-warning">Restante</div>
+              <div class="stat-value text-sm text-warning">R$ <%= number_with_precision(summary[:remaining_amount], precision: 2, delimiter: ".") %></div>
+            </div>
+          </div>
+          
+          <!-- Next Payment -->
+          <% if summary[:next_due_date] %>
+            <div class="alert alert-info p-3 mb-4">
+              <div class="text-sm">
+                <strong>Próxima parcela:</strong><br>
+                <%= l(summary[:next_due_date], format: :short) %>
+                <span class="badge badge-outline badge-sm ml-2">
+                  <% days_diff = (summary[:next_due_date] - Date.current).to_i %>
+                  <% if days_diff == 0 %>
+                    Hoje
+                  <% elsif days_diff == 1 %>
+                    Amanhã
+                  <% elsif days_diff > 0 %>
+                    Em <%= days_diff %> dias
+                  <% else %>
+                    <%= days_diff.abs %> dias em atraso
+                  <% end %>
+                </span>
+              </div>
+            </div>
+          <% elsif summary[:paid_installments] >= plan.installment_count %>
+            <div class="alert alert-success p-3 mb-4">
+              <div class="text-sm">
+                <strong>✅ Parcelamento concluído!</strong>
+              </div>
+            </div>
+          <% end %>
+          
+          <!-- Account & Category Info -->
+          <div class="text-sm text-base-content/70 mb-4">
+            <% first_transaction = plan.transactions.first %>
+            <% if first_transaction %>
+              <div><strong>Conta:</strong> <%= first_transaction.from_account&.name || 'N/A' %></div>
+              <div><strong>Categoria:</strong> <%= first_transaction.category&.name || 'N/A' %></div>
+            <% else %>
+              <div><strong>Conta:</strong> N/A</div>
+              <div><strong>Categoria:</strong> N/A</div>
+            <% end %>
+            <div><strong>Frequência:</strong> <%= plan.recurrence_frequency.capitalize %></div>
+          </div>
+          
+          <!-- Actions -->
+          <div class="card-actions justify-end">
+            <%= link_to 'Ver', installment_plan_path(plan), class: "btn btn-sm btn-primary" %>
+            <%= link_to 'Editar', edit_installment_plan_path(plan), class: "btn btn-sm btn-ghost" %>
+            <%= link_to plan.active? ? 'Desativar' : 'Ativar', 
+                        toggle_active_installment_plan_path(plan), 
+                        method: :patch,
+                        class: "btn btn-sm #{plan.active? ? 'btn-warning' : 'btn-success'}" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="text-center py-12">
+    <div class="text-6xl mb-4">📊</div>
+    <h3 class="text-xl font-semibold mb-2">Nenhum plano de parcelamento</h3>
+    <p class="text-base-content/60 mb-6">
+      Crie planos de parcelamento para organizar suas compras em várias parcelas.
+    </p>
+    <%= link_to 'Criar Primeiro Plano', new_installment_plan_path, class: "btn btn-primary" %>
+  </div>
+<% end %>

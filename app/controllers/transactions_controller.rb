@@ -12,10 +12,10 @@ class TransactionsController < ApplicationController
 
     @transactions = Transaction.in_competence_month(selected_month).order(event_date: :desc)
     
-    # Filtrar por grupo se especificado
-    if params[:group].present?
-      @transactions = @transactions.where(transaction_group_id: params[:group])
-      @transaction_group = TransactionGroup.find_by(id: params[:group])
+    # Filtrar por plano de parcelamento se especificado
+    if params[:plan].present?
+      @transactions = @transactions.where(installment_plan_id: params[:plan])
+      @installment_plan = InstallmentPlan.find_by(id: params[:plan])
     end
   end
 
@@ -33,25 +33,14 @@ class TransactionsController < ApplicationController
   end
 
   def create
-    # Verifica se é parcelamento automático
-    if params[:create_installments].present?
-      create_installment_transactions
+    # Verifica o tipo de recorrência e processa adequadamente
+    case params[:recurrence_type]
+    when 'recurring'
+      create_recurring_transaction
+    when 'installment'
+      create_installment_transaction
     else
-      @transaction = Transaction.new(transaction_params)
-      
-      # Apply intelligent defaults and validations
-      apply_intelligent_defaults(@transaction)
-      
-      # Auto-associar com fatura se for cartão de crédito
-      if @transaction.from_account&.account_type&.code == "CREDIT"
-        associate_with_credit_statement(@transaction)
-      end
-      
-      if @transaction.save
-        redirect_to transactions_path, notice: t('messages.transaction.created')
-      else
-        render :new, status: :unprocessable_entity
-      end
+      create_single_transaction
     end
   end
 
@@ -184,77 +173,131 @@ class TransactionsController < ApplicationController
     params.require(:transaction).permit(
       :description, :amount, :transaction_type, :event_date, :payment_date,
       :from_account_id, :to_account_id, :category_id, :installment,
-      :transaction_group_id, :recurrence_type, :credit_statement_id
+      :recurrence_type, :credit_statement_id,
+      :recurrence_frequency, :installment_number, :notes
       # status removido - será controlado automaticamente
     )
   end
 
-  def create_installment_transactions
-    begin
-      installment_data = JSON.parse(params[:create_installments])
-      total_amount = installment_data['total_amount'].to_f
-      installments_count = installment_data['installments_count'].to_i
-      installment_value = installment_data['installment_value'].to_f
-      start_date = Date.parse(installment_data['start_date'])
-      
-      # Validações básicas
-      if total_amount <= 0 || installments_count < 2 || installments_count > 60
-        redirect_to new_transaction_path, alert: t('messages.transaction.invalid_installment_data')
-        return
-      end
-
-      ActiveRecord::Base.transaction do
-        # Cria o grupo de transações
-        transaction_group = TransactionGroup.create!(
-          name: "#{transaction_params[:description]} (#{installments_count}x)",
-          group_type: 'installment',
-          total_amount: total_amount,
-          installments_count: installments_count
-        )
-
-        # Cria cada parcela
-        installments_count.times do |i|
-          installment_date = start_date + i.months
-          
-          # Ajusta o valor da última parcela para compensar arredondamentos
-          amount = if i == installments_count - 1
-                    total_amount - (installment_value * (installments_count - 1))
-                  else
-                    installment_value
-                  end
-
-          transaction = Transaction.new(
-            description: "#{transaction_params[:description]} (#{i + 1}/#{installments_count})",
-            amount: amount.round(2),
-            transaction_type: transaction_params[:transaction_type],
-            event_date: installment_date,
-            payment_date: installment_date, # Usa a mesma data para evento e pagamento em parcelamentos
-            from_account_id: transaction_params[:from_account_id],
-            to_account_id: transaction_params[:to_account_id],
-            category_id: transaction_params[:category_id],
-            installment: i + 1,
-            transaction_group: transaction_group,
-            recurrence_type: 'single'
-            # Status será determinado automaticamente pelo apply_intelligent_defaults
-          )
-
-          apply_intelligent_defaults(transaction)
-          
-          # Auto-associar com fatura se for cartão de crédito
-          if transaction.from_account&.account_type&.code == "CREDIT"
-            associate_with_credit_statement(transaction)
-          end
-
-          transaction.save!
-        end
-      end
-
-      redirect_to transactions_path, notice: t('messages.transaction.installments_created', 
-                                               count: installments_count, 
-                                               amount: number_to_currency(installment_value))
-      
-    rescue JSON::ParserError, ActiveRecord::RecordInvalid => e
-      redirect_to new_transaction_path, alert: t('messages.transaction.installment_error', error: e.message)
+  # Novos métodos para o modelo robusto
+  def create_single_transaction
+    @transaction = Transaction.new(transaction_params)
+    @transaction.recurrence_type = 'single'
+    
+    # Apply intelligent defaults and validations
+    apply_intelligent_defaults(@transaction)
+    
+    # Auto-associar com fatura se for cartão de crédito
+    if @transaction.from_account&.account_type&.code == "CREDIT"
+      associate_with_credit_statement(@transaction)
+    end
+    
+    if @transaction.save
+      redirect_to transactions_path, notice: t('messages.transaction.created')
+    else
+      render :new, status: :unprocessable_entity
     end
   end
+
+  def create_recurring_transaction
+    return create_single_transaction unless params[:create_recurring_commitment].present?
+
+    ActiveRecord::Base.transaction do
+      # Criar o compromisso recorrente
+      recurring_commitment = RecurringCommitment.new(
+        name: transaction_params[:description],
+        category_id: transaction_params[:category_id],
+        frequency: params[:recurrence_frequency] || 'monthly',
+        amount_type: params[:recurring_amount_type] || 'fixed',
+        expected_amount: (params[:recurring_amount_type] == 'fixed' ? transaction_params[:amount] : nil),
+        start_date: transaction_params[:event_date],
+        status: 'active'
+      )
+
+      if recurring_commitment.save
+        # Criar a primeira transação associada ao compromisso
+        @transaction = Transaction.new(transaction_params)
+        @transaction.recurrence_type = 'recurring'
+        @transaction.recurring_commitment = recurring_commitment
+        
+        apply_intelligent_defaults(@transaction)
+        
+        if @transaction.from_account&.account_type&.code == "CREDIT"
+          associate_with_credit_statement(@transaction)
+        end
+
+        if @transaction.save
+          redirect_to transactions_path, notice: t('messages.transaction.recurring_created')
+        else
+          raise ActiveRecord::Rollback
+        end
+      else
+        @transaction = Transaction.new(transaction_params)
+        @transaction.errors.add(:base, "Erro ao criar compromisso recorrente: #{recurring_commitment.errors.full_messages.join(', ')}")
+        render :new, status: :unprocessable_entity
+      end
+    end
+  rescue ActiveRecord::Rollback
+    @transaction = Transaction.new(transaction_params) if @transaction.nil?
+    @transaction.errors.add(:base, "Erro ao criar transação recorrente")
+    render :new, status: :unprocessable_entity
+  end
+
+  def create_installment_transaction
+    return create_single_transaction unless params[:create_installment_plan].present?
+
+    installments_count = params[:installments_count].to_i
+    
+    if installments_count < 2 || installments_count > 60
+      @transaction = Transaction.new(transaction_params)
+      @transaction.errors.add(:base, "Número de parcelas deve estar entre 2 e 60")
+      render :new, status: :unprocessable_entity
+      return
+    end
+
+    ActiveRecord::Base.transaction do
+      # Criar o plano de parcelamento
+      installment_plan = InstallmentPlan.new(
+        name: "#{transaction_params[:description]} (#{installments_count}x)",
+        category_id: transaction_params[:category_id],
+        installment_count: installments_count,
+        total_amount: transaction_params[:amount],
+        starts_on: transaction_params[:event_date]
+      )
+
+      if installment_plan.save
+        # Criar todas as transações do parcelamento
+        success = installment_plan.create_installment_transactions!(
+          description_base: transaction_params[:description],
+          transaction_type: transaction_params[:transaction_type],
+          from_account_id: transaction_params[:from_account_id],
+          to_account_id: transaction_params[:to_account_id]
+        )
+
+        if success
+          # Aplicar lógica especial para cartões de crédito em cada transação
+          if Account.find(transaction_params[:from_account_id])&.account_type&.code == "CREDIT"
+            installment_plan.transactions.each do |transaction|
+              associate_with_credit_statement(transaction)
+              transaction.save!
+            end
+          end
+
+          redirect_to transactions_path, notice: t('messages.transaction.installments_created', 
+                                                   count: installments_count)
+        else
+          raise ActiveRecord::Rollback
+        end
+      else
+        @transaction = Transaction.new(transaction_params)
+        @transaction.errors.add(:base, "Erro ao criar plano de parcelamento: #{installment_plan.errors.full_messages.join(', ')}")
+        render :new, status: :unprocessable_entity
+      end
+    end
+  rescue ActiveRecord::Rollback
+    @transaction = Transaction.new(transaction_params) if @transaction.nil?
+    @transaction.errors.add(:base, "Erro ao criar parcelamento")
+    render :new, status: :unprocessable_entity
+  end
+
 end

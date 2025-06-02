@@ -30,6 +30,9 @@ gem "tailwindcss-rails"
 
 gem 'apexcharts'
 
+# For date grouping in analytics
+gem 'groupdate'
+
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 

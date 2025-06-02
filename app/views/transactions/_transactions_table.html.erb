@@ -1,0 +1,66 @@
+<%# Partial para exibir tabela de transações %>
+<% running_balance = 0 %>
+<div class="bg-base-100 rounded-box shadow overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="table table-zebra w-full text-sm">
+      <thead class="bg-base-200">
+        <tr>
+          <th><%= t('ui.transaction.table.event') %></th>
+          <th><%= t('ui.transaction.table.payment') %></th>
+          <th><%= t('activerecord.attributes.transaction.description') %></th>
+          <th><%= t('ui.transaction.table.origin') %></th>
+          <th><%= t('ui.transaction.table.destination') %></th>
+          <th><%= t('activerecord.attributes.transaction.category') %></th>
+          <th class="text-right"><%= t('activerecord.attributes.transaction.amount') %></th>
+          <% if show_installment_info %>
+            <th class="text-right"><%= t('activerecord.attributes.transaction.installment') %></th>
+          <% end %>
+          <th class="text-right"><%= t('ui.transaction.table.accumulated_balance') %></th>
+          <th class="text-right"><%= t('ui.actions.title') %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% transactions.each do |tx| %>
+          <% delta = tx.transaction_type == 'income' ? tx.amount : -tx.amount %>
+          <% running_balance += delta %>
+          <tr>
+            <td><%= l(tx.event_date) if tx.event_date %></td>
+            <td><%= l(tx.payment_date) if tx.payment_date %></td>
+            <td><%= tx.description %></td>
+            <td><%= tx.from_account.name %></td>
+            <td><%= tx.to_account&.name %></td>
+            <td><%= tx.category.name %></td>
+            <td class="text-right <%= tx.transaction_type == 'income' ? 'text-success' : 'text-error' %>">
+              <%= number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.') %>
+            </td>
+            <% if show_installment_info %>
+              <td class="text-right">
+                <% if tx.installment_plan.present? %>
+                  <%= "#{tx.installment_number}/#{tx.installment_plan.installment_count}" %>
+                <% else %>
+                  —
+                <% end %>
+              </td>
+            <% end %>
+            <td class="text-right text-base-content/60">
+              <%= number_to_currency(running_balance, unit: 'R$', separator: ',', delimiter: '.') %>
+            </td>
+            <td class="text-right">
+              <div class="flex gap-1 justify-end">
+                <button class="btn btn-ghost btn-xs" 
+                        data-action="click->modal#show" 
+                        data-url="<%= transaction_path(tx) %>"
+                        title="<%= t('ui.actions.show') %>">
+                  👁️
+                </button>
+                <%= link_to edit_transaction_path(tx), class: "btn btn-ghost btn-xs", title: t('ui.actions.edit') do %>
+                  ✏️
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

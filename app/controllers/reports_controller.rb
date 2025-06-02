@@ -52,6 +52,9 @@ class ReportsController < ApplicationController
     else
       @category_percentages = []
     end
+    
+    # Initialize @categories_analysis for the view
+    @categories_analysis = @category_breakdown.to_h
   end
 
   def load_credit_card_analysis
@@ -112,5 +115,36 @@ class ReportsController < ApplicationController
     # Identify best and worst months
     @best_month = @monthly_trends.max_by { |m| m[:savings_rate] }
     @worst_month = @monthly_trends.min_by { |m| m[:savings_rate] }
+  end
+  
+  def variable_expenses_analysis
+    @account_id = params[:account_id]
+    @category_id = params[:category_id]
+    @start_date = params[:start_date]&.to_date || 6.months.ago
+    @end_date = params[:end_date]&.to_date || Date.current
+    @analysis_type = params[:analysis_type] || 'monthly'
+    
+    @analysis_result = VariableExpenseAnalyzerService.new(
+      account_id: @account_id,
+      category_id: @category_id,
+      start_date: @start_date,
+      end_date: @end_date,
+      analysis_type: @analysis_type
+    ).call
+    
+    @accounts = Account.all
+    @categories = Category.all
+    
+    if @analysis_result[:success]
+      @analysis_data = @analysis_result[:data]
+    else
+      flash.now[:alert] = @analysis_result[:errors].join(', ')
+      @analysis_data = {}
+    end
+    
+    respond_to do |format|
+      format.html
+      format.json { render json: @analysis_result }
+    end
   end
 end

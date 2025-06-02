@@ -1,0 +1,28 @@
+<% content_for :title, t('ui.actions.new') + ' ' + t('activerecord.models.recurring_commitment.one') %>
+
+<div class="container mx-auto px-4 py-6">
+  <!-- Breadcrumb -->
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><%= link_to t('ui.navigation.recurring_commitments'), recurring_commitments_path %></li>
+      <li><%= t('ui.actions.new') %></li>
+    </ul>
+  </div>
+
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-base-content mb-2">
+      <%= t('ui.actions.new') %> <%= t('activerecord.models.recurring_commitment.one') %>
+    </h1>
+    <p class="text-base-content/70">
+      Crie um compromisso recorrente para automatizar lançamentos regulares como aluguel, assinaturas e contas mensais.
+    </p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="card bg-base-100 shadow-lg">
+    <div class="card-body">
+      <%= render 'form', recurring_commitment: @recurring_commitment %>
+    </div>
+  </div>
+</div>
