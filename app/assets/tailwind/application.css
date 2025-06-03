@@ -1,4 +1,54 @@
 @import "tailwindcss";
-@plugin "daisyui" {
-  themes: light --default, dark --prefersdark, cupcake, synthwave, corporate;
+@plugin "daisyui";
+@plugin "daisyui/theme" {
+  name: "zeno";
+  default: true; /* set as default */
+  prefersdark: false; /* set as default dark mode (prefers-color-scheme:dark) */
+  color-scheme: light; /* color of browser-provided UI */
+
+  /* Cores baseadas na sua paleta */
+  --color-base-100: oklch(98.5% 0.008 65);          /* #FFFBF4 - Creme suave */
+  --color-base-200: oklch(95% 0.01 65);             /* Um pouco mais escuro */
+  --color-base-300: oklch(92% 0.015 65);            /* Mais escuro ainda */
+  --color-base-content: oklch(20% 0.005 270);       /* #2C2C2C - Texto escuro */
+
+  --color-primary: oklch(45.2% 0.082 178);          /* #3A6B65 - Verde-água escuro */
+  --color-primary-content: oklch(98% 0.01 178);     /* Texto sobre primary */
+
+  --color-secondary: oklch(80.5% 0.12 85);          /* #F4C542 - Dourado espiral */
+  --color-secondary-content: oklch(20% 0.01 85);    /* Texto sobre secondary */
+
+  --color-accent: oklch(90.8% 0.02 158);            /* #DCE6E3 - Cinza-verde claro */
+  --color-accent-content: oklch(25% 0.01 158);      /* Texto sobre accent */
+
+  --color-neutral: oklch(20% 0.005 270);            /* #2C2C2C - Texto escuro */
+  --color-neutral-content: oklch(95% 0.01 270);     /* Texto sobre neutral */
+
+  --color-info: oklch(85.2% 0.06 180);              /* #A1DED9 - Azul esverdeado claro */
+  --color-info-content: oklch(15% 0.01 180);        /* Texto sobre info */
+
+  --color-success: oklch(82.1% 0.08 135);           /* #A7D07C - Verde claro */
+  --color-success-content: oklch(15% 0.01 135);     /* Texto sobre success */
+
+  --color-warning: oklch(82.5% 0.11 78);            /* #F7CB5A - Amarelo queimado */
+  --color-warning-content: oklch(20% 0.01 78);      /* Texto sobre warning */
+
+  --color-error: oklch(72.8% 0.11 35);              /* #EC8F6A - Coral */
+  --color-error-content: oklch(15% 0.01 35);        /* Texto sobre error */
+
+  /* border radius */
+  --radius-selector: 0.75rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+
+  /* base sizes */
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+
+  /* border size */
+  --border: 1px;
+
+  /* effects */
+  --depth: 1;
+  --noise: 0;
 }
