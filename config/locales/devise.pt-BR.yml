@@ -65,6 +65,8 @@ pt-BR:
       not_saved:
         one: "1 erro impediu %{resource} de ser salvo:"
         other: "%{count} erros impediram %{resource} de ser salvo:"
+      required: "é obrigatório"
+      blank: "não pode ficar em branco"
 
   # Additional authentication errors
   activerecord:
@@ -75,7 +77,13 @@ pt-BR:
         password_confirmation: "Confirmação de senha"
         current_password: "Senha atual"
         remember_me: "Lembrar-me"
+      category:
+        name: "Nome"
+        user: "Usuário"
     errors:
+      messages:
+        required: "é obrigatório"
+        blank: "não pode ficar em branco"
       models:
         user:
           attributes:
@@ -92,3 +100,11 @@ pt-BR:
             current_password:
               blank: "não pode ficar em branco"
               invalid: "não é válida"
+        category:
+          attributes:
+            user:
+              required: "é obrigatório"
+              blank: "não pode ficar em branco"
+            name:
+              required: "é obrigatório"
+              blank: "não pode ficar em branco"
