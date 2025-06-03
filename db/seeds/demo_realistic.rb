@@ -2,45 +2,47 @@ puts "Seeding realistic family financial data..."
 
 require 'date'
 
+default_user = User.first || User.create!(email: "admin@example.com", password: "password", password_confirmation: "password")
+
 # Limpa dados existentes de demo
-Transaction.destroy_all
-InstallmentPlan.destroy_all
-RecurringCommitment.destroy_all
-CreditStatement.destroy_all
-Account.destroy_all
+Transaction.where(user: default_user).destroy_all
+InstallmentPlan.where(user: default_user).destroy_all
+RecurringCommitment.where(user: default_user).destroy_all
+CreditStatement.joins(:account).where(accounts: { user: default_user }).destroy_all
+Account.where(user: default_user).destroy_all
 
 # === CONTAS E CARTÕES ===
 puts "Criando contas da família..."
 
 accounts = {
   # Contas correntes
-  itau_pai:      Account.create!(name: "Itaú - João", account_type: AccountType.find_by(code: "BANK")),
-  bradesco_mae:  Account.create!(name: "Bradesco - Maria", account_type: AccountType.find_by(code: "BANK")),
+  itau_pai:      Account.create!(name: "Itaú - João", account_type: AccountType.find_by(code: "BANK"), user: default_user),
+  bradesco_mae:  Account.create!(name: "Bradesco - Maria", account_type: AccountType.find_by(code: "BANK"), user: default_user),
   
   # Cartões de crédito
-  nubank_pai:    Account.create!(name: "Nubank - João", account_type: AccountType.find_by(code: "CREDIT"), closing_day: 15, due_day: 5),
-  inter_mae:     Account.create!(name: "Inter - Maria", account_type: AccountType.find_by(code: "CREDIT"), closing_day: 20, due_day: 10),
-  santander:     Account.create!(name: "Santander - Família", account_type: AccountType.find_by(code: "CREDIT"), closing_day: 25, due_day: 15),
+  nubank_pai:    Account.create!(name: "Nubank - João", account_type: AccountType.find_by(code: "CREDIT"), closing_day: 15, due_day: 5, user: default_user),
+  inter_mae:     Account.create!(name: "Inter - Maria", account_type: AccountType.find_by(code: "CREDIT"), closing_day: 20, due_day: 10, user: default_user),
+  santander:     Account.create!(name: "Santander - Família", account_type: AccountType.find_by(code: "CREDIT"), closing_day: 25, due_day: 15, user: default_user),
   
   # Poupança
-  poupanca:      Account.create!(name: "Poupança Emergência", account_type: AccountType.find_by(code: "SAVINGS")),
+  poupanca:      Account.create!(name: "Poupança Emergência", account_type: AccountType.find_by(code: "SAVINGS"), user: default_user),
   
   # Contas de despesas (estabelecimentos)
-  mercado:       Account.create!(name: "Supermercados", account_type: AccountType.find_by(code: "EXPENSE")),
-  farmacia:      Account.create!(name: "Farmácias", account_type: AccountType.find_by(code: "EXPENSE")),
-  escola:        Account.create!(name: "Escola dos Filhos", account_type: AccountType.find_by(code: "EXPENSE")),
-  posto:         Account.create!(name: "Postos de Gasolina", account_type: AccountType.find_by(code: "EXPENSE")),
-  lazer:         Account.create!(name: "Lazer e Entretenimento", account_type: AccountType.find_by(code: "EXPENSE")),
-  saude:         Account.create!(name: "Saúde e Medicina", account_type: AccountType.find_by(code: "EXPENSE")),
-  casa:          Account.create!(name: "Casa e Utilidades", account_type: AccountType.find_by(code: "EXPENSE")),
-  vestuario:     Account.create!(name: "Roupas e Calçados", account_type: AccountType.find_by(code: "EXPENSE")),
-  transporte:    Account.create!(name: "Transporte", account_type: AccountType.find_by(code: "EXPENSE")),
-  banco:         Account.create!(name: "Bancos e Financeiras", account_type: AccountType.find_by(code: "EXPENSE")),
+  mercado:       Account.create!(name: "Supermercados", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
+  farmacia:      Account.create!(name: "Farmácias", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
+  escola:        Account.create!(name: "Escola dos Filhos", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
+  posto:         Account.create!(name: "Postos de Gasolina", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
+  lazer:         Account.create!(name: "Lazer e Entretenimento", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
+  saude:         Account.create!(name: "Saúde e Medicina", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
+  casa:          Account.create!(name: "Casa e Utilidades", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
+  vestuario:     Account.create!(name: "Roupas e Calçados", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
+  transporte:    Account.create!(name: "Transporte", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
+  banco:         Account.create!(name: "Bancos e Financeiras", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
   
   # Contas de receita
-  empresa_pai:   Account.create!(name: "Empresa João", account_type: AccountType.find_by(code: "REVENUE")),
-  empresa_mae:   Account.create!(name: "Empresa Maria", account_type: AccountType.find_by(code: "REVENUE")),
-  freelance:     Account.create!(name: "Trabalhos Extra", account_type: AccountType.find_by(code: "REVENUE"))
+  empresa_pai:   Account.create!(name: "Empresa João", account_type: AccountType.find_by(code: "REVENUE"), user: default_user),
+  empresa_mae:   Account.create!(name: "Empresa Maria", account_type: AccountType.find_by(code: "REVENUE"), user: default_user),
+  freelance:     Account.create!(name: "Trabalhos Extra", account_type: AccountType.find_by(code: "REVENUE"), user: default_user)
 }
 
 # === CATEGORIAS EXPANDIDAS ===
@@ -55,10 +57,10 @@ categorias_extras = [
 ]
 
 categorias_extras.each do |nome|
-  Category.find_or_create_by(name: nome)
+  Category.find_or_create_by(name: nome, user: default_user)
 end
 
-categories = Category.all.index_by(&:name)
+categories = Category.where(user: default_user).index_by(&:name)
 
 # === FATURAS DE CARTÃO DE CRÉDITO (CRIAR ANTES DAS TRANSAÇÕES) ===
 puts "Criando faturas de cartão..."
@@ -161,7 +163,9 @@ meses_gerados = []
     to_account: accounts[:itau_pai],
     category: categories["Salário"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user,
+    user: default_user
   )
   
   # Salário da mãe - R$ 8.500 (dia 10)
@@ -175,7 +179,9 @@ meses_gerados = []
     to_account: accounts[:bradesco_mae],
     category: categories["Salário"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user,
+    user: default_user
   )
   
   # Freelance ocasional (30% de chance por mês)
@@ -191,7 +197,9 @@ meses_gerados = []
       to_account: [accounts[:itau_pai], accounts[:bradesco_mae]].sample,
       category: categories["Freelance"],
       recurrence_type: "single",
-      status: "confirmed"
+      status: "confirmed",
+    user: default_user,
+      user: default_user
     )
   end
   
@@ -208,7 +216,9 @@ meses_gerados = []
     to_account: accounts[:escola],
     category: categories["Educação"] || categories["Escola"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user,
+    user: default_user
   )
   
   # Plano de saúde família - R$ 1.450 (dia 12)
@@ -222,7 +232,8 @@ meses_gerados = []
     to_account: accounts[:saude],
     category: categories["Plano Saúde"] || categories["Saúde"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
   
   # Aluguel/Financiamento casa - R$ 2.200 (dia 10)
@@ -236,7 +247,8 @@ meses_gerados = []
     to_account: accounts[:banco],
     category: categories["Aluguel"] || categories["Habitação"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
   
   # Internet e TV - R$ 180 (dia 15)
@@ -250,7 +262,8 @@ meses_gerados = []
     to_account: accounts[:casa],
     category: categories["Internet"] || categories["Assinatura"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
   
   # Celular família - R$ 220 (dia 20)
@@ -264,7 +277,8 @@ meses_gerados = []
     to_account: accounts[:casa],
     category: categories["Telefonia"] || categories["Assinatura"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
   
   # === MERCADO (3-4 VEZES POR MÊS) ===
@@ -292,7 +306,8 @@ meses_gerados = []
       to_account: accounts[:mercado],
       category: categories["Supermercado"] || categories["Alimentação"],
       recurrence_type: "single",
-      status: "confirmed"
+      status: "confirmed",
+    user: default_user
     )
     
     # Associar com fatura se for cartão de crédito
@@ -319,7 +334,8 @@ meses_gerados = []
       to_account: accounts[:posto],
       category: categories["Combustível"] || categories["Transporte"],
       recurrence_type: "single",
-      status: "confirmed"
+      status: "confirmed",
+    user: default_user
     )
     
     # Associar com fatura se for cartão de crédito
@@ -342,7 +358,8 @@ meses_gerados = []
       to_account: accounts[:farmacia],
       category: categories["Farmácia"] || categories["Saúde"],
       recurrence_type: "single",
-      status: "confirmed"
+      status: "confirmed",
+    user: default_user
     )
     
     # Associar com fatura se for cartão de crédito
@@ -369,7 +386,8 @@ meses_gerados = []
       to_account: accounts[:lazer],
       category: categories["Restaurante"] || categories["Lazer"],
       recurrence_type: "single",
-      status: "confirmed"
+      status: "confirmed",
+    user: default_user
     )
     
     # Associar com fatura se for cartão de crédito
@@ -392,7 +410,8 @@ meses_gerados = []
       to_account: accounts[:transporte],
       category: categories["Transporte"],
       recurrence_type: "single",
-      status: "confirmed"
+      status: "confirmed",
+    user: default_user
     )
     
     # Associar com fatura se for cartão de crédito
@@ -419,7 +438,8 @@ meses_gerados = []
       to_account: accounts[:lazer],
       category: categories["Netflix"] || categories["Lazer"],
       recurrence_type: "single",
-      status: "confirmed"
+      status: "confirmed",
+    user: default_user
     )
     
     # Associar com fatura se for cartão de crédito
@@ -443,7 +463,8 @@ meses_gerados = []
         to_account: accounts[:vestuario],
         category: categories["Compras"] || categories["Vestuário"],
         recurrence_type: "single",
-        status: "confirmed"
+        status: "confirmed",
+    user: default_user
       )
       
       # Associar com fatura se for cartão de crédito
@@ -466,7 +487,8 @@ meses_gerados = []
     to_account: accounts[:casa],
     category: categories["Energia"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
   
   # Água e esgoto
@@ -481,7 +503,8 @@ meses_gerados = []
     to_account: accounts[:casa],
     category: categories["Habitação"] || categories["Energia"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
   
   # === ACADEMIA E ATIVIDADES FÍSICAS ===
@@ -495,7 +518,8 @@ meses_gerados = []
     to_account: accounts[:saude],
     category: categories["Academia"] || categories["Saúde"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
   
   Transaction.create!(
@@ -508,7 +532,8 @@ meses_gerados = []
     to_account: accounts[:saude],
     category: categories["Academia"] || categories["Saúde"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
 end
 
@@ -516,14 +541,15 @@ end
 puts "Criando parcelamentos..."
 
 # TV 65" - 10x de R$ 380 (6 meses atrás)
-tv_plan = InstallmentPlan.create!(
+tv_plan = InstallmentPlan.create!(user: default_user, 
   name: "Smart TV 65 polegadas",
   installment_count: 10,
   recurrence_frequency: "monthly",
   starts_on: 6.months.ago.beginning_of_month + 15.days,
   total_amount: 3800.00,
   status: "active",
-  notes: "Smart TV Samsung 65\" comprada na Black Friday"
+  notes: "Smart TV Samsung 65\" comprada na Black Friday",
+  user: default_user
 )
 
 10.times do |i|
@@ -541,12 +567,13 @@ tv_plan = InstallmentPlan.create!(
     category: categories["Compras"],
     recurrence_type: "installment",
     installment_plan: tv_plan,
-    status: status
+    status: status,
+    user: default_user
   )
 end
 
 # Carro usado - 48x de R$ 890 (financiamento que começou 8 meses atrás)
-carro_plan = InstallmentPlan.create!(
+carro_plan = InstallmentPlan.create!(user: default_user, 
   name: "Financiamento Civic 2019",
   installment_count: 48,
   recurrence_frequency: "monthly",
@@ -572,12 +599,13 @@ carro_plan = InstallmentPlan.create!(
     category: categories["Empréstimo"] || categories["Transporte"],
     recurrence_type: "installment",
     installment_plan: carro_plan,
-    status: status
+    status: status,
+    user: default_user
   )
 end
 
 # Móveis planejados - 24x de R$ 520 (começou 3 meses atrás)
-moveis_plan = InstallmentPlan.create!(
+moveis_plan = InstallmentPlan.create!(user: default_user, 
   name: "Móveis planejados cozinha",
   installment_count: 24,
   recurrence_frequency: "monthly",
@@ -602,12 +630,13 @@ moveis_plan = InstallmentPlan.create!(
     category: categories["Decoração"] || categories["Casa"],
     recurrence_type: "installment",
     installment_plan: moveis_plan,
-    status: status
+    status: status,
+    user: default_user
   )
 end
 
 # Empréstimo pessoal para emergência - 36x de R$ 450 (começou 10 meses atrás)
-emprestimo_plan = InstallmentPlan.create!(
+emprestimo_plan = InstallmentPlan.create!(user: default_user, 
   name: "Empréstimo pessoal Banco do Brasil",
   installment_count: 36,
   recurrence_frequency: "monthly",
@@ -632,7 +661,8 @@ emprestimo_plan = InstallmentPlan.create!(
     category: categories["Empréstimo"],
     recurrence_type: "installment",
     installment_plan: emprestimo_plan,
-    status: status
+    status: status,
+    user: default_user
   )
 end
 
@@ -640,7 +670,7 @@ end
 puts "Criando compromissos recorrentes..."
 
 # Salário João - todo dia 5 do mês
-salario_joao = RecurringCommitment.create!(
+salario_joao = RecurringCommitment.create!(user: default_user, 
   name: "Salário João - Empresa ABC",
   default_amount: 8500.00,
   recurrence_frequency: "monthly",
@@ -651,7 +681,7 @@ salario_joao = RecurringCommitment.create!(
 )
 
 # Salário Maria - todo dia 10 do mês
-salario_maria = RecurringCommitment.create!(
+salario_maria = RecurringCommitment.create!(user: default_user, 
   name: "Salário Maria - Consultoria XYZ",
   default_amount: 6800.00,
   recurrence_frequency: "monthly",
@@ -662,7 +692,7 @@ salario_maria = RecurringCommitment.create!(
 )
 
 # Aluguel - todo dia 10 do mês
-aluguel = RecurringCommitment.create!(
+aluguel = RecurringCommitment.create!(user: default_user, 
   name: "Aluguel do apartamento",
   default_amount: 2800.00,
   recurrence_frequency: "monthly",
@@ -673,7 +703,7 @@ aluguel = RecurringCommitment.create!(
 )
 
 # Escola dos filhos - todo dia 15
-escola_filhos = RecurringCommitment.create!(
+escola_filhos = RecurringCommitment.create!(user: default_user, 
   name: "Mensalidade escola particular",
   default_amount: 1200.00,
   recurrence_frequency: "monthly",
@@ -684,7 +714,7 @@ escola_filhos = RecurringCommitment.create!(
 )
 
 # Internet e TV - todo dia 20
-internet_tv = RecurringCommitment.create!(
+internet_tv = RecurringCommitment.create!(user: default_user, 
   name: "Internet e TV por assinatura",
   default_amount: 180.00,
   recurrence_frequency: "monthly",
@@ -695,7 +725,7 @@ internet_tv = RecurringCommitment.create!(
 )
 
 # Academia casal - todo dia 8
-academia = RecurringCommitment.create!(
+academia = RecurringCommitment.create!(user: default_user, 
   name: "Academia Smart Fit - Casal",
   default_amount: 140.00,
   recurrence_frequency: "monthly",
@@ -706,7 +736,7 @@ academia = RecurringCommitment.create!(
 )
 
 # Freelance João - toda sexta-feira
-freelance_joao = RecurringCommitment.create!(
+freelance_joao = RecurringCommitment.create!(user: default_user, 
   name: "Consultoria TI - Freelance",
   default_amount: 1500.00,
   recurrence_frequency: "monthly",
@@ -737,7 +767,8 @@ puts "Gerando algumas transações baseadas nos compromissos..."
     category: categories["Salário"] || categories.values.sample,
     recurrence_type: "recurring",
     recurring_commitment: salario_joao,
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
   
   # Salário Maria (associado ao compromisso recorrente)
@@ -752,7 +783,8 @@ puts "Gerando algumas transações baseadas nos compromissos..."
     category: categories["Salário"] || categories.values.sample,
     recurrence_type: "recurring",
     recurring_commitment: salario_maria,
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
   
   # Aluguel (associado ao compromisso recorrente)
@@ -767,7 +799,8 @@ puts "Gerando algumas transações baseadas nos compromissos..."
     category: categories["Habitação"] || categories.values.sample,
     recurrence_type: "recurring",
     recurring_commitment: aluguel,
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
 end
 
@@ -800,7 +833,8 @@ CreditStatement.all.each do |fatura|
       to_account: fatura.account,
       category: categories["Transferência"] || categories.values.sample,
       recurrence_type: "single",
-      status: "confirmed"
+      status: "confirmed",
+    user: default_user
     )
   end
 end
@@ -823,7 +857,8 @@ puts "Criando transferências..."
     to_account: [accounts[:itau_pai], accounts[:bradesco_mae]].sample,
     category: categories["Transferência"] || categories["PIX Recebido"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
 end
 
@@ -846,7 +881,8 @@ puts "Adicionando gastos extras e emergências..."
     to_account: accounts[:saude],
     category: categories["Saúde"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
 end
 
@@ -866,7 +902,8 @@ end
     to_account: accounts[:transporte],
     category: categories["Manutenção"] || categories["Transporte"],
     recurrence_type: "single",
-    status: "confirmed"
+    status: "confirmed",
+    user: default_user
   )
 end
 
@@ -882,7 +919,8 @@ transaction = Transaction.create!(
   to_account: accounts[:lazer],
   category: categories["Lazer"],
   recurrence_type: "single",
-  status: "confirmed"
+  status: "confirmed",
+    user: default_user
 )
 
 # Associar com fatura se for cartão de crédito
@@ -900,7 +938,8 @@ transaction = Transaction.create!(
   to_account: accounts[:casa],
   category: categories["Casa"] || categories["Compras"],
   recurrence_type: "single",
-  status: "confirmed"
+  status: "confirmed",
+    user: default_user
 )
 
 # Associar com fatura se for cartão de crédito
@@ -917,7 +956,8 @@ transaction = Transaction.create!(
   to_account: accounts[:saude],
   category: categories["Saúde"],
   recurrence_type: "single",
-  status: "confirmed"
+  status: "confirmed",
+    user: default_user
 )
 
 # Associar com fatura se for cartão de crédito
@@ -937,7 +977,8 @@ Transaction.create!(
   to_account: accounts[:lazer],
   category: categories["Lazer"],
   recurrence_type: "single",
-  status: "pending"
+  status: "pending",
+    user: default_user
 )
 
 # Material escolar próximo ano
@@ -951,7 +992,8 @@ Transaction.create!(
   to_account: accounts[:escola],
   category: categories["Educação"],
   recurrence_type: "single",
-  status: "pending"
+  status: "pending",
+    user: default_user
 )
 
 # === ESTATÍSTICAS FINAIS ===
