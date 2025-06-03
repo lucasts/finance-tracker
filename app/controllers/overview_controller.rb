@@ -301,7 +301,8 @@ def balance_alert(projected_balance)
 end
 
 def generate_category_projections(month_date)
-  analyzer = VariableExpenseAnalyzerService.new(current_user.id)
+  analyzer = VariableExpenseAnalyzerService.new
+  analyzer.user = current_user
   
   current_user_scope(Category).map do |category|
     current_spent = current_user_scope(Transaction)
@@ -310,7 +311,7 @@ def generate_category_projections(month_date)
                       .where(category: category)
                       .sum(:amount)
     
-    projected = analyzer.projected_expense_for_category(category.id, month_date)
+    projected = analyzer.projected_expense_for_category(category.id, 1)
     
     {
       category: category,
