@@ -2,7 +2,7 @@ class RecurringCommitmentsController < ApplicationController
   before_action :set_recurring_commitment, only: [:show, :edit, :update, :destroy, :timeline, :toggle_active]
   
   def index
-    @recurring_commitments = RecurringCommitment.includes(:category, :transactions)
+    @recurring_commitments = current_user_scope(RecurringCommitment).includes(:category, :transactions)
                                                .active
                                                .order(:name)
     
@@ -25,27 +25,27 @@ class RecurringCommitmentsController < ApplicationController
   end
   
   def new
-    @recurring_commitment = RecurringCommitment.new
-    @accounts = Account.all
-    @categories = Category.all
+    @recurring_commitment = current_user.recurring_commitments.build
+    @accounts = current_user_scope(Account).all
+    @categories = current_user_scope(Category).all
   end
   
   def create
-    @recurring_commitment = RecurringCommitment.new(recurring_commitment_params)
+    @recurring_commitment = current_user.recurring_commitments.build(recurring_commitment_params)
     
     if @recurring_commitment.save
       redirect_to @recurring_commitment, notice: 'Compromisso recorrente criado com sucesso.'
     else
-      @accounts = Account.all
-      @categories = Category.all
+      @accounts = current_user_scope(Account).all
+      @categories = current_user_scope(Category).all
       render :new, status: :unprocessable_entity
     end
   end
   
   def edit
     @edit_strategies = %w[future_only all_transactions split_commitment]
-    @accounts = Account.all
-    @categories = Category.all
+    @accounts = current_user_scope(Account).all
+    @categories = current_user_scope(Category).all
   end
   
   def update
@@ -130,8 +130,8 @@ class RecurringCommitmentsController < ApplicationController
       redirect_to @recurring_commitment, notice: success_message
     else
       @edit_strategies = %w[future_only all_transactions split_commitment]
-      @accounts = Account.all
-      @categories = Category.all
+      @accounts = current_user_scope(Account).all
+      @categories = current_user_scope(Category).all
       flash.now[:alert] = editor_service.errors.full_messages.join(', ')
       render :show, status: :unprocessable_entity
     end
@@ -142,14 +142,14 @@ class RecurringCommitmentsController < ApplicationController
       redirect_to @recurring_commitment, notice: 'Compromisso recorrente atualizado com sucesso.'
     else
       @edit_strategies = %w[future_only all_transactions split_commitment]
-      @accounts = Account.all
-      @categories = Category.all
+      @accounts = current_user_scope(Account).all
+      @categories = current_user_scope(Category).all
       render :edit, status: :unprocessable_entity
     end
   end
   
   def set_recurring_commitment
-    @recurring_commitment = RecurringCommitment.find(params[:id])
+    @recurring_commitment = current_user_scope(RecurringCommitment).find(params[:id])
   end
   
   def recurring_commitment_params

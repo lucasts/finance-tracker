@@ -30,6 +30,9 @@ gem "tailwindcss-rails"
 
 gem 'apexcharts'
 
+# Authentication
+gem 'devise'
+
 # For date grouping in analytics
 gem 'groupdate'
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_02_141128) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_03_014934) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -27,13 +27,17 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_02_141128) do
     t.integer "account_type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
     t.index ["account_type_id"], name: "index_accounts_on_account_type_id"
+    t.index ["user_id"], name: "index_accounts_on_user_id"
   end
 
   create_table "categories", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_categories_on_user_id"
   end
 
   create_table "credit_statements", force: :cascade do |t|
@@ -61,8 +65,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_02_141128) do
     t.decimal "total_amount", precision: 15, scale: 2
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
     t.index ["recurrence_frequency"], name: "index_installment_plans_on_recurrence_frequency"
     t.index ["status"], name: "index_installment_plans_on_status"
+    t.index ["user_id"], name: "index_installment_plans_on_user_id"
   end
 
   create_table "recurring_commitments", force: :cascade do |t|
@@ -76,9 +82,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_02_141128) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
     t.index ["category_id"], name: "index_recurring_commitments_on_category_id"
     t.index ["recurrence_frequency"], name: "index_recurring_commitments_on_recurrence_frequency"
     t.index ["status"], name: "index_recurring_commitments_on_status"
+    t.index ["user_id"], name: "index_recurring_commitments_on_user_id"
   end
 
   create_table "transaction_groups", force: :cascade do |t|
@@ -113,6 +121,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_02_141128) do
     t.string "recurrence_pattern"
     t.string "recurrence_frequency"
     t.integer "installment_number"
+    t.integer "user_id", null: false
     t.index ["category_id"], name: "index_transactions_on_category_id"
     t.index ["credit_statement_id"], name: "index_transactions_on_credit_statement_id"
     t.index ["from_account_id"], name: "index_transactions_on_from_account_id"
@@ -122,11 +131,28 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_02_141128) do
     t.index ["recurring_commitment_id"], name: "index_transactions_on_recurring_commitment_id"
     t.index ["to_account_id"], name: "index_transactions_on_to_account_id"
     t.index ["transaction_group_id"], name: "index_transactions_on_transaction_group_id"
+    t.index ["user_id"], name: "index_transactions_on_user_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
   add_foreign_key "accounts", "account_types"
+  add_foreign_key "accounts", "users"
+  add_foreign_key "categories", "users"
   add_foreign_key "credit_statements", "accounts"
+  add_foreign_key "installment_plans", "users"
   add_foreign_key "recurring_commitments", "categories"
+  add_foreign_key "recurring_commitments", "users"
   add_foreign_key "transactions", "accounts", column: "from_account_id"
   add_foreign_key "transactions", "accounts", column: "to_account_id"
   add_foreign_key "transactions", "categories"
@@ -134,4 +160,5 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_02_141128) do
   add_foreign_key "transactions", "installment_plans"
   add_foreign_key "transactions", "recurring_commitments"
   add_foreign_key "transactions", "transaction_groups"
+  add_foreign_key "transactions", "users"
 end

@@ -1,0 +1,147 @@
+<% content_for :title, "Editar Perfil" %>
+
+<div class="container mx-auto px-4 py-6">
+  <!-- Breadcrumb -->
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><%= link_to "Visão Geral", root_path %></li>
+      <li>Editar Perfil</li>
+    </ul>
+  </div>
+
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-base-content mb-2">
+      Editar Perfil
+    </h1>
+    <p class="text-base-content/70">
+      Atualize suas informações pessoais e preferências de conta.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Form -->
+    <div class="lg:col-span-2">
+      <div class="card bg-base-100 shadow-lg">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Informações da Conta</h2>
+          
+          <!-- Error Messages -->
+          <%= render "devise/shared/error_messages", resource: resource %>
+
+          <!-- Edit Form -->
+          <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }, local: true, class: "space-y-4") do |f| %>
+            
+            <!-- Email Field -->
+            <div class="form-control">
+              <%= f.label :email, class: "label" do %>
+                <span class="label-text font-medium">Email</span>
+              <% end %>
+              <%= f.email_field :email, 
+                                autofocus: true, 
+                                autocomplete: "email",
+                                class: "input input-bordered w-full" %>
+              <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+                <label class="label">
+                  <span class="label-text-alt text-warning">
+                    Aguardando confirmação para: <%= resource.unconfirmed_email %>
+                  </span>
+                </label>
+              <% end %>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-control">
+              <%= f.label :password, class: "label" do %>
+                <span class="label-text font-medium">Nova Senha</span>
+                <span class="label-text-alt">(deixe em branco se não quiser alterar)</span>
+              <% end %>
+              <%= f.password_field :password, 
+                                  autocomplete: "new-password",
+                                  class: "input input-bordered w-full",
+                                  placeholder: "••••••••" %>
+              <% if @minimum_password_length %>
+                <label class="label">
+                  <span class="label-text-alt">Mínimo <%= @minimum_password_length %> caracteres</span>
+                </label>
+              <% end %>
+            </div>
+
+            <!-- Password Confirmation Field -->
+            <div class="form-control">
+              <%= f.label :password_confirmation, class: "label" do %>
+                <span class="label-text font-medium">Confirme a Nova Senha</span>
+              <% end %>
+              <%= f.password_field :password_confirmation, 
+                                  autocomplete: "new-password",
+                                  class: "input input-bordered w-full",
+                                  placeholder: "••••••••" %>
+            </div>
+
+            <!-- Current Password Field -->
+            <div class="form-control">
+              <%= f.label :current_password, class: "label" do %>
+                <span class="label-text font-medium">Senha Atual</span>
+                <span class="label-text-alt">(necessária para confirmar as alterações)</span>
+              <% end %>
+              <%= f.password_field :current_password, 
+                                  autocomplete: "current-password",
+                                  class: "input input-bordered w-full",
+                                  placeholder: "••••••••" %>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-control mt-6">
+              <%= f.submit "Atualizar", 
+                          class: "btn btn-primary text-white" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Account Actions -->
+      <div class="card bg-base-100 shadow-lg">
+        <div class="card-body">
+          <h3 class="card-title text-lg mb-4">Ações da Conta</h3>
+          
+          <div class="space-y-3">
+            <%= link_to root_path, class: "btn btn-outline btn-block" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+              Voltar ao Dashboard
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="card bg-error/10 border border-error/20">
+        <div class="card-body">
+          <h3 class="card-title text-error text-lg mb-4">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            Zona de Perigo
+          </h3>
+          
+          <p class="text-sm text-base-content/70 mb-4">
+            Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente removidos.
+          </p>
+          
+          <%= button_to "Excluir minha conta", 
+                        registration_path(resource_name), 
+                        data: { 
+                          confirm: "Tem certeza? Esta ação não pode ser desfeita!", 
+                          turbo_confirm: "Tem certeza? Esta ação não pode ser desfeita!" 
+                        }, 
+                        method: :delete,
+                        class: "btn btn-error btn-outline btn-sm w-full" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

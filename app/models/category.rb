@@ -1,4 +1,8 @@
 class Category < ApplicationRecord
+  # Associação de usuário
+  belongs_to :user
+  
+  # Associações existentes
   has_many :transactions, dependent: :restrict_with_error
 
   validates :name, presence: true
@@ -32,5 +36,10 @@ class Category < ApplicationRecord
     return 0 if monthly_totals.empty?
     
     monthly_totals.sum / monthly_totals.length
+  end
+
+  # Projeção de gastos automática para esta categoria
+  def projected_expense(months_ahead = 1, user = nil)
+    VariableExpenseAnalyzerService.projected_expense_for_category(self, months_ahead, user || self.user)
   end
 end

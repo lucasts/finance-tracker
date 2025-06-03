@@ -169,6 +169,61 @@
     </div>
   </div>
 
+<!-- Expense Projections Section -->
+<div class="card bg-base-100 shadow mt-6">
+  <div class="card-body">
+    <h3 class="card-title mb-4">🎯 Projeções de Gastos por Categoria</h3>
+    <% if @category_projections.any? %>
+      <div class="space-y-3">
+        <% @category_projections.each do |projection| %>
+          <div class="bg-base-200 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="font-semibold"><%= projection[:category].name %></h4>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-base-content/60">
+                  R$ <%= number_with_precision(projection[:current_spent], precision: 2, delimiter: ".") %> / 
+                  R$ <%= number_with_precision(projection[:projected], precision: 2, delimiter: ".") %>
+                </span>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-2 mb-2">
+              <div class="flex-1 bg-base-300 rounded-full h-2">
+                <div class="bg-primary h-2 rounded-full transition-all duration-300" 
+                     style="width: <%= [projection[:percentage_used], 100].min %>%"></div>
+              </div>
+              <span class="text-sm font-medium <%= projection[:percentage_used] > 100 ? 'text-error' : 'text-base-content' %>">
+                <%= projection[:percentage_used] %>%
+              </span>
+            </div>
+            
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-base-content/70">
+                <% if projection[:remaining] > 0 %>
+                  Disponível: R$ <%= number_with_precision(projection[:remaining], precision: 2, delimiter: ".") %>
+                <% else %>
+                  Excedeu em: R$ <%= number_with_precision(projection[:remaining].abs, precision: 2, delimiter: ".") %>
+                <% end %>
+              </span>
+              <% if projection[:percentage_used] > 80 %>
+                <span class="badge badge-warning badge-sm">
+                  <%= projection[:percentage_used] > 100 ? 'Excedido' : 'Atenção' %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center text-base-content/60 py-4">
+        <div class="text-4xl mb-2">🎯</div>
+        <p>Nenhuma projeção disponível</p>
+        <p class="text-sm mt-2">As projeções são baseadas no histórico de gastos por categoria</p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
 <!-- Credit Card Statements Section -->
 <div class="card bg-base-100 shadow mt-6">
   <div class="card-body">

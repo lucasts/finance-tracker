@@ -2,15 +2,15 @@ class AccountsController < ApplicationController
   before_action :set_account, only: [:edit, :update, :destroy]
 
   def index
-    @accounts = Account.includes(:account_type).order(:name)
+    @accounts = current_user_scope(Account).includes(:account_type).order(:name)
   end
 
   def new
-    @account = Account.new
+    @account = current_user.accounts.build
   end
 
   def create
-    @account = Account.new(account_params)
+    @account = current_user.accounts.build(account_params)
     if @account.save
       redirect_to accounts_path, notice: "Conta criada com sucesso."
     else
@@ -36,7 +36,7 @@ class AccountsController < ApplicationController
   private
 
   def set_account
-    @account = Account.find(params[:id])
+    @account = current_user_scope(Account).find(params[:id])
   end
 
   def account_params

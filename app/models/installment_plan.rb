@@ -7,6 +7,9 @@
 # Frequência: monthly (padrão), weekly, annual etc.
 #
 class InstallmentPlan < ApplicationRecord
+  # Associação de usuário
+  belongs_to :user
+  
   has_many :transactions, dependent: :nullify
   
   validates :name, presence: true

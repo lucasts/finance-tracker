@@ -1,4 +1,8 @@
 class Transaction < ApplicationRecord
+  # Associações de usuário
+  belongs_to :user
+  
+  # Associações existentes
   belongs_to :from_account, class_name: "Account"
   belongs_to :to_account, class_name: "Account", optional: true
   belongs_to :category

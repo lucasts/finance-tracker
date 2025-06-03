@@ -10,12 +10,13 @@ class TransactionsController < ApplicationController
       selected_month = Date.today
     end
 
-    @transactions = Transaction.in_competence_month(selected_month).order(event_date: :desc)
+    # Filtrar por usuário atual
+    @transactions = current_user_scope(Transaction).in_competence_month(selected_month).order(event_date: :desc)
     
     # Filtrar por plano de parcelamento se especificado
     if params[:plan].present?
       @transactions = @transactions.where(installment_plan_id: params[:plan])
-      @installment_plan = InstallmentPlan.find_by(id: params[:plan])
+      @installment_plan = current_user_scope(InstallmentPlan).find_by(id: params[:plan])
     end
   end
 
@@ -24,7 +25,7 @@ class TransactionsController < ApplicationController
   end
 
   def new
-    @transaction = Transaction.new
+    @transaction = current_user.transactions.build
     # Set intelligent defaults
     @transaction.event_date = Date.current
     @transaction.payment_date = Date.current
@@ -73,7 +74,7 @@ class TransactionsController < ApplicationController
   private
 
   def set_transaction
-    @transaction = Transaction.find(params[:id])
+    @transaction = current_user_scope(Transaction).find(params[:id])
   end
 
   def apply_intelligent_defaults(transaction)

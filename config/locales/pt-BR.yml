@@ -438,3 +438,61 @@ pt-BR:
       create: "Criar %{model}"
       submit: "Salvar %{model}"
       update: "Atualizar %{model}"
+
+  # Devise buttons and labels
+  devise:
+    buttons:
+      sign_in: "Entrar"
+      sign_up: "Criar Conta"
+      sign_out: "Sair"
+      forgot_password: "Esqueceu sua senha?"
+      reset_password: "Redefinir Senha"
+      change_password: "Alterar Senha"
+      confirm: "Confirmar"
+      cancel: "Cancelar"
+      update: "Atualizar"
+      back: "Voltar"
+    
+    labels:
+      email: "Email"
+      password: "Senha"
+      password_confirmation: "Confirme a Senha"
+      current_password: "Senha Atual"
+      remember_me: "Lembrar-me"
+      minimum_password_length: "mínimo %{length} caracteres"
+    
+    links:
+      sign_in: "Entrar"
+      sign_up: "Criar conta"
+      forgot_password: "Esqueceu sua senha?"
+      confirmation_instructions: "Não recebeu as instruções de confirmação?"
+      unlock_instructions: "Não recebeu as instruções de desbloqueio?"
+
+  # Authentication related
+  authentication:
+    required: "Você precisa estar logado para acessar esta página."
+    logout_success: "Logout realizado com sucesso."
+    login_success: "Login realizado com sucesso."
+    
+  # Application specific
+  application:
+    name: "Finance Tracker"
+    tagline: "Controle suas finanças pessoais"
+    
+  # Time formats
+  time:
+    formats:
+      default: "%d/%m/%Y %H:%M"
+      short: "%d/%m/%Y"
+      long: "%A, %d de %B de %Y"
+
+  # Date formats  
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      short: "%d/%m"
+      long: "%d de %B de %Y"
+    day_names: [Domingo, Segunda, Terça, Quarta, Quinta, Sexta, Sábado]
+    month_names: [~, Janeiro, Fevereiro, Março, Abril, Maio, Junho, Julho, Agosto, Setembro, Outubro, Novembro, Dezembro]
+    abbr_day_names: [Dom, Seg, Ter, Qua, Qui, Sex, Sáb]
+    abbr_month_names: [~, Jan, Fev, Mar, Abr, Mai, Jun, Jul, Ago, Set, Out, Nov, Dez]

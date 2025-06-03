@@ -11,6 +11,10 @@
 #
 # Relacionamento: tem muitas transactions (via recurring_commitment_id)
 class RecurringCommitment < ApplicationRecord
+  # Associação de usuário
+  belongs_to :user
+  
+  # Associações existentes
   belongs_to :category
   has_many :transactions, dependent: :restrict_with_error
 

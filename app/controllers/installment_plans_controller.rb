@@ -2,7 +2,7 @@ class InstallmentPlansController < ApplicationController
   before_action :set_installment_plan, only: [:show, :edit, :update, :destroy, :toggle_active]
   
   def index
-    @installment_plans = InstallmentPlan.includes(
+    @installment_plans = current_user_scope(InstallmentPlan).includes(
                            transactions: [:from_account, :to_account, :category]
                          ).order(created_at: :desc)
     
@@ -32,13 +32,13 @@ class InstallmentPlansController < ApplicationController
   end
   
   def new
-    @installment_plan = InstallmentPlan.new
-    @accounts = Account.all
-    @categories = Category.all
+    @installment_plan = current_user.installment_plans.build
+    @accounts = current_user_scope(Account).all
+    @categories = current_user_scope(Category).all
   end
   
   def create
-    @installment_plan = InstallmentPlan.new(installment_plan_params)
+    @installment_plan = current_user.installment_plans.build(installment_plan_params)
     
     if @installment_plan.save
       # Gera a primeira parcela se a data de início já passou
@@ -48,23 +48,23 @@ class InstallmentPlansController < ApplicationController
       
       redirect_to @installment_plan, notice: 'Plano de parcelamento criado com sucesso.'
     else
-      @accounts = Account.all
-      @categories = Category.all
+      @accounts = current_user_scope(Account).all
+      @categories = current_user_scope(Category).all
       render :new, status: :unprocessable_entity
     end
   end
   
   def edit
-    @accounts = Account.all
-    @categories = Category.all
+    @accounts = current_user_scope(Account).all
+    @categories = current_user_scope(Category).all
   end
   
   def update
     if @installment_plan.update(installment_plan_params)
       redirect_to @installment_plan, notice: 'Plano de parcelamento atualizado com sucesso.'
     else
-      @accounts = Account.all
-      @categories = Category.all
+      @accounts = current_user_scope(Account).all
+      @categories = current_user_scope(Category).all
       render :edit, status: :unprocessable_entity
     end
   end
@@ -120,7 +120,7 @@ class InstallmentPlansController < ApplicationController
   private
   
   def set_installment_plan
-    @installment_plan = InstallmentPlan.find(params[:id])
+    @installment_plan = current_user_scope(InstallmentPlan).find(params[:id])
   end
   
   def installment_plan_params
@@ -193,7 +193,7 @@ class InstallmentPlansController < ApplicationController
   end
   
   def generate_first_installment
-    Transaction.create!(
+    current_user.transactions.create!(
       description: "#{@installment_plan.name} (1/#{@installment_plan.installment_count})",
       amount: @installment_plan.installment_amount,
       transaction_type: @installment_plan.transaction_type,

@@ -1,0 +1,97 @@
+<% content_for :title, "Entrar" %>
+
+<div class="min-h-screen flex items-center justify-center bg-base-200">
+  <div class="card w-full max-w-md bg-base-100 shadow-xl">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">Finance Tracker</h1>
+        <p class="text-base-content/70 mt-2">Entre em sua conta</p>
+      </div>
+
+      <!-- Flash Messages -->
+      <% if notice %>
+        <div class="alert alert-success mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span><%= notice %></span>
+        </div>
+      <% end %>
+      
+      <% if alert %>
+        <div class="alert alert-error mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span><%= alert %></span>
+        </div>
+      <% end %>
+
+      <!-- Login Form -->
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), local: true, class: "space-y-4") do |f| %>
+        
+        <!-- Email Field -->
+        <div class="form-control">
+          <%= f.label :email, class: "label" do %>
+            <span class="label-text font-medium">Email</span>
+          <% end %>
+          <%= f.email_field :email, 
+                            autofocus: true, 
+                            autocomplete: "email",
+                            class: "input input-bordered w-full",
+                            placeholder: "seu@email.com" %>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-control">
+          <%= f.label :password, class: "label" do %>
+            <span class="label-text font-medium">Senha</span>
+          <% end %>
+          <%= f.password_field :password, 
+                              autocomplete: "current-password",
+                              class: "input input-bordered w-full",
+                              placeholder: "••••••••" %>
+        </div>
+
+        <!-- Remember Me -->
+        <% if devise_mapping.rememberable? %>
+          <div class="form-control">
+            <label class="label cursor-pointer justify-start">
+              <%= f.check_box :remember_me, class: "checkbox checkbox-primary" %>
+              <span class="label-text ml-3">Lembrar-me</span>
+            </label>
+          </div>
+        <% end %>
+
+        <!-- Submit Button -->
+        <div class="form-control mt-6">
+          <%= f.submit "Entrar", 
+                      class: "btn btn-primary btn-block text-white" %>
+        </div>
+      <% end %>
+
+      <!-- Divider -->
+      <div class="divider">ou</div>
+
+      <!-- Links -->
+      <div class="text-center space-y-2">
+        <%= render "devise/shared/links" %>
+      </div>
+
+      <!-- Demo User Info -->
+      <div class="alert alert-info mt-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+          <h3 class="font-bold">Usuário Demo</h3>
+          <div class="text-sm">
+            Email: <strong>demo@finance-tracker.com</strong><br>
+            Senha: <strong>password123</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

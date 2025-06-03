@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  devise_for :users
+  
+  # Root route para usuários autenticados
+  root 'overview#index'
+  
   resources :credit_statements, only: [:index, :show]  
   resources :transactions      
   resources :overview, only: [:index]  
@@ -35,6 +40,4 @@ Rails.application.routes.draw do
       get :status
     end
   end
-
-  root 'overview#index'
 end

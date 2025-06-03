@@ -3,9 +3,12 @@ class OverviewController < ApplicationController
     @month = params[:month] || Date.today.strftime('%Y-%m')
     month_date = Date.strptime(@month, "%Y-%m")
     
-    @transactions = Transaction.in_competence_month(month_date)
-    @income_total = Transaction.in_competence_month(month_date).income.sum(:amount)
-    @expense_total = Transaction.in_competence_month(month_date).expense.sum(:amount)
+    # Filtrar por usuário atual
+    user_transactions = current_user_scope(Transaction)
+    
+    @transactions = user_transactions.in_competence_month(month_date)
+    @income_total = user_transactions.in_competence_month(month_date).income.sum(:amount)
+    @expense_total = user_transactions.in_competence_month(month_date).expense.sum(:amount)
 
     @balance = @income_total - @expense_total
 
@@ -20,12 +23,15 @@ class OverviewController < ApplicationController
     load_credit_statements(month_date)
 
     # === PRÓXIMOS COMPROMISSOS ===
-    @upcoming = Transaction.upcoming_payments(10)
+    @upcoming = user_transactions.upcoming_payments(10)
     
     # === ANÁLISES E PROJEÇÕES ===
     @category_ranking = category_ranking(month_date)
     @projected_balance = projected_balance(@balance, @month)
     @balance_alert = balance_alert(@projected_balance)
+    
+    # === PROJEÇÕES AUTOMÁTICAS POR CATEGORIA ===
+    @category_projections = generate_category_projections(month_date)
     
     # === DADOS PARA GRÁFICOS ===
     today = Date.today
@@ -217,9 +223,10 @@ def generate_chart_data
     month_str = month_date.strftime('%Y-%m')
     month_label = I18n.l(month_date, format: '%b/%y')
     
-    # Calcula receitas e despesas do mês
-    income = Transaction.income.confirmed.in_competence_month(month_date).sum(:amount)
-    expense = Transaction.expense.confirmed.in_competence_month(month_date).sum(:amount)
+    # Calcula receitas e despesas do mês (filtrado por usuário)
+    user_transactions = current_user_scope(Transaction)
+    income = user_transactions.income.confirmed.in_competence_month(month_date).sum(:amount)
+    expense = user_transactions.expense.confirmed.in_competence_month(month_date).sum(:amount)
     
     # Calcula saldo do mês
     monthly_balance = income - expense
@@ -242,7 +249,7 @@ end
 
 def category_ranking(month_date = nil)
   month_date ||= Date.today
-  Transaction
+  current_user_scope(Transaction)
     .expense
     .in_competence_month(month_date)
     .confirmed
@@ -265,8 +272,8 @@ def projected_balance(current_balance, month)
   month_date = Date.strptime(month, "%Y-%m")
   end_of_month = month_date.end_of_month
   
-  # Transações futuras do mês atual (depois de hoje)
-  future_transactions = Transaction.where(
+  # Transações futuras do mês atual (depois de hoje) - filtrado por usuário
+  future_transactions = current_user_scope(Transaction).where(
     status: ["pending", "confirmed"],
     event_date: (Date.current + 1.day)..end_of_month
   )
@@ -291,4 +298,27 @@ def balance_alert(projected_balance)
   else
     nil
   end
+end
+
+def generate_category_projections(month_date)
+  analyzer = VariableExpenseAnalyzerService.new(current_user.id)
+  
+  current_user_scope(Category).map do |category|
+    current_spent = current_user_scope(Transaction)
+                      .in_competence_month(month_date)
+                      .expense
+                      .where(category: category)
+                      .sum(:amount)
+    
+    projected = analyzer.projected_expense_for_category(category.id, month_date)
+    
+    {
+      category: category,
+      current_spent: current_spent,
+      projected: projected,
+      remaining: projected - current_spent,
+      percentage_used: projected > 0 ? (current_spent / projected * 100).round(1) : 0
+    }
+  end.select { |projection| projection[:projected] > 0 }
+     .sort_by { |projection| -projection[:projected] }
 end

@@ -9,6 +9,8 @@ class VariableExpenseAnalyzerService
   attribute :start_date, :date, default: -> { 6.months.ago }
   attribute :end_date, :date, default: -> { Date.current }
   attribute :analysis_type, :string, default: 'monthly'
+  
+  attr_accessor :user
 
   validates :start_date, :end_date, presence: true
   validates :analysis_type, inclusion: { in: %w[daily weekly monthly yearly] }
@@ -44,6 +46,44 @@ class VariableExpenseAnalyzerService
   # Método de conveniência para análise geral
   def self.analyze_general(options = {})
     new(options).call
+  end
+
+  # Método simples para projeção de gastos por categoria
+  def self.projected_expense_for_category(category, months_ahead = 1, user = nil)
+    return 0 unless category
+
+    # Usar o usuário da categoria se não fornecido
+    user ||= category.user
+    return 0 unless user
+
+    # Buscar transações dos últimos 6 meses da categoria
+    start_date = 6.months.ago.beginning_of_month
+    end_date = Date.current.end_of_month
+    
+    transactions = Transaction.joins(:category)
+                             .where(categories: { id: category.id })
+                             .where(transaction_type: 'expense')
+                             .where(status: 'confirmed')
+                             .where(event_date: start_date..end_date)
+                             .where(user: user)
+    
+    # Calcular média mensal
+    total_amount = transactions.sum(:amount)
+    months_count = ((end_date.year * 12 + end_date.month) - (start_date.year * 12 + start_date.month) + 1)
+    monthly_average = months_count > 0 ? total_amount / months_count : 0
+    
+    # Projetar para os próximos meses
+    (monthly_average * months_ahead).round(2)
+  end
+
+  # Instancia method version for user context
+  def projected_expense_for_category(category_id, months_ahead = 1)
+    category = Category.find_by(id: category_id)
+    return 0 unless category
+
+    # Use the user from initialization if available
+    user = @user || category.user
+    self.class.projected_expense_for_category(category, months_ahead, user)
   end
 
   private
