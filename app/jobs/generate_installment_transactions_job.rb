@@ -8,7 +8,7 @@ class GenerateInstallmentTransactionsJob < ApplicationJob
     
     # Busca planos de parcelamento ativos que têm parcelas pendentes
     installment_plans = InstallmentPlan.joins("LEFT JOIN transactions ON transactions.installment_plan_id = installment_plans.id")
-                                      .where(active: true)
+                                      .where(status: :active)
                                       .group('installment_plans.id')
                                       .having('COUNT(transactions.id) < installment_plans.installment_count')
     
@@ -38,7 +38,7 @@ class GenerateInstallmentTransactionsJob < ApplicationJob
       Rails.logger.error "Errors in GenerateInstallmentTransactionsJob: #{errors.join('; ')}"
     end
 
-    { generated: generated_count, errors: errors }
+    { generated_count: generated_count, errors: errors }
   end
 
   private
@@ -76,16 +76,43 @@ class GenerateInstallmentTransactionsJob < ApplicationJob
     # Calcula a data correta da parcela
     installment_date = calculate_next_installment_date(plan, installment_number)
     
+    # Calcula o valor da parcela
+    installment_amount = plan.total_amount ? (plan.total_amount / plan.installment_count) : 0
+    
+    # Busca template de transação anterior ou define padrões
+    template_transaction = plan.transactions.order(:event_date).last
+    
     Transaction.create!(
       description: "#{plan.name} (#{installment_number}/#{plan.installment_count})",
-      amount: plan.installment_amount,
-      transaction_type: plan.transaction_type,
-      date: installment_date,
-      account: plan.account,
-      category: plan.category,
+      amount: installment_amount,
+      transaction_type: 'expense', # Parcelas são geralmente despesas
+      event_date: installment_date,
+      payment_date: installment_date,
+      from_account: template_transaction&.from_account || find_default_account(plan.user),
+      to_account: template_transaction&.to_account || find_expense_account(plan.user),
+      category: template_transaction&.category || find_default_category(plan.user),
       installment_plan: plan,
-      installment_number: installment_number,
-      notes: "Parcela gerada automaticamente pelo sistema"
+      recurrence_type: 'installment',
+      status: installment_date <= Date.current ? 'confirmed' : 'pending',
+      user: plan.user
     )
+  end
+
+  private
+
+  def find_default_account(user)
+    Account.joins(:account_type)
+           .where(user: user, account_types: { code: 'BANK' })
+           .first || Account.where(user: user).first
+  end
+
+  def find_expense_account(user)
+    Account.joins(:account_type)
+           .where(user: user, account_types: { code: 'EXPENSE' })
+           .first
+  end
+
+  def find_default_category(user)
+    Category.where(user: user).first || Category.create!(user: user, name: 'Parcelamento')
   end
 end

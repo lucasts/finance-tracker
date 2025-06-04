@@ -21,6 +21,10 @@
     "source=finance-sqlite-db,target=/workspace/storage/sqlite,type=volume",
     "type=volume,source=finance-bundle,target=/usr/local/bundle", 
     "type=volume,source=finance-node,target=/usr/local/share/.cache/yarn/v6",
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
-  ]
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/root/.ssh,type=bind,consistency=cached",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  }
 }

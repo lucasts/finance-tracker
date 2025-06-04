@@ -7,7 +7,7 @@ class GenerateRecurringTransactionsJob < ApplicationJob
     Rails.logger.info "Starting GenerateRecurringTransactionsJob for date: #{date}"
     
     # Busca compromissos recorrentes ativos
-    recurring_commitments = RecurringCommitment.where(active: true)
+    recurring_commitments = RecurringCommitment.where(status: :active)
     
     generated_count = 0
     errors = []
@@ -35,7 +35,7 @@ class GenerateRecurringTransactionsJob < ApplicationJob
       Rails.logger.error "Errors in GenerateRecurringTransactionsJob: #{errors.join('; ')}"
     end
 
-    { generated: generated_count, errors: errors }
+    { generated_count: generated_count, errors: errors }
   end
 
   private
@@ -49,14 +49,14 @@ class GenerateRecurringTransactionsJob < ApplicationJob
     return false if commitment.end_date.present? && commitment.end_date < date
     
     # Verifica se é dia de gerar baseado na frequência
-    case commitment.frequency
+    case commitment.recurrence_frequency
     when 'daily'
       true
     when 'weekly'
       date.wday == commitment.start_date.wday
     when 'monthly'
       is_monthly_generation_day?(commitment, date)
-    when 'yearly'
+    when 'annual'
       date.month == commitment.start_date.month && date.day == commitment.start_date.day
     else
       false
@@ -77,20 +77,74 @@ class GenerateRecurringTransactionsJob < ApplicationJob
   def transaction_exists_for_date?(commitment, date)
     Transaction.exists?(
       recurring_commitment: commitment,
-      date: date
+      event_date: date
     )
   end
 
   def create_transaction_for_commitment(commitment, date)
+    # Determina contas baseado nas transações anteriores ou usa padrões
+    recent_transaction = commitment.transactions.order(:event_date).last
+    
+    # Define o tipo de transação baseado na categoria
+    transaction_type = determine_transaction_type(commitment)
+    
+    # Define contas baseadas no tipo de transação
+    if transaction_type == 'income'
+      # Para receitas: empresa/fonte -> conta bancária
+      from_account = recent_transaction&.from_account || find_revenue_account(commitment)
+      to_account = recent_transaction&.to_account || find_bank_account(commitment.user)
+    else
+      # Para despesas: conta bancária -> categoria de despesa
+      from_account = recent_transaction&.from_account || find_bank_account(commitment.user)
+      to_account = recent_transaction&.to_account || find_expense_account(commitment)
+    end
+
     Transaction.create!(
       description: commitment.name,
-      amount: commitment.amount,
-      transaction_type: commitment.transaction_type,
-      date: date,
-      account: commitment.account,
+      amount: commitment.default_amount || 0,
+      transaction_type: transaction_type,
+      event_date: date,
+      payment_date: date,
+      from_account: from_account,
+      to_account: to_account,
       category: commitment.category,
       recurring_commitment: commitment,
-      notes: "Gerado automaticamente pelo sistema"
+      recurrence_type: 'recurring',
+      status: 'confirmed',
+      user: commitment.user
     )
+  end
+
+  private
+
+  def determine_transaction_type(commitment)
+    # Análise da categoria para determinar tipo
+    category_name = commitment.category.name.downcase
+    
+    income_keywords = ['salário', 'freelance', 'renda', 'receita', 'dividend']
+    
+    if income_keywords.any? { |keyword| category_name.include?(keyword) }
+      'income'
+    else
+      'expense'
+    end
+  end
+
+  def find_bank_account(user)
+    Account.joins(:account_type)
+           .where(user: user, account_types: { code: 'BANK' })
+           .first || Account.where(user: user).first
+  end
+
+  def find_revenue_account(commitment)
+    Account.joins(:account_type)
+           .where(user: commitment.user, account_types: { code: 'REVENUE' })
+           .first || Account.where(user: commitment.user).first
+  end
+
+  def find_expense_account(commitment)
+    Account.joins(:account_type)
+           .where(user: commitment.user, account_types: { code: 'EXPENSE' })
+           .first || Account.where(user: commitment.user).first
   end
 end

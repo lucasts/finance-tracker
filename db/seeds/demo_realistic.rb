@@ -1,15 +1,42 @@
+puts "=== SEEDING DEMO DATA FOR DEVELOPMENT ==="
 puts "Seeding realistic family financial data..."
 
 require 'date'
 
-default_user = User.first || User.create!(email: "admin@example.com", password: "password", password_confirmation: "password")
+# Create demo user for development
+puts "Creating demo user..."
+default_user = User.find_or_create_by!(email: "admin@example.com") do |user|
+  user.password = "password"
+  user.password_confirmation = "password"
+end
+
+puts "Demo user: #{default_user.email}"
 
 # Limpa dados existentes de demo
+puts "Cleaning existing demo data..."
 Transaction.where(user: default_user).destroy_all
 InstallmentPlan.where(user: default_user).destroy_all
 RecurringCommitment.where(user: default_user).destroy_all
 CreditStatement.joins(:account).where(accounts: { user: default_user }).destroy_all
 Account.where(user: default_user).destroy_all
+Category.where(user: default_user).destroy_all
+
+# === CATEGORIAS DEMO ===
+puts "Creating demo categories..."
+Category.find_or_create_by!(name: "Energia", user: default_user)
+Category.find_or_create_by!(name: "Aluguel", user: default_user)
+Category.find_or_create_by!(name: "Supermercado", user: default_user)
+Category.find_or_create_by!(name: "Farmácia", user: default_user)
+Category.find_or_create_by!(name: "Assinatura", user: default_user)
+Category.find_or_create_by!(name: "Restaurante", user: default_user)
+Category.find_or_create_by!(name: "Escola", user: default_user)
+Category.find_or_create_by!(name: "Plano Saúde", user: default_user)
+Category.find_or_create_by!(name: "Netflix", user: default_user)
+Category.find_or_create_by!(name: "Massagem", user: default_user)
+Category.find_or_create_by!(name: "Salário", user: default_user)
+Category.find_or_create_by!(name: "Freelance", user: default_user)
+Category.find_or_create_by!(name: "PIX Recebido", user: default_user)
+Category.find_or_create_by!(name: "Compras", user: default_user)
 
 # === CONTAS E CARTÕES ===
 puts "Criando contas da família..."

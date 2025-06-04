@@ -20,6 +20,17 @@ test:
   <<: *default
   database: storage/test.sqlite3
 
+preprod:
+  <<: *default
+  adapter: postgresql
+  encoding: unicode
+  database: zeno_preprod
+  username: postgres
+  password: postgres
+  host: db
+  port: 5432
+  pool: 5
+
 production:
   <<: *default
   database: storage/production.sqlite3

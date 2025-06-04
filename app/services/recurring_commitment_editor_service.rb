@@ -7,7 +7,7 @@ class RecurringCommitmentEditorService
   attribute :recurring_commitment
   attribute :edit_strategy, :string, default: 'future_only'
   attribute :effective_date, :date, default: -> { Date.current }
-  attribute :new_attributes, :hash, default: -> { {} }
+  attribute :new_attributes, default: -> { {} }
 
   validates :recurring_commitment, presence: true
   validates :edit_strategy, inclusion: { in: %w[future_only all_transactions split_commitment] }

@@ -1,0 +1,6 @@
+# Procfile para ambiente de pré-produção
+# Simula o comportamento do Heroku
+
+web: bundle exec rails server -p $PORT -e preprod
+worker: bundle exec sidekiq
+release: rails db:migrate

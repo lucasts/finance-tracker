@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_preprod_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: zeno_preprod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432" # evita conflitar com um postgres já rodando localmente
+      
+  redis:
+    image: redis:7
+    ports:
+      - "6380:6379"
+
+  app:
+    build: .
+    command: bundle exec rails s -b 0.0.0.0 -p 3001 -e preprod
+    env_file:
+      - .env.preprod
+    environment:
+      RAILS_ENV: preprod
+      DATABASE_URL: postgres://postgres:postgres@db:5432/zeno_preprod
+      REDIS_URL: redis://redis:6379/1
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+      - redis
+
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq -e preprod
+    env_file:
+      - .env.preprod
+    environment:
+      RAILS_ENV: preprod
+      DATABASE_URL: postgres://postgres:postgres@db:5432/zeno_preprod
+      REDIS_URL: redis://redis:6379/1
+    depends_on:
+      - db
+      - redis
+
+  mailcatcher:
+    image: sj26/mailcatcher
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+
+volumes:
+  postgres_preprod_data:
