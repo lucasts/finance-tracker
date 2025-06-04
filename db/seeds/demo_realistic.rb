@@ -164,7 +164,6 @@ meses_gerados = []
     category: categories["Salário"],
     recurrence_type: "single",
     status: "confirmed",
-    user: default_user,
     user: default_user
   )
   
