@@ -1,0 +1,11 @@
+# Exemplo de CSV para importação
+# Campos obrigatórios: data, valor, descricao
+# Opcional: categoria, status, tipo, parcela
+
+data,valor,descricao,categoria,status,tipo,parcela
+2025-05-01,1200.00,Aluguel,Habitação,confirmed,expense,
+2025-05-03,350.00,Supermercado,Alimentação,confirmed,expense,
+2025-05-05,4000.00,Salário,Salário,confirmed,income,
+2025-05-10,200.00,Academia,Saúde,confirmed,expense,
+2025-05-15,150.00,Netflix,Assinatura,confirmed,expense,3/12
+2025-05-20,100.00,Transferência para Poupança,Transferência,confirmed,transfer,
