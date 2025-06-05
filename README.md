@@ -36,6 +36,19 @@ Sistema completo de gestão financeira familiar com separação entre competênc
 rails test
 ```
 
+### 📊 Dados de Demonstração
+O setup padrão carrega apenas dados essenciais. Para demonstrações ou desenvolvimento com dados ricos:
+
+```bash
+# Carregar dados de demonstração (recomendado para demos)
+rails db:seed:demo
+
+# Reset completo com dados de demonstração
+rails db:seed:demo_full
+```
+
+**📋 [Ver documentação completa dos dados](DEMO_DATA_MANAGEMENT.md)**
+
 ### 🎯 Pré-produção (Heroku-like)
 Ambiente completo que simula produção:
 
@@ -61,21 +74,6 @@ Ambiente completo que simula produção:
 - App Rails (porta 3001)
 
 [📖 **Documentação completa do ambiente**](PREPROD.md)
-
-## 📊 Demonstração
-
-### Dados Realistas
-```bash
-# Carregar demonstração realista (família brasileira)
-rails runner "load 'db/seeds/demo_realistic.rb'"
-```
-
-**Inclui:**
-- 654 transações de 12 meses
-- Contas bancárias múltiplas
-- Cartões de crédito com faturas
-- 4 parcelamentos ativos (R$ 75.200)
-- 7 compromissos recorrentes (R$ 21.120/mês)
 
 ## 🤖 Automação
 

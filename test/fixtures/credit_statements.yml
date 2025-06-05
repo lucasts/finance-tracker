@@ -1,15 +1,21 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  card_account: one
-  month: MyString
-  total_amount: 9.99
-  due_date: 2025-05-29
-  status: 1
+  account: one
+  month: "2024-01"
+  amount_due: 1500.00
+  amount_paid: 1500.00
+  status: 1  # paid
+  closed_on: 2024-01-15
+  due_on: 2024-02-05
+  paid_on: 2024-02-03
 
 two:
-  card_account: two
-  month: MyString
-  total_amount: 9.99
-  due_date: 2025-05-29
-  status: 1
+  account: two
+  month: "2024-02"
+  amount_due: 2200.50
+  amount_paid: 0.00
+  status: 0  # open
+  closed_on: 2024-02-15
+  due_on: 2024-03-05
+  paid_on: null
