@@ -2,12 +2,8 @@
 puts "Loading essential setup seeds..."
 load Rails.root.join('db', 'seeds', 'setup.rb')
 
-# Load demo data only in development environment
-if Rails.env.development?
-  puts "Development environment detected - loading demo data..."
-  load Rails.root.join('db', 'seeds', 'demo_realistic.rb')
-else
-  puts "Environment: #{Rails.env} - skipping demo data (only loads in development)"
-end
-
-puts "Seeds completed for #{Rails.env} environment."
+# Demo data is now separated and won't load automatically
+# To load demo data manually, run: rails db:seed:demo
+puts "Essential seeds completed."
+puts ""
+puts "💡 Para carregar dados de demonstração, execute: rails db:seed:demo"
