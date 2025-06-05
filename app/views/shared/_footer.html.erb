@@ -1,7 +1,11 @@
 <footer class="footer items-center p-4 bg-base-200 text-base-content mt-10 border-t">
   <div class="flex flex-col md:flex-row w-full justify-between items-center gap-4">
-    <div>
-      <p class="text-sm">Finance Tracker © <%= Time.now.year %> - Todos os direitos reservados</p>
+    <div class="flex items-center gap-3">
+      <%= image_tag "logo-min.png", alt: "Zeno", class: "h-6 w-auto" %>
+      <div>
+        <p class="text-sm font-semibold"><%= t('app.name') %> © <%= Time.now.year %></p>
+        <p class="text-xs text-base-content/70"><%= t('app.taglines.footer') %></p>
+      </div>
     </div>
     <div class="flex items-center gap-2">
       <span class="text-sm">Tema:</span>

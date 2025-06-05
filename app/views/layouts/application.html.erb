@@ -1,8 +1,18 @@
 <!DOCTYPE html data-theme="zeno" lang="pt-BR">
 <html>
   <head>
-    <title>Finance Tracker</title>
+    <title><%= content_for(:title) || "#{t('app.name')} - #{t('app.tagline')}" %></title>
+    <meta name="description" content="<%= content_for(:description) || "#{t('app.name')} - #{t('app.tagline')} Sistema completo de gestão financeira familiar com controle de cartões, parcelamentos e fluxo de caixa." %>">
+    <meta name="keywords" content="gestão financeira, controle de gastos, orçamento familiar, cartão de crédito, parcelamentos, fluxo de caixa">
+    <meta name="author" content="Zeno">
+    <meta property="og:title" content="<%= content_for(:title) || "#{t('app.name')} - #{t('app.tagline')}" %>">
+    <meta property="og:description" content="<%= content_for(:description) || "Sistema completo de gestão financeira familiar" %>">
+    <meta property="og:image" content="<%= asset_url('full_logo_zeno.png') %>">
+    <meta property="og:type" content="website">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" type="image/png" href="/logo-min.png">
+    <link rel="apple-touch-icon" href="/logo-min.png">
+    <link rel="shortcut icon" href="/logo-min.png">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>

@@ -1,4 +1,14 @@
 pt-BR:
+  # Zeno Branding
+  app:
+    name: "Zeno"
+    tagline: "Clareza para suas finanças."
+    taglines:
+      dashboard: "Clareza para suas finanças."
+      login: "Simplifique sua vida financeira."
+      footer: "Sua visão financeira, simplificada."
+      complete: "Zeno - Clareza para suas finanças."
+
   # Modelos
   activerecord:
     errors:
@@ -476,7 +486,7 @@ pt-BR:
     
   # Application specific
   application:
-    name: "Finance Tracker"
+    name: "Zeno"
     tagline: "Controle suas finanças pessoais"
     
   # Time formats

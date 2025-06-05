@@ -1,4 +1,104 @@
-<div>
-  <h1 class="font-bold text-4xl">Categories#show</h1>
-  <p>Find me in app/views/categories/show.html.erb</p>
+<% content_for :title, "#{@category.name} - Categoria" %>
+<% content_for :description, "Detalhes da categoria #{@category.name} no #{t('app.name')}" %>
+
+<div class="breadcrumbs text-sm mb-6">
+  <ul>
+    <li><%= link_to "Início", root_path %></li>
+    <li><%= link_to "Categorias", categories_path %></li>
+    <li><%= @category.name %></li>
+  </ul>
+</div>
+
+<div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+  <div>
+    <h1 class="text-3xl font-bold flex items-center gap-3">
+      📂 <%= @category.name %>
+    </h1>
+    <p class="text-base-content/70 mt-2">Transações e análises da categoria</p>
+  </div>
+  
+  <div class="flex flex-wrap gap-2">
+    <%= link_to 'Editar', edit_category_path(@category), class: "btn btn-primary" %>
+    <%= link_to 'Voltar', categories_path, class: "btn btn-ghost" %>
+  </div>
+</div>
+
+<!-- Category Statistics -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+  <div class="card bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+    <div class="card-body">
+      <h3 class="card-title text-primary">💰 Total Este Mês</h3>
+      <p class="text-2xl font-bold">
+        R$ <%= number_with_precision(@category.transactions.where('transaction_date >= ?', Date.current.beginning_of_month).sum(:amount), precision: 2, delimiter: ".") %>
+      </p>
+      <p class="text-sm text-base-content/60">Gastos no mês atual</p>
+    </div>
+  </div>
+  
+  <div class="card bg-gradient-to-br from-secondary/10 to-secondary/5 border border-secondary/20">
+    <div class="card-body">
+      <h3 class="card-title text-secondary">📊 Total de Transações</h3>
+      <p class="text-2xl font-bold"><%= @category.transactions.count %></p>
+      <p class="text-sm text-base-content/60">Todas as transações</p>
+    </div>
+  </div>
+  
+  <div class="card bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/20">
+    <div class="card-body">
+      <h3 class="card-title text-accent">📈 Média Mensal</h3>
+      <p class="text-2xl font-bold">
+        R$ <%= number_with_precision(@category.transactions.group_by_month(:transaction_date).sum(:amount).values.sum.to_f / [@category.transactions.group_by_month(:transaction_date).count, 1].max, precision: 2, delimiter: ".") %>
+      </p>
+      <p class="text-sm text-base-content/60">Baseado no histórico</p>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Transactions -->
+<div class="card bg-base-100 shadow">
+  <div class="card-body">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="card-title">💳 Transações Recentes</h2>
+      <%= link_to "Ver todas", transactions_path(category_id: @category.id), class: "btn btn-sm btn-outline" %>
+    </div>
+    
+    <% if @category.transactions.any? %>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição</th>
+              <th>Conta</th>
+              <th class="text-right">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @category.transactions.limit(15).order(created_at: :desc).each do |transaction| %>
+              <tr>
+                <td><%= l(transaction.transaction_date, format: :short) %></td>
+                <td><%= transaction.description %></td>
+                <td>
+                  <div class="badge badge-outline badge-sm">
+                    <%= transaction.account.name %>
+                  </div>
+                </td>
+                <td class="text-right font-mono">
+                  <span class="<%= transaction.transaction_type == 'income' ? 'text-success' : 'text-error' %>">
+                    <%= transaction.transaction_type == 'income' ? '+' : '-' %>R$ <%= number_with_precision(transaction.amount.abs, precision: 2, delimiter: ".") %>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-8">
+        <div class="text-4xl mb-2">📂</div>
+        <p class="text-base-content/60">Nenhuma transação encontrada</p>
+        <p class="text-sm text-base-content/50 mt-1">As transações aparecerão aqui quando forem categorizadas</p>
+      </div>
+    <% end %>
+  </div>
 </div>

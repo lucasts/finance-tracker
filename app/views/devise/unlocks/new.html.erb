@@ -1,31 +1,47 @@
-<div class="min-h-screen bg-base-200 flex items-center justify-center p-4">
+<% content_for :title, "Desbloquear conta" %>
+
+<div class="min-h-screen flex items-center justify-center bg-base-200">
   <div class="card w-full max-w-md bg-base-100 shadow-xl">
     <div class="card-body">
-      <h2 class="card-title justify-center text-2xl mb-6">
-        <%= t('devise.unlocks.new.resend_unlock_instructions') %>
-      </h2>
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <%= image_tag "full_logo_zeno-min.png", alt: "Zeno - Clareza para suas finanças", class: "h-20 w-auto mx-auto mb-4" %>
+        <p class="text-base-content/70 mt-2">Desbloquear conta</p>
+        <p class="text-sm text-base-content/60 mt-1">
+          Digite seu email para receber instruções de desbloqueio.
+        </p>
+      </div>
 
-      <%= form_for(resource, as: resource_name, url: unlock_path(resource_name), html: { method: :post, class: "space-y-4" }) do |f| %>
-        <%= render "devise/shared/error_messages", resource: resource %>
+      <!-- Error Messages -->
+      <%= render "devise/shared/error_messages", resource: resource %>
 
+      <!-- Unlock Form -->
+      <%= form_for(resource, as: resource_name, url: unlock_path(resource_name), html: { method: :post }, local: true, class: "space-y-4") do |f| %>
+        
+        <!-- Email Field -->
         <div class="form-control">
-          <%= f.label :email, class: "label" %>
-          <span class="label-text"><%= t('activerecord.attributes.user.email') %></span>
+          <%= f.label :email, class: "label" do %>
+            <span class="label-text font-medium">Email</span>
+          <% end %>
           <%= f.email_field :email, 
                             autofocus: true, 
                             autocomplete: "email",
                             class: "input input-bordered w-full",
-                            placeholder: t('activerecord.attributes.user.email') %>
+                            placeholder: "seu@email.com" %>
         </div>
 
+        <!-- Submit Button -->
         <div class="form-control mt-6">
-          <%= f.submit t('devise.unlocks.new.resend_unlock_instructions'), 
-                      class: "btn btn-primary w-full" %>
+          <%= f.submit "Reenviar instruções de desbloqueio", 
+                      class: "btn btn-primary btn-block text-white" %>
         </div>
       <% end %>
 
-      <div class="divider"></div>
-      <%= render "devise/shared/links" %>
+      <!-- Divider -->
+      <div class="divider">ou</div>
+      <div class="text-center">
+        <%= render "devise/shared/links" %>
+      </div>
     </div>
   </div>
 </div>
