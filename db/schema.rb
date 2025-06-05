@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_03_014934) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_04_180200) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -55,6 +55,42 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_03_014934) do
     t.index ["account_id"], name: "index_credit_statements_on_account_id"
   end
 
+  create_table "import_sessions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "source_type", null: false
+    t.string "original_filename"
+    t.string "account_type"
+    t.integer "account_id", null: false
+    t.text "raw_file"
+    t.json "metadata"
+    t.datetime "imported_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_import_sessions_on_user_id"
+  end
+
+  create_table "imported_transactions", force: :cascade do |t|
+    t.integer "import_session_id", null: false
+    t.integer "line_number"
+    t.string "external_id"
+    t.string "raw_data", null: false
+    t.string "description"
+    t.decimal "amount", precision: 15, scale: 2
+    t.date "event_date"
+    t.date "payment_date"
+    t.string "transaction_type"
+    t.string "status"
+    t.string "category_guess"
+    t.string "installment_info"
+    t.integer "installment_plan_id"
+    t.integer "recurring_commitment_id"
+    t.integer "matched_transaction_id"
+    t.json "parsed_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["import_session_id"], name: "index_imported_transactions_on_import_session_id"
+  end
+
   create_table "installment_plans", force: :cascade do |t|
     t.string "name", null: false
     t.integer "installment_count", null: false
@@ -69,6 +105,20 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_03_014934) do
     t.index ["recurrence_frequency"], name: "index_installment_plans_on_recurrence_frequency"
     t.index ["status"], name: "index_installment_plans_on_status"
     t.index ["user_id"], name: "index_installment_plans_on_user_id"
+  end
+
+  create_table "reconciliation_entries", force: :cascade do |t|
+    t.integer "imported_transaction_id", null: false
+    t.integer "transaction_id"
+    t.string "action", null: false
+    t.json "decision_data"
+    t.integer "user_id", null: false
+    t.datetime "decided_at", null: false
+    t.text "audit_log"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["imported_transaction_id"], name: "index_reconciliation_entries_on_imported_transaction_id"
+    t.index ["transaction_id"], name: "index_reconciliation_entries_on_transaction_id"
   end
 
   create_table "recurring_commitments", force: :cascade do |t|
@@ -150,7 +200,15 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_03_014934) do
   add_foreign_key "accounts", "users"
   add_foreign_key "categories", "users"
   add_foreign_key "credit_statements", "accounts"
+  add_foreign_key "import_sessions", "users"
+  add_foreign_key "imported_transactions", "import_sessions"
+  add_foreign_key "imported_transactions", "installment_plans"
+  add_foreign_key "imported_transactions", "recurring_commitments"
+  add_foreign_key "imported_transactions", "transactions", column: "matched_transaction_id"
   add_foreign_key "installment_plans", "users"
+  add_foreign_key "reconciliation_entries", "imported_transactions"
+  add_foreign_key "reconciliation_entries", "transactions"
+  add_foreign_key "reconciliation_entries", "users"
   add_foreign_key "recurring_commitments", "categories"
   add_foreign_key "recurring_commitments", "users"
   add_foreign_key "transactions", "accounts", column: "from_account_id"
