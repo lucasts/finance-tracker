@@ -12,8 +12,7 @@
         "terminal.integrated.shell.linux": "/bin/bash"
       },
       "extensions": [
-        "rebornix.Ruby",
-        "castwide.solargraph"
+        "rebornix.Ruby"
       ]
     }
   },
