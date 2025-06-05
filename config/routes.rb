@@ -40,4 +40,14 @@ Rails.application.routes.draw do
       get :status
     end
   end
+
+  resources :import_sessions, only: [:index, :new, :create, :show] do
+    member do
+      get :confirm
+      post :finalize
+      post :batch_process_pending
+    end
+    resources :imported_transactions, only: [:edit, :update]
+  end
+  resources :reconciliation_entries, only: [:create]
 end
