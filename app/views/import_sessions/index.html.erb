@@ -1,0 +1,238 @@
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-base-content flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        Minhas Importações
+      </h1>
+      <p class="text-base-content/70 mt-1">Histórico de importações de extratos bancários</p>
+    </div>
+    <%= link_to new_import_session_path, class: "btn btn-primary gap-2" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Nova Importação
+    <% end %>
+  </div>
+
+  <% if @import_sessions.any? %>
+    <!-- Estatísticas rápidas -->
+    <div class="stats shadow mb-6 w-full">
+      <div class="stat">
+        <div class="stat-figure text-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div class="stat-title">Total de Importações</div>
+        <div class="stat-value text-primary"><%= @import_sessions.count %></div>
+        <div class="stat-desc">Arquivos processados</div>
+      </div>
+      
+      <div class="stat">
+        <div class="stat-figure text-success">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div class="stat-title">Concluídas</div>
+        <div class="stat-value text-success"><%= @import_sessions.where.not(imported_at: nil).count %></div>
+        <div class="stat-desc">Processamentos finalizados</div>
+      </div>
+      
+      <div class="stat">
+        <div class="stat-figure text-warning">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="stat-title">Pendentes</div>
+        <div class="stat-value text-warning"><%= @import_sessions.where(imported_at: nil).count %></div>
+        <div class="stat-desc">Aguardando conciliação</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-figure text-info">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+        </div>
+        <div class="stat-title">Esta Semana</div>
+        <div class="stat-value text-info"><%= @import_sessions.where(created_at: 1.week.ago..Time.current).count %></div>
+        <div class="stat-desc">Novas importações</div>
+      </div>
+    </div>
+
+    <!-- Filtros e busca -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+      <div class="card-body py-4">
+        <div class="flex flex-col sm:flex-row gap-4 items-center">
+          <div class="form-control flex-1">
+            <div class="input-group">
+              <input type="text" 
+                     placeholder="Buscar por nome do arquivo..." 
+                     class="input input-bordered flex-1" 
+                     id="search-input"
+                     onkeyup="filterTable()">
+              <span class="bg-base-200 px-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </span>
+            </div>
+          </div>
+          <div class="form-control">
+            <select class="select select-bordered" id="status-filter" onchange="filterTable()">
+              <option value="">Todos os status</option>
+              <option value="completed">Concluídas</option>
+              <option value="pending">Pendentes</option>
+            </select>
+          </div>
+          <div class="form-control">
+            <select class="select select-bordered" id="type-filter" onchange="filterTable()">
+              <option value="">Todos os tipos</option>
+              <option value="OFX">OFX</option>
+              <option value="CSV">CSV</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela de importações -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body p-0">
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr class="bg-base-200">
+                <th class="font-semibold">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Data
+                </th>
+                <th class="font-semibold">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Arquivo
+                </th>
+                <th class="font-semibold">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  Conta
+                </th>
+                <th class="font-semibold">Status</th>
+                <th class="font-semibold">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @import_sessions.each do |session| %>
+                <tr class="hover import-row" 
+                    data-filename="<%= session.original_filename.downcase %>"
+                    data-status="<%= session.imported_at ? 'completed' : 'pending' %>"
+                    data-type="<%= session.source_type.upcase %>">
+                  <td>
+                    <div class="flex flex-col">
+                      <span class="font-medium"><%= l(session.created_at, format: :short) %></span>
+                      <span class="text-xs text-base-content/60"><%= time_ago_in_words(session.created_at) %> atrás</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="badge badge-outline badge-sm">
+                        <%= session.source_type.upcase %>
+                      </div>
+                      <span class="font-medium truncate max-w-xs" title="<%= session.original_filename %>">
+                        <%= session.original_filename %>
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 rounded-full bg-primary"></div>
+                      <span><%= session.account&.name %></span>
+                    </div>
+                  </td>
+                  <td>
+                    <% if session.imported_at %>
+                      <div class="badge badge-success gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Concluída
+                      </div>
+                    <% else %>
+                      <div class="badge badge-warning gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Pendente
+                      </div>
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= render 'action_buttons', session: session %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <!-- Estado vazio -->
+    <div class="hero min-h-96">
+      <div class="hero-content text-center">
+        <div class="max-w-md">
+          <div class="mb-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h1 class="text-2xl font-bold mb-4">Nenhuma importação ainda</h1>
+          <p class="text-base-content/70 mb-6">
+            Comece importando um extrato bancário para conciliar suas transações automaticamente.
+          </p>
+          <%= link_to new_import_session_path, class: "btn btn-primary gap-2" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+            </svg>
+            Fazer Primeira Importação
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<script>
+function filterTable() {
+  const searchInput = document.getElementById('search-input').value.toLowerCase();
+  const statusFilter = document.getElementById('status-filter').value;
+  const typeFilter = document.getElementById('type-filter').value;
+  const rows = document.querySelectorAll('.import-row');
+  
+  rows.forEach(row => {
+    const filename = row.dataset.filename;
+    const status = row.dataset.status;
+    const type = row.dataset.type;
+    
+    const matchesSearch = filename.includes(searchInput);
+    const matchesStatus = !statusFilter || status === statusFilter;
+    const matchesType = !typeFilter || type === typeFilter;
+    
+    if (matchesSearch && matchesStatus && matchesType) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+</script>

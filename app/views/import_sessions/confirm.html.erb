@@ -1,0 +1,513 @@
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="breadcrumbs text-sm mb-2">
+      <ul>
+        <li><%= link_to "Importações", import_sessions_path, class: "link link-hover" %></li>
+        <li><%= link_to @import_session.original_filename, import_session_path(@import_session), class: "link link-hover" %></li>
+        <li class="text-base-content/70">Confirmação Final</li>
+      </ul>
+    </div>
+    <h1 class="text-3xl font-bold text-base-content flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      Confirmação Final da Importação
+    </h1>
+    <p class="text-base-content/70 mt-1">Revise todas as decisões de conciliação antes de finalizar</p>
+  </div>
+
+  <!-- Cards de informação -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Informações da importação -->
+    <div class="card bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-primary mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Arquivo Importado
+        </h2>
+        <div class="space-y-3">
+          <div class="flex justify-between">
+            <span class="text-base-content/70">Nome:</span>
+            <span class="font-medium truncate max-w-32" title="<%= @import_session.original_filename %>">
+              <%= @import_session.original_filename %>
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-base-content/70">Tipo:</span>
+            <div class="badge badge-primary badge-sm"><%= @import_session.source_type.upcase %></div>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-base-content/70">Conta:</span>
+            <span class="font-medium"><%= @import_session.account&.name %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-base-content/70">Data:</span>
+            <span class="font-medium"><%= l(@import_session.created_at, format: :short) %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estatísticas de conciliação -->
+    <div class="card bg-gradient-to-br from-success/5 to-success/10 border border-success/20 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-success mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Resumo
+        </h2>
+        <% 
+          total = @import_session.imported_transactions.count
+          conciliadas = @import_session.imported_transactions.joins(:reconciliation_entry).where.not(reconciliation_entries: { action: nil }).count
+          pendentes = total - conciliadas
+          novas = @import_session.imported_transactions.joins(:reconciliation_entry).where(reconciliation_entries: { action: 'create_new' }).count
+          associadas = @import_session.imported_transactions.joins(:reconciliation_entry).where(reconciliation_entries: { action: 'associate' }).count
+          ignoradas = @import_session.imported_transactions.joins(:reconciliation_entry).where(reconciliation_entries: { action: 'ignore' }).count
+        %>
+        <div class="space-y-3">
+          <div class="flex justify-between">
+            <span class="text-base-content/70">Total:</span>
+            <span class="font-bold text-primary"><%= total %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-base-content/70">Novas:</span>
+            <span class="font-bold text-success"><%= novas %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-base-content/70">Associadas:</span>
+            <span class="font-bold text-info"><%= associadas %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-base-content/70">Ignoradas:</span>
+            <span class="font-bold text-warning"><%= ignoradas %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status do progresso -->
+    <div class="card bg-gradient-to-br from-info/5 to-info/10 border border-info/20 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-info mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Progresso
+        </h2>
+        <% progresso = total > 0 ? (conciliadas.to_f / total * 100).round : 0 %>
+        <div class="space-y-3">
+          <div class="flex justify-between text-sm">
+            <span>Conciliação</span>
+            <span class="font-bold"><%= progresso %>%</span>
+          </div>
+          <progress class="progress progress-info w-full" value="<%= progresso %>" max="100"></progress>
+          <div class="text-xs text-base-content/60">
+            <% if pendentes == 0 %>
+              <div class="flex items-center gap-1 text-success">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Todas as transações processadas
+              </div>
+            <% else %>
+              <div class="flex items-center gap-1 text-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <%= pendentes %> transação(ões) pendente(s)
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerta de status -->
+  <% if pendentes > 0 %>
+    <div class="alert alert-warning mb-8">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"/>
+      </svg>
+      <div>
+        <h3 class="font-bold">Atenção!</h3>
+        <div class="text-sm">
+          Existem <%= pendentes %> transação(ões) ainda não conciliada(s). 
+          É necessário processar todas as transações antes de finalizar a importação.
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <div class="alert alert-success mb-8">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <div>
+        <h3 class="font-bold">Pronto para finalizar!</h3>
+        <div class="text-sm">
+          Todas as transações foram processadas. Você pode finalizar a importação agora.
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Tabela detalhada -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-header">
+      <div class="card-title flex justify-between items-center p-6 pb-0">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          Decisões de Conciliação
+        </h2>
+      </div>
+    </div>
+    
+    <div class="card-body p-0">
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr class="bg-base-200">
+              <th class="font-semibold">#</th>
+              <th class="font-semibold">Descrição</th>
+              <th class="font-semibold">Valor</th>
+              <th class="font-semibold">Decisão</th>
+              <th class="font-semibold">Resultado</th>
+              <th class="font-semibold">Processado por</th>
+              <th class="font-semibold">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @import_session.imported_transactions.order(:line_number).each do |tx| %>
+              <% rec = tx.reconciliation_entry %>
+              <tr class="hover">
+                <td>
+                  <div class="badge badge-neutral badge-sm"><%= tx.line_number %></div>
+                </td>
+                <td>
+                  <div class="max-w-xs truncate" title="<%= tx.description %>">
+                    <span class="font-medium"><%= tx.description %></span>
+                  </div>
+                </td>
+                <td>
+                  <div class="font-mono font-semibold <%= tx.amount >= 0 ? 'text-success' : 'text-error' %>">
+                    <%= number_to_currency(tx.amount, unit: 'R$') %>
+                  </div>
+                </td>
+                <td>
+                  <% if rec&.action == 'create_new' %>
+                    <div class="badge badge-success gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Nova transação
+                    </div>
+                  <% elsif rec&.action == 'associate' %>
+                    <div class="badge badge-info gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                      Associada
+                    </div>
+                  <% elsif rec&.action == 'ignore' %>
+                    <div class="badge badge-warning gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                      </svg>
+                      Ignorada
+                    </div>
+                  <% else %>
+                    <div class="badge badge-neutral gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Pendente
+                    </div>
+                  <% end %>
+                </td>
+                <td>
+                  <% if rec&.linked_transaction %>
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 rounded-full bg-success"></div>
+                      <span class="text-sm truncate max-w-32" title="<%= rec.linked_transaction.description %>">
+                        <%= rec.linked_transaction.description %>
+                      </span>
+                    </div>
+                  <% elsif rec&.action == 'ignore' %>
+                    <span class="text-base-content/50 italic text-sm">Transação ignorada</span>
+                  <% else %>
+                    <span class="text-base-content/50 italic text-sm">Nenhuma ação realizada</span>
+                  <% end %>
+                </td>
+                <td>
+                  <% if rec&.user %>
+                    <div class="text-xs">
+                      <div class="font-medium"><%= rec.user.email.split('@').first %></div>
+                      <div class="text-base-content/60"><%= time_ago_in_words(rec.decided_at) %> atrás</div>
+                    </div>
+                  <% else %>
+                    <span class="text-base-content/50 italic text-xs">Não processado</span>
+                  <% end %>
+                </td>
+                <td>
+                  <div class="flex gap-1">
+                    <% if rec&.linked_transaction %>
+                      <%= link_to transaction_path(rec.linked_transaction), 
+                          class: "btn btn-sm btn-outline gap-1", 
+                          title: "Ver transação" do %>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      <% end %>
+                    <% elsif rec.nil? %>
+                      <%= link_to edit_import_session_imported_transaction_path(@import_session, tx), 
+                          class: "btn btn-sm btn-primary gap-1", 
+                          title: "Conciliar" do %>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>  <!-- Footer com ações -->
+  <div class="flex flex-col sm:flex-row gap-4 justify-between items-center mt-8">
+    <div class="flex gap-2">
+      <%= link_to import_session_path(@import_session), class: "btn btn-ghost gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+        </svg>
+        Voltar aos Detalhes
+      <% end %>
+      
+      <% if pendentes > 0 %>
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-warning gap-2" id="batch-process-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Processar Pendentes
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-64">
+            <li>
+              <a onclick="processAllPending('create_new')" class="gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Criar Novas Transações
+              </a>
+            </li>
+            <li>
+              <a onclick="processAllPending('ignore')" class="gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                </svg>
+                Ignorar Todas
+              </a>
+            </li>
+          </ul>
+        </div>
+      <% end %>
+    </div>
+
+    <% if pendentes == 0 %>
+      <%= button_to finalize_import_session_path(@import_session), 
+          method: :post, 
+          class: "btn btn-success gap-2 btn-lg", 
+          data: { 
+            confirm: "Confirma a finalização da importação? Esta ação marcará a importação como concluída e não poderá ser desfeita." 
+          } do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Finalizar Importação
+      <% end %>
+    <% else %>
+      <div class="btn btn-disabled gap-2 btn-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Finalizar Importação
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Progress Modal -->
+<dialog id="progress_modal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Processando Transações</h3>
+    <div class="py-4">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="loading loading-spinner loading-md text-primary"></span>
+        <span id="progress-text">Processando...</span>
+      </div>
+      <progress id="progress-bar" class="progress progress-primary w-full" value="0" max="100"></progress>
+      <div class="text-sm text-base-content/70 mt-2">
+        <span id="progress-details">Preparando processamento...</span>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+function processAllPending(actionType = 'create_new') {
+  const pendingRows = document.querySelectorAll('tr:has(.badge-neutral)');
+  if (pendingRows.length === 0) {
+    showAlert('Não há transações pendentes para processar.', 'warning');
+    return;
+  }
+  
+  const actionText = actionType === 'create_new' ? 'criar novas transações' : 'ignorar';
+  const confirmMessage = `Processar ${pendingRows.length} transação(ões) pendente(s) e ${actionText}?`;
+  
+  if (!confirm(confirmMessage)) {
+    return;
+  }
+  
+  // Show progress modal
+  const modal = document.getElementById('progress_modal');
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const progressDetails = document.getElementById('progress-details');
+  
+  modal.showModal();
+  progressBar.value = 0;
+  progressText.textContent = 'Iniciando processamento...';
+  progressDetails.textContent = `0 de ${pendingRows.length} transações processadas`;
+  
+  // Disable batch button
+  const batchBtn = document.getElementById('batch-process-btn');
+  batchBtn.disabled = true;
+  
+  // Make AJAX request
+  fetch('<%= batch_process_pending_import_session_path(@import_session) %>', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: JSON.stringify({ action_type: actionType })
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Simulate progress for better UX
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += 10;
+      progressBar.value = progress;
+      
+      if (progress >= 100) {
+        clearInterval(progressInterval);
+        progressText.textContent = 'Concluído!';
+        progressDetails.textContent = `${data.processed_count || 0} transações processadas`;
+        
+        // Close modal after delay
+        setTimeout(() => {
+          modal.close();
+          
+          if (data.success) {
+            showAlert(data.message, 'success');
+            // Reload page to show updated status
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            showAlert(data.message, 'error');
+            if (data.errors && data.errors.length > 0) {
+              console.error('Batch processing errors:', data.errors);
+              const errorList = data.errors.slice(0, 3).join('\n');
+              setTimeout(() => {
+                alert('Erros encontrados:\n' + errorList + (data.errors.length > 3 ? '\n...' : ''));
+              }, 2000);
+            }
+          }
+        }, 1000);
+      } else {
+        const processed = Math.floor((progress / 100) * pendingRows.length);
+        progressDetails.textContent = `${processed} de ${pendingRows.length} transações processadas`;
+      }
+    }, 100);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    modal.close();
+    showAlert('Erro ao processar transações. Tente novamente.', 'error');
+  })
+  .finally(() => {
+    // Re-enable button
+    batchBtn.disabled = false;
+  });
+}
+
+function showAlert(message, type) {
+  // Create alert element
+  const alertDiv = document.createElement('div');
+  alertDiv.className = `alert alert-${type} mb-4 animate-fade-in`;
+  
+  const iconSvg = type === 'success' ? 
+    `<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+     </svg>` :
+    type === 'warning' ?
+    `<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"/>
+     </svg>` :
+    `<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+     </svg>`;
+  
+  alertDiv.innerHTML = `
+    ${iconSvg}
+    <span>${message}</span>
+    <button class="btn btn-sm btn-ghost" onclick="this.parentElement.remove()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  `;
+  
+  // Insert at the top of the container
+  const container = document.querySelector('.container');
+  const header = container.querySelector('.mb-8');
+  container.insertBefore(alertDiv, header.nextSibling);
+  
+  // Auto remove after 8 seconds
+  setTimeout(() => {
+    if (alertDiv.parentNode) {
+      alertDiv.style.opacity = '0';
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 300);
+    }
+  }, 8000);
+}
+
+// Add some CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+document.head.appendChild(style);
+</script>

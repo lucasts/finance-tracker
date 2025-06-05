@@ -1,0 +1,363 @@
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="breadcrumbs text-sm mb-2">
+      <ul>
+        <li><%= link_to "Importações", import_sessions_path, class: "link link-hover" %></li>
+        <li><%= link_to @import_session.original_filename, import_session_path(@import_session), class: "link link-hover" %></li>
+        <li class="text-base-content/70">Conciliação</li>
+      </ul>
+    </div>
+    <h1 class="text-3xl font-bold text-base-content flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+      Conciliação de Transação
+    </h1>
+    <p class="text-base-content/70 mt-1">Linha <%= @imported_transaction.line_number %> • Analise e decida o que fazer com esta transação</p>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+    <!-- Coluna esquerda: Dados importados -->
+    <div class="space-y-6">
+      <!-- Card da transação importada -->
+      <div class="card bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 shadow-xl">
+        <div class="card-body">
+          <div class="card-title flex items-center gap-2 text-primary mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+            </svg>
+            Transação Importada
+            <div class="badge badge-primary badge-sm">Linha <%= @imported_transaction.line_number %></div>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm font-medium text-base-content/70">Descrição</label>
+                <div class="p-3 bg-base-100 rounded-lg border">
+                  <div class="font-medium break-words"><%= @imported_transaction.description %></div>
+                </div>
+              </div>
+              <div>
+                <label class="text-sm font-medium text-base-content/70">Valor</label>
+                <div class="p-3 bg-base-100 rounded-lg border">
+                  <div class="font-mono font-bold text-lg <%= @imported_transaction.amount >= 0 ? 'text-success' : 'text-error' %>">
+                    <%= number_to_currency(@imported_transaction.amount, unit: 'R$') %>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm font-medium text-base-content/70">Data do Evento</label>
+                <div class="p-3 bg-base-100 rounded-lg border">
+                  <div class="font-medium">
+                    <%= l(@imported_transaction.event_date, format: :long) if @imported_transaction.event_date %>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="text-sm font-medium text-base-content/70">Data de Pagamento</label>
+                <div class="p-3 bg-base-100 rounded-lg border">
+                  <div class="font-medium">
+                    <%= l(@imported_transaction.payment_date, format: :long) if @imported_transaction.payment_date %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sugestões do sistema -->
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <div class="card-title flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Sugestões Inteligentes
+          </div>
+
+          <!-- Alertas de padrões encontrados -->
+          <% if @matches[:installment_plan] %>
+            <div class="alert alert-info mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <div>
+                <h3 class="font-bold">Parcelamento Detectado!</h3>
+                <div class="text-xs">Possível parcela do plano: <strong><%= @matches[:installment_plan].name %></strong></div>
+              </div>
+            </div>
+          <% end %>
+
+          <% if @matches[:recurring_commitment] %>
+            <div class="alert alert-info mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <div>
+                <h3 class="font-bold">Compromisso Recorrente Detectado!</h3>
+                <div class="text-xs">Possível ocorrência do compromisso: <strong><%= @matches[:recurring_commitment].name %></strong></div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Transações similares -->
+          <% if @matches[:candidates].present? %>
+            <div class="mb-4">
+              <h4 class="font-semibold mb-3 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                Transações Existentes Similares
+              </h4>
+              <div class="space-y-2 max-h-64 overflow-y-auto">
+                <% @matches[:candidates].each do |tx| %>
+                  <div class="p-3 border rounded-lg hover:bg-base-200 cursor-pointer transition-colors"
+                       onclick="selectTransaction(<%= tx.id %>)"
+                       id="tx-<%= tx.id %>">
+                    <div class="flex justify-between items-start">
+                      <div class="flex-1">
+                        <div class="font-medium text-sm"><%= tx.description %></div>
+                        <div class="text-xs text-base-content/70 mt-1">
+                          <%= l(tx.event_date, format: :short) if tx.event_date %> •
+                          <span class="<%= tx.amount >= 0 ? 'text-success' : 'text-error' %>">
+                            <%= number_to_currency(tx.amount, unit: 'R$') %>
+                          </span>
+                          <% if tx.category %>
+                            • <span class="badge badge-outline badge-xs"><%= tx.category.name %></span>
+                          <% end %>
+                        </div>
+                      </div>
+                      <input type="radio" name="matched_transaction_id" value="<%= tx.id %>" class="radio radio-primary radio-sm">
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% else %>
+            <div class="text-center py-6">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-base-content/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <div class="text-sm text-base-content/70">Nenhuma transação similar encontrada</div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Dados originais (expansível) -->
+      <div class="collapse collapse-arrow bg-base-100 shadow-xl">
+        <input type="checkbox" /> 
+        <div class="collapse-title text-lg font-medium flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-base-content/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Dados Técnicos
+        </div>
+        <div class="collapse-content"> 
+          <div class="bg-base-200 rounded-lg p-4">
+            <pre class="text-xs overflow-x-auto"><%= JSON.pretty_generate(@imported_transaction.parsed_data || {}) rescue @imported_transaction.raw_data %></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna direita: Formulário de conciliação -->
+    <div class="space-y-6">
+      <%= form_with model: @imported_transaction, url: import_session_imported_transaction_path(@import_session, @imported_transaction), method: :put, local: true, html: { class: "space-y-6" } do |f| %>
+        
+        <!-- Ações de conciliação -->
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <div class="card-title flex items-center gap-2 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Ação de Conciliação
+            </div>
+            
+            <div class="space-y-3">
+              <label class="cursor-pointer">
+                <div class="flex items-center gap-3 p-4 border rounded-lg hover:bg-primary/5 transition-colors">
+                  <input type="radio" name="reconciliation_action" value="create_new" checked class="radio radio-primary">
+                  <div class="flex-1">
+                    <div class="font-medium">Criar Nova Transação</div>
+                    <div class="text-sm text-base-content/70">Adiciona uma nova transação ao sistema</div>
+                  </div>
+                  <div class="badge badge-primary badge-sm">Recomendado</div>
+                </div>
+              </label>
+
+              <% if @matches[:candidates].present? %>
+                <label class="cursor-pointer">
+                  <div class="flex items-center gap-3 p-4 border rounded-lg hover:bg-info/5 transition-colors">
+                    <input type="radio" name="reconciliation_action" value="associate" class="radio radio-info">
+                    <div class="flex-1">
+                      <div class="font-medium">Associar à Existente</div>
+                      <div class="text-sm text-base-content/70">Vincula a uma transação já cadastrada</div>
+                    </div>
+                    <div class="badge badge-info badge-sm">Match encontrado</div>
+                  </div>
+                </label>
+              <% end %>
+
+              <label class="cursor-pointer">
+                <div class="flex items-center gap-3 p-4 border rounded-lg hover:bg-warning/5 transition-colors">
+                  <input type="radio" name="reconciliation_action" value="ignore" class="radio radio-warning">
+                  <div class="flex-1">
+                    <div class="font-medium">Ignorar</div>
+                    <div class="text-sm text-base-content/70">Não processa esta linha</div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edição de dados -->
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <div class="card-title flex items-center gap-2 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Editar Dados da Transação
+            </div>
+            
+            <div class="space-y-4">
+              <div class="form-control">
+                <%= f.label :description, class: "label" do %>
+                  <span class="label-text font-medium">Descrição</span>
+                <% end %>
+                <%= f.text_field :description, 
+                    value: @imported_transaction.description, 
+                    class: "input input-bordered w-full", 
+                    placeholder: "Descrição da transação..." %>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="form-control">
+                  <%= f.label :amount, class: "label" do %>
+                    <span class="label-text font-medium">Valor</span>
+                  <% end %>
+                  <%= f.number_field :amount, 
+                      value: @imported_transaction.amount, 
+                      class: "input input-bordered w-full", 
+                      step: 0.01, 
+                      placeholder: "0,00" %>
+                </div>
+
+                <div class="form-control">
+                  <%= f.label :transaction_type, class: "label" do %>
+                    <span class="label-text font-medium">Tipo</span>
+                  <% end %>
+                  <%= f.select :transaction_type, 
+                      [['Receita', 'income'], ['Despesa', 'expense'], ['Transferência', 'transfer']], 
+                      { selected: @imported_transaction.amount >= 0 ? 'income' : 'expense' }, 
+                      { class: "select select-bordered w-full" } %>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="form-control">
+                  <%= f.label :event_date, class: "label" do %>
+                    <span class="label-text font-medium">Data do Evento</span>
+                  <% end %>
+                  <%= f.date_field :event_date, 
+                      value: @imported_transaction.event_date, 
+                      class: "input input-bordered w-full" %>
+                </div>
+
+                <div class="form-control">
+                  <%= f.label :payment_date, class: "label" do %>
+                    <span class="label-text font-medium">Data do Pagamento</span>
+                  <% end %>
+                  <%= f.date_field :payment_date, 
+                      value: @imported_transaction.payment_date, 
+                      class: "input input-bordered w-full" %>
+                </div>
+              </div>
+
+              <div class="form-control">
+                <%= f.label :category_id, class: "label" do %>
+                  <span class="label-text font-medium">Categoria</span>
+                <% end %>
+                <%= f.collection_select :category_id, 
+                    current_user.categories, :id, :name, 
+                    { prompt: 'Selecione uma categoria...' }, 
+                    { class: "select select-bordered w-full" } %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <div class="flex flex-col sm:flex-row gap-3 justify-between">
+              <%= link_to import_session_path(@import_session), class: "btn btn-ghost gap-2" do %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                </svg>
+                Cancelar
+              <% end %>
+              
+              <%= f.submit "Salvar Decisão", 
+                  class: "btn btn-primary gap-2 flex-1 sm:flex-none", 
+                  data: { 
+                    confirm: "Confirma a decisão de conciliação? Esta ação não pode ser desfeita facilmente." 
+                  } do %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Confirmar Conciliação
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Script para melhorar interação -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-select associate action when clicking on a similar transaction
+  const transactionCards = document.querySelectorAll('[id^="tx-"]');
+  const associateRadio = document.querySelector('input[value="associate"]');
+  
+  // Highlight selected transaction
+  const transactionRadios = document.querySelectorAll('input[name="matched_transaction_id"]');
+  transactionRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      transactionCards.forEach(card => card.classList.remove('ring-2', 'ring-info', 'bg-info/5'));
+      if (this.checked) {
+        const selectedCard = document.getElementById('tx-' + this.value);
+        if (selectedCard) {
+          selectedCard.classList.add('ring-2', 'ring-info', 'bg-info/5');
+        }
+        if (associateRadio) associateRadio.checked = true;
+      }
+    });
+  });
+});
+
+function selectTransaction(transactionId) {
+  const radio = document.querySelector(`input[value="${transactionId}"]`);
+  const associateRadio = document.querySelector('input[value="associate"]');
+  
+  if (radio) {
+    radio.checked = true;
+    radio.dispatchEvent(new Event('change'));
+  }
+  if (associateRadio) {
+    associateRadio.checked = true;
+  }
+}
+</script>
