@@ -1,0 +1,6 @@
+date,description,amount,category,account
+2023-02-01,Academia,-120.00,Saúde,Conta Corrente
+2023-02-02,Freelance,800.00,Receita,Conta Poupança
+2023-02-03,Aluguel,-900.00,Habitacao,Conta Corrente
+2023-02-04,Uber,-35.00,Transporte,Conta Corrente
+2023-02-05,Padaria,-25.00,Alimentação,Conta Poupança
