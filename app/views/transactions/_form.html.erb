@@ -204,7 +204,7 @@
                    class="checkbox checkbox-primary" 
                    data-recurrence-target="repeatCheckbox"
                    data-action="change->recurrence#handleRepeatToggle">
-            <span class="label-text text-lg">📅 Repetir este lançamento?</span>
+            <span class="label-text font-medium">📅 Repetir este lançamento?</span>
           </label>
           <div class="text-sm text-base-content/60 ml-8 mt-1">
             Marque esta opção para gastos recorrentes ou parcelamentos
@@ -212,18 +212,18 @@
         </div>
 
         <!-- Opções de repetição (aparecem quando checkbox marcado) -->
-        <div data-recurrence-target="repeatOptions" class="hidden mt-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div data-recurrence-target="repeatOptions" class="hidden mt-4">
+          <div class="space-y-3">
             <!-- Compromisso Recorrente -->
             <div class="form-control">
-              <label class="label cursor-pointer justify-start gap-3 p-4 border border-base-300 rounded-lg hover:bg-base-50 transition-colors">
+              <label class="label cursor-pointer justify-start gap-3 p-3 border border-base-300 rounded-lg hover:bg-base-50 transition-colors">
                 <input type="radio" 
                        name="repeat_type" 
                        value="recurring" 
-                       class="radio radio-primary" 
+                       class="radio radio-primary flex-shrink-0" 
                        data-recurrence-target="repeatType"
                        data-action="change->recurrence#handleTypeChange">
-                <div>
+                <div class="flex-1">
                   <div class="font-semibold">🔄 Compromisso Recorrente</div>
                   <div class="text-sm text-base-content/60">Gastos que se repetem regularmente como aluguel, assinaturas</div>
                 </div>
@@ -232,14 +232,14 @@
 
             <!-- Parcelamento -->
             <div class="form-control">
-              <label class="label cursor-pointer justify-start gap-3 p-4 border border-base-300 rounded-lg hover:bg-base-50 transition-colors">
+              <label class="label cursor-pointer justify-start gap-3 p-3 border border-base-300 rounded-lg hover:bg-base-50 transition-colors">
                 <input type="radio" 
                        name="repeat_type" 
                        value="installment" 
-                       class="radio radio-primary" 
+                       class="radio radio-primary flex-shrink-0" 
                        data-recurrence-target="repeatType"
                        data-action="change->recurrence#handleTypeChange">
-                <div>
+                <div class="flex-1">
                   <div class="font-semibold">📊 Parcelamento</div>
                   <div class="text-sm text-base-content/60">Compras divididas em parcelas fixas</div>
                 </div>
@@ -252,7 +252,7 @@
         <%= form.hidden_field :recurrence_type, value: "single", data: { recurrence_target: "hiddenType" } %>
 
         <!-- Recurring Commitment Section -->
-        <div data-recurrence-target="recurringSection" class="space-y-4 mt-6 hidden">
+        <div data-recurrence-target="recurringSection" class="space-y-4 mt-4 hidden">
           <div class="alert alert-info">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -265,7 +265,7 @@
             </div>
           </div>
 
-          <div class="form-control max-w-sm">
+          <div class="form-control max-w-xs">
             <label class="label">
               <span class="label-text">📊 Frequência de repetição</span>
             </label>
@@ -287,7 +287,7 @@
         </div>
 
         <!-- Installment Plan Section -->
-        <div data-recurrence-target="installmentSection" class="space-y-4 mt-6 hidden">
+        <div data-recurrence-target="installmentSection" class="space-y-4 mt-4 hidden">
           <% if transaction.installment_plan_id.present? %>
             <!-- Existing installment plan info -->
             <div class="alert alert-info">
@@ -320,7 +320,7 @@
               </div>
             </div>
 
-            <div class="form-control max-w-sm">
+            <div class="form-control max-w-xs">
               <label class="label">
                 <span class="label-text">📅 Número de parcelas</span>
               </label>
@@ -340,20 +340,20 @@
 
             <!-- Preview das parcelas -->
             <div data-recurrence-target="installmentPreview" class="hidden">
-              <div class="divider">📋 Resumo do Parcelamento</div>
-              <div class="bg-base-200 rounded-lg p-4 transition-all duration-300">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+              <div class="divider text-sm">📋 Resumo do Parcelamento</div>
+              <div class="bg-base-200 rounded-lg p-3 transition-all duration-300">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
                   <div>
-                    <div class="text-2xl font-bold text-primary" data-recurrence-target="installmentValue">R$ 0,00</div>
-                    <div class="text-sm text-base-content/60">Valor por parcela</div>
+                    <div class="text-xl font-bold text-primary" data-recurrence-target="installmentValue">R$ 0,00</div>
+                    <div class="text-xs text-base-content/60">Valor por parcela</div>
                   </div>
                   <div>
-                    <div class="text-2xl font-bold text-secondary" data-recurrence-target="firstDate">-</div>
-                    <div class="text-sm text-base-content/60">Primeira parcela</div>
+                    <div class="text-xl font-bold text-secondary" data-recurrence-target="firstDate">-</div>
+                    <div class="text-xs text-base-content/60">Primeira parcela</div>
                   </div>
                   <div>
-                    <div class="text-2xl font-bold text-accent" data-recurrence-target="lastDate">-</div>
-                    <div class="text-sm text-base-content/60">Última parcela</div>
+                    <div class="text-xl font-bold text-accent" data-recurrence-target="lastDate">-</div>
+                    <div class="text-xs text-base-content/60">Última parcela</div>
                   </div>
                 </div>
               </div>
