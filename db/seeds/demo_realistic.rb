@@ -206,7 +206,6 @@ meses_gerados = []
     category: categories["Salário"],
     recurrence_type: "single",
     status: "confirmed",
-    user: default_user,
     user: default_user
   )
   
@@ -224,7 +223,6 @@ meses_gerados = []
       category: categories["Freelance"],
       recurrence_type: "single",
       status: "confirmed",
-    user: default_user,
       user: default_user
     )
   end
@@ -243,7 +241,6 @@ meses_gerados = []
     category: categories["Educação"] || categories["Escola"],
     recurrence_type: "single",
     status: "confirmed",
-    user: default_user,
     user: default_user
   )
   
@@ -575,7 +572,7 @@ tv_plan = InstallmentPlan.create!(user: default_user,
   total_amount: 3800.00,
   status: "active",
   notes: "Smart TV Samsung 65\" comprada na Black Friday",
-  user: default_user
+  category: categories["Compras"]
 )
 
 10.times do |i|
@@ -600,13 +597,14 @@ end
 
 # Carro usado - 48x de R$ 890 (financiamento que começou 8 meses atrás)
 carro_plan = InstallmentPlan.create!(user: default_user, 
-  name: "Financiamento Civic 2019",
+  name: "Carro usado (financiamento)",
   installment_count: 48,
   recurrence_frequency: "monthly",
   starts_on: 8.months.ago.beginning_of_month + 10.days,
   total_amount: 42720.00,
   status: "active",
-  notes: "Financiamento Honda Civic 2019 usado - 48 parcelas"
+  notes: "Fiat Cronos 2020 - financiamento de 48x",
+  category: categories["Compras"]
 )
 
 48.times do |i|
@@ -632,13 +630,14 @@ end
 
 # Móveis planejados - 24x de R$ 520 (começou 3 meses atrás)
 moveis_plan = InstallmentPlan.create!(user: default_user, 
-  name: "Móveis planejados cozinha",
+  name: "Móveis planejados",
   installment_count: 24,
   recurrence_frequency: "monthly",
-  starts_on: 3.months.ago.beginning_of_month + 20.days,
-  total_amount: 12480.00,
+  starts_on: 3.months.ago.beginning_of_month + 5.days,
+  total_amount: 24000.00,
   status: "active",
-  notes: "Móveis planejados da cozinha e área de serviço"
+  notes: "Móveis planejados para cozinha e quartos",
+  category: categories["Compras"]
 )
 
 24.times do |i|
@@ -663,13 +662,14 @@ end
 
 # Empréstimo pessoal para emergência - 36x de R$ 450 (começou 10 meses atrás)
 emprestimo_plan = InstallmentPlan.create!(user: default_user, 
-  name: "Empréstimo pessoal Banco do Brasil",
-  installment_count: 36,
+  name: "Empréstimo pessoal",
+  installment_count: 12,
   recurrence_frequency: "monthly",
-  starts_on: 10.months.ago.beginning_of_month + 5.days,
-  total_amount: 16200.00,
+  starts_on: 2.months.ago.beginning_of_month + 2.days,
+  total_amount: 12000.00,
   status: "active",
-  notes: "Empréstimo pessoal para emergência médica da família"
+  notes: "Empréstimo para reforma da casa",
+  category: categories["Compras"]
 )
 
 36.times do |i|
