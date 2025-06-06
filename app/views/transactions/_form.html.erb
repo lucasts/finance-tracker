@@ -366,25 +366,8 @@
       </div>
     </div>
 
-    <!-- Advanced Options (collapsible) -->
-    <div class="card bg-base-100 shadow-sm border border-base-300" data-controller="collapsible">
-      <div class="card-body">
-        <div class="cursor-pointer" data-action="click->collapsible#toggle">
-          <h3 class="card-title text-lg">
-            ⚙️ <%= t('ui.transaction.form.advanced_options') %>
-            <svg data-collapsible-target="icon" class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </h3>
-          <p class="text-sm text-base-content/60 mt-1"><%= t('ui.transaction.form.advanced_info') %></p>
-        </div>
-        
-        <div data-collapsible-target="content" class="hidden mt-4 space-y-6">
-          <!-- Hidden field to preserve status -->
-          <%= form.hidden_field :status, value: transaction.status || "confirmed" %>
-        </div>
-      </div>
-    </div>
+    <!-- Hidden field to preserve status -->
+    <%= form.hidden_field :status, value: transaction.status || "confirmed" %>
 
     <!-- Action Buttons -->
     <div class="flex justify-end gap-3 pt-4">
