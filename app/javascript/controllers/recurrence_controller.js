@@ -4,7 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "repeatCheckbox",
-    "repeatOptions",
+    "repeatOptions", 
     "repeatType",
     "hiddenType",
     "recurringSection", 
@@ -20,20 +20,25 @@ export default class extends Controller {
   ]
 
   connect() {
+    console.log("Recurrence controller connected")
     this.updateDisplay()
   }
 
   handleRepeatToggle() {
+    console.log("Repeat toggle changed:", this.repeatCheckboxTarget.checked)
     this.updateDisplay()
   }
 
   handleTypeChange() {
+    console.log("Type changed:", this.getSelectedRepeatType())
     this.updateDisplay()
   }
 
   updateDisplay() {
     const isRepeating = this.repeatCheckboxTarget.checked
     const selectedType = this.getSelectedRepeatType()
+    
+    console.log("UpdateDisplay called:", { isRepeating, selectedType })
     
     // Show/hide repeat options
     if (isRepeating) {
@@ -43,32 +48,40 @@ export default class extends Controller {
     }
     
     // Hide all sections first
-    this.recurringSection?.classList.add('hidden')
-    this.installmentSection?.classList.add('hidden')
+    if (this.hasRecurringSectionTarget) {
+      this.recurringSectionTarget.classList.add('hidden')
+    }
+    if (this.hasInstallmentSectionTarget) {
+      this.installmentSectionTarget.classList.add('hidden')
+    }
     
     // Update hidden field and show relevant section
     if (!isRepeating) {
       this.hiddenTypeTarget.value = "single"
-      this.createRecurringTarget.value = ""
-      this.createInstallmentTarget.value = ""
+      if (this.hasCreateRecurringTarget) this.createRecurringTarget.value = ""
+      if (this.hasCreateInstallmentTarget) this.createInstallmentTarget.value = ""
     } else {
       switch(selectedType) {
         case 'recurring':
           this.hiddenTypeTarget.value = "recurring"
-          this.recurringSection?.classList.remove('hidden')
-          this.createRecurringTarget.value = "true"
-          this.createInstallmentTarget.value = ""
+          if (this.hasRecurringSectionTarget) {
+            this.recurringSectionTarget.classList.remove('hidden')
+          }
+          if (this.hasCreateRecurringTarget) this.createRecurringTarget.value = "true"
+          if (this.hasCreateInstallmentTarget) this.createInstallmentTarget.value = ""
           break
         case 'installment':
           this.hiddenTypeTarget.value = "installment"
-          this.installmentSection?.classList.remove('hidden')
-          this.createInstallmentTarget.value = "true" 
-          this.createRecurringTarget.value = ""
+          if (this.hasInstallmentSectionTarget) {
+            this.installmentSectionTarget.classList.remove('hidden')
+          }
+          if (this.hasCreateInstallmentTarget) this.createInstallmentTarget.value = "true" 
+          if (this.hasCreateRecurringTarget) this.createRecurringTarget.value = ""
           break
         default:
           this.hiddenTypeTarget.value = "single"
-          this.createRecurringTarget.value = ""
-          this.createInstallmentTarget.value = ""
+          if (this.hasCreateRecurringTarget) this.createRecurringTarget.value = ""
+          if (this.hasCreateInstallmentTarget) this.createInstallmentTarget.value = ""
           break
       }
     }
@@ -78,7 +91,8 @@ export default class extends Controller {
     const checkedRadio = this.repeatTypeTargets.find(radio => radio.checked)
     return checkedRadio ? checkedRadio.value : null
   }
-      calculateInstallment() {
+
+  calculateInstallment() {
     const installmentsCount = parseInt(this.installmentsCountTarget.value)
     const amountField = document.querySelector('[data-transaction-form-target="amount"]')
     const eventDateField = document.querySelector('[data-transaction-form-target="eventDate"]')
