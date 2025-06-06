@@ -173,7 +173,8 @@ class InstallmentPlan < ApplicationRecord
           installment_number: number,
           payment_date: installment_date,
           event_date: installment_date,
-          recurrence_type: 'installment'
+          recurrence_type: 'installment',
+          user: user  # Add the user from the installment plan
         )
         
         transaction.save!

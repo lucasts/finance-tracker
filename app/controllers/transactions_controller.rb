@@ -35,11 +35,10 @@ class TransactionsController < ApplicationController
 
   def create
     # Verifica o tipo de recorrência e processa adequadamente
-    case params[:recurrence_type]
-    when 'recurring'
-      create_recurring_transaction
-    when 'installment'
+    if params[:recurrence_type] == 'installment' || params[:create_installment_plan].present?
       create_installment_transaction
+    elsif params[:recurrence_type] == 'recurring' || params[:create_recurring_commitment].present?
+      create_recurring_transaction
     else
       create_single_transaction
     end
@@ -175,8 +174,8 @@ class TransactionsController < ApplicationController
       :description, :amount, :transaction_type, :event_date, :payment_date,
       :from_account_id, :to_account_id, :category_id, :installment,
       :recurrence_type, :credit_statement_id,
-      :recurrence_frequency, :installment_number
-      # status removido - será controlado automaticamente
+      :recurrence_frequency, :installment_number,
+      :status # permitir status para evitar warning e permitir atribuição explícita
     )
   end
 
