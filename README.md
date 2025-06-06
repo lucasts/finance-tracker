@@ -33,7 +33,7 @@ Sistema completo de gestão financeira familiar com separação entre competênc
 ./bin/dev
 
 # Testes
-rails test
+bundle exec rspec
 ```
 
 ### 📊 Dados de Demonstração

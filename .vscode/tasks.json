@@ -9,9 +9,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Testes",
+      "label": "Tests",
       "type": "shell",
-      "command": "rails test",
+      "command": "bundle exec rspec",
       "group": "test",
       "problemMatcher": []
     },

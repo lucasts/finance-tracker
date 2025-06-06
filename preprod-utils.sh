@@ -87,7 +87,7 @@ case "${1:-help}" in
         ;;
     "test")
         echo "🧪 Executando testes no ambiente preprod..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails test
+        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app bundle exec rspec
         ;;
     "status")
         echo "📊 Status dos containers:"
