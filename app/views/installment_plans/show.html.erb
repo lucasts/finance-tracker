@@ -209,7 +209,7 @@
                     <%= transaction.installment_number %>/<%= @installment_plan.installment_count %>
                   </div>
                 </td>
-                <td><%= l(transaction.date, format: :short) %></td>
+                <td><%= l(transaction.payment_date || transaction.event_date, format: :short) %></td>
                 <td class="font-semibold">R$ <%= number_with_precision(transaction.amount, precision: 2, delimiter: ".") %></td>
                 <td>
                   <div class="badge badge-success">Pago</div>
