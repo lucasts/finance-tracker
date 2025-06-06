@@ -4,7 +4,7 @@ class RecurringTransactionsJob < ApplicationJob
   def perform
     Rails.logger.info "Starting recurring transactions generation..."
     
-    active_commitments = RecurringCommitment.active
+    active_commitments = RecurringCommitment.where(status: :active)
     generated_count = 0
     
     active_commitments.find_each do |commitment|
@@ -50,7 +50,8 @@ class RecurringTransactionsJob < ApplicationJob
       category: commitment.category,
       recurring_commitment: commitment,
       recurrence_type: 'recurring',
-      status: occurrence_date > Date.current ? 'pending' : 'confirmed'
+      status: occurrence_date > Date.current ? 'pending' : 'confirmed',
+      user: commitment.user
     )
   end
 
@@ -72,7 +73,7 @@ class RecurringTransactionsJob < ApplicationJob
 
   def default_account_for_commitment(commitment)
     # Return the most commonly used account for this category
-    Account.joins(:transactions)
+    Account.joins(:transactions_from)
            .where(transactions: { category: commitment.category })
            .group('accounts.id')
            .order('COUNT(transactions.id) DESC')

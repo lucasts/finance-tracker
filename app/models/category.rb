@@ -5,7 +5,7 @@ class Category < ApplicationRecord
   # Associações existentes
   has_many :transactions, dependent: :restrict_with_error
 
-  validates :name, presence: true
+  validates :name, presence: true, length: { maximum: 255 }, uniqueness: { scope: :user_id }
 
   # Get variable expense analysis for this category
   def expense_analysis(timeframe_months: 12, analysis_date: Date.current)

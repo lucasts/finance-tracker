@@ -380,17 +380,6 @@
         </div>
         
         <div data-collapsible-target="content" class="hidden mt-4 space-y-6">
-          <!-- Additional Notes -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">📝 <%= t('ui.transaction.form.notes_label') %></span>
-            </label>
-            <%= form.text_area :notes, 
-                  class: "textarea textarea-bordered w-full", 
-                  rows: 3,
-                  placeholder: t('ui.transaction.form.notes_placeholder') %>
-          </div>
-          
           <!-- Hidden field to preserve status -->
           <%= form.hidden_field :status, value: transaction.status || "confirmed" %>
         </div>

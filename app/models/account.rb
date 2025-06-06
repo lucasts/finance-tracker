@@ -9,4 +9,11 @@ class Account < ApplicationRecord
   has_many :import_sessions, dependent: :nullify
 
   validates :name, presence: true
+
+  # Calcula o saldo da conta baseado nas transações
+  def balance
+    credits = transactions_to.confirmed.sum(:amount) || 0.0
+    debits = transactions_from.confirmed.sum(:amount) || 0.0
+    credits - debits
+  end
 end

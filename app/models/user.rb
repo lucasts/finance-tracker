@@ -14,4 +14,35 @@ class User < ApplicationRecord
   has_many :reconciliation_entries, dependent: :nullify
 
   validates :email, presence: true, uniqueness: true
+
+  # Métodos de negócio para cálculos financeiros
+  def total_balance
+    accounts.sum { |account| account.balance || 0.0 }
+  end
+
+  def monthly_income(date = Date.current)
+    transactions.income
+               .in_competence_month(date)
+               .confirmed
+               .sum(:amount)
+  end
+
+  def monthly_expenses(date = Date.current)
+    transactions.expense
+               .in_competence_month(date)
+               .confirmed
+               .sum(:amount)
+  end
+
+  def monthly_balance(date = Date.current)
+    monthly_income(date) - monthly_expenses(date)
+  end
+
+  def pending_transactions_count
+    transactions.pending.count
+  end
+
+  def upcoming_payments(limit = 10)
+    transactions.upcoming_payments(limit)
+  end
 end

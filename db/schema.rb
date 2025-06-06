@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_04_180200) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_06_012556) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -102,6 +102,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_04_180200) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.integer "category_id", null: false
+    t.index ["category_id"], name: "index_installment_plans_on_category_id"
     t.index ["recurrence_frequency"], name: "index_installment_plans_on_recurrence_frequency"
     t.index ["status"], name: "index_installment_plans_on_status"
     t.index ["user_id"], name: "index_installment_plans_on_user_id"
@@ -205,6 +207,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_04_180200) do
   add_foreign_key "imported_transactions", "installment_plans"
   add_foreign_key "imported_transactions", "recurring_commitments"
   add_foreign_key "imported_transactions", "transactions", column: "matched_transaction_id"
+  add_foreign_key "installment_plans", "categories"
   add_foreign_key "installment_plans", "users"
   add_foreign_key "reconciliation_entries", "imported_transactions"
   add_foreign_key "reconciliation_entries", "transactions"

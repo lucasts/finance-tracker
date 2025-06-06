@@ -175,15 +175,22 @@ class TransactionsController < ApplicationController
       :description, :amount, :transaction_type, :event_date, :payment_date,
       :from_account_id, :to_account_id, :category_id, :installment,
       :recurrence_type, :credit_statement_id,
-      :recurrence_frequency, :installment_number, :notes
+      :recurrence_frequency, :installment_number
       # status removido - será controlado automaticamente
     )
   end
 
   # Novos métodos para o modelo robusto
   def create_single_transaction
-    @transaction = Transaction.new(transaction_params)
+    @transaction = current_user.transactions.build(transaction_params)
     @transaction.recurrence_type = 'single'
+    
+    # Validate that accounts belong to current user
+    unless validate_account_ownership(@transaction)
+      @transaction.errors.add(:base, "Conta não encontrada ou não autorizada")
+      render :new, status: :unprocessable_entity
+      return
+    end
     
     # Apply intelligent defaults and validations
     apply_intelligent_defaults(@transaction)
@@ -205,7 +212,7 @@ class TransactionsController < ApplicationController
 
     ActiveRecord::Base.transaction do
       # Criar o compromisso recorrente
-      recurring_commitment = RecurringCommitment.new(
+      recurring_commitment = current_user.recurring_commitments.build(
         name: transaction_params[:description],
         category_id: transaction_params[:category_id],
         frequency: params[:recurrence_frequency] || 'monthly',
@@ -217,7 +224,7 @@ class TransactionsController < ApplicationController
 
       if recurring_commitment.save
         # Criar a primeira transação associada ao compromisso
-        @transaction = Transaction.new(transaction_params)
+        @transaction = current_user.transactions.build(transaction_params)
         @transaction.recurrence_type = 'recurring'
         @transaction.recurring_commitment = recurring_commitment
         
@@ -258,7 +265,7 @@ class TransactionsController < ApplicationController
 
     ActiveRecord::Base.transaction do
       # Criar o plano de parcelamento
-      installment_plan = InstallmentPlan.new(
+      installment_plan = current_user.installment_plans.build(
         name: "#{transaction_params[:description]} (#{installments_count}x)",
         category_id: transaction_params[:category_id],
         installment_count: installments_count,
@@ -299,6 +306,20 @@ class TransactionsController < ApplicationController
     @transaction = Transaction.new(transaction_params) if @transaction.nil?
     @transaction.errors.add(:base, "Erro ao criar parcelamento")
     render :new, status: :unprocessable_entity
+  end
+
+  def validate_account_ownership(transaction)
+    if transaction.from_account_id.present?
+      from_account = current_user_scope(Account).find_by(id: transaction.from_account_id)
+      return false unless from_account
+    end
+    
+    if transaction.to_account_id.present?
+      to_account = current_user_scope(Account).find_by(id: transaction.to_account_id)
+      return false unless to_account
+    end
+    
+    true
   end
 
 end

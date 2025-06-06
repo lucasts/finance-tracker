@@ -1,33 +1,7 @@
 <div class="container mx-auto max-w-2xl px-4 py-8">
   <!-- Header -->
   <div class="text-center mb-8">
-    <h1 class=    <% end %>
-  </div>
-
-  <!-- Link de volta -->
-  <div class="text-center mt-6">
-    <%= link_to import_sessions_path, class: "link link-hover text-base-content/70" do %>
-      ← Voltar para importações
-    <% end %>
-  </div>
-</div>
-
-<script>
-function updateFilePreview(input) {
-  const preview = document.getElementById('file-preview');
-  const fileName = document.getElementById('file-name');
-  const fileSize = document.getElementById('file-size');
-  
-  if (input.files && input.files[0]) {
-    const file = input.files[0];
-    fileName.textContent = file.name;
-    fileSize.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-    preview.classList.remove('hidden');
-  } else {
-    preview.classList.add('hidden');
-  }
-}
-</script>font-bold text-base-content mb-2">
+    <h1 class="text-3xl font-bold text-base-content mb-2">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 inline-block mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
       </svg>
@@ -135,12 +109,7 @@ function updateFilePreview(input) {
                 confirm: "Confirma a importação do arquivo selecionado?",
                 loading: "Processando arquivo..."
               },
-              onclick: "this.classList.add('loading'); this.disabled = true; setTimeout(() => this.form.submit(), 100);" do %>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-            </svg>
-            Enviar Arquivo
-          <% end %>
+              onclick: "this.classList.add('loading'); this.disabled = true; setTimeout(() => this.form.submit(), 100);" %>
         </div>
       <% end %>
     </div>
@@ -153,3 +122,20 @@ function updateFilePreview(input) {
     <% end %>
   </div>
 </div>
+
+<script>
+function updateFilePreview(input) {
+  const preview = document.getElementById('file-preview');
+  const fileName = document.getElementById('file-name');
+  const fileSize = document.getElementById('file-size');
+  
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    fileName.textContent = file.name;
+    fileSize.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+    preview.classList.remove('hidden');
+  } else {
+    preview.classList.add('hidden');
+  }
+}
+</script>

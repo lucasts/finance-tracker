@@ -29,8 +29,11 @@ class AccountsController < ApplicationController
   end
 
   def destroy
-    @account.destroy
-    redirect_to accounts_path, notice: "Conta removida com sucesso."
+    if @account.destroy
+      redirect_to accounts_path, notice: "Conta removida com sucesso."
+    else
+      redirect_to accounts_path, alert: "A conta não pode ser removida pois possui transações associadas."
+    end
   end
 
   private

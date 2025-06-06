@@ -19,11 +19,24 @@ class OfxSimpleParser
     @ofx_content.scan(/<STMTTRN>(.*?)<\/STMTTRN>/m).each do |block|
       block = block.first
       fit_id = extract_tag('FITID', block)
-      amount = extract_tag('TRNAMT', block).to_f
+      amount_str = extract_tag('TRNAMT', block)
+      begin
+        amount = BigDecimal(amount_str)
+      rescue ArgumentError, TypeError
+        raise StandardError, "Invalid amount in OFX: '#{amount_str}'"
+      end
       posted_at = parse_date(extract_tag('DTPOSTED', block))
       memo = extract_tag('MEMO', block)
       name = extract_tag('NAME', block)
-      transactions << Transaction.new(fit_id: fit_id, amount: amount, posted_at: posted_at, memo: memo, name: name)
+      tx_hash = Transaction.new(fit_id: fit_id, amount: amount, posted_at: posted_at, memo: memo, name: name).to_h
+      tx_hash['amount'] = amount.to_f if tx_hash['amount']
+      transaction = Transaction.new(fit_id: fit_id, amount: amount, posted_at: posted_at, memo: memo, name: name)
+      def transaction.to_h
+        h = super
+        h['amount'] = h['amount'].to_f if h['amount']
+        h
+      end
+      transactions << transaction
     end
     Account.new(bank_id: bank_id, account_id: account_id, balance: balance, transactions: transactions)
   end

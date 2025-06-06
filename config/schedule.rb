@@ -23,7 +23,7 @@ when 'preprod'
 
   # Job de limpeza diário às 3:00
   every 1.day, at: '3:00 am' do
-    runner "puts 'Executando limpeza de dados de teste...'"
+    # Add cleanup job here when needed
   end
 
 when 'production'

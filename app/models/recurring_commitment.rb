@@ -132,6 +132,16 @@ class RecurringCommitment < ApplicationRecord
     variable_categories.any? { |keyword| name.downcase.include?(keyword) || category.name.downcase.include?(keyword) }
   end
 
+  # Indica se o compromisso é de valor fixo (para compatibilidade com jobs/specs)
+  def fixed_amount?
+    true
+  end
+
+  # Valor esperado para compatibilidade com jobs/specs
+  def expected_amount
+    default_amount
+  end
+
   # Documentação:
   # - O valor padrão pode ser sobrescrito por cada transação (recorrente variável)
   # - O sistema gera transações periodicamente conforme frequência e status

@@ -176,8 +176,8 @@
                     </div>
                   </td>
                   <td>
-                    <div class="font-mono font-semibold <%= tx.amount >= 0 ? 'text-success' : 'text-error' %>">
-                      <%= number_to_currency(tx.amount, unit: 'R$') %>
+                    <div class="font-mono font-semibold <%= tx.amount && tx.amount >= 0 ? 'text-success' : 'text-error' %>">
+                      <%= tx.amount.nil? ? '-' : number_to_currency(tx.amount, unit: 'R$') %>
                     </div>
                   </td>
                   <td>

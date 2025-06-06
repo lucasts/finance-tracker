@@ -9,6 +9,7 @@
 class InstallmentPlan < ApplicationRecord
   # Associação de usuário
   belongs_to :user
+  belongs_to :category
   
   has_many :transactions, dependent: :nullify
   

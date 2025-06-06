@@ -14,7 +14,10 @@ class ImportSessionsController < ApplicationController
     file = params[:import_session][:file]
     if file.present?
       @import_session.original_filename = file.original_filename
-      @import_session.raw_file = file.read
+      content = file.read
+      # Force UTF-8 encoding to avoid encoding errors
+      content = content.encode('UTF-8', invalid: :replace, undef: :replace, replace: '')
+      @import_session.raw_file = content
       @import_session.source_type = params[:import_session][:source_type]
       @import_session.account_id = params[:import_session][:account_id]
       @import_session.imported_at = nil

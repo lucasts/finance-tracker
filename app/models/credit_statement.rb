@@ -27,7 +27,7 @@ class CreditStatement < ApplicationRecord
     if amount_paid >= amount_due
       self.status = :paid
       self.paid_on ||= Date.today
-    elsif due_on.present? && due_on < Date.today && amount_paid < 0
+    elsif due_on.present? && due_on < Date.today && amount_paid < amount_due
       self.status = :overdue
     else
       self.status = :open
