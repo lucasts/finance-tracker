@@ -18,7 +18,7 @@ class RecurringCommitment < ApplicationRecord
   belongs_to :category
   has_many :transactions, dependent: :restrict_with_error
 
-  enum status: { active: 0, paused: 1, closed: 2 }
+  enum :status, { active: 0, paused: 1, closed: 2 }
 
   validates :name, :category_id, :recurrence_frequency, :start_date, :status, presence: true
   validates :recurrence_frequency, inclusion: { in: %w[monthly weekly annual] }, allow_blank: true

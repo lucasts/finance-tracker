@@ -1,4 +1,4 @@
-FROM ruby:3.2.7
+FROM ruby:3.4.2
 
 # Instale dependências do sistema
 RUN apt-get update -qq && \
@@ -9,7 +9,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs
 
 # Instale Yarn 1.22.x
-RUN npm install -g yarn@1.22.19
+RUN npm install -g yarn@1.22.22
 
 WORKDIR /workspace
 

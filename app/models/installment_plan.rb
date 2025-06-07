@@ -24,7 +24,7 @@ class InstallmentPlan < ApplicationRecord
   validates :status, presence: true
   validates :total_amount, numericality: { greater_than: 0 }, allow_blank: true
   
-  enum status: { active: 0, paused: 1, closed: 2 }
+  enum :status, { active: 0, paused: 1, closed: 2 }
   
   scope :active_plans, -> { where(status: :active) }
   scope :by_frequency, ->(freq) { where(recurrence_frequency: freq) }

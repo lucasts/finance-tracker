@@ -2,7 +2,7 @@ class CreditStatement < ApplicationRecord
   belongs_to :account
   has_many :transactions, dependent: :nullify
 
-  enum status: { open: 0, paid: 1, overdue: 2 }
+  enum :status, { open: 0, paid: 1, overdue: 2 }
 
   validates :month, presence: true, format: { with: /\A\d{4}-\d{2}\z/ }
   validates :amount_due, :amount_paid, presence: true
