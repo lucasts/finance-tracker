@@ -169,7 +169,7 @@
 
     <!-- Coluna direita: Formulário de conciliação -->
     <div class="space-y-6">
-      <%= form_with model: @imported_transaction, url: import_session_imported_transaction_path(@import_session, @imported_transaction), method: :put, local: true, html: { class: "space-y-6" } do |f| %>
+      <%= form_with model: @imported_transaction, url: import_session_imported_transaction_path(@import_session, @imported_transaction), method: :put, local: true, html: { class: "space-y-6", data: { controller: "imported-transaction-form" } } do |f| %>
         
         <!-- Ações de conciliação -->
         <div class="card bg-base-100 shadow-xl">
@@ -245,11 +245,21 @@
                   <%= f.label :amount, class: "label" do %>
                     <span class="label-text font-medium">Valor</span>
                   <% end %>
-                  <%= f.number_field :amount, 
-                      value: @imported_transaction.amount, 
-                      class: "input input-bordered w-full", 
-                      step: 0.01, 
-                      placeholder: "0,00" %>
+                  <%= f.number_field :amount,
+                      value: number_with_precision(@imported_transaction.amount.abs, precision: 2),
+                      class: "input input-bordered w-full text-lg font-bold",
+                      step: 0.01,
+                      min: 0.01,
+                      placeholder: t('ui.transaction.form.amount_placeholder'),
+                      data: {
+                        imported_transaction_form_target: "amount",
+                        action: "input->imported-transaction-form#handleAmountChange"
+                      } %>
+                  <label class="label">
+                    <span class="label-text-alt text-base-content/60" data-imported-transaction-form-target="amountHelper">
+                      Informe o valor da transação (use vírgula para centavos)
+                    </span>
+                  </label>
                 </div>
 
                 <div class="form-control">
@@ -258,7 +268,7 @@
                   <% end %>
                   <%= f.select :transaction_type, 
                       [['Receita', 'income'], ['Despesa', 'expense'], ['Transferência', 'transfer']], 
-                      { selected: @imported_transaction.amount >= 0 ? 'income' : 'expense' }, 
+                      { selected: @imported_transaction.transaction_type || 'expense' }, 
                       { class: "select select-bordered w-full" } %>
                 </div>
               </div>
