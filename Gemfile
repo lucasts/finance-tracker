@@ -30,6 +30,9 @@ gem "tailwindcss-rails"
 
 gem 'apexcharts'
 
+# CSV parsing (required in Rails 8)
+gem 'csv'
+
 # Authentication
 gem 'devise'
 
