@@ -12,7 +12,7 @@
         "terminal.integrated.shell.linux": "/bin/bash"
       },
       "extensions": [
-        "rebornix.Ruby"
+        "shopify.ruby-lsp"
       ]
     }
   },
