@@ -1,54 +1,85 @@
-<!doctype html>
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="zeno">
+<head>
+  <title>Solicitação inválida - Zeno</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="description" content="Solicitação inválida no sistema Zeno - Clareza para suas finanças">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    body { 
+      font-family: 'Inter', sans-serif;
+    }
+    
+    :root {
+      --zeno-primary: #3A6B65;
+      --zeno-secondary: #F4C542;
+      --zeno-background: #FFFBF4;
+    }
 
-<html lang="en">
+    [data-theme="zeno"] {
+      --primary: #3A6B65;
+      --secondary: #F4C542;
+      --accent: #2DD4BF;
+      --neutral: #1F2937;
+      --base-100: #FFFBF4;
+      --base-200: #F9F7F1;
+      --base-300: #F3F0E8;
+      --info: #3ABFF8;
+      --success: #36D399;
+      --warning: #FBBD23;
+      --error: #F87272;
+    }
 
-  <head>
+    .gradient-bg {
+      background: linear-gradient(135deg, var(--zeno-primary) 0%, var(--zeno-secondary) 100%);
+    }
+  </style>
+</head>
 
-    <title>The server cannot process the request due to a client error (400 Bad Request)</title>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1, width=device-width">
-    <meta name="robots" content="noindex, nofollow">
-
-    <style>
-
-      *, *::before, *::after {
-        box-sizing: border-box;
-      }
-
-      * {
-        margin: 0;
-      }
-
-      html {
-        font-size: 16px;
-      }
-
-      body {
-        background: #FFF;
-        color: #261B23;
-        display: grid;
-        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Aptos, Roboto, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-        font-size: clamp(1rem, 2.5vw, 2rem);
-        -webkit-font-smoothing: antialiased;
-        font-style: normal;
-        font-weight: 400;
-        letter-spacing: -0.0025em;
-        line-height: 1.4;
-        min-height: 100vh;
-        place-items: center;
-        text-rendering: optimizeLegibility;
-        -webkit-text-size-adjust: 100%;
-      }
-
-      a {
-        color: inherit;
-        font-weight: 700;
-        text-decoration: underline;
-        text-underline-offset: 0.0925em;
-      }
-
-      b, strong {
+<body class="bg-base-200 text-base-content min-h-screen flex items-center justify-center">
+  <div class="container mx-auto px-4">
+    <div class="max-w-md mx-auto">
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body text-center">
+          <div class="mb-6">
+            <img src="/full_logo_zeno-min.png" alt="Zeno" class="h-16 w-auto mx-auto mb-4">
+          </div>
+          
+          <div class="text-6xl mb-4">⚠️</div>
+          
+          <h1 class="text-3xl font-bold text-error mb-2">Solicitação inválida</h1>
+          <p class="text-base-content/70 mb-6">
+            A solicitação enviada não pôde ser processada devido a um erro do cliente.
+          </p>
+          
+          <div class="card-actions justify-center space-x-2">
+            <button onclick="history.back()" class="btn btn-outline btn-lg">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Voltar
+            </button>
+            <a href="/" class="btn btn-primary btn-lg">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              Página inicial
+            </a>
+          </div>
+          
+          <div class="mt-6 text-xs text-base-content/50">
+            Erro 400 - Zeno © 2025
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
         font-weight: 700;
       }
 
