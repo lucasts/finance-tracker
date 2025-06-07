@@ -3,7 +3,7 @@
 require 'date'
 
 class OfxSimpleParser
-  Transaction = Struct.new(:fit_id, :amount, :posted_at, :memo, :name, keyword_init: true)
+  Transaction = Struct.new(:fit_id, :amount, :posted_at, :memo, :name, :trntype, keyword_init: true)
   Account = Struct.new(:bank_id, :account_id, :balance, :transactions, keyword_init: true)
 
   def initialize(ofx_content)
@@ -28,9 +28,10 @@ class OfxSimpleParser
       posted_at = parse_date(extract_tag('DTPOSTED', block))
       memo = extract_tag('MEMO', block)
       name = extract_tag('NAME', block)
-      tx_hash = Transaction.new(fit_id: fit_id, amount: amount, posted_at: posted_at, memo: memo, name: name).to_h
+      trntype = extract_tag('TRNTYPE', block)
+      tx_hash = Transaction.new(fit_id: fit_id, amount: amount, posted_at: posted_at, memo: memo, name: name, trntype: trntype).to_h
       tx_hash['amount'] = amount.to_f if tx_hash['amount']
-      transaction = Transaction.new(fit_id: fit_id, amount: amount, posted_at: posted_at, memo: memo, name: name)
+      transaction = Transaction.new(fit_id: fit_id, amount: amount, posted_at: posted_at, memo: memo, name: name, trntype: trntype)
       def transaction.to_h
         h = super
         h['amount'] = h['amount'].to_f if h['amount']
