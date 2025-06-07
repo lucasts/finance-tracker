@@ -2,7 +2,7 @@ FROM ruby:3.4.2
 
 # Instale dependências do sistema
 RUN apt-get update -qq && \
-    apt-get install -y build-essential curl sqlite3 libsqlite3-dev
+    apt-get install -y build-essential watchman curl sqlite3 libsqlite3-dev
 
 # Instale Node.js 20.x
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
