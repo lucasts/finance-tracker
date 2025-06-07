@@ -9,7 +9,7 @@ describe CsvImportService do
     result = CsvImportService.new(csv_content).parse
     expect(result.size).to eq(2)
     expect(result.first[:description]).to eq('Salário')
-    expect(result.last[:amount]).to eq(BigDecimal('-200'))
+    expect(result.last[:amount]).to eq(BigDecimal('200'))
   end
 
   it 'detects and ignores duplicates (simulated)' do

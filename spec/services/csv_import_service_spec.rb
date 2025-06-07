@@ -33,12 +33,12 @@ RSpec.describe CsvImportService, type: :service do
         groceries = result[1]
         expect(groceries[:line_number]).to eq(2)
         expect(groceries[:description]).to eq('Groceries')
-        expect(groceries[:amount]).to eq(BigDecimal('-150.75'))
+        expect(groceries[:amount]).to eq(BigDecimal('150.75'))
         expect(groceries[:transaction_type]).to eq('expense')
         expect(groceries[:status]).to eq('pending')
       end
       
-      it 'infers transaction type when not specified' do
+      it 'infers transaction type from amount sign when no type specified' do
         csv_without_type = "data,valor,descricao,categoria,status,tipo,parcela\n" \
                           "2025-06-01,100.50,Income Test,,confirmed,,\n" \
                           "2025-06-02,-50.25,Expense Test,,pending,,"
@@ -100,7 +100,7 @@ RSpec.describe CsvImportService, type: :service do
         expect(result.length).to eq(3)
         expect(result[0][:amount]).to eq(BigDecimal('1000'))
         expect(result[1][:amount]).to eq(BigDecimal('50.25'))
-        expect(result[2][:amount]).to eq(BigDecimal('-75.50'))
+        expect(result[2][:amount]).to eq(BigDecimal('75.50'))
       end
       
       it 'handles special characters in description' do
@@ -137,25 +137,28 @@ RSpec.describe CsvImportService, type: :service do
       end
     end
     
-    context 'transaction type inference' do
-      it 'infers income for positive amounts' do
+    context 'transaction type behavior' do
+      it 'infers income for positive amounts when no type and no negative values in file' do
         csv_content = "data,valor,descricao,categoria,status,tipo,parcela\n" \
                      "2025-06-01,100.50,Positive Amount,,,,"
         
         service = CsvImportService.new(csv_content)
         result = service.parse
         
+        # Single positive value, uses legacy inference, infers income
         expect(result[0][:transaction_type]).to eq('income')
       end
       
-      it 'infers expense for negative amounts' do
+      it 'infers expense for negative amounts when no type and mixed signs detected' do
         csv_content = "data,valor,descricao,categoria,status,tipo,parcela\n" \
                      "2025-06-01,-50.25,Negative Amount,,,,"
         
         service = CsvImportService.new(csv_content)
         result = service.parse
         
+        # Single negative value, pattern detected, converts to expense
         expect(result[0][:transaction_type]).to eq('expense')
+        expect(result[0][:amount]).to eq(BigDecimal('50.25'))
       end
       
       it 'uses specified type when present' do

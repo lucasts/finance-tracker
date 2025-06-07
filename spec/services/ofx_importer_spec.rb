@@ -19,7 +19,7 @@ RSpec.describe OfxImportService, type: :service do
         expect(first_transaction[:line_number]).to eq(1)
         expect(first_transaction[:external_id]).to eq('1')
         expect(first_transaction[:description]).to eq('Supermercado')
-        expect(first_transaction[:amount]).to eq(-200.00)
+        expect(first_transaction[:amount]).to eq(200.00)
         expect(first_transaction[:event_date]).to eq(Date.new(2024, 1, 2))
         expect(first_transaction[:payment_date]).to eq(Date.new(2024, 1, 2))
         expect(first_transaction[:transaction_type]).to eq('expense')
@@ -111,7 +111,7 @@ RSpec.describe OfxImportService, type: :service do
         # Second transaction with memo only
         second_transaction = result[1]
         expect(second_transaction[:description]).to eq('ATM withdrawal')
-        expect(second_transaction[:amount]).to eq(-25.75)
+        expect(second_transaction[:amount]).to eq(25.75)
         expect(second_transaction[:transaction_type]).to eq('expense')
       end
     end
@@ -202,7 +202,7 @@ RSpec.describe OfxImportService, type: :service do
         expect(result[0][:transaction_type]).to eq('income')
         
         # Valor negativo grande
-        expect(result[1][:amount]).to eq(-999999.99)
+        expect(result[1][:amount]).to eq(999999.99)
         expect(result[1][:transaction_type]).to eq('expense')
         
         # Valor positivo grande
