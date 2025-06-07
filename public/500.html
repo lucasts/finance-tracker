@@ -1,110 +1,102 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="zeno">
+<html lang="pt-BR">
 <head>
+  <meta charset="utf-8">
   <title>Erro interno - Zeno</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta charset="utf-8">
   <meta name="description" content="Erro interno no sistema Zeno - Clareza para suas finanças">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <link rel="icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
-    body { 
+    body {
+      background: #F9F7F1;
+      color: #1F2937;
       font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    
-    :root {
-      --zeno-primary: #3A6B65;
-      --zeno-secondary: #F4C542;
-      --zeno-background: #FFFBF4;
+    .zeno-card {
+      background: #FFFBF4;
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 32px 0 rgba(60, 60, 60, 0.08);
+      padding: 2.5rem 2rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
     }
-
-    [data-theme="zeno"] {
-      --primary: #3A6B65;
-      --secondary: #F4C542;
-      --accent: #2DD4BF;
-      --neutral: #1F2937;
-      --base-100: #FFFBF4;
-      --base-200: #F9F7F1;
-      --base-300: #F3F0E8;
-      --info: #3ABFF8;
-      --success: #36D399;
-      --warning: #FBBD23;
-      --error: #F87272;
+    .zeno-logo {
+      height: 64px;
+      margin-bottom: 1.5rem;
     }
-
-    .gradient-bg {
-      background: linear-gradient(135deg, var(--zeno-primary) 0%, var(--zeno-secondary) 100%);
+    .zeno-title {
+      color: #F87272;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .zeno-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .zeno-desc {
+      color: #6B7280;
+      margin-bottom: 2rem;
+    }
+    .zeno-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .zeno-btn {
+      background: #3A6B65;
+      color: #FFFBF4;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .zeno-btn.outline {
+      background: transparent;
+      color: #3A6B65;
+      border: 2px solid #3A6B65;
+    }
+    .zeno-footer {
+      color: #9CA3AF;
+      font-size: 0.85rem;
+      margin-top: 1.5rem;
+    }
+    .zeno-help {
+      background: #F3F0E8;
+      color: #1F2937;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
     }
   </style>
 </head>
-
-<body class="bg-base-200 text-base-content min-h-screen flex items-center justify-center">
-  <div class="container mx-auto px-4">
-    <div class="max-w-lg mx-auto">
-      <div class="card bg-base-100 shadow-2xl border border-base-300">
-        <div class="card-body text-center p-8">
-          <!-- Logo Section -->
-          <div class="mb-8">
-            <img src="/full_logo_zeno-min.png" alt="Zeno - Clareza para suas finanças" class="h-20 w-auto mx-auto mb-4">
-            <div class="text-sm text-primary font-medium">Clareza para suas finanças</div>
-          </div>
-          
-          <!-- Error Icon -->
-          <div class="text-7xl mb-6 text-error">⚠️</div>
-          
-          <!-- Error Message -->
-          <h1 class="text-4xl font-bold text-error mb-4">Erro interno</h1>
-          <div class="text-lg text-base-content/80 mb-2">Ops! Algo deu errado.</div>
-          <p class="text-base-content/70 mb-8 leading-relaxed">
-            Ocorreu um erro interno no sistema. Nossa equipe foi notificada automaticamente e está trabalhando para resolver o problema o mais rápido possível.
-          </p>
-          
-          <!-- Action Buttons -->
-          <div class="flex flex-col sm:flex-row gap-3 justify-center mb-6">
-            <button onclick="location.reload()" class="btn btn-outline btn-lg">
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Tentar novamente
-            </button>
-            <a href="/" class="btn btn-primary btn-lg">
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              Voltar ao início
-            </a>
-          </div>
-          
-          <!-- Additional Help -->
-          <div class="bg-base-200 rounded-lg p-4 mb-6">
-            <p class="text-sm text-base-content/70">
-              Se o problema persistir, entre em contato com nosso suporte técnico.
-            </p>
-          </div>
-          
-          <!-- Footer -->
-          <div class="mt-8 pt-6 border-t border-base-300">
-            <div class="text-xs text-base-content/50">
-              Erro 500 - Zeno © 2025 - Clareza para suas finanças
-            </div>
-          </div>
-        </div>
-      </div>
+<body>
+  <div class="zeno-card">
+    <img src="/full_logo_zeno-min.png" alt="Zeno" class="zeno-logo">
+    <div class="zeno-icon">⚠️</div>
+    <div class="zeno-title">Erro interno</div>
+    <div class="zeno-desc">Ops! Algo deu errado.<br>Ocorreu um erro interno no sistema. Nossa equipe foi notificada automaticamente e está trabalhando para resolver o problema o mais rápido possível.</div>
+    <div class="zeno-actions">
+      <button class="zeno-btn outline" onclick="location.reload()">Tentar novamente</button>
+      <a href="/" class="zeno-btn">Voltar ao início</a>
     </div>
+    <div class="zeno-help">
+      Se o problema persistir, entre em contato com nosso suporte técnico.
+    </div>
+    <div class="zeno-footer">Erro 500 - Zeno © 2025</div>
   </div>
-
-  <script>
-    // Auto-refresh after 30 seconds
-    setTimeout(() => {
-      const refreshBtn = document.querySelector('button[onclick="location.reload()"]');
-      if (refreshBtn) {
-        refreshBtn.classList.add('loading');
-        refreshBtn.disabled = true;
-        location.reload();
-      }
-    }, 30000);
-  </script>
 </body>
 </html>

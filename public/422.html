@@ -1,49 +1,91 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="zeno">
+<html lang="pt-BR">
 <head>
-  <title>Alteração rejeitada - Zeno</title>
   <meta charset="utf-8">
+  <title>Alteração rejeitada - Zeno</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Alteração rejeitada no sistema Zeno - Clareza para suas finanças">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <link rel="icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    body {
+      background: #F9F7F1;
+      color: #1F2937;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .zeno-card {
+      background: #FFFBF4;
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 32px 0 rgba(60, 60, 60, 0.08);
+      padding: 2.5rem 2rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .zeno-logo {
+      height: 64px;
+      margin-bottom: 1.5rem;
+    }
+    .zeno-title {
+      color: #F4C542;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .zeno-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .zeno-desc {
+      color: #6B7280;
+      margin-bottom: 2rem;
+    }
+    .zeno-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .zeno-btn {
+      background: #3A6B65;
+      color: #FFFBF4;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .zeno-btn.outline {
+      background: transparent;
+      color: #3A6B65;
+      border: 2px solid #3A6B65;
+    }
+    .zeno-footer {
+      color: #9CA3AF;
+      font-size: 0.85rem;
+      margin-top: 1.5rem;
+    }
   </style>
 </head>
-
-<body class="bg-base-200 text-base-content min-h-screen flex items-center justify-center">
-  <div class="container mx-auto px-4">
-    <div class="max-w-md mx-auto">
-      <div class="card bg-base-100 shadow-xl">
-        <div class="card-body text-center">
-          <div class="mb-6">
-            <img src="/full_logo_zeno-min.png" alt="Zeno" class="h-16 w-auto mx-auto mb-4">
-          </div>
-          
-          <div class="text-6xl mb-4">⚠️</div>
-          
-          <h1 class="text-3xl font-bold text-warning mb-2">Alteração rejeitada</h1>
-          <p class="text-base-content/70 mb-6">
-            A alteração que você tentou fazer foi rejeitada. Talvez você tenha tentado alterar algo para o qual não tem acesso.
-          </p>
-          
-          <div class="card-actions justify-center">
-            <button onclick="history.back()" class="btn btn-outline">
-              ← Voltar
-            </button>
-            <a href="/" class="btn btn-primary">
-              🏠 Início
-            </a>
-          </div>
-          
-          <div class="mt-6 text-xs text-base-content/50">
-            Erro 422 - Zeno © 2025
-          </div>
-        </div>
-      </div>
+<body>
+  <div class="zeno-card">
+    <img src="/full_logo_zeno-min.png" alt="Zeno" class="zeno-logo">
+    <div class="zeno-icon">🚫</div>
+    <div class="zeno-title">Alteração rejeitada</div>
+    <div class="zeno-desc">A alteração enviada não pôde ser processada. Verifique os dados e tente novamente.</div>
+    <div class="zeno-actions">
+      <button class="zeno-btn outline" onclick="history.back()">Voltar</button>
+      <a href="/" class="zeno-btn">Página inicial</a>
     </div>
+    <div class="zeno-footer">Erro 422 - Zeno © 2025</div>
   </div>
 </body>
 </html>
