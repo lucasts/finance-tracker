@@ -26,11 +26,13 @@ class ReportsController < ApplicationController
     # Income and expense totals using transaction_type
     @income_total = @transactions.where(transaction_type: "income").sum(:amount)
     @expense_total = @transactions.where(transaction_type: "expense").sum(:amount)
+    @transfer_total = @transactions.where(transaction_type: "transfer").sum(:amount)
     @balance = @income_total - @expense_total
     
     # Transaction counts
     @income_count = @transactions.where(transaction_type: "income").count
     @expense_count = @transactions.where(transaction_type: "expense").count
+    @transfer_count = @transactions.where(transaction_type: "transfer").count
     @total_transactions = @transactions.count
   end
 
