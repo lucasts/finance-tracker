@@ -94,6 +94,7 @@ pt-BR:
       
       category:
         name: "Nome"
+        category_type: "Tipo de Categoria"
         description: "Descrição"
         created_at: "Criado em"
         updated_at: "Atualizado em"
