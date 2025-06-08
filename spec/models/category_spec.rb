@@ -6,6 +6,7 @@ RSpec.describe Category, type: :model do
 
   describe 'validations' do
     it { should validate_presence_of(:name) }
+    it { should validate_presence_of(:category_type) }
     
     it 'accepts valid names' do
       expect(build(:category, name: 'Alimentação', user: user)).to be_valid
@@ -17,6 +18,16 @@ RSpec.describe Category, type: :model do
       expect(build(:category, name: '', user: user)).not_to be_valid
       expect(build(:category, name: nil, user: user)).not_to be_valid
       expect(build(:category, name: '   ', user: user)).not_to be_valid
+    end
+
+    it 'accepts valid category types' do
+      expect(build(:category, category_type: 'income', user: user)).to be_valid
+      expect(build(:category, category_type: 'expense', user: user)).to be_valid
+    end
+
+    it 'defaults to expense category_type' do
+      category = create(:category, user: user)
+      expect(category.category_type).to eq('expense')
     end
   end
 
@@ -30,18 +41,46 @@ RSpec.describe Category, type: :model do
     end
     
     it 'can have multiple transactions' do
-      transaction1 = create(:transaction, category: category, user: user)
-      transaction2 = create(:transaction, category: category, user: user)
+      transaction1 = create(:transaction, :expense, category: category, user: user)
+      transaction2 = create(:transaction, :expense, category: category, user: user)
       
       expect(category.transactions).to include(transaction1, transaction2)
       expect(category.transactions.count).to eq(2)
     end
     
     it 'does not allow deletion if there are transactions' do
-      create(:transaction, category: category, user: user)
+      create(:transaction, :expense, category: category, user: user)
       
       expect { category.destroy }.not_to change(Category, :count)
       expect(category.errors[:base]).to be_present
+    end
+  end
+
+  describe 'enums' do
+    describe 'category_type' do
+      it 'defines income and expense types' do
+        expect(Category.category_types).to eq({ 'income' => 0, 'expense' => 1 })
+      end
+
+      it 'provides helper methods' do
+        income_category = create(:category, category_type: 'income', user: user)
+        expense_category = create(:category, category_type: 'expense', user: user)
+
+        expect(income_category.income?).to be true
+        expect(income_category.expense?).to be false
+        expect(expense_category.income?).to be false
+        expect(expense_category.expense?).to be true
+      end
+
+      it 'provides scope methods' do
+        income_category = create(:category, category_type: 'income', user: user)
+        expense_category = create(:category, category_type: 'expense', user: user)
+
+        expect(Category.income).to include(income_category)
+        expect(Category.income).not_to include(expense_category)
+        expect(Category.expense).to include(expense_category)
+        expect(Category.expense).not_to include(income_category)
+      end
     end
   end
 
@@ -75,7 +114,7 @@ RSpec.describe Category, type: :model do
         # Create transactions from last 3 months
         3.times do |i|
           month_date = (i + 1).months.ago.beginning_of_month + 15.days
-          create(:transaction, :confirmed, 
+          create(:transaction, :confirmed, :expense,
                  category: category, 
                  user: user,
                  amount: 100 + (i * 50),
@@ -94,7 +133,7 @@ RSpec.describe Category, type: :model do
       end
       
       it 'considers only confirmed transactions' do
-        create(:transaction, :pending, 
+        create(:transaction, :pending, :expense,
                category: category, 
                user: user,
                amount: 999,
@@ -163,13 +202,13 @@ RSpec.describe Category, type: :model do
     end
     
     it 'calculates averages with decimal values' do
-      create(:transaction, :confirmed,
+      create(:transaction, :confirmed, :expense,
              category: category,
              user: user,
              amount: 33.33,
              event_date: 1.month.ago)
              
-      create(:transaction, :confirmed,
+      create(:transaction, :confirmed, :expense,
              category: category,
              user: user,
              amount: 66.67,

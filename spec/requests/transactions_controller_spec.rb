@@ -301,4 +301,263 @@ RSpec.describe TransactionsController, type: :request do
       expect(response.body).not_to include(shared_category_name_transaction.description)
     end
   end
+
+  describe 'Transfer functionality' do
+    let(:from_account) { create(:account, user: user, name: 'Conta Corrente') }
+    let(:to_account) { create(:account, user: user, name: 'Poupança') }
+    let(:other_user_account) { create(:account, user: other_user, name: 'Conta Alheia') }
+
+    describe 'POST #create with transfer' do
+      context 'with valid transfer parameters' do
+        let(:valid_transfer_params) do
+          {
+            transaction: {
+              description: 'Transferência para poupança',
+              amount: 500.00,
+              event_date: Date.current,
+              payment_date: Date.current,
+              transaction_type: 'transfer',
+              from_account_id: from_account.id,
+              to_account_id: to_account.id,
+              status: 'confirmed'
+            },
+            recurrence_type: 'single'
+          }
+        end
+
+        it 'creates a new transfer transaction' do
+          expect {
+            post transactions_path, params: valid_transfer_params
+          }.to change(Transaction, :count).by(1)
+        end
+
+        it 'creates transfer without category' do
+          post transactions_path, params: valid_transfer_params
+          transaction = Transaction.last
+          expect(transaction.category).to be_nil
+          expect(transaction.transaction_type).to eq('transfer')
+        end
+
+        it 'associates transaction with current user' do
+          post transactions_path, params: valid_transfer_params
+          transaction = Transaction.last
+          expect(transaction.user).to eq(user)
+        end
+
+        it 'redirects to transactions index' do
+          post transactions_path, params: valid_transfer_params
+          expect(response).to redirect_to(transactions_path)
+        end
+      end
+
+      context 'with invalid transfer parameters' do
+        let(:invalid_transfer_params) do
+          {
+            transaction: {
+              description: 'Transferência inválida',
+              amount: 500.00,
+              event_date: Date.current,
+              payment_date: Date.current,
+              transaction_type: 'transfer',
+              from_account_id: from_account.id,
+              to_account_id: nil, # Missing to_account
+              status: 'confirmed'
+            },
+            recurrence_type: 'single'
+          }
+        end
+
+        it 'does not create transaction without to_account' do
+          expect {
+            post transactions_path, params: invalid_transfer_params
+          }.not_to change(Transaction, :count)
+        end
+
+        it 'renders new template with errors' do
+          post transactions_path, params: invalid_transfer_params
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+      end
+
+      context 'with same from_account and to_account' do
+        let(:same_account_params) do
+          {
+            transaction: {
+              description: 'Transferência para mesma conta',
+              amount: 500.00,
+              event_date: Date.current,
+              payment_date: Date.current,
+              transaction_type: 'transfer',
+              from_account_id: from_account.id,
+              to_account_id: from_account.id, # Same account
+              status: 'confirmed'
+            },
+            recurrence_type: 'single'
+          }
+        end
+
+        it 'does not create transaction with same accounts' do
+          expect {
+            post transactions_path, params: same_account_params
+          }.not_to change(Transaction, :count)
+        end
+
+        it 'shows validation error' do
+          post transactions_path, params: same_account_params
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+      end
+
+      context 'with category (should be invalid)' do
+        let(:transfer_with_category_params) do
+          {
+            transaction: {
+              description: 'Transferência com categoria',
+              amount: 500.00,
+              event_date: Date.current,
+              payment_date: Date.current,
+              transaction_type: 'transfer',
+              from_account_id: from_account.id,
+              to_account_id: to_account.id,
+              category_id: category.id, # Should not have category
+              status: 'confirmed'
+            },
+            recurrence_type: 'single'
+          }
+        end
+
+        it 'does not create transfer with category' do
+          expect {
+            post transactions_path, params: transfer_with_category_params
+          }.not_to change(Transaction, :count)
+        end
+
+        it 'shows validation error' do
+          post transactions_path, params: transfer_with_category_params
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+      end
+
+      context 'with other users accounts' do
+        let(:other_user_transfer_params) do
+          {
+            transaction: {
+              description: 'Transferência com conta alheia',
+              amount: 500.00,
+              event_date: Date.current,
+              payment_date: Date.current,
+              transaction_type: 'transfer',
+              from_account_id: from_account.id,
+              to_account_id: other_user_account.id, # Other user's account
+              status: 'confirmed'
+            },
+            recurrence_type: 'single'
+          }
+        end
+
+        it 'does not create transfer with other users account' do
+          expect {
+            post transactions_path, params: other_user_transfer_params
+          }.not_to change(Transaction, :count)
+        end
+
+        it 'returns unprocessable entity status' do
+          post transactions_path, params: other_user_transfer_params
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+      end
+    end
+
+    describe 'PATCH #update transfer' do
+      let!(:transfer_transaction) do
+        create(:transaction, :transfer, 
+               user: user, 
+               from_account: from_account, 
+               to_account: to_account,
+               description: 'Original transfer',
+               amount: 300.00)
+      end
+
+      context 'with valid transfer updates' do
+        let(:update_transfer_params) do
+          {
+            transaction: {
+              description: 'Updated transfer description',
+              amount: 750.00
+            }
+          }
+        end
+
+        it 'updates the transfer transaction' do
+          patch transaction_path(transfer_transaction), params: update_transfer_params
+          transfer_transaction.reload
+          expect(transfer_transaction.description).to eq('Updated transfer description')
+          expect(transfer_transaction.amount).to eq(750.00)
+        end
+
+        it 'maintains transfer type and accounts' do
+          patch transaction_path(transfer_transaction), params: update_transfer_params
+          transfer_transaction.reload
+          expect(transfer_transaction.transaction_type).to eq('transfer')
+          expect(transfer_transaction.from_account).to eq(from_account)
+          expect(transfer_transaction.to_account).to eq(to_account)
+          expect(transfer_transaction.category).to be_nil
+        end
+
+        it 'redirects to transactions index' do
+          patch transaction_path(transfer_transaction), params: update_transfer_params
+          expect(response).to redirect_to(transactions_path)
+        end
+      end
+
+      context 'changing transfer to have category (invalid)' do
+        let(:invalid_update_params) do
+          {
+            transaction: {
+              category_id: category.id
+            }
+          }
+        end
+
+        it 'does not update transfer with category' do
+          original_category = transfer_transaction.category
+          patch transaction_path(transfer_transaction), params: invalid_update_params
+          transfer_transaction.reload
+          expect(transfer_transaction.category).to eq(original_category)
+        end
+
+        it 'returns unprocessable entity status' do
+          patch transaction_path(transfer_transaction), params: invalid_update_params
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+      end
+    end
+
+    describe 'Transfer display and filtering' do
+      let!(:income_transaction) { create(:transaction, :income, user: user, from_account: from_account, amount: 1000, event_date: Date.current) }
+      let!(:expense_transaction) { create(:transaction, :expense, user: user, from_account: from_account, amount: 200, event_date: Date.current) }
+      let!(:transfer_transaction) { create(:transaction, :transfer, user: user, from_account: from_account, to_account: to_account, amount: 300, event_date: Date.current) }
+
+      it 'includes transfer transactions in index' do
+        get transactions_path
+        expect(response.body).to include(transfer_transaction.description)
+        expect(response.body).to include('Transferência')
+      end
+
+      it 'shows transfer transactions without category' do
+        get transactions_path
+        expect(response).to have_http_status(:success)
+        # Transfer should not have category displayed
+        expect(response.body).to include(transfer_transaction.description)
+      end
+
+      it 'shows transfer details in show action' do
+        get transaction_path(transfer_transaction)
+        expect(response).to have_http_status(:success)
+        expect(response.body).to include(transfer_transaction.description)
+        expect(response.body).to include(from_account.name)
+        expect(response.body).to include(to_account.name)
+      end
+    end
+  end
 end

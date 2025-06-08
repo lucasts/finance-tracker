@@ -16,18 +16,19 @@ RSpec.describe User, type: :model do
 
   describe 'business methods' do
     let(:user) { create(:user) }
-    let(:checking_account) { create(:account, user: user) }
-    let(:credit_account) { create(:account, user: user) }
-    let(:category) { create(:category, user: user) }
+    let(:checking_account) { create(:account, :asset, user: user) }
+    let(:credit_account) { create(:account, :asset, user: user) }
+    let(:income_category) { create(:category, :income, user: user) }
+    let(:expense_category) { create(:category, :expense, user: user) }
 
     before do
       # Creates some transactions for testing
       create(:transaction, :income, :confirmed, user: user, to_account: checking_account, 
-             category: category, amount: 1000, event_date: Date.current)
+             category: income_category, amount: 1000, event_date: Date.current)
       create(:transaction, :expense, :confirmed, user: user, from_account: checking_account, 
-             category: category, amount: 300, event_date: Date.current)
+             category: expense_category, amount: 300, event_date: Date.current)
       create(:transaction, :expense, :confirmed, user: user, from_account: credit_account, 
-             category: category, amount: 200, event_date: Date.current)
+             category: expense_category, amount: 200, event_date: Date.current)
     end
 
     describe '#total_balance' do
@@ -69,7 +70,7 @@ RSpec.describe User, type: :model do
     describe '#pending_transactions_count' do
       it 'counts pending transactions' do
         create(:transaction, :pending, user: user, from_account: checking_account, 
-               category: category, amount: 100, event_date: Date.tomorrow)
+               category: expense_category, amount: 100, event_date: Date.tomorrow)
         
         expect(user.pending_transactions_count).to eq(1)
       end
@@ -78,7 +79,7 @@ RSpec.describe User, type: :model do
     describe '#upcoming_payments' do
       it 'returns future payments' do
         future_transaction = create(:transaction, :pending, user: user, 
-                                   from_account: checking_account, category: category,
+                                   from_account: checking_account, category: expense_category,
                                    amount: 150, event_date: 1.week.from_now)
         
         expect(user.upcoming_payments).to include(future_transaction)
@@ -87,7 +88,7 @@ RSpec.describe User, type: :model do
       it 'limits the number of results' do
         12.times do |i|
           create(:transaction, :pending, user: user, from_account: checking_account, 
-                 category: category, amount: 50, event_date: (i + 1).days.from_now)
+                 category: expense_category, amount: 50, event_date: (i + 1).days.from_now)
         end
         
         expect(user.upcoming_payments.count).to eq(10) # Default limit
@@ -110,23 +111,24 @@ RSpec.describe User, type: :model do
 
     it 'handles extreme decimal values' do
       account = create(:account, user: user)
-      category = create(:category, user: user)
+      income_category = create(:category, :income, user: user)
+      expense_category = create(:category, :expense, user: user)
       
       create(:transaction, :income, :confirmed, user: user, to_account: account, 
-             category: category, amount: 999999.99, event_date: Date.current)
+             category: income_category, amount: 999999.99, event_date: Date.current)
       create(:transaction, :expense, :confirmed, user: user, from_account: account, 
-             category: category, amount: 0.01, event_date: Date.current)
+             category: expense_category, amount: 0.01, event_date: Date.current)
       
       expect(user.monthly_balance).to be_within(0.01).of(999999.98)
     end
 
     it 'handles extreme dates' do
       account = create(:account, user: user)
-      category = create(:category, user: user)
+      income_category = create(:category, :income, user: user)
       
       # Very old transaction - should not affect current month
-      create(:transaction, :income, user: user, from_account: account, 
-             category: category, amount: 1000, event_date: Date.new(1900, 1, 1))
+      create(:transaction, :income, user: user, to_account: account, 
+             category: income_category, amount: 1000, event_date: Date.new(1900, 1, 1))
       
       expect(user.monthly_income).to eq(0.0)
     end
