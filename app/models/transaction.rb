@@ -5,7 +5,7 @@ class Transaction < ApplicationRecord
   # Associações existentes
   belongs_to :from_account, class_name: "Account"
   belongs_to :to_account, class_name: "Account", optional: true
-  belongs_to :category
+  belongs_to :category, optional: true
   belongs_to :credit_statement, optional: true
   
   # Associações para o modelo robusto
@@ -13,11 +13,17 @@ class Transaction < ApplicationRecord
   belongs_to :installment_plan, optional: true
 
   validates :description, :amount, :event_date, :payment_date, :transaction_type, presence: true
-  validates :transaction_type, inclusion: { in: %w[income expense] }
   validates :status, inclusion: { in: %w[pending confirmed cancelled] }
   
   # Validação de exclusividade mútua - transação só pode pertencer a UM tipo
   validate :exclusive_association_validation
+  
+  # Validação para garantir compatibilidade entre transaction_type e category_type
+  validate :category_type_compatibility
+  
+  # Validações específicas para transferências
+  validate :accounts_for_transfer
+  validate :category_for_transaction_type
   
   # Callbacks para automação do status
   before_validation :set_default_status, if: :new_record?
@@ -25,6 +31,7 @@ class Transaction < ApplicationRecord
   
   scope :income, -> { where transaction_type: :income }
   scope :expense, -> { where transaction_type: :expense }
+  scope :transfer, -> { where transaction_type: :transfer }
   scope :pending, -> { where status: :pending }
   scope :confirmed, -> { where status: :confirmed }
   scope :cancelled, -> { where status: :cancelled }
@@ -50,12 +57,13 @@ class Transaction < ApplicationRecord
   }
 
   enum :status, { pending: 0, confirmed: 1, cancelled: 2 }
+  enum :transaction_type, { income: 0, expense: 1, transfer: 2 }
   enum :recurrence_type, { single: 0, recurring: 1, installment: 2 }
   
-  # Novos scopes para o modelo robusto
-  scope :single_transactions, -> { where(recurrence_type: :single) }
-  scope :recurring_transactions, -> { where(recurrence_type: :recurring) }
-  scope :installment_transactions, -> { where(recurrence_type: :installment) }
+  scope :income, -> { where transaction_type: :income }
+  scope :expense, -> { where transaction_type: :expense }
+  scope :transfer, -> { where transaction_type: :transfer }
+  scope :single_transactions, -> { where recurrence_type: :single }
   scope :from_recurring_commitment, ->(commitment) { where(recurring_commitment: commitment) }
   scope :from_installment_plan, ->(plan) { where(installment_plan: plan) }
   
@@ -164,6 +172,41 @@ class Transaction < ApplicationRecord
       if recurring_commitment_id.present? || installment_plan_id.present?
         errors.add(:base, "Single transactions cannot have recurring commitment or installment plan")
       end
+    end
+  end
+  
+  private
+  
+  def category_type_compatibility
+    return unless category && transaction_type
+    return if transfer? # Transferências não têm categoria
+    
+    expected_category_type = transaction_type == 'income' ? 'income' : 'expense'
+    
+    unless category.category_type == expected_category_type
+      category_type_label = category.category_type == 'income' ? 'receita' : 'despesa'
+      transaction_type_label = transaction_type == 'income' ? 'receita' : 'despesa'
+      
+      errors.add(:category, "é do tipo #{category_type_label}, mas a transação é do tipo #{transaction_type_label}")
+    end
+  end
+
+  def accounts_for_transfer
+    if transfer?
+      if from_account_id.blank? || to_account_id.blank?
+        errors.add(:base, "É necessário informar conta de origem e destino para transferências")
+      end
+      if from_account_id == to_account_id
+        errors.add(:base, "Conta de origem e destino não podem ser iguais em uma transferência")
+      end
+    end
+  end
+
+  def category_for_transaction_type
+    if transfer?
+      errors.add(:category_id, "Transferência não deve ter categoria") if category_id.present?
+    else
+      errors.add(:category_id, "Categoria obrigatória") if category_id.blank?
     end
   end
 end

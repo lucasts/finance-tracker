@@ -15,9 +15,16 @@ class User < ApplicationRecord
 
   validates :email, presence: true, uniqueness: true
 
+  # Callbacks
+  after_create :create_default_categories
+
   # Métodos de negócio para cálculos financeiros
   def total_balance
-    accounts.sum { |account| account.balance || 0.0 }
+    # In double-entry bookkeeping, only sum asset accounts (user's actual accounts)
+    # External accounts (revenue/expense) are used for double-entry but don't represent user's wealth
+    accounts.joins(:account_type)
+            .where(account_types: { role: 'asset' })
+            .sum { |account| account.balance || 0.0 }
   end
 
   def monthly_income(date = Date.current)
@@ -44,5 +51,11 @@ class User < ApplicationRecord
 
   def upcoming_payments(limit = 10)
     transactions.upcoming_payments(limit)
+  end
+
+  private
+
+  def create_default_categories
+    DefaultCategoriesService.create_for_user(self)
   end
 end

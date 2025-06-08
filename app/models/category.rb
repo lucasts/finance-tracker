@@ -2,10 +2,15 @@ class Category < ApplicationRecord
   # Associação de usuário
   belongs_to :user
   
+  # Enum para tipo de categoria
+  enum :category_type, { income: 0, expense: 1 }, default: :expense
+  
   # Associações existentes
   has_many :transactions, dependent: :restrict_with_error
 
   validates :name, presence: true, length: { maximum: 255 }, uniqueness: { scope: :user_id }
+  validates :category_type, presence: true
+  validates :description, length: { maximum: 500 }, allow_blank: true
 
   # Get variable expense analysis for this category
   def expense_analysis(timeframe_months: 12, analysis_date: Date.current)
