@@ -8,7 +8,7 @@ export default class extends Controller {
     "fromAccountHelper", "toAccountHelper", "paymentDateHelper",
     "paymentDateSection", "creditCardInfo", "creditCardDetails",
     "categorySuggestions", "suggestionButtons", "amountHelper",
-    "accountData", "categoryData"
+    "accountData", "categoryData", "categorySection"
   ]
 
   connect() {
@@ -41,7 +41,12 @@ export default class extends Controller {
       this.updateForIncome()
     } else if (selectedType === 'expense') {
       this.updateForExpense()
+    } else if (selectedType === 'transfer') {
+      this.updateForTransfer()
     }
+    
+    // Filter categories based on transaction type
+    this.filterCategoriesByType(selectedType)
     
     this.updateFormState()
   }
@@ -105,6 +110,9 @@ export default class extends Controller {
     this.fromAccountHelperTarget.textContent = "Origem da receita (cliente, empregador, etc.)"
     this.toAccountHelperTarget.textContent = "Conta que receberá o dinheiro"
     
+    // Show category section for income
+    this.showCategorySection()
+    
     // Filter accounts for income
     this.filterAccountsForIncome()
   }
@@ -116,8 +124,25 @@ export default class extends Controller {
     this.fromAccountHelperTarget.textContent = "De onde sai o dinheiro"
     this.toAccountHelperTarget.textContent = "Para onde vai o dinheiro (loja, serviço, etc.)"
     
+    // Show category section for expenses
+    this.showCategorySection()
+    
     // Filter accounts for expense
     this.filterAccountsForExpense()
+  }
+
+  updateForTransfer() {
+    this.accountsTitleTarget.textContent = "🔄 Contas (Transferência)"
+    this.fromAccountLabelTarget.textContent = "Conta de Origem"
+    this.toAccountLabelTarget.textContent = "Conta de Destino"
+    this.fromAccountHelperTarget.textContent = "De onde sai o dinheiro"
+    this.toAccountHelperTarget.textContent = "Para onde vai o dinheiro"
+    
+    // Hide category section for transfers
+    this.hideCategorySection()
+    
+    // Clear category selection for transfers
+    this.categoryTarget.value = ''
   }
 
   updateForAccountType(account) {
@@ -148,6 +173,18 @@ export default class extends Controller {
 
   hideCreditCardInfo() {
     this.creditCardInfoTarget.classList.add('hidden')
+  }
+
+  showCategorySection() {
+    if (this.hasCategorySectionTarget) {
+      this.categorySectionTarget.classList.remove('hidden')
+    }
+  }
+
+  hideCategorySection() {
+    if (this.hasCategorySectionTarget) {
+      this.categorySectionTarget.classList.add('hidden')
+    }
   }
 
   updatePaymentDate() {
@@ -184,6 +221,8 @@ export default class extends Controller {
   }
 
   getCategorySuggestions(description) {
+    const transactionType = this.getSelectedTransactionType()
+    
     const keywords = {
       'Supermercado': ['mercado', 'supermercado', 'zaffari', 'carrefour', 'walmart', 'big'],
       'Restaurante': ['restaurante', 'ifood', 'uber eats', 'pizza', 'lanche', 'café'],
@@ -194,14 +233,20 @@ export default class extends Controller {
       'Lazer': ['cinema', 'teatro', 'parque', 'viagem', 'netflix', 'spotify'],
       'Vestuário': ['roupa', 'sapato', 'calça', 'camisa', 'renner', 'c&a'],
       'Transporte': ['uber', '99', 'ônibus', 'taxi', 'passagem', 'transporte'],
-      'Habitação': ['aluguel', 'condomínio', 'iptu', 'água', 'luz', 'energia']
+      'Habitação': ['aluguel', 'condomínio', 'iptu', 'água', 'luz', 'energia'],
+      // Income keywords
+      'Salário': ['salário', 'salary', 'pagamento', 'ordenado'],
+      'Freelance': ['freelance', 'freela', 'trabalho', 'projeto'],
+      'PIX Recebido': ['pix', 'transferência', 'recebimento']
     }
 
     const suggestions = []
     
     for (const [category, keywordList] of Object.entries(keywords)) {
       if (keywordList.some(keyword => description.includes(keyword))) {
-        const categoryData = this.categoryData.find(cat => cat.name === category)
+        const categoryData = this.categoryData.find(cat => 
+          cat.name === category && cat.category_type === transactionType
+        )
         if (categoryData) {
           suggestions.push(categoryData)
         }
@@ -226,6 +271,39 @@ export default class extends Controller {
 
   hideCategorySuggestions() {
     this.categorySuggestionsTarget.classList.add('hidden')
+  }
+
+  filterCategoriesByType(transactionType) {
+    if (!transactionType) return
+    
+    // Get all option elements in the category select
+    const categorySelect = this.categoryTarget
+    const options = Array.from(categorySelect.options)
+    
+    // Clear current selection if it doesn't match the transaction type
+    const currentCategoryId = categorySelect.value
+    if (currentCategoryId) {
+      const currentCategory = this.categoryData.find(cat => cat.id.toString() === currentCategoryId)
+      if (currentCategory && currentCategory.category_type !== transactionType) {
+        categorySelect.value = ''
+      }
+    }
+    
+    // Filter options based on transaction type
+    options.forEach(option => {
+      if (option.value === '') {
+        // Keep the empty option
+        option.style.display = ''
+        return
+      }
+      
+      const categoryData = this.categoryData.find(cat => cat.id.toString() === option.value)
+      if (categoryData && categoryData.category_type === transactionType) {
+        option.style.display = ''
+      } else {
+        option.style.display = 'none'
+      }
+    })
   }
 
   selectSuggestedCategory(event) {
@@ -314,9 +392,19 @@ export default class extends Controller {
     const hasAmount = parseFloat(this.amountTarget.value) > 0
     const hasEventDate = this.eventDateTarget.value.length > 0
     const hasFromAccount = this.fromAccountTarget.value.length > 0
-    const hasCategory = this.categoryTarget.value.length > 0
     const hasTransactionType = this.getSelectedTransactionType() !== null
     
+    const transactionType = this.getSelectedTransactionType()
+    
+    // For transfers, we need both from_account and to_account, but no category
+    if (transactionType === 'transfer') {
+      const hasToAccount = this.toAccountTarget.value.length > 0
+      const accountsAreDifferent = this.fromAccountTarget.value !== this.toAccountTarget.value
+      return hasDescription && hasAmount && hasEventDate && hasFromAccount && hasToAccount && hasTransactionType && accountsAreDifferent
+    }
+    
+    // For income and expense, we need category but to_account is optional
+    const hasCategory = this.categoryTarget.value.length > 0
     return hasDescription && hasAmount && hasEventDate && hasFromAccount && hasCategory && hasTransactionType
   }
 }
