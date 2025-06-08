@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_06_175507) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_08_001542) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -37,6 +37,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_175507) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.integer "category_type", default: 1, null: false
+    t.text "description"
+    t.index ["category_type"], name: "index_categories_on_category_type"
     t.index ["user_id"], name: "index_categories_on_user_id"
   end
 
@@ -155,11 +158,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_175507) do
   create_table "transactions", force: :cascade do |t|
     t.string "description"
     t.decimal "amount"
-    t.string "transaction_type"
     t.date "event_date"
     t.integer "from_account_id", null: false
     t.integer "to_account_id"
-    t.integer "category_id", null: false
+    t.integer "category_id"
     t.integer "installment"
     t.integer "status", default: 0
     t.integer "recurrence_type", default: 0
@@ -174,6 +176,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_175507) do
     t.string "recurrence_frequency"
     t.integer "installment_number"
     t.integer "user_id", null: false
+    t.integer "transaction_type", default: 1, null: false
     t.index ["category_id"], name: "index_transactions_on_category_id"
     t.index ["credit_statement_id"], name: "index_transactions_on_credit_statement_id"
     t.index ["from_account_id"], name: "index_transactions_on_from_account_id"
@@ -183,6 +186,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_175507) do
     t.index ["recurring_commitment_id"], name: "index_transactions_on_recurring_commitment_id"
     t.index ["to_account_id"], name: "index_transactions_on_to_account_id"
     t.index ["transaction_group_id"], name: "index_transactions_on_transaction_group_id"
+    t.index ["transaction_type"], name: "index_transactions_on_transaction_type"
     t.index ["user_id"], name: "index_transactions_on_user_id"
   end
 
