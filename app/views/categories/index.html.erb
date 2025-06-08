@@ -9,15 +9,27 @@
       <thead class="bg-base-200">
         <tr>
           <th><%= t('activerecord.attributes.category.name') %></th>
+          <th>Descrição</th>
+          <th><%= t('activerecord.attributes.category.category_type') %></th>
           <th class="text-right"><%= t('ui.actions.title') %></th>
         </tr>
       </thead>
       <tbody>
         <% @categories.each do |cat| %>
           <tr>
-            <td><%= cat.name %></td>
+            <td><strong><%= cat.name %></strong></td>
+            <td class="text-sm text-gray-600">
+              <%= cat.description.present? ? truncate(cat.description, length: 80) : "—" %>
+            </td>
+            <td>
+              <% if cat.income? %>
+                <span class="badge badge-success">📈 <%= t('ui.transaction.types.income') %></span>
+              <% else %>
+                <span class="badge badge-error">📉 <%= t('ui.transaction.types.expense') %></span>
+              <% end %>
+            </td>
             <td class="text-right">
-              <%= link_to t('ui.actions.edit'), edit_category_path(cat), class: "link link-primary" %>
+              <%= link_to t('ui.actions.edit'), edit_category_path(cat), class: "btn btn-sm btn-outline btn-primary" %>
             </td>
           </tr>
         <% end %>

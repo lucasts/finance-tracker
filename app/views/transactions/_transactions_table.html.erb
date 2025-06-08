@@ -21,17 +21,48 @@
       </thead>
       <tbody>
         <% transactions.each do |tx| %>
-          <% delta = tx.transaction_type == 'income' ? tx.amount : -tx.amount %>
-          <% running_balance += delta %>
+          <% 
+            case tx.transaction_type
+            when 'income'
+              delta = tx.amount
+            when 'expense' 
+              delta = -tx.amount
+            when 'transfer'
+              delta = 0  # Transfers don't affect overall balance
+            else
+              delta = 0
+            end
+            running_balance += delta 
+          %>
           <tr>
             <td><%= l(tx.event_date) if tx.event_date %></td>
             <td><%= l(tx.payment_date) if tx.payment_date %></td>
             <td><%= tx.description %></td>
             <td><%= tx.from_account.name %></td>
             <td><%= tx.to_account&.name %></td>
-            <td><%= tx.category.name %></td>
-            <td class="text-right <%= tx.transaction_type == 'income' ? 'text-success' : 'text-error' %>">
-              <%= number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.') %>
+            <td>
+              <% if tx.category.present? %>
+                <%= tx.category.name %>
+              <% else %>
+                <span class="text-base-content/50 italic">—</span>
+              <% end %>
+            </td>
+            <td class="text-right <%= 
+              case tx.transaction_type
+              when 'income' then 'text-success'
+              when 'expense' then 'text-error'  
+              when 'transfer' then 'text-warning'
+              else 'text-base-content'
+              end
+            %>">
+              <%= 
+                case tx.transaction_type
+                when 'transfer'
+                  "🔄 #{number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.')}"
+                else
+                  number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.')
+                end
+              %>
             </td>
             <% if show_installment_info %>
               <td class="text-right">

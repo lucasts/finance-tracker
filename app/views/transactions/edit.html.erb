@@ -33,8 +33,22 @@
     <h4 class="font-bold">Editando transação existente</h4>
     <div class="text-sm">
       Criada em <%= l(@transaction.created_at, format: :short) %> • 
-      <span class="<%= @transaction.transaction_type == 'income' ? 'text-success' : 'text-error' %>">
-        <%= @transaction.transaction_type == 'income' ? '📈 Receita' : '📉 Despesa' %>
+      <span class="<%= 
+        case @transaction.transaction_type
+        when 'income' then 'text-success'
+        when 'expense' then 'text-error'
+        when 'transfer' then 'text-warning'
+        else 'text-base-content'
+        end
+      %>">
+        <%= 
+          case @transaction.transaction_type
+          when 'income' then '📈 Receita'
+          when 'expense' then '📉 Despesa'
+          when 'transfer' then '🔄 Transferência'
+          else @transaction.transaction_type.humanize
+          end
+        %>
       </span> • 
       <%= number_to_currency(@transaction.amount) %>
     </div>

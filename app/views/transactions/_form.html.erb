@@ -21,6 +21,14 @@
                   action: "change->transaction-form#handleTypeChange" 
                 } %>
           <%= form.label :transaction_type_expense, "📉 #{t('ui.transaction.types.expense')}", class: "cursor-pointer flex items-center gap-2" %>
+          
+          <%= form.radio_button :transaction_type, "transfer", 
+                class: "radio radio-warning ml-6", 
+                data: { 
+                  transaction_form_target: "transactionType",
+                  action: "change->transaction-form#handleTypeChange" 
+                } %>
+          <%= form.label :transaction_type_transfer, "🔄 #{t('ui.transaction.types.transfer')}", class: "cursor-pointer flex items-center gap-2" %>
         </div>
       </div>
     </div>
@@ -165,13 +173,13 @@
     </div>
 
     <!-- Category and Classification -->
-    <div class="card bg-base-100 shadow-sm border border-base-300">
+    <div class="card bg-base-100 shadow-sm border border-base-300" data-transaction-form-target="categorySection">
       <div class="card-body">
         <h3 class="card-title text-lg mb-4">🏷️ <%= t('ui.transaction.form.categorization') %></h3>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="lg:col-span-2">
             <%= form_select_group(form, :category_id, 
-                  Category.order(:name), 
+                  @categories || Category.order(:name), 
                   :id, 
                   :name, 
                   label: t('activerecord.attributes.transaction.category'),
@@ -392,9 +400,10 @@
   </script>
 
   <script type="application/json" data-transaction-form-target="categoryData">
-    <%= raw Category.order(:name).map { |category| {
+    <%= raw (@categories || Category.order(:name)).map { |category| {
       id: category.id,
-      name: category.name
+      name: category.name,
+      category_type: category.category_type
     }}.to_json %>
   </script>
 <% end %>

@@ -84,8 +84,22 @@
                   </div>
                 </td>
                 <td class="text-right font-mono">
-                  <span class="<%= transaction.transaction_type == 'income' ? 'text-success' : 'text-error' %>">
-                    <%= transaction.transaction_type == 'income' ? '+' : '-' %>R$ <%= number_with_precision(transaction.amount.abs, precision: 2, delimiter: ".") %>
+                  <span class="<%= 
+                    case transaction.transaction_type
+                    when 'income' then 'text-success'
+                    when 'expense' then 'text-error'
+                    when 'transfer' then 'text-warning'
+                    else 'text-base-content'
+                    end
+                  %>">
+                    <%= 
+                      case transaction.transaction_type
+                      when 'income' then '+'
+                      when 'expense' then '-'
+                      when 'transfer' then '🔄'
+                      else ''
+                      end
+                    %>R$ <%= number_with_precision(transaction.amount.abs, precision: 2, delimiter: ".") %>
                   </span>
                 </td>
               </tr>

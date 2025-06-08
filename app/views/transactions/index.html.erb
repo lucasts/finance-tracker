@@ -8,8 +8,9 @@
 <% if @transactions.any? %>
   <% income_total = @transactions.select { |t| t.transaction_type == 'income' }.sum(&:amount) %>
   <% expense_total = @transactions.select { |t| t.transaction_type == 'expense' }.sum(&:amount) %>
+  <% transfer_total = @transactions.select { |t| t.transaction_type == 'transfer' }.sum(&:amount) %>
   <% balance = income_total - expense_total %>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
     <div class="alert alert-success">
       <div class="flex-1">
         <label class="label-text"><%= t('ui.transaction.types.income').pluralize %></label>
@@ -20,6 +21,12 @@
       <div class="flex-1">
         <label class="label-text"><%= t('ui.transaction.types.expense').pluralize %></label>
         <p class="text-xl font-bold"><%= number_to_currency(expense_total) %></p>
+      </div>
+    </div>
+    <div class="alert alert-warning">
+      <div class="flex-1">
+        <label class="label-text"><%= t('ui.transaction.types.transfer').pluralize %></label>
+        <p class="text-xl font-bold"><%= number_to_currency(transfer_total) %></p>
       </div>
     </div>
     <div class="alert alert-info">
@@ -61,7 +68,7 @@
           <label class="label">
             <span class="label-text"><%= t('activerecord.attributes.transaction.transaction_type') %></span>
           </label>
-          <%= select_tag :transaction_type, options_for_select([[t('ui.filters.all'), nil], [t('ui.transaction.types.income'), "income"], [t('ui.transaction.types.expense'), "expense"]], params[:transaction_type]), class: "select select-bordered w-full" %>
+          <%= select_tag :transaction_type, options_for_select([[t('ui.filters.all'), nil], [t('ui.transaction.types.income'), "income"], [t('ui.transaction.types.expense'), "expense"], [t('ui.transaction.types.transfer'), "transfer"]], params[:transaction_type]), class: "select select-bordered w-full" %>
         </div>
         <div class="form-control">
           <label class="label">

@@ -1,6 +1,30 @@
 <%= form_with(model: category, local: true) do |form| %>
   <div class="space-y-4">
     <%= form_group(form, :name) %>
+    
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text">📝 Descrição (opcional)</span>
+      </label>
+      <%= form.text_area :description, class: "textarea textarea-bordered", placeholder: "Descreva o tipo de gasto ou receita desta categoria...", rows: 3 %>
+      <label class="label">
+        <span class="label-text-alt">Máximo 500 caracteres</span>
+      </label>
+    </div>
+    
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text">💰 <%= t('activerecord.attributes.category.category_type') %></span>
+      </label>
+      <div class="flex gap-4">
+        <%= form.radio_button :category_type, "income", class: "radio radio-success" %>
+        <%= form.label :category_type_income, "📈 #{t('ui.transaction.types.income')}", class: "cursor-pointer flex items-center gap-2" %>
+        
+        <%= form.radio_button :category_type, "expense", class: "radio radio-error ml-6" %>
+        <%= form.label :category_type_expense, "📉 #{t('ui.transaction.types.expense')}", class: "cursor-pointer flex items-center gap-2" %>
+      </div>
+    </div>
+    
     <%= primary_button("Salvar") %>
   </div>
 <% end %>

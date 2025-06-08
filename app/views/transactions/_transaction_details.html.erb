@@ -4,8 +4,29 @@
   <div class="flex justify-between items-center p-6 border-b border-base-300">
     <div class="flex items-center gap-3">
       <div class="avatar">
-        <div class="w-10 h-10 rounded-full bg-<%= transaction.transaction_type == 'income' ? 'success' : 'error' %> text-<%= transaction.transaction_type == 'income' ? 'success' : 'error' %>-content flex items-center justify-center">
-          <%= transaction.transaction_type == 'income' ? '💰' : '💳' %>
+        <div class="w-10 h-10 rounded-full bg-<%= 
+          case transaction.transaction_type
+          when 'income' then 'success'
+          when 'expense' then 'error'
+          when 'transfer' then 'warning'
+          else 'neutral'
+          end
+        %> text-<%= 
+          case transaction.transaction_type  
+          when 'income' then 'success'
+          when 'expense' then 'error'
+          when 'transfer' then 'warning'
+          else 'neutral'
+          end
+        %>-content flex items-center justify-center">
+          <%= 
+            case transaction.transaction_type
+            when 'income' then '💰'
+            when 'expense' then '💳'
+            when 'transfer' then '🔄'
+            else '📊'
+            end
+          %>
         </div>
       </div>
       <div>
@@ -21,22 +42,53 @@
     <!-- Amount and Type -->
     <div class="stats stats-horizontal shadow w-full">
       <div class="stat">
-        <div class="stat-figure text-<%= transaction.transaction_type == 'income' ? 'success' : 'error' %>">
+        <div class="stat-figure text-<%= 
+          case transaction.transaction_type
+          when 'income' then 'success'
+          when 'expense' then 'error'
+          when 'transfer' then 'warning'
+          else 'neutral'
+          end
+        %>">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current">
-            <% if transaction.transaction_type == 'income' %>
+            <% case transaction.transaction_type %>
+            <% when 'income' %>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-            <% else %>
+            <% when 'expense' %>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+            <% when 'transfer' %>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
             <% end %>
           </svg>
         </div>
         <div class="stat-title">Valor</div>
-        <div class="stat-value text-<%= transaction.transaction_type == 'income' ? 'success' : 'error' %>">
+        <div class="stat-value text-<%= 
+          case transaction.transaction_type
+          when 'income' then 'success'
+          when 'expense' then 'error'
+          when 'transfer' then 'warning'
+          else 'neutral'
+          end
+        %>">
           <%= number_to_currency(transaction.amount, unit: 'R$', separator: ',', delimiter: '.') %>
         </div>
         <div class="stat-desc">
-          <span class="badge badge-<%= transaction.transaction_type == 'income' ? 'success' : 'error' %> badge-sm">
-            <%= transaction.transaction_type == 'income' ? 'Receita' : 'Despesa' %>
+          <span class="badge badge-<%= 
+            case transaction.transaction_type
+            when 'income' then 'success'
+            when 'expense' then 'error'
+            when 'transfer' then 'warning'
+            else 'neutral'
+            end
+          %> badge-sm">
+            <%= 
+              case transaction.transaction_type
+              when 'income' then 'Receita'
+              when 'expense' then 'Despesa'
+              when 'transfer' then 'Transferência'
+              else transaction.transaction_type.humanize
+              end
+            %>
           </span>
         </div>
       </div>
@@ -91,7 +143,13 @@
             🏷️ Categoria
           </h4>
           <div class="text-sm">
-            <span class="badge badge-primary"><%= transaction.category.name %></span>
+            <% if transaction.category.present? %>
+              <span class="badge badge-primary"><%= transaction.category.name %></span>
+            <% else %>
+              <span class="text-base-content/50 italic">
+                <%= transaction.transaction_type == 'transfer' ? 'N/A (Transferência)' : 'Não informado' %>
+              </span>
+            <% end %>
           </div>
         </div>
       </div>
