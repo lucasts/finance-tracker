@@ -23,20 +23,24 @@ Category.where(user: default_user).destroy_all
 
 # === CATEGORIAS DEMO ===
 puts "Creating demo categories..."
-Category.find_or_create_by!(name: "Energia", user: default_user)
-Category.find_or_create_by!(name: "Aluguel", user: default_user)
-Category.find_or_create_by!(name: "Supermercado", user: default_user)
-Category.find_or_create_by!(name: "Farmácia", user: default_user)
-Category.find_or_create_by!(name: "Assinatura", user: default_user)
-Category.find_or_create_by!(name: "Restaurante", user: default_user)
-Category.find_or_create_by!(name: "Escola", user: default_user)
-Category.find_or_create_by!(name: "Plano Saúde", user: default_user)
-Category.find_or_create_by!(name: "Netflix", user: default_user)
-Category.find_or_create_by!(name: "Massagem", user: default_user)
-Category.find_or_create_by!(name: "Salário", user: default_user)
-Category.find_or_create_by!(name: "Freelance", user: default_user)
-Category.find_or_create_by!(name: "PIX Recebido", user: default_user)
-Category.find_or_create_by!(name: "Compras", user: default_user)
+
+# Categorias de DESPESA (expense)
+Category.find_or_create_by!(name: "Energia", user: default_user) { |c| c.category_type = :expense }
+Category.find_or_create_by!(name: "Aluguel", user: default_user) { |c| c.category_type = :expense }
+Category.find_or_create_by!(name: "Supermercado", user: default_user) { |c| c.category_type = :expense }
+Category.find_or_create_by!(name: "Farmácia", user: default_user) { |c| c.category_type = :expense }
+Category.find_or_create_by!(name: "Assinatura", user: default_user) { |c| c.category_type = :expense }
+Category.find_or_create_by!(name: "Restaurante", user: default_user) { |c| c.category_type = :expense }
+Category.find_or_create_by!(name: "Escola", user: default_user) { |c| c.category_type = :expense }
+Category.find_or_create_by!(name: "Plano Saúde", user: default_user) { |c| c.category_type = :expense }
+Category.find_or_create_by!(name: "Netflix", user: default_user) { |c| c.category_type = :expense }
+Category.find_or_create_by!(name: "Massagem", user: default_user) { |c| c.category_type = :expense }
+Category.find_or_create_by!(name: "Compras", user: default_user) { |c| c.category_type = :expense }
+
+# Categorias de RECEITA (income)
+Category.find_or_create_by!(name: "Salário", user: default_user) { |c| c.category_type = :income }
+Category.find_or_create_by!(name: "Freelance", user: default_user) { |c| c.category_type = :income }
+Category.find_or_create_by!(name: "PIX Recebido", user: default_user) { |c| c.category_type = :income }
 
 # === CONTAS E CARTÕES ===
 puts "Criando contas da família..."
@@ -79,12 +83,19 @@ puts "Criando categorias adicionais..."
 categorias_extras = [
   "Alimentação", "Saúde", "Transporte", "Educação", "Lazer", "Habitação",
   "Vestuário", "Combustível", "Telefonia", "Internet", "Streaming",
-  "Academia", "Beleza", "Empréstimo", "Investimento", "Transferência",
+  "Academia", "Beleza", "Empréstimo", "Investimento",
   "Impostos", "Seguros", "Manutenção", "Decoração"
 ]
 
 categorias_extras.each do |nome|
-  Category.find_or_create_by(name: nome, user: default_user)
+  Category.find_or_create_by(name: nome, user: default_user) do |category|
+    category.category_type = 'expense'
+  end
+end
+
+# Adicionar categoria de transferência para despesas
+Category.find_or_create_by(name: "Transferência", user: default_user) do |category|
+  category.category_type = 'expense'
 end
 
 categories = Category.where(user: default_user).index_by(&:name)
@@ -868,20 +879,44 @@ end
 # === TRANSFERÊNCIAS ENTRE CONTAS ===
 puts "Criando transferências..."
 
-# Algumas transferências ocasionais entre contas da família
-4.times do |i|
+# Transferências entre contas da família
+8.times do |i|
   data_transferencia = (Date.today - rand(90..300).days)
-  valor_transferencia = rand(500..2000)
+  valor_transferencia = rand(200..2000)
+  
+  # Diferentes tipos de transferências
+  case i % 4
+  when 0
+    # Poupança para conta corrente
+    from_account = accounts[:poupanca]
+    to_account = [accounts[:itau_pai], accounts[:bradesco_mae]].sample
+    descricao = "Transferência da poupança"
+  when 1
+    # Entre contas correntes
+    from_account = accounts[:itau_pai]
+    to_account = accounts[:bradesco_mae]
+    descricao = "Transferência PIX entre contas"
+  when 2
+    # Para poupança (reserva de emergência)
+    from_account = [accounts[:itau_pai], accounts[:bradesco_mae]].sample
+    to_account = accounts[:poupanca]
+    descricao = "Reserva de emergência"
+  else
+    # Transferência para pagamento de cartão
+    from_account = accounts[:bradesco_mae]
+    to_account = accounts[:itau_pai]
+    descricao = "Transferência para pagamento"
+  end
   
   Transaction.create!(
-    description: "Transferência entre contas",
+    description: descricao,
     amount: valor_transferencia,
-    transaction_type: "income",
+    transaction_type: "transfer",
     event_date: data_transferencia,
     payment_date: data_transferencia,
-    from_account: accounts[:poupanca],
-    to_account: [accounts[:itau_pai], accounts[:bradesco_mae]].sample,
-    category: categories["Transferência"] || categories["PIX Recebido"],
+    from_account: from_account,
+    to_account: to_account,
+    category: nil,  # Transferências não têm categoria
     recurrence_type: "single",
     status: "confirmed",
     user: default_user
@@ -1027,6 +1062,7 @@ puts "\n=== RESUMO DOS DADOS GERADOS ==="
 puts "Total de transações: #{Transaction.count}"
 puts "Receitas confirmadas: #{Transaction.income.confirmed.count}"
 puts "Despesas confirmadas: #{Transaction.expense.confirmed.count}"
+puts "Transferências confirmadas: #{Transaction.transfer.confirmed.count}"
 puts "Parcelamentos criados: #{InstallmentPlan.count}"
 puts "Compromissos recorrentes: #{RecurringCommitment.count}"
 puts "Faturas de cartão: #{CreditStatement.count}"
@@ -1044,9 +1080,10 @@ meses_gerados.each do |mes_str|
   mes_date = Date.strptime(mes_str, '%Y-%m')
   receitas = Transaction.income.confirmed.in_competence_month(mes_date).sum(:amount)
   despesas = Transaction.expense.confirmed.in_competence_month(mes_date).sum(:amount)
+  transferencias = Transaction.transfer.confirmed.in_competence_month(mes_date).sum(:amount)
   saldo = receitas - despesas
   
-  puts "#{mes_str}: Receitas R$ #{receitas.to_i} | Despesas R$ #{despesas.to_i} | Saldo R$ #{saldo.to_i}"
+  puts "#{mes_str}: Receitas R$ #{receitas.to_i} | Despesas R$ #{despesas.to_i} | Transferências R$ #{transferencias.to_i} | Saldo R$ #{saldo.to_i}"
 end
 
 puts "\nSeed realista finalizado com sucesso! 🎉"
