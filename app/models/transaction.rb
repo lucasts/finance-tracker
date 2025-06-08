@@ -146,7 +146,18 @@ class Transaction < ApplicationRecord
     if check_date && check_date > current_date
       'pending'    # Transação futura
     else
-      'confirmed'  # Transação atual ou passada
+      # Para parcelas de planos de parcelamento, usar lógica diferente
+      if installment_plan.present? && installment_number.present?
+        # Primeira parcela pode ser confirmada se for no passado/presente
+        # Demais parcelas sempre pending até serem pagas manualmente
+        if installment_number == 1 && check_date <= current_date
+          'confirmed'
+        else
+          'pending'
+        end
+      else
+        'confirmed'  # Transação atual ou passada (exceto parcelamentos)
+      end
     end
   end
   
