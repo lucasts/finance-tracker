@@ -12,41 +12,69 @@ export default class extends Controller {
   ]
 
   connect() {
+    console.log("🔍 DEBUG: TransactionForm controller connected")
+    
+    // Parse account and category data
     this.accountData = JSON.parse(this.accountDataTarget.textContent)
     this.categoryData = JSON.parse(this.categoryDataTarget.textContent)
     
-    // Initialize form state
-    this.updateFormState()
-    this.setupInitialState()
+    console.log("🔍 DEBUG: Account data loaded:", this.accountData.length, "accounts")
+    console.log("🔍 DEBUG: Category data loaded:", this.categoryData.length, "categories")
     
-    console.log("TransactionForm controller connected")
+    // Initialize form state
+    this.setupInitialState()
+    this.updateFormState()
+    
+    console.log("🔍 DEBUG: Initial setup complete")
   }
 
   setupInitialState() {
+    console.log("🔍 DEBUG: Setting up initial state")
+    
     // Set default values if creating new transaction
     if (!this.eventDateTarget.value) {
       this.eventDateTarget.value = new Date().toISOString().split('T')[0]
+      console.log("🔍 DEBUG: Set default event date")
     }
     
-    // Trigger initial updates
-    this.handleTypeChange()
+    // Trigger initial updates based on current form state
+    const selectedType = this.getSelectedTransactionType()
+    console.log("🔍 DEBUG: Initial transaction type:", selectedType)
+    
+    if (selectedType) {
+      this.handleTypeChange()
+    } else {
+      // If no type is selected, show all accounts and categories
+      this.showAllAccountOptions('from')
+      this.showAllAccountOptions('to')
+      this.showCategorySection()
+    }
+    
     this.handleAccountChange()
     this.handleDescriptionChange()
+    
+    console.log("🔍 DEBUG: Initial state setup complete")
   }
 
   handleTypeChange() {
     const selectedType = this.getSelectedTransactionType()
+    
+    console.log("🔍 DEBUG: Transaction type changed to:", selectedType)
     
     if (selectedType === 'income') {
       this.updateForIncome()
     } else if (selectedType === 'expense') {
       this.updateForExpense()
     } else if (selectedType === 'transfer') {
+      console.log("🔍 DEBUG: Setting up for transfer - should hide category section")
       this.updateForTransfer()
     }
     
     // Filter categories based on transaction type
     this.filterCategoriesByType(selectedType)
+    
+    // Filter accounts based on transaction type
+    this.filterAccountsByType(selectedType)
     
     this.updateFormState()
   }
@@ -112,9 +140,6 @@ export default class extends Controller {
     
     // Show category section for income
     this.showCategorySection()
-    
-    // Filter accounts for income
-    this.filterAccountsForIncome()
   }
 
   updateForExpense() {
@@ -126,12 +151,10 @@ export default class extends Controller {
     
     // Show category section for expenses
     this.showCategorySection()
-    
-    // Filter accounts for expense
-    this.filterAccountsForExpense()
   }
 
   updateForTransfer() {
+    console.log("🔍 DEBUG: updateForTransfer called")
     this.accountsTitleTarget.textContent = "🔄 Contas (Transferência)"
     this.fromAccountLabelTarget.textContent = "Conta de Origem"
     this.toAccountLabelTarget.textContent = "Conta de Destino"
@@ -139,10 +162,13 @@ export default class extends Controller {
     this.toAccountHelperTarget.textContent = "Para onde vai o dinheiro"
     
     // Hide category section for transfers
+    console.log("🔍 DEBUG: About to hide category section")
     this.hideCategorySection()
+    console.log("🔍 DEBUG: Category section hidden")
     
     // Clear category selection for transfers
     this.categoryTarget.value = ''
+    console.log("🔍 DEBUG: Category value cleared")
   }
 
   updateForAccountType(account) {
@@ -182,8 +208,15 @@ export default class extends Controller {
   }
 
   hideCategorySection() {
+    console.log("🔍 DEBUG: hideCategorySection called")
+    console.log("🔍 DEBUG: hasCategorySectionTarget:", this.hasCategorySectionTarget)
+    
     if (this.hasCategorySectionTarget) {
+      console.log("🔍 DEBUG: Category section target found, adding 'hidden' class")
       this.categorySectionTarget.classList.add('hidden')
+      console.log("🔍 DEBUG: Category section classes:", this.categorySectionTarget.classList.toString())
+    } else {
+      console.log("🔍 DEBUG: Category section target NOT found!")
     }
   }
 
@@ -351,14 +384,87 @@ export default class extends Controller {
 
   filterAccountsForIncome() {
     // For income: from_account should be revenue accounts, to_account should be asset accounts
-    // This would require updating the select options dynamically
-    // For now, just update helper text
+    this.filterAccountOptions('from', ['REVENUE'])
+    this.filterAccountOptions('to', ['BANK', 'CASH', 'SAVINGS'])
   }
 
   filterAccountsForExpense() {
     // For expense: from_account should be asset accounts, to_account should be expense accounts
-    // This would require updating the select options dynamically
-    // For now, just update helper text
+    this.filterAccountOptions('from', ['BANK', 'CREDIT', 'CASH', 'SAVINGS'])
+    this.filterAccountOptions('to', ['EXPENSE'])
+  }
+
+  filterAccountsByType(transactionType) {
+    console.log("🔍 DEBUG: filterAccountsByType called with:", transactionType)
+    
+    if (transactionType === 'income') {
+      console.log("🔍 DEBUG: Filtering accounts for income")
+      this.filterAccountsForIncome()
+    } else if (transactionType === 'expense') {
+      console.log("🔍 DEBUG: Filtering accounts for expense")
+      this.filterAccountsForExpense()
+    } else if (transactionType === 'transfer') {
+      console.log("🔍 DEBUG: Filtering accounts for transfer")
+      // For transfers: both accounts should be asset accounts
+      this.filterAccountOptions('from', ['BANK', 'CREDIT', 'CASH', 'SAVINGS'])
+      this.filterAccountOptions('to', ['BANK', 'CREDIT', 'CASH', 'SAVINGS'])
+    } else {
+      console.log("🔍 DEBUG: Showing all accounts (no type selected)")
+      // Show all accounts if no transaction type selected
+      this.showAllAccountOptions('from')
+      this.showAllAccountOptions('to')
+    }
+  }
+
+  filterAccountOptions(accountType, allowedTypeCodes) {
+    console.log("🔍 DEBUG: filterAccountOptions called for", accountType, "with allowed types:", allowedTypeCodes)
+    
+    const selectElement = accountType === 'from' ? this.fromAccountTarget : this.toAccountTarget
+    const options = Array.from(selectElement.options)
+    
+    console.log("🔍 DEBUG: Found", options.length, "account options")
+    
+    // Clear current selection if it doesn't match the allowed types
+    const currentAccountId = selectElement.value
+    if (currentAccountId) {
+      const currentAccount = this.accountData.find(acc => acc.id.toString() === currentAccountId)
+      if (currentAccount && !allowedTypeCodes.includes(currentAccount.type_code)) {
+        console.log("🔍 DEBUG: Clearing current selection - account type", currentAccount.type_code, "not in allowed types")
+        selectElement.value = ''
+      }
+    }
+    
+    let visibleCount = 0
+    let hiddenCount = 0
+    
+    // Filter options based on allowed account types
+    options.forEach(option => {
+      if (option.value === '') {
+        // Keep the empty option
+        option.style.display = ''
+        return
+      }
+      
+      const accountData = this.accountData.find(acc => acc.id.toString() === option.value)
+      if (accountData && allowedTypeCodes.includes(accountData.type_code)) {
+        option.style.display = ''
+        visibleCount++
+      } else {
+        option.style.display = 'none'
+        hiddenCount++
+      }
+    })
+    
+    console.log("🔍 DEBUG: Account filtering result -", visibleCount, "visible,", hiddenCount, "hidden")
+  }
+
+  showAllAccountOptions(accountType) {
+    const selectElement = accountType === 'from' ? this.fromAccountTarget : this.toAccountTarget
+    const options = Array.from(selectElement.options)
+    
+    options.forEach(option => {
+      option.style.display = ''
+    })
   }
 
   filterToAccounts(fromAccount) {

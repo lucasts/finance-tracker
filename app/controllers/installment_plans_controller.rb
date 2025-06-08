@@ -7,9 +7,9 @@ class InstallmentPlansController < ApplicationController
                          ).order(created_at: :desc)
     
     @plan_summaries = @installment_plans.map do |plan|
-      paid_installments = plan.transactions.count
+      paid_installments = plan.transactions.where(status: 'confirmed').count
       remaining_installments = plan.installment_count - paid_installments
-      total_paid = plan.transactions.sum(:amount)
+      total_paid = plan.transactions.where(status: 'confirmed').sum(:amount)
       remaining_amount = plan.total_amount - total_paid
       next_due_date = calculate_next_due_date(plan)
       
@@ -132,7 +132,7 @@ class InstallmentPlansController < ApplicationController
   end
   
   def calculate_next_due_date(plan)
-    paid_count = plan.transactions.count
+    paid_count = plan.transactions.where(status: 'confirmed').count
     return nil if paid_count >= plan.installment_count
     
     next_installment_number = paid_count + 1
@@ -153,8 +153,8 @@ class InstallmentPlansController < ApplicationController
   end
   
   def calculate_progress(plan)
-    paid_installments = plan.transactions.count
-    total_paid = plan.transactions.sum(:amount)
+    paid_installments = plan.transactions.where(status: 'confirmed').count
+    total_paid = plan.transactions.where(status: 'confirmed').sum(:amount)
     next_due_date = calculate_next_due_date(plan)
     
     {
@@ -170,7 +170,7 @@ class InstallmentPlansController < ApplicationController
   end
   
   def calculate_next_installments(plan, count = 3)
-    paid_count = plan.transactions.count
+    paid_count = plan.transactions.where(status: 'confirmed').count
     next_installments = []
     
     (1..count).each do |i|

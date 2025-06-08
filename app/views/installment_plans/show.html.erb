@@ -212,7 +212,13 @@
                 <td><%= l(transaction.payment_date || transaction.event_date, format: :short) %></td>
                 <td class="font-semibold">R$ <%= number_with_precision(transaction.amount, precision: 2, delimiter: ".") %></td>
                 <td>
-                  <div class="badge badge-success">Pago</div>
+                  <% if transaction.status == "confirmed" %>
+                    <div class="badge badge-success">Pago</div>
+                  <% elsif transaction.status == "pending" %>
+                    <div class="badge badge-warning">Pendente</div>
+                  <% else %>
+                    <div class="badge badge-error">Cancelado</div>
+                  <% end %>
                 </td>
                 <td>
                   <%= link_to 'Ver', transaction_path(transaction), class: "btn btn-xs btn-ghost" %>

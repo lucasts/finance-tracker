@@ -177,6 +177,15 @@ class InstallmentPlan < ApplicationRecord
           user: user  # Add the user from the installment plan
         )
         
+        # Aplicar lógica de status específica para parcelas
+        # Primeira parcela: confirmed se for atual/passada, senão pending
+        # Demais parcelas: sempre pending
+        if number == 1 && installment_date <= Date.current
+          transaction.status = 'confirmed'
+        else
+          transaction.status = 'pending'
+        end
+        
         transaction.save!
       end
     end

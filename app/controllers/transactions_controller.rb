@@ -13,15 +13,6 @@ class TransactionsController < ApplicationController
     # Filtrar por usuário atual
     @transactions = current_user_scope(Transaction).in_competence_month(selected_month).order(event_date: :desc)
     
-    # Apply additional filters
-    if params[:account_id].present?
-      @transactions = @transactions.where("from_account_id = ? OR to_account_id = ?", params[:account_id], params[:account_id])
-    end
-    
-    if params[:transaction_type].present?
-      @transactions = @transactions.where(transaction_type: params[:transaction_type])
-    end
-    
     # Filtrar por plano de parcelamento se especificado
     if params[:plan].present?
       @transactions = @transactions.where(installment_plan_id: params[:plan])
@@ -40,9 +31,6 @@ class TransactionsController < ApplicationController
     @transaction.payment_date = Date.current
     @transaction.recurrence_type = 'single'
     # Status será determinado automaticamente baseado nas datas
-    
-    # Load categories for the form, filtering by transaction type if provided
-    load_categories_for_form
   end
 
   def create
@@ -56,9 +44,7 @@ class TransactionsController < ApplicationController
     end
   end
 
-  def edit
-    load_categories_for_form
-  end
+  def edit; end
 
   def update
     # Reasociar com fatura se mudou conta ou data
@@ -333,15 +319,6 @@ class TransactionsController < ApplicationController
     end
     
     true
-  end
-
-  def load_categories_for_form
-    # Load all categories with their types for the form
-    # This provides both the filtered options and the data for dynamic filtering
-    @categories = current_user_scope(Category).order(:name)
-    @income_categories = @categories.income
-    @expense_categories = @categories.expense
-    # Transferências não precisam de categorias
   end
 
 end

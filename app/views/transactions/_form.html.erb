@@ -97,7 +97,7 @@
               </span>
             </label>
             <%= form.collection_select :from_account_id, 
-                  Account.includes(:account_type).order(:name), 
+                  @accounts || Account.includes(:account_type).order(:name), 
                   :id, 
                   ->(account) { "#{account.name} (#{account.account_type.name})" },
                   { prompt: "Selecione a conta" }, 
@@ -122,7 +122,7 @@
               </span>
             </label>
             <%= form.collection_select :to_account_id, 
-                  Account.includes(:account_type).order(:name), 
+                  @accounts || Account.includes(:account_type).order(:name), 
                   :id, 
                   ->(account) { "#{account.name} (#{account.account_type.name})" },
                   { prompt: "Selecione a conta" }, 
@@ -389,7 +389,7 @@
 
   <!-- Hidden data for JavaScript -->
   <script type="application/json" data-transaction-form-target="accountData">
-    <%= raw Account.includes(:account_type).map { |account| {
+    <%= raw (@accounts || Account.includes(:account_type)).map { |account| {
       id: account.id,
       name: account.name,
       type_code: account.account_type.code,
