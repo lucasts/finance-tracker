@@ -38,6 +38,7 @@ Rails.application.routes.draw do
       post :run_recurring
       post :run_installments
       get :status
+      get :preview
     end
   end
 

@@ -8,6 +8,7 @@
 <div class="flex justify-between items-center mb-6">
   <h1 class="text-3xl font-bold">🤖 Automação de Transações</h1>
   <div class="flex gap-2">
+    <%= link_to "🔮 Preview", preview_automation_index_path, class: "btn btn-outline btn-sm" %>
     <%= link_to "📊 Relatórios", reports_path, class: "btn btn-outline btn-sm" %>
     <%= link_to "💰 Transações", transactions_path, class: "btn btn-outline btn-sm" %>
   </div>
@@ -81,19 +82,26 @@
   <div class="card-body">
     <h2 class="card-title mb-4">🎮 Ações Manuais</h2>
     
+    <!-- Data para teste de automação -->
+    <div class="mb-4 p-4 bg-info/10 rounded-lg border border-info/20">
+      <h3 class="font-medium text-info mb-2">📅 Data para Testes</h3>
+      <div class="flex gap-2 items-center">
+        <input type="date" id="test_date" class="input input-bordered input-sm" value="<%= Date.current.next_month.change(day: 5).to_s %>" />
+        <span class="text-sm text-base-content/70">Selecione uma data futura para teste (ex: 05/07/2025)</span>
+      </div>
+    </div>
+    
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Daily Automation -->
       <div class="card bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
         <div class="card-body">
           <h3 class="card-title text-primary">🚀 Automação Completa</h3>
           <p class="text-sm text-base-content/70 mb-4">
-            Executa todas as automações (transações recorrentes + parcelas) para o dia atual.
+            Executa todas as automações (transações recorrentes + parcelas) para a data selecionada.
           </p>
-          <%= link_to run_daily_automation_index_path, method: :post, 
-                      class: "btn btn-primary w-full",
-                      data: { confirm: "Executar automação completa para hoje?" } do %>
+          <button id="run_daily" class="btn btn-primary w-full">
             🤖 Executar Tudo
-          <% end %>
+          </button>
         </div>
       </div>
 
@@ -102,13 +110,11 @@
         <div class="card-body">
           <h3 class="card-title text-success">🔄 Apenas Recorrentes</h3>
           <p class="text-sm text-base-content/70 mb-4">
-            Gera apenas transações de compromissos recorrentes que estão pendentes.
+            Gera apenas transações de compromissos recorrentes para a data selecionada.
           </p>
-          <%= link_to run_recurring_automation_index_path, method: :post, 
-                      class: "btn btn-success w-full",
-                      data: { confirm: "Gerar transações recorrentes?" } do %>
+          <button id="run_recurring" class="btn btn-success w-full">
             🔄 Gerar Recorrentes
-          <% end %>
+          </button>
         </div>
       </div>
 
@@ -117,16 +123,58 @@
         <div class="card-body">
           <h3 class="card-title text-warning">📊 Apenas Parcelas</h3>
           <p class="text-sm text-base-content/70 mb-4">
-            Gera apenas parcelas de parcelamentos que estão vencidas ou a vencer.
+            Gera apenas parcelas de parcelamentos para a data selecionada.
           </p>
-          <%= link_to run_installments_automation_index_path, method: :post, 
-                      class: "btn btn-warning w-full",
-                      data: { confirm: "Gerar parcelas pendentes?" } do %>
+          <button id="run_installments" class="btn btn-warning w-full">
             📊 Gerar Parcelas
-          <% end %>
+          </button>
         </div>
       </div>
     </div>
+
+    <!-- Script para submeter o formulário com a data personalizada -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        function submitWithDate(url) {
+          const testDate = document.getElementById('test_date').value;
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = url;
+          
+          const dateInput = document.createElement('input');
+          dateInput.type = 'hidden';
+          dateInput.name = 'test_date';
+          dateInput.value = testDate;
+          
+          const tokenInput = document.createElement('input');
+          tokenInput.type = 'hidden';
+          tokenInput.name = 'authenticity_token';
+          tokenInput.value = document.querySelector('meta[name="csrf-token"]').content;
+          
+          form.appendChild(dateInput);
+          form.appendChild(tokenInput);
+          document.body.appendChild(form);
+          
+          if (confirm(`Executar automação para a data ${testDate}?`)) {
+            form.submit();
+          }
+          
+          document.body.removeChild(form);
+        }
+        
+        document.getElementById('run_daily').addEventListener('click', function() {
+          submitWithDate('<%= run_daily_automation_index_path %>');
+        });
+        
+        document.getElementById('run_recurring').addEventListener('click', function() {
+          submitWithDate('<%= run_recurring_automation_index_path %>');
+        });
+        
+        document.getElementById('run_installments').addEventListener('click', function() {
+          submitWithDate('<%= run_installments_automation_index_path %>');
+        });
+      });
+    </script>
   </div>
 </div>
 
@@ -217,6 +265,46 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Documentação sobre Automação -->
+<div class="card bg-base-100 shadow mb-8">
+  <div class="card-body">
+    <h2 class="card-title mb-4">📘 Como funciona a automação</h2>
+    
+    <div class="prose max-w-none">
+      <h3>Transações Recorrentes</h3>
+      <p>O sistema gera transações para compromissos recorrentes seguindo estas regras:</p>
+      <ul>
+        <li><strong>Frequência:</strong> A geração respeita a frequência configurada (mensal, semanal, anual)</li>
+        <li><strong>Dia de geração:</strong> Para compromissos mensais, gera no mesmo dia do mês da data de início</li>
+        <li><strong>Verificação de duplicidade:</strong> Não gera transação se já existir uma para a mesma data</li>
+        <li><strong>Status do compromisso:</strong> Considera apenas compromissos com status "ativo"</li>
+        <li><strong>Período ativo:</strong> Respeita as datas de início e término do compromisso</li>
+      </ul>
+
+      <div class="alert alert-info">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span><strong>Dica:</strong> Se uma automação não gerou transações, verifique se todas as condições acima são atendidas. Por exemplo, se é o dia certo do mês ou se já existe uma transação para hoje.</span>
+        </div>
+      </div>
+
+      <h3>Parcelas de Parcelamentos</h3>
+      <p>Para parcelamentos, o sistema:</p>
+      <ul>
+        <li>Gera parcelas conforme a frequência configurada no plano</li>
+        <li>Cria até atingir o número total de parcelas definido</li>
+        <li>Cada parcela tem seu valor calculado (valor total ÷ número de parcelas)</li>
+      </ul>
+
+      <h3>Testes de Automação</h3>
+      <p>
+        Use a opção "Data para Testes" acima para simular a geração de transações em datas futuras.
+        Isso permite verificar se suas configurações estão corretas sem precisar esperar pela data real.
+      </p>
     </div>
   </div>
 </div>

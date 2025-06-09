@@ -1,0 +1,171 @@
+<div class="breadcrumbs text-sm mb-6">
+  <ul>
+    <li><%= link_to "Início", root_path %></li>
+    <li><%= link_to "Automação", automation_index_path %></li>
+    <li>Preview de Automação</li>
+  </ul>
+</div>
+
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-3xl font-bold">🔮 Preview de Automação: <%= @date.strftime("%d/%m/%Y") %></h1>
+  <div class="flex gap-2">
+    <%= link_to "⬅️ Voltar", automation_index_path, class: "btn btn-outline btn-sm" %>
+  </div>
+</div>
+
+<div class="bg-base-100 rounded-box shadow p-4 mb-6">
+  <form action="<%= preview_automation_index_path %>" method="get" class="flex flex-wrap gap-4 items-end">
+    <div class="form-control w-full max-w-xs">
+      <label class="label">
+        <span class="label-text">Selecione a data para simulação:</span>
+      </label>
+      <input type="date" name="date" class="input input-bordered w-full" value="<%= @date %>" />
+    </div>
+    
+    <button type="submit" class="btn btn-primary">🔍 Verificar automações</button>
+  </form>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+  <!-- Transações Recorrentes -->
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title text-primary">🔄 Transações Recorrentes</h2>
+      
+      <% if @preview_results[:recurring_transactions].empty? %>
+        <div class="alert">
+          <span>Não há compromissos recorrentes ativos configurados.</span>
+        </div>
+      <% else %>
+        <div class="overflow-x-auto">
+          <table class="table table-zebra w-full">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Status</th>
+                <th>Frequência</th>
+                <th>Informações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @preview_results[:recurring_transactions].each do |commitment| %>
+                <tr>
+                  <td>
+                    <div class="font-bold"><%= commitment[:name] %></div>
+                    <div class="text-xs opacity-60">ID: <%= commitment[:id] %></div>
+                  </td>
+                  <td>
+                    <% if commitment[:already_exists] %>
+                      <div class="badge badge-warning">Já existe</div>
+                    <% elsif commitment[:should_generate] %>
+                      <div class="badge badge-success">Será gerada</div>
+                    <% else %>
+                      <div class="badge badge-ghost">Não será gerada</div>
+                    <% end %>
+                  </td>
+                  <td>
+                    <div><%= t("enums.recurrence_frequency.#{commitment[:frequency]}") rescue commitment[:frequency].humanize %></div>
+                    
+                    <% if commitment[:generation_day].present? %>
+                      <div class="text-xs opacity-60">Dia <%= commitment[:generation_day] %></div>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if commitment[:already_exists] %>
+                      <span class="text-sm text-warning">Já existe transação para esta data</span>
+                    <% elsif !commitment[:should_generate] %>
+                      <% if commitment[:frequency] == 'monthly' && commitment[:generation_day] != @date.day %>
+                        <span class="text-sm">Dia diferente (esperado: <%= commitment[:generation_day] %>)</span>
+                      <% else %>
+                        <span class="text-sm">Não atende critérios</span>
+                      <% end %>
+                    <% else %>
+                      <span class="text-sm text-success">Será gerada na automação</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Parcelas -->
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title text-warning">📊 Parcelas</h2>
+      
+      <% if @preview_results[:installment_transactions].empty? %>
+        <div class="alert">
+          <span>Não há parcelamentos ativos configurados.</span>
+        </div>
+      <% else %>
+        <div class="overflow-x-auto">
+          <table class="table table-zebra w-full">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Status</th>
+                <th>Informações</th>
+                <th>Progresso</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @preview_results[:installment_transactions].each do |plan| %>
+                <tr>
+                  <td>
+                    <div class="font-bold"><%= plan[:name] %></div>
+                    <div class="text-xs opacity-60">ID: <%= plan[:id] %></div>
+                  </td>
+                  <td>
+                    <% if plan[:should_generate] %>
+                      <div class="badge badge-success">Será gerada</div>
+                    <% else %>
+                      <div class="badge badge-ghost">Não será gerada</div>
+                    <% end %>
+                  </td>
+                  <td>
+                    <div>
+                      <%= plan[:current_installment] %>/<%= plan[:total_installments] %> 
+                      parcelas
+                    </div>
+                    <div class="text-xs opacity-60">
+                      <%= t("enums.recurrence_frequency.#{plan[:frequency]}") rescue plan[:frequency].humanize %>
+                    </div>
+                  </td>
+                  <td>
+                    <progress class="progress progress-warning w-full" 
+                              value="<%= plan[:current_installment] %>" 
+                              max="<%= plan[:total_installments] %>"></progress>
+                    <% if plan[:should_generate] %>
+                      <span class="text-xs text-success">Nova parcela será gerada</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="card bg-base-100 shadow">
+  <div class="card-body">
+    <h2 class="card-title">ℹ️ Como usar este preview</h2>
+    <p>Esta página permite verificar quais transações seriam geradas se a automação fosse executada em uma data específica.</p>
+    <ul class="list-disc list-inside space-y-1">
+      <li>Use o seletor de data acima para simular diferentes datas</li>
+      <li>Compromissos recorrentes mensais geram transações apenas nos mesmos dias do mês da data de início</li>
+      <li>Parcelas são geradas conforme a frequência e quando o número máximo de parcelas ainda não foi atingido</li>
+      <li>A opção "Já existe" indica que já existe uma transação para este compromisso na data selecionada</li>
+    </ul>
+    
+    <div class="flex justify-end mt-4">
+      <%= link_to "Voltar para Automação", automation_index_path, class: "btn btn-primary" %>
+    </div>
+  </div>
+</div>
