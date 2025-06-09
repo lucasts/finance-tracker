@@ -1,28 +1,22 @@
-# == RecurringCommitment
-# Compromisso recorrente (fixo ou variável)
-# - name: string
-# - category_id: referência obrigatória
-# - default_amount: decimal (opcional)
-# - recurrence_frequency: string (ex: 'monthly', 'weekly', 'annual')
-# - start_date: date
-# - end_date: date (opcional)
-# - status: enum { active: 0, paused: 1, closed: 2 }
-# - notes: text (opcional)
-#
-# Relacionamento: tem muitas transactions (via recurring_commitment_id)
 class RecurringCommitment < ApplicationRecord
   # Associação de usuário
   belongs_to :user
   
   # Associações existentes
   belongs_to :category
+  belongs_to :from_account, class_name: 'Account'
+  belongs_to :to_account, class_name: 'Account'
   has_many :transactions, dependent: :restrict_with_error
 
   enum :status, { active: 0, paused: 1, closed: 2 }
 
   validates :name, :category_id, :recurrence_frequency, :start_date, :status, presence: true
+  validates :from_account, presence: true
+  validates :to_account, presence: true
   validates :recurrence_frequency, inclusion: { in: %w[monthly weekly annual] }, allow_blank: true
   validates :default_amount, numericality: { greater_than: 0 }, allow_nil: true
+
+  validate :accounts_must_be_different
 
   # Scopes úteis
   scope :active_commitments, -> { where(status: :active) }
@@ -145,4 +139,12 @@ class RecurringCommitment < ApplicationRecord
   # Documentação:
   # - O valor padrão pode ser sobrescrito por cada transação (recorrente variável)
   # - O sistema gera transações periodicamente conforme frequência e status
+
+  private
+
+  def accounts_must_be_different
+    if from_account_id == to_account_id
+      errors.add(:to_account_id, 'não pode ser igual à conta de origem')
+    end
+  end
 end

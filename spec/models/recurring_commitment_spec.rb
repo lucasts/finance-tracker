@@ -3,7 +3,9 @@ require 'rails_helper'
 RSpec.describe RecurringCommitment, type: :model do
   let(:user) { create(:user) }
   let(:category) { create(:category, user: user) }
-  let(:commitment) { create(:recurring_commitment, user: user, category: category) }
+  let(:from_account) { create(:account, user: user) }
+  let(:to_account) { create(:account, user: user) }
+  let(:commitment) { create(:recurring_commitment, user: user, category: category, from_account: from_account, to_account: to_account) }
 
   describe 'validations' do
     it { should validate_presence_of(:name) }
@@ -11,6 +13,7 @@ RSpec.describe RecurringCommitment, type: :model do
     it { should validate_presence_of(:recurrence_frequency) }
     it { should validate_presence_of(:start_date) }
     it { should validate_presence_of(:status) }
+    it { should validate_presence_of(:from_account) }
     
     it { should validate_inclusion_of(:recurrence_frequency)
            .in_array(%w[monthly weekly annual]) }
@@ -26,7 +29,9 @@ RSpec.describe RecurringCommitment, type: :model do
                         recurrence_frequency: 'monthly',
                         start_date: Date.current,
                         user: user,
-                        category: category)
+                        category: category,
+                        from_account: from_account,
+                        to_account: to_account)
       expect(commitment).to be_valid
     end
     
@@ -36,7 +41,7 @@ RSpec.describe RecurringCommitment, type: :model do
     end
     
     it 'accepts null default_amount' do
-      commitment = build(:recurring_commitment, default_amount: nil, user: user, category: category)
+      commitment = build(:recurring_commitment, default_amount: nil, user: user, category: category, from_account: from_account, to_account: to_account)
       expect(commitment).to be_valid
     end
     
@@ -49,6 +54,7 @@ RSpec.describe RecurringCommitment, type: :model do
   describe 'associations' do
     it { should belong_to(:user) }
     it { should belong_to(:category) }
+    it { should belong_to(:from_account).class_name('Account') }
     it { should have_many(:transactions).dependent(:restrict_with_error) }
     
     it 'belongs to a user and category' do
@@ -341,19 +347,21 @@ RSpec.describe RecurringCommitment, type: :model do
       old_commitment = build(:recurring_commitment,
                             start_date: 10.years.ago,
                             user: user,
-                            category: category)
+                            category: category,
+                            from_account: from_account,
+                            to_account: to_account)
       expect(old_commitment).to be_valid
     end
-    
     it 'handles end dates in the distant future' do
       long_commitment = build(:recurring_commitment,
                              start_date: Date.current,
                              end_date: 10.years.from_now,
                              user: user,
-                             category: category)
+                             category: category,
+                             from_account: from_account,
+                             to_account: to_account)
       expect(long_commitment).to be_valid
     end
-    
     it 'handles decimal values' do
       decimal_commitment = create(:recurring_commitment,
                                  default_amount: 999.99,
@@ -361,16 +369,14 @@ RSpec.describe RecurringCommitment, type: :model do
                                  category: category)
       expect(decimal_commitment.default_amount).to eq(999.99)
     end
-    
     it 'handles long names' do
       long_name = 'a' * 255
-      commitment = build(:recurring_commitment, name: long_name, user: user, category: category)
+      commitment = build(:recurring_commitment, name: long_name, user: user, category: category, from_account: from_account, to_account: to_account)
       expect(commitment).to be_valid
     end
-    
     it 'handles long notes' do
       long_notes = 'a' * 1000
-      commitment = build(:recurring_commitment, notes: long_notes, user: user, category: category)
+      commitment = build(:recurring_commitment, notes: long_notes, user: user, category: category, from_account: from_account, to_account: to_account)
       expect(commitment).to be_valid
     end
   end

@@ -103,12 +103,12 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <!-- Amount -->
     <div class="form-control">
-      <%= form.label :amount, class: "label" do %>
+      <%= form.label :default_amount, class: "label" do %>
         <span class="label-text">Valor Padrão</span>
       <% end %>
       <div class="input-group">
         <span class="input-group-text">R$</span>
-        <%= form.number_field :amount, 
+        <%= form.number_field :default_amount, 
                               step: 0.01,
                               class: "input input-bordered w-full",
                               placeholder: "0,00" %>
@@ -118,7 +118,9 @@
       </label>
     </div>
 
-    <!-- Transaction Type -->
+    <!-- Campo transaction_type removido pois não existe no modelo RecurringCommitment -->
+    <!-- Se precisar adicionar tipo de transação, crie uma migration: add_transaction_type_to_recurring_commitments -->
+    <!-- 
     <div class="form-control">
       <%= form.label :transaction_type, class: "label" do %>
         <span class="label-text">Tipo de Transação</span>
@@ -127,25 +129,26 @@
                       options_for_select([
                         ['Despesa', 'expense'],
                         ['Receita', 'income']
-                      ], recurring_commitment.transaction_type),
+                      ], nil),
                       { prompt: "Selecione o tipo" },
                       { class: "select select-bordered w-full" } %>
     </div>
+    -->
   </div>
 
   <!-- Frequency and Dates -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- Frequency -->
     <div class="form-control">
-      <%= form.label :frequency, class: "label" do %>
+      <%= form.label :recurrence_frequency, class: "label" do %>
         <span class="label-text">Frequência</span>
       <% end %>
-      <%= form.select :frequency,
+      <%= form.select :recurrence_frequency,
                       options_for_select([
                         ['Mensal', 'monthly'],
                         ['Semanal', 'weekly'],
                         ['Anual', 'yearly']
-                      ], recurring_commitment.frequency),
+                      ], recurring_commitment.recurrence_frequency),
                       { prompt: "Selecione a frequência" },
                       { class: "select select-bordered w-full" } %>
     </div>
@@ -183,15 +186,38 @@
                        placeholder: "Informações adicionais sobre este compromisso..." %>
   </div>
 
-  <!-- Active Status -->
+  <!-- Status -->
   <div class="form-control">
-    <label class="cursor-pointer label justify-start gap-3">
-      <%= form.check_box :active, class: "checkbox checkbox-primary" %>
-      <span class="label-text">
-        <span class="font-medium">Compromisso ativo</span>
-        <div class="text-sm opacity-70">Compromissos ativos geram transações automaticamente</div>
-      </span>
+    <label class="label">
+      <span class="label-text">Status</span>
     </label>
+    <%= form.select :status,
+                    options_for_select([
+                      ['Ativo', 'active'],
+                      ['Pausado', 'paused'],
+                      ['Fechado', 'closed']
+                    ], recurring_commitment.status),
+                    {},
+                    { class: "select select-bordered w-full" } %>
+    <label class="label">
+      <span class="label-text-alt">Apenas compromissos ativos geram transações automaticamente</span>
+    </label>
+  </div>
+
+  <!-- Contas de Origem e Destino -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="form-control">
+      <%= form.label :from_account_id, class: "label" do %>
+        <span class="label-text">Conta de Origem</span>
+      <% end %>
+      <%= form.collection_select :from_account_id, @accounts, :id, :name, { prompt: "Selecione a conta de origem" }, { class: "select select-bordered w-full" } %>
+    </div>
+    <div class="form-control">
+      <%= form.label :to_account_id, class: "label" do %>
+        <span class="label-text">Conta de Destino</span>
+      <% end %>
+      <%= form.collection_select :to_account_id, @accounts, :id, :name, { prompt: "Selecione a conta de destino" }, { class: "select select-bordered w-full" } %>
+    </div>
   </div>
 
   <!-- Action Buttons -->

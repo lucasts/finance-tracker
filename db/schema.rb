@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_08_001542) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_08_130000) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -138,9 +138,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_001542) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.integer "from_account_id", null: false
+    t.integer "to_account_id", null: false
     t.index ["category_id"], name: "index_recurring_commitments_on_category_id"
+    t.index ["from_account_id"], name: "index_recurring_commitments_on_from_account_id"
     t.index ["recurrence_frequency"], name: "index_recurring_commitments_on_recurrence_frequency"
     t.index ["status"], name: "index_recurring_commitments_on_status"
+    t.index ["to_account_id"], name: "index_recurring_commitments_on_to_account_id"
     t.index ["user_id"], name: "index_recurring_commitments_on_user_id"
   end
 
@@ -216,6 +220,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_001542) do
   add_foreign_key "reconciliation_entries", "imported_transactions"
   add_foreign_key "reconciliation_entries", "transactions"
   add_foreign_key "reconciliation_entries", "users"
+  add_foreign_key "recurring_commitments", "accounts", column: "from_account_id"
+  add_foreign_key "recurring_commitments", "accounts", column: "to_account_id"
   add_foreign_key "recurring_commitments", "categories"
   add_foreign_key "recurring_commitments", "users"
   add_foreign_key "transactions", "accounts", column: "from_account_id"

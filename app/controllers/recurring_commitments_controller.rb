@@ -19,7 +19,7 @@ class RecurringCommitmentsController < ApplicationController
   end
   
   def show
-    @recent_transactions = @recurring_commitment.transactions.order(date: :desc).limit(10)
+    @recent_transactions = @recurring_commitment.transactions.order(event_date: :desc).limit(10)
     @next_transaction_date = calculate_next_transaction_date
     @total_generated = @recurring_commitment.transactions.sum(:amount)
   end
@@ -71,13 +71,13 @@ class RecurringCommitmentsController < ApplicationController
     end_date = Date.current + months_forward.months
     
     transactions = @recurring_commitment.transactions
-                                       .where(date: start_date..end_date)
-                                       .order(:date)
+                                       .where(event_date: start_date..end_date)
+                                       .order(:event_date)
     
     timeline_data = transactions.map do |transaction|
       {
         id: transaction.id,
-        date: transaction.date,
+        date: transaction.event_date,
         amount: transaction.amount,
         description: transaction.description,
         type: transaction.transaction_type
@@ -88,7 +88,7 @@ class RecurringCommitmentsController < ApplicationController
       commitment: {
         id: @recurring_commitment.id,
         name: @recurring_commitment.name,
-        frequency: @recurring_commitment.frequency
+        frequency: @recurring_commitment.recurrence_frequency
       },
       transactions: timeline_data,
       period: {
@@ -155,7 +155,8 @@ class RecurringCommitmentsController < ApplicationController
   def recurring_commitment_params
     params.require(:recurring_commitment).permit(
       :name, :amount, :frequency, :start_date, :end_date, :transaction_type,
-      :account_id, :category_id, :notes, :active, :edit_strategy, :effective_date, :advanced_edit
+      :account_id, :category_id, :notes, :active, :edit_strategy, :effective_date, :advanced_edit,
+      :from_account_id, :to_account_id
     )
   end
   
@@ -164,18 +165,18 @@ class RecurringCommitmentsController < ApplicationController
   def calculate_next_transaction_date
     return nil unless @recurring_commitment.active?
     
-    last_transaction = @recurring_commitment.transactions.order(:date).last
+    last_transaction = @recurring_commitment.transactions.order(:event_date).last
     return @recurring_commitment.start_date unless last_transaction
     
-    case @recurring_commitment.frequency
+    case @recurring_commitment.recurrence_frequency
     when 'daily'
-      last_transaction.date + 1.day
+      last_transaction.event_date + 1.day
     when 'weekly'
-      last_transaction.date + 1.week
+      last_transaction.event_date + 1.week
     when 'monthly'
-      last_transaction.date + 1.month
+      last_transaction.event_date + 1.month
     when 'yearly'
-      last_transaction.date + 1.year
+      last_transaction.event_date + 1.year
     end
   end
 end

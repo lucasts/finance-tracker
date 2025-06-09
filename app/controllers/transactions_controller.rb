@@ -214,11 +214,11 @@ class TransactionsController < ApplicationController
       recurring_commitment = current_user.recurring_commitments.build(
         name: transaction_params[:description],
         category_id: transaction_params[:category_id],
-        frequency: params[:recurrence_frequency] || 'monthly',
-        amount_type: params[:recurring_amount_type] || 'fixed',
-        expected_amount: (params[:recurring_amount_type] == 'fixed' ? transaction_params[:amount] : nil),
+        recurrence_frequency: params[:recurrence_frequency] || 'monthly',
         start_date: transaction_params[:event_date],
-        status: 'active'
+        status: 'active',
+        from_account_id: transaction_params[:from_account_id],
+        to_account_id: transaction_params[:to_account_id]
       )
 
       if recurring_commitment.save
@@ -226,13 +226,10 @@ class TransactionsController < ApplicationController
         @transaction = current_user.transactions.build(transaction_params)
         @transaction.recurrence_type = 'recurring'
         @transaction.recurring_commitment = recurring_commitment
-        
         apply_intelligent_defaults(@transaction)
-        
         if @transaction.from_account&.account_type&.code == "CREDIT"
           associate_with_credit_statement(@transaction)
         end
-
         if @transaction.save
           redirect_to transactions_path, notice: t('messages.transaction.recurring_created')
         else
@@ -240,7 +237,10 @@ class TransactionsController < ApplicationController
         end
       else
         @transaction = Transaction.new(transaction_params)
-        @transaction.errors.add(:base, "Erro ao criar compromisso recorrente: #{recurring_commitment.errors.full_messages.join(', ')}")
+        # Adiciona os erros do compromisso recorrente ao objeto de transação para exibir no form
+        recurring_commitment.errors.full_messages.each do |msg|
+          @transaction.errors.add(:base, "Compromisso recorrente: #{msg}")
+        end
         render :new, status: :unprocessable_entity
       end
     end

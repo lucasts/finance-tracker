@@ -6,7 +6,7 @@ RSpec.describe RecurringTransactionsJob, type: :job do
   let!(:account) { create(:account, user: user) }
   let(:occurrence_date) { Date.current - 1.day }
   let!(:commitment) do
-    create(:recurring_commitment, user: user, category: category, status: :active, start_date: occurrence_date - 1.month, end_date: nil, default_amount: 100)
+    create(:recurring_commitment, user: user, category: category, from_account: account, status: :active, start_date: occurrence_date - 1.month, end_date: nil, default_amount: 100)
   end
 
   before do

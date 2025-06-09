@@ -18,7 +18,7 @@
           <%= @recurring_commitment.active? ? '✓ Ativo' : '⏸ Pausado' %>
         </div>
         <div class="badge badge-outline badge-lg">
-          <%= t("ui.transaction.recurring.frequencies.#{@recurring_commitment.frequency}") %>
+          <%= t("ui.transaction.recurring.recurrence.recurrence_frequency.#{@recurring_commitment.recurrence_frequency}") %>
         </div>
         <div class="badge badge-primary badge-lg">
           <%= @recurring_commitment.category.name %>
@@ -56,9 +56,9 @@
     <div class="stat bg-primary text-primary-content rounded-lg">
       <div class="stat-title text-primary-content/70">Valor Padrão</div>
       <div class="stat-value text-2xl">
-        R$ <%= number_with_precision(@recurring_commitment.amount || 0, precision: 2, delimiter: '.', separator: ',') %>
+        R$ <%= number_with_precision(@recurring_commitment.default_amount || 0, precision: 2, delimiter: '.', separator: ',') %>
       </div>
-      <div class="stat-desc text-primary-content/70">Por <%= @recurring_commitment.frequency == 'monthly' ? 'mês' : @recurring_commitment.frequency %></div>
+      <div class="stat-desc text-primary-content/70">Por <%= @recurring_commitment.recurrence_frequency == 'monthly' ? 'mês' : @recurring_commitment.recurrence_frequency %></div>
     </div>
     
     <div class="stat bg-secondary text-secondary-content rounded-lg">
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="flex justify-between items-center">
               <div>
                 <div class="font-bold">${transaction.description}</div>
-                <div class="text-sm opacity-70">${new Date(transaction.date).toLocaleDateString('pt-BR')}</div>
+                <div class="text-sm opacity-70">${new Date(transaction.event_date).toLocaleDateString('pt-BR')}</div>
               </div>
               <div class="text-right">
                 <div class="font-bold text-lg ${transaction.type === 'expense' ? 'text-error' : 'text-success'}">
@@ -346,16 +346,17 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="input-group">
                 <span class="bg-base-300 px-3 flex items-center">R$</span>
                 <%= form.number_field :amount, class: "input input-bordered w-full", 
-                                      step: 0.01, value: @recurring_commitment.amount %>
+                                      step: 0.01, value: @recurring_commitment.default_amount %>
               </div>
             </div>
             
             <div class="form-control">
-              <%= form.label :account_id, "Conta", class: "label label-text font-semibold" %>
-              <%= form.select :account_id, 
-                              options_from_collection_for_select(Account.all, :id, :name, @recurring_commitment.account_id),
-                              { prompt: "Selecione uma conta" },
-                              { class: "select select-bordered w-full" } %>
+              <%= form.label :from_account_id, "Conta de Origem", class: "label label-text font-semibold" %>
+              <%= form.collection_select :from_account_id, Account.all, :id, :name, { prompt: "Selecione a conta de origem" }, { class: "select select-bordered w-full" } %>
+            </div>
+            <div class="form-control">
+              <%= form.label :to_account_id, "Conta de Destino", class: "label label-text font-semibold" %>
+              <%= form.collection_select :to_account_id, Account.all, :id, :name, { prompt: "Selecione a conta de destino" }, { class: "select select-bordered w-full" } %>
             </div>
             
             <div class="form-control">
@@ -367,29 +368,21 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             
             <div class="form-control">
-              <%= form.label :frequency, "Frequência", class: "label label-text font-semibold" %>
-              <%= form.select :frequency,
+              <%= form.label :recurrence_frequency, "Frequência", class: "label label-text font-semibold" %>
+              <%= form.select :recurrence_frequency,
                               options_for_select([
                                 ['Diária', 'daily'],
                                 ['Semanal', 'weekly'], 
                                 ['Mensal', 'monthly'],
                                 ['Trimestral', 'quarterly'],
                                 ['Anual', 'yearly']
-                              ], @recurring_commitment.frequency),
+                              ], @recurring_commitment.recurrence_frequency),
                               {},
                               { class: "select select-bordered w-full" } %>
             </div>
             
-            <div class="form-control">
-              <%= form.label :transaction_type, "Tipo", class: "label label-text font-semibold" %>
-              <%= form.select :transaction_type,
-                              options_for_select([
-                                ['Despesa', 'expense'],
-                                ['Receita', 'income']
-                              ], @recurring_commitment.transaction_type),
-                              {},
-                              { class: "select select-bordered w-full" } %>
-            </div>
+            <!-- Campo transaction_type removido pois não existe no modelo RecurringCommitment -->
+            <!-- Se precisar adicionar tipo de transação, crie uma migration: add_transaction_type_to_recurring_commitments -->
           </div>
           
           <div class="form-control mt-4">
