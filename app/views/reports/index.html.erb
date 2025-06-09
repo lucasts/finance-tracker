@@ -400,334 +400,55 @@
   </div>
 </div>
 
-<!-- Chart.js Integration -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-let currentChart = null;
-
-// Sample data - in production this would come from the backend
-const chartData = {
-  labels: [<%= @monthly_trends.map { |t| "'#{t[:month_label]}'" }.join(', ') %>],
-  monthlyTrends: <%= @monthly_trends.to_json.html_safe %>,
-  categories: <%= (@categories_analysis&.keys || []).map(&:to_s).to_json.html_safe %>,
-  categoryAmounts: <%= (@categories_analysis&.values || []).to_json.html_safe %>
-};
-
-function showChart(type) {
-  const ctx = document.getElementById('timeline-chart');
-  
-  // Clear existing chart
-  if (currentChart) {
-    currentChart.destroy();
-  }
-  
-  // Update button states
-  document.querySelectorAll('.btn').forEach(btn => {
-    btn.classList.remove('btn-primary');
-    btn.classList.add('btn-outline');
-  });
-  event.target.classList.remove('btn-outline');
-  event.target.classList.add('btn-primary');
-  
-  let config = {};
-  
-  switch(type) {
-    case 'expense-trends':
-      config = {
-        type: 'line',
-        data: {
-          labels: chartData.labels,
-          datasets: [{
-            label: 'Despesas',
-            data: chartData.monthlyTrends.map(t => t.expenses),
-            borderColor: 'rgb(239, 68, 68)',
-            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-            tension: 0.4,
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            title: {
-              display: true,
-              text: 'Tendência de Despesas por Mês'
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function(value) {
-                  return 'R$ ' + value.toLocaleString('pt-BR');
-                }
-              }
-            }
-          }
-        }
-      };
-      break;
-      
-    case 'income-vs-expense':
-      config = {
-        type: 'bar',
-        data: {
-          labels: chartData.labels,
-          datasets: [
-            {
-              label: 'Receitas',
-              data: chartData.monthlyTrends.map(t => t.income),
-              backgroundColor: 'rgba(34, 197, 94, 0.8)',
-              borderColor: 'rgb(34, 197, 94)',
-              borderWidth: 1
-            },
-            {
-              label: 'Despesas',
-              data: chartData.monthlyTrends.map(t => t.expenses),
-              backgroundColor: 'rgba(239, 68, 68, 0.8)',
-              borderColor: 'rgb(239, 68, 68)',
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            title: {
-              display: true,
-              text: 'Receitas vs Despesas por Mês'
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function(value) {
-                  return 'R$ ' + value.toLocaleString('pt-BR');
-                }
-              }
-            }
-          }
-        }
-      };
-      break;
-      
-    case 'savings-rate':
-      config = {
-        type: 'line',
-        data: {
-          labels: chartData.labels,
-          datasets: [{
-            label: 'Taxa de Poupança (%)',
-            data: chartData.monthlyTrends.map(t => t.savings_rate),
-            borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.4,
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            title: {
-              display: true,
-              text: 'Taxa de Poupança por Mês'
-            }
-          },
-          scales: {
-            y: {
-              ticks: {
-                callback: function(value) {
-                  return value + '%';
-                }
-              }
-            }
-          }
-        }
-      };
-      break;
-      
-    case 'category-breakdown':
-      config = {
-        type: 'doughnut',
-        data: {
-          labels: chartData.categories,
-          datasets: [{
-            data: chartData.categoryAmounts,
-            backgroundColor: [
-              'rgba(239, 68, 68, 0.8)',
-              'rgba(34, 197, 94, 0.8)',
-              'rgba(59, 130, 246, 0.8)',
-              'rgba(245, 158, 11, 0.8)',
-              'rgba(139, 92, 246, 0.8)',
-              'rgba(236, 72, 153, 0.8)',
-              'rgba(14, 165, 233, 0.8)',
-              'rgba(34, 197, 94, 0.8)'
-            ],
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            title: {
-              display: true,
-              text: 'Gastos por Categoria (Mês Atual)'
-            },
-            legend: {
-              position: 'right'
-            }
-          }
-        }
-      };
-      break;
-  }
-  
-  currentChart = new Chart(ctx, config);
-}
-
-// Auto-load first chart
-document.addEventListener('DOMContentLoaded', function() {
-  // Trigger first chart automatically
-  const firstButton = document.querySelector('[onclick="showChart(\'expense-trends\')"]');
-  if (firstButton) {
-    firstButton.click();
-  }
-});
-</script>
-
-<!-- Advanced Insights Dashboard -->
-<div class="card bg-base-100 shadow mt-8">
+<!-- Projected Transactions Section -->
+<div class="card bg-base-100 shadow mt-6">
   <div class="card-body">
-    <h2 class="card-title mb-6">🔍 Insights e Análises Avançadas</h2>
-    
-    <!-- Quick Insights Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-      <!-- Variable Expenses Insight -->
-      <div class="card bg-gradient-to-br from-info/10 to-info/5 border border-info/20">
-        <div class="card-body p-4">
-          <h3 class="font-semibold text-info mb-2">💡 Gastos Variáveis</h3>
-          <% variable_categories = @category_breakdown.first(3).select { |cat, amount| ['Supermercado', 'Farmácia', 'Combustível', 'Restaurante'].any? { |keyword| cat.include?(keyword) } } %>
-          <% if variable_categories.any? %>
-            <div class="text-sm space-y-1">
-              <% variable_categories.each do |category, amount| %>
-                <div class="flex justify-between">
-                  <span><%= category %></span>
-                  <span class="font-bold">R$ <%= number_with_precision(amount, precision: 0, delimiter: ".") %></span>
-                </div>
-              <% end %>
-            </div>
-            <div class="mt-3">
-              <%= link_to "📊 Análise Detalhada", variable_expenses_analysis_reports_path, 
-                          class: "btn btn-info btn-xs w-full" %>
-            </div>
-          <% else %>
-            <p class="text-sm text-base-content/60">Sem gastos variáveis significativos este mês.</p>
-          <% end %>
-        </div>
+    <h3 class="card-title mb-4">🔮 Lançamentos Previstos (Projeção de Compromissos)</h3>
+    <% if @projected_transactions.any? %>
+      <ul class="space-y-2">
+        <% @projected_transactions.each do |proj| %>
+          <li class="flex justify-between items-center p-2 bg-base-200 rounded border border-dashed border-base-content/30 text-base-content/60">
+            <span class="flex items-center gap-2">
+              <%= proj[:description] %>
+              <span class="badge badge-outline badge-sm"><%= l(proj[:date], format: :short) %></span>
+              <span class="badge badge-secondary badge-xs" title="Este lançamento ainda não foi realizado, previsão automática">previsto</span>
+            </span>
+            <span class="font-bold">R$ <%= number_with_precision(proj[:amount], precision: 2) %></span>
+          </li>
+        <% end %>
+      </ul>
+      <div class="text-xs text-base-content/50 mt-2">
+        <span class="inline-flex items-center gap-1"><i class="fa fa-eye"></i> Lançamentos previstos são projeções automáticas de compromissos recorrentes e não estão lançados no extrato real.</span>
       </div>
-      
-      <!-- Savings Progress -->
-      <div class="card bg-gradient-to-br from-success/10 to-success/5 border border-success/20">
-        <div class="card-body p-4">
-          <h3 class="font-semibold text-success mb-2">💰 Poupança</h3>
-          <div class="text-lg font-bold mb-2">
-            <%= @savings_rate > 0 ? "#{@savings_rate}%" : "0%" %>
-          </div>
-          <div class="text-sm mb-3">
-            <% if @savings_rate > 20 %>
-              <span class="text-success">✅ Excelente!</span>
-            <% elsif @savings_rate > 10 %>
-              <span class="text-warning">⚡ Bom ritmo</span>
-            <% elsif @savings_rate > 0 %>
-              <span class="text-info">📈 Progredindo</span>
-            <% else %>
-              <span class="text-error">⚠️ Atenção</span>
-            <% end %>
-          </div>
-          <div class="w-full bg-base-300 rounded-full h-2">
-            <div class="bg-success rounded-full h-2" style="width: <%= [@savings_rate, 100].min %>%"></div>
-          </div>
-        </div>
+    <% else %>
+      <div class="text-center text-base-content/60 py-4">
+        <div class="text-4xl mb-2">🔮</div>
+        <p>Nenhum lançamento previsto para este mês</p>
       </div>
-      
-      <!-- Monthly Comparison -->
-      <div class="card bg-gradient-to-br from-warning/10 to-warning/5 border border-warning/20">
-        <div class="card-body p-4">
-          <h3 class="font-semibold text-warning mb-2">📈 Comparação</h3>
-          <% if @monthly_trends.length >= 2 %>
-            <% current_month = @monthly_trends.last %>
-            <% prev_month = @monthly_trends[-2] %>
-            <% expense_change = prev_month[:expenses] > 0 ? ((current_month[:expenses] - prev_month[:expenses]) / prev_month[:expenses] * 100).round(1) : 0 %>
-            <div class="text-sm space-y-1">
-              <div class="flex justify-between">
-                <span>Despesas vs mês anterior</span>
-                <span class="font-bold <%= expense_change > 0 ? 'text-error' : 'text-success' %>">
-                  <%= expense_change > 0 ? '+' : '' %><%= expense_change %>%
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span>Saldo vs mês anterior</span>
-                <% balance_change = prev_month[:balance] != 0 ? ((current_month[:balance] - prev_month[:balance]) / prev_month[:balance] * 100).round(1) : 0 %>
-                <span class="font-bold <%= balance_change > 0 ? 'text-success' : 'text-error' %>">
-                  <%= balance_change > 0 ? '+' : '' %><%= balance_change %>%
-                </span>
-              </div>
-            </div>
-          <% else %>
-            <p class="text-sm text-base-content/60">Dados insuficientes para comparação.</p>
-          <% end %>
-        </div>
-      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Totais projetados -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+  <div class="card bg-gradient-to-br from-success/10 to-success/5 border border-success/20">
+    <div class="card-body">
+      <h2 class="card-title text-success">💰 Receitas Projetadas</h2>
+      <p class="text-2xl font-bold">R$ <%= number_with_precision(@projected_income_total, precision: 2, delimiter: ".") %></p>
     </div>
-    
-    <!-- Detailed Analysis Actions -->
-    <div class="divider">Análises Detalhadas</div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer">
-        <div class="card-body p-4 text-center">
-          <div class="text-2xl mb-2">📊</div>
-          <h4 class="font-semibold">Gastos Variáveis</h4>
-          <p class="text-xs text-base-content/60 mb-3">Análise de padrões e tendências</p>
-          <%= link_to "Analisar", variable_expenses_analysis_reports_path, 
-                      class: "btn btn-primary btn-sm w-full" %>
-        </div>
-      </div>
-      
-      <div class="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer">
-        <div class="card-body p-4 text-center">
-          <div class="text-2xl mb-2">💳</div>
-          <h4 class="font-semibold">Cartões de Crédito</h4>
-          <p class="text-xs text-base-content/60 mb-3">Análise de faturas e gastos</p>
-          <%= link_to "Ver Faturas", credit_statements_path, 
-                      class: "btn btn-secondary btn-sm w-full" %>
-        </div>
-      </div>
-      
-      <div class="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer">
-        <div class="card-body p-4 text-center">
-          <div class="text-2xl mb-2">🔄</div>
-          <h4 class="font-semibold">Compromissos</h4>
-          <p class="text-xs text-base-content/60 mb-3">Recorrentes e parcelamentos</p>
-          <%= link_to "Gerenciar", recurring_commitments_path, 
-                      class: "btn btn-accent btn-sm w-full" %>
-        </div>
-      </div>
-      
-      <div class="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer">
-        <div class="card-body p-4 text-center">
-          <div class="text-2xl mb-2">🤖</div>
-          <h4 class="font-semibold">Automação</h4>
-          <p class="text-xs text-base-content/60 mb-3">Status e controles</p>
-          <%= link_to "Configurar", automation_index_path, 
-                      class: "btn btn-info btn-sm w-full" %>
-        </div>
-      </div>
+  </div>
+  <div class="card bg-gradient-to-br from-error/10 to-error/5 border border-error/20">
+    <div class="card-body">
+      <h2 class="card-title text-error">💸 Despesas Projetadas</h2>
+      <p class="text-2xl font-bold">R$ <%= number_with_precision(@projected_expense_total, precision: 2, delimiter: ".") %></p>
+    </div>
+  </div>
+  <div class="card bg-gradient-to-br from-info/10 to-info/5 border border-info/20">
+    <div class="card-body">
+      <h2 class="card-title text-info">🔮 Saldo Projetado</h2>
+      <p class="text-2xl font-bold <%= @projected_balance >= 0 ? 'text-success' : 'text-error' %>">R$ <%= number_with_precision(@projected_balance, precision: 2, delimiter: ".") %></p>
     </div>
   </div>
 </div>
+
+<!-- ...existing code... -->

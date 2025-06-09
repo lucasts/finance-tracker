@@ -41,6 +41,10 @@ class OverviewController < ApplicationController
     # === ESTATÍSTICAS ADICIONAIS ===
     @monthly_stats = monthly_statistics(month_date)
     @savings_rate = calculate_savings_rate(@income_total, @expense_total)
+
+    # === PROJEÇÃO DE COMPROMISSOS RECORRENTES ===
+    projection_service = RecurringProjectionService.new(as_of: month_date)
+    @projected_transactions = projection_service.projected_transactions
   end
 end
 
@@ -265,26 +269,25 @@ end
 private
 
 def projected_balance(current_balance, month)
-  # Saldo atual do mês
   base_balance = current_balance
-  
-  # Buscar transações futuras até o final do mês
   month_date = Date.strptime(month, "%Y-%m")
   end_of_month = month_date.end_of_month
-  
+
   # Transações futuras do mês atual (depois de hoje) - filtrado por usuário
   future_transactions = current_user_scope(Transaction).where(
     status: ["pending", "confirmed"],
     event_date: (Date.current + 1.day)..end_of_month
   )
-  
-  # Separar receitas e despesas usando transaction_type
   future_income = future_transactions.where(transaction_type: "income").sum(:amount)
   future_expenses = future_transactions.where(transaction_type: "expense").sum(:amount)
-  
-  # Calcular projeção
-  projected = base_balance + future_income - future_expenses
-  
+
+  # Inclui lançamentos previstos (projeção de compromissos recorrentes)
+  projection_service = RecurringProjectionService.new(as_of: month_date)
+  projected_transactions = projection_service.projected_transactions
+  projected_income = projected_transactions.select { |t| t[:amount].to_f > 0 }.sum { |t| t[:amount].to_f }
+  projected_expenses = projected_transactions.select { |t| t[:amount].to_f < 0 }.sum { |t| t[:amount].to_f.abs }
+
+  projected = base_balance + future_income - future_expenses + projected_income - projected_expenses
   projected
 end
 

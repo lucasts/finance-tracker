@@ -200,6 +200,37 @@
       <% end %>
     </div>
   </div>
+
+  <!-- Lançamentos previstos futuros (projeção) -->
+  <div class="card bg-base-100 shadow mt-6">
+    <div class="card-body">
+      <h3 class="card-title mb-4">🔮 Lançamentos Previstos (Projeção)</h3>
+      <% projection_service = RecurringProjectionService.new(as_of: Date.current) %>
+      <% projected = projection_service.projected_transactions.select { |t| t[:recurring_commitment_id] == @recurring_commitment.id } %>
+      <% if projected.any? %>
+        <ul class="space-y-2">
+          <% projected.each do |proj| %>
+            <li class="flex justify-between items-center p-2 bg-base-200 rounded border border-dashed border-base-content/30 text-base-content/60">
+              <span class="flex items-center gap-2">
+                <%= proj[:description] %>
+                <span class="badge badge-outline badge-sm"><%= l(proj[:date], format: :short) %></span>
+                <span class="badge badge-secondary badge-xs" title="Este lançamento ainda não foi realizado, previsão automática">previsto</span>
+              </span>
+              <span class="font-bold">R$ <%= number_with_precision(proj[:amount], precision: 2) %></span>
+            </li>
+          <% end %>
+        </ul>
+        <div class="text-xs text-base-content/50 mt-2">
+          <span class="inline-flex items-center gap-1"><i class="fa fa-eye"></i> Lançamentos previstos são projeções automáticas deste compromisso e não estão lançados no extrato real.</span>
+        </div>
+      <% else %>
+        <div class="text-center text-base-content/60 py-4">
+          <div class="text-4xl mb-2">🔮</div>
+          <p>Nenhum lançamento previsto para este compromisso</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
 </div>
 
 <!-- Timeline Modal -->
