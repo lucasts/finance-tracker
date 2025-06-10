@@ -1,10 +1,11 @@
 <%# Partial para exibir tabela de transações %>
 <% running_balance = 0 %>
-<div class="bg-base-100 rounded-box shadow overflow-hidden">
+<div class="bg-base-100 rounded-box shadow">
   <div class="overflow-x-auto">
     <table class="table table-zebra w-full text-sm">
       <thead class="bg-base-200">
         <tr>
+          <th><%= t('ui.transaction.table.type') %></th>
           <th><%= t('ui.transaction.table.event') %></th>
           <th><%= t('ui.transaction.table.payment') %></th>
           <th><%= t('activerecord.attributes.transaction.description') %></th>
@@ -12,9 +13,6 @@
           <th><%= t('ui.transaction.table.destination') %></th>
           <th><%= t('activerecord.attributes.transaction.category') %></th>
           <th class="text-right"><%= t('activerecord.attributes.transaction.amount') %></th>
-          <% if show_installment_info %>
-            <th class="text-right"><%= t('activerecord.attributes.transaction.installment') %></th>
-          <% end %>
           <th class="text-right"><%= t('ui.transaction.table.accumulated_balance') %></th>
           <th class="text-right"><%= t('ui.actions.title') %></th>
         </tr>
@@ -35,9 +33,44 @@
             running_balance += delta 
           %>
           <tr>
+            <td>
+              <% case tx.transaction_type %>
+              <% when 'income' %>
+                <span class="badge badge-success badge-sm"><%= t('ui.transaction.types.income') %></span>
+              <% when 'expense' %>
+                <span class="badge badge-error badge-sm"><%= t('ui.transaction.types.expense') %></span>
+              <% when 'transfer' %>
+                <span class="badge badge-warning badge-sm"><%= t('ui.transaction.types.transfer') %></span>
+              <% end %>
+            </td>
             <td><%= l(tx.event_date) if tx.event_date %></td>
             <td><%= l(tx.payment_date) if tx.payment_date %></td>
-            <td><%= tx.description %></td>
+            <td>
+              <div class="flex items-center gap-2">
+                <div>
+                  <%= tx.description %>
+                  <% if tx.installment_plan.present? %>
+                    <div class="text-xs text-base-content/60">
+                      <%= "#{tx.installment_number}/#{tx.installment_plan.installment_count}" %> - <%= tx.installment_plan.name %>
+                    </div>
+                  <% elsif tx.recurring_commitment.present? %>
+                    <div class="text-xs text-base-content/60">
+                      <%= tx.recurring_commitment.name %>
+                    </div>
+                  <% end %>
+                </div>
+                
+                <% if tx.installment_plan.present? %>
+                  <div class="tooltip tooltip-top" data-tip="<%= "#{t('ui.transaction.installments.tooltip')}: #{tx.installment_plan.name}" %>">
+                    <span class="material-icons text-sm text-primary">event_repeat</span>
+                  </div>
+                <% elsif tx.recurring_commitment.present? %>
+                  <div class="tooltip tooltip-top" data-tip="<%= "#{t('ui.transaction.recurring.tooltip')}: #{tx.recurring_commitment.name}" %>">
+                    <span class="material-icons text-sm text-secondary">change_circle</span>
+                  </div>
+                <% end %>
+              </div>
+            </td>
             <td><%= tx.from_account.name %></td>
             <td><%= tx.to_account&.name %></td>
             <td>
@@ -64,15 +97,6 @@
                 end
               %>
             </td>
-            <% if show_installment_info %>
-              <td class="text-right">
-                <% if tx.installment_plan.present? %>
-                  <%= "#{tx.installment_number}/#{tx.installment_plan.installment_count}" %>
-                <% else %>
-                  —
-                <% end %>
-              </td>
-            <% end %>
             <td class="text-right text-base-content/60">
               <%= number_to_currency(running_balance, unit: 'R$', separator: ',', delimiter: '.') %>
             </td>

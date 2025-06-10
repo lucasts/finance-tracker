@@ -87,54 +87,9 @@
   </div>
 </div>
 
-<!-- Transactions grouped by type -->
-
-<!-- Installment Plan Transactions -->
-<% installment_plans = @transactions.select(&:installment_plan).group_by(&:installment_plan) %>
-<% installment_plans.each do |plan, transactions| %>
-  <div class="alert alert-info mt-6 mb-4">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-    </svg>
-    <div>
-      <h3 class="font-bold">💳 <%= t('ui.transaction.installments.title') %></h3>
-      <div class="text-xs"><%= plan.name %></div>
-    </div>
-  </div>
-
-  <%= render 'transactions_table', transactions: transactions, show_installment_info: true %>
-<% end %>
-
-<!-- Recurring Commitment Transactions -->
-<% recurring_commitments = @transactions.select(&:recurring_commitment).group_by(&:recurring_commitment) %>
-<% recurring_commitments.each do |commitment, transactions| %>
-  <div class="alert alert-success mt-6 mb-4">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-    </svg>
-    <div>
-      <h3 class="font-bold">🔄 <%= t('ui.transaction.recurring.title') %></h3>
-      <div class="text-xs"><%= commitment.name %></div>
-    </div>
-  </div>
-
-  <%= render 'transactions_table', transactions: transactions, show_installment_info: false %>
-<% end %>
-
-<!-- Single Transactions -->
-<% single_transactions = @transactions.select { |t| t.installment_plan.nil? && t.recurring_commitment.nil? } %>
-<% unless single_transactions.empty? %>
-  <div class="alert mt-6 mb-4">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-    </svg>
-    <div>
-      <h3 class="font-bold">📄 <%= t('ui.transaction.single.title') %></h3>
-      <div class="text-xs"><%= t('ui.transaction.single.description') %></div>
-    </div>
-  </div>
-
-  <%= render 'transactions_table', transactions: single_transactions, show_installment_info: false %>
+<!-- All Transactions in unified list -->
+<% if @transactions.any? %>
+  <%= render 'transactions_table', transactions: @transactions %>
 <% end %>
 
 <% if @transactions.empty? %>

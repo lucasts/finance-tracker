@@ -153,6 +153,22 @@ pt-BR:
         expense: "Despesa"
         transfer: "Transferência"
       
+      table:
+        type: "Tipo"
+        event: "Evento"
+        payment: "Pagamento"
+        origin: "Origem"
+        destination: "Destino"
+        accumulated_balance: "Saldo Acumulado"
+      
+      recurring:
+        title: "Compromisso Recorrente"
+        tooltip: "Recorrente"
+      
+      single:
+        title: "Únicos"
+        description: "Lançamentos únicos e transferências"
+      
       status:
         pending: "Pendente"
         confirmed: "Confirmado"
@@ -176,9 +192,6 @@ pt-BR:
           single: "Transação única, sem repetição"
           recurring: "Compromisso que se repete (ex: aluguel, assinatura)"
           installment: "Compra dividida em parcelas fixas"
-      
-      recurring:
-        title: "Compromisso Recorrente"
         description: "Esta transação criará um compromisso recorrente que gerará automaticamente lançamentos futuros."
         frequency_label: "Frequência"
         frequency_prompt: "Selecione a frequência"
@@ -192,12 +205,6 @@ pt-BR:
           variable: "Valor Variável"
         variable_amount_title: "Valor Variável Selecionado"
         variable_amount_description: "O valor informado será usado como base, mas você poderá ajustar cada lançamento futuro conforme necessário."
-
-      installments:
-        title: "Parcelamento"
-        current: "Parcela atual"
-        total: "Total de parcelas"
-        remaining: "Restante"
       
       new:
         subtitle: "Crie uma nova entrada de receita ou despesa"
@@ -235,6 +242,7 @@ pt-BR:
       
       installments:
         title: "Parcelamento"
+        tooltip: "Parcelamento"
         enable: "Parcelar este lançamento?"
         automatic: "Parcelamento Automático"
         automatic_description: "Informe quantas parcelas mensais deseja. O sistema usará o valor já informado acima e criará automaticamente todos os lançamentos."
@@ -245,6 +253,9 @@ pt-BR:
         first_installment: "Primeira parcela"
         last_installment: "Última parcela"
         existing_plan: "Plano de Parcelamento Existente"
+        current: "Parcela atual"
+        total: "Total de parcelas"
+        remaining: "Restante"
         
         # ...existing code...
       
