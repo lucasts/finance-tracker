@@ -545,25 +545,13 @@ tv_plan = InstallmentPlan.create!(user: default_user,
   category: categories["Compras Diversas"]
 )
 
-10.times do |i|
-  data_parcela = tv_plan.starts_on + i.months
-  status = data_parcela <= Date.today ? "confirmed" : "pending"
-  
-  Transaction.create!(
-    description: "Smart TV Samsung 65\" - #{i + 1}/10",
-    amount: 380.00,
-    transaction_type: "expense",
-    event_date: data_parcela,
-    payment_date: data_parcela.next_month.change(day: 15),
-    from_account: accounts[:santander],
-    to_account: accounts[:casa],
-    category: categories["Compras Diversas"],
-    recurrence_type: "installment",
-    installment_plan: tv_plan,
-    status: status,
-    user: default_user
-  )
-end
+# Use proper model method to create installment transactions
+tv_plan.create_installment_transactions!({
+  description_base: "Smart TV Samsung 65\"",
+  transaction_type: "expense",
+  from_account_id: accounts[:santander].id,
+  to_account_id: accounts[:casa].id
+})
 
 # Carro usado - 48x de R$ 890 (financiamento que começou 8 meses atrás)
 carro_plan = InstallmentPlan.create!(user: default_user, 
@@ -577,26 +565,13 @@ carro_plan = InstallmentPlan.create!(user: default_user,
   category: categories["Compras Diversas"]
 )
 
-48.times do |i|
-  data_parcela = carro_plan.starts_on + i.months
-  next if data_parcela > 3.years.from_now
-  status = data_parcela <= Date.today ? "confirmed" : "pending"
-  
-  Transaction.create!(
-    description: "Financiamento Honda Civic - #{i + 1}/48",
-    amount: 890.00,
-    transaction_type: "expense",
-    event_date: data_parcela,
-    payment_date: data_parcela,
-    from_account: accounts[:bradesco_mae],
-    to_account: accounts[:banco],
-    category: categories["Finanças"],
-    recurrence_type: "installment",
-    installment_plan: carro_plan,
-    status: status,
-    user: default_user
-  )
-end
+# Use proper model method to create installment transactions
+carro_plan.create_installment_transactions!({
+  description_base: "Financiamento Honda Civic",
+  transaction_type: "expense",
+  from_account_id: accounts[:bradesco_mae].id,
+  to_account_id: accounts[:banco].id
+})
 
 # Móveis planejados - 24x de R$ 520 (começou 3 meses atrás)
 moveis_plan = InstallmentPlan.create!(user: default_user, 
@@ -610,27 +585,15 @@ moveis_plan = InstallmentPlan.create!(user: default_user,
   category: categories["Compras Diversas"]
 )
 
-24.times do |i|
-  data_parcela = moveis_plan.starts_on + i.months
-  status = data_parcela <= Date.today ? "confirmed" : "pending"
-  
-  Transaction.create!(
-    description: "Móveis planejados Todeschini - #{i + 1}/24",
-    amount: 520.00,
-    transaction_type: "expense",
-    event_date: data_parcela,
-    payment_date: data_parcela.next_month.change(day: 10),
-    from_account: accounts[:inter_mae],
-    to_account: accounts[:casa],
-    category: categories["Habitação"],
-    recurrence_type: "installment",
-    installment_plan: moveis_plan,
-    status: status,
-    user: default_user
-  )
-end
+# Use proper model method to create installment transactions
+moveis_plan.create_installment_transactions!({
+  description_base: "Móveis planejados Todeschini",
+  transaction_type: "expense",
+  from_account_id: accounts[:inter_mae].id,
+  to_account_id: accounts[:casa].id
+})
 
-# Empréstimo pessoal para emergência - 36x de R$ 450 (começou 10 meses atrás)
+# Empréstimo pessoal para emergência - 12x de R$ 1000 (começou 2 meses atrás)
 emprestimo_plan = InstallmentPlan.create!(user: default_user, 
   name: "Empréstimo pessoal",
   installment_count: 12,
@@ -642,25 +605,13 @@ emprestimo_plan = InstallmentPlan.create!(user: default_user,
   category: categories["Finanças"]
 )
 
-36.times do |i|
-  data_parcela = emprestimo_plan.starts_on + i.months
-  status = data_parcela <= Date.today ? "confirmed" : "pending"
-  
-  Transaction.create!(
-    description: "Empréstimo pessoal BB - #{i + 1}/36",
-    amount: 450.00,
-    transaction_type: "expense",
-    event_date: data_parcela,
-    payment_date: data_parcela,
-    from_account: accounts[:itau_pai],
-    to_account: accounts[:banco],
-    category: categories["Finanças"],
-    recurrence_type: "installment",
-    installment_plan: emprestimo_plan,
-    status: status,
-    user: default_user
-  )
-end
+# Use proper model method to create installment transactions
+emprestimo_plan.create_installment_transactions!({
+  description_base: "Empréstimo pessoal BB",
+  transaction_type: "expense",
+  from_account_id: accounts[:itau_pai].id,
+  to_account_id: accounts[:banco].id
+})
 
 # === COMPROMISSOS RECORRENTES ===
 puts "Criando compromissos recorrentes..."
@@ -758,63 +709,28 @@ freelance_joao = RecurringCommitment.create!(user: default_user,
 
 puts "Compromissos recorrentes criados: #{RecurringCommitment.count}"
 
-# === GERAR TRANSAÇÕES MANUAIS DOS COMPROMISSOS ===
-puts "Gerando algumas transações baseadas nos compromissos..."
+# === GERAR TRANSAÇÕES DOS COMPROMISSOS RECORRENTES ===
+puts "Gerando transações recorrentes usando o job oficial..."
 
-# Gerar algumas transações de salário para os últimos meses
-3.times do |i|
-  mes_passado = i.months.ago.beginning_of_month
+# Use the official job to generate recurring transactions for the past months
+# This ensures we use the proper model methods and business logic
+(1..12).each do |months_ago|
+  target_date = months_ago.months.ago.beginning_of_month
   
-  # Salário João (associado ao compromisso recorrente)
-  Transaction.create!(
-    description: "Salário João - #{mes_passado.strftime('%m/%Y')}",
-    amount: 8500.00,
-    transaction_type: "income",
-    event_date: mes_passado + 5.days,
-    payment_date: mes_passado + 5.days,
-    from_account: accounts[:empresa_pai],
-    to_account: accounts[:itau_pai],
-    category: categories["Salário"],
-    recurrence_type: "recurring",
-    recurring_commitment: salario_joao,
-    status: "confirmed",
-    user: default_user
-  )
-  
-  # Salário Maria (associado ao compromisso recorrente)
-  Transaction.create!(
-    description: "Salário Maria - #{mes_passado.strftime('%m/%Y')}",
-    amount: 6800.00,
-    transaction_type: "income",
-    event_date: mes_passado + 10.days,
-    payment_date: mes_passado + 10.days,
-    from_account: accounts[:empresa_mae],
-    to_account: accounts[:bradesco_mae],
-    category: categories["Salário"],
-    recurrence_type: "recurring",
-    recurring_commitment: salario_maria,
-    status: "confirmed",
-    user: default_user
-  )
-  
-  # Aluguel (associado ao compromisso recorrente)
-  Transaction.create!(
-    description: "Aluguel - #{mes_passado.strftime('%m/%Y')}",
-    amount: 2800.00,
-    transaction_type: "expense",
-    event_date: mes_passado + 10.days,
-    payment_date: mes_passado + 10.days,
-    from_account: accounts[:itau_pai],
-    to_account: accounts[:casa],
-    category: categories["Habitação"],
-    recurrence_type: "recurring",
-    recurring_commitment: aluguel,
-    status: "confirmed",
-    user: default_user
-  )
+  # Generate transactions for each day of the month to catch all recurring commitments
+  (1..target_date.end_of_month.day).each do |day|
+    check_date = Date.new(target_date.year, target_date.month, day)
+    next if check_date > Date.current # Don't generate future transactions
+    
+    # Run the job for this specific date
+    result = GenerateRecurringTransactionsJob.new.perform(check_date)
+    if result[:generated_count] > 0
+      puts "  Generated #{result[:generated_count]} recurring transactions for #{check_date}"
+    end
+  end
 end
 
-puts "Transações de exemplo geradas!"
+puts "Transações recorrentes geradas automaticamente!"
 
 # === ATUALIZAR VALORES DAS FATURAS ===
 puts "Atualizando valores das faturas..."
