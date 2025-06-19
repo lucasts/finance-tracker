@@ -61,7 +61,7 @@ case "${1:-help}" in
         ;;
     "db")
         echo "🗄️  Conectando ao PostgreSQL..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec db psql -U postgres zeno_preprod
+        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec db psql -U postgres orzeny_preprod
         ;;
     "redis")
         echo "📦 Conectando ao Redis..."
