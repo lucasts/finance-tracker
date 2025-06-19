@@ -1,10 +1,10 @@
 #!/bin/bash
-# Ambiente de Pré-produção - Zeno Finance Tracker
+# Ambiente de Pré-produção - Orzeny Finance Tracker
 # Simula um ambiente Heroku-like
 
 set -e  # Para em caso de erro
 
-echo "🚀 Iniciando ambiente de pré-produção Zeno Finance Tracker..."
+echo "🚀 Iniciando ambiente de pré-produção Orzeny Finance Tracker..."
 echo "📦 Este ambiente simula uma configuração similar ao Heroku"
 echo ""
 

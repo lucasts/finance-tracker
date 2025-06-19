@@ -1,13 +1,13 @@
 pt-BR:
-  # Zeno Branding
+  # Orzeny Branding
   app:
-    name: "Zeno"
+    name: "Orzeny"
     tagline: "Clareza para suas finanças."
     taglines:
       dashboard: "Clareza para suas finanças."
       login: "Simplifique sua vida financeira."
       footer: "Sua visão financeira, simplificada."
-      complete: "Zeno - Clareza para suas finanças."
+      complete: "Orzeny - Clareza para suas finanças."
 
   # Modelos
   activerecord:
@@ -498,7 +498,7 @@ pt-BR:
     
   # Application specific
   application:
-    name: "Zeno"
+    name: "Orzeny"
     tagline: "Controle suas finanças pessoais"
     
   # Time formats

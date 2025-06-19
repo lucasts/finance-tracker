@@ -16,7 +16,7 @@ else
 fi
 
 show_help() {
-    echo "🔧 Utilitários Pré-produção - Zeno Finance Tracker"
+    echo "🔧 Utilitários Pré-produção - Orzeny Finance Tracker"
     echo ""
     echo "Comandos disponíveis:"
     echo "  start     - Inicia o ambiente de pré-produção"

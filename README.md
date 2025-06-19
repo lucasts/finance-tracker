@@ -1,4 +1,4 @@
-# 💰 Zeno Finance Tracker
+# 💰 Orzeny Finance Tracker
 
 Sistema completo de gestão financeira familiar com separação entre competência de cartão de crédito e fluxo de caixa real, projeções futuras e automação de transações recorrentes.
 

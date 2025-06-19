@@ -24,7 +24,7 @@ preprod:
   <<: *default
   adapter: postgresql
   encoding: unicode
-  database: zeno_preprod
+  database: orzeny_preprod
   username: postgres
   password: postgres
   host: db

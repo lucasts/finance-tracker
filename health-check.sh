@@ -42,7 +42,7 @@ fi
 
 # Verificar banco de dados
 echo "🗄️  Verificando banco de dados..."
-DB_CHECK=$($DOCKER_COMPOSE -f docker-compose.preprod.yml exec -T db psql -U postgres -d zeno_preprod -c "SELECT 1;" 2>/dev/null || echo "FAIL")
+DB_CHECK=$($DOCKER_COMPOSE -f docker-compose.preprod.yml exec -T db psql -U postgres -d orzeny_preprod -c "SELECT 1;" 2>/dev/null || echo "FAIL")
 if [[ "$DB_CHECK" == *"1"* ]]; then
     echo "✅ PostgreSQL conectando"
 else
