@@ -18,6 +18,7 @@ applyTo: '\*\*'
 
 * **Backend**: Ruby on Rails 8.x+ (English for all code).
 * **Frontend**: ERB views, Tailwind CSS 4, DaisyUI (as the component standard), Stimulus.js for JS interactivity.
+* **Frontend**: Yarn to install JS packages.
 * **Testing**: RSpec (preferred); always write or update tests when adding or changing features.
 * **Jobs/Background Tasks**: Prefer to use Rails ActiveJob depending on context.
 * **Authentication**: Devise for user management and security.
