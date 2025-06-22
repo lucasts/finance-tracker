@@ -178,8 +178,8 @@ class TransactionsController < ApplicationController
       :status
     )
     # Normaliza amount para decimal (ex: '123,77' => 123.77)
-    if permitted[:amount].is_a?(String)
-      permitted[:amount] = permitted[:amount].gsub('.', '').gsub(',', '.')
+    if permitted[:amount].is_a?(String) && permitted[:amount].include?(',')
+        permitted[:amount] = permitted[:amount].gsub('.', '').gsub(',', '.')
     end
     permitted[:amount] = permitted[:amount].to_d if permitted[:amount].present?
     permitted
