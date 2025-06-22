@@ -26,13 +26,13 @@ puts "Criando contas da família..."
 
 accounts = {
   # Contas correntes
-  itau_pai:      Account.create!(name: "Itaú - João", account_type: AccountType.find_by(code: "BANK"), user: default_user),
-  bradesco_mae:  Account.create!(name: "Bradesco - Maria", account_type: AccountType.find_by(code: "BANK"), user: default_user),
+  itau_pai:      Account.create!(name: "Itaú - João", account_type: AccountType.find_by(code: "CHECKING"), user: default_user),
+  bradesco_mae:  Account.create!(name: "Bradesco - Maria", account_type: AccountType.find_by(code: "CHECKING"), user: default_user),
   
   # Cartões de crédito
-  nubank_pai:    Account.create!(name: "Nubank - João", account_type: AccountType.find_by(code: "CREDIT"), closing_day: 15, due_day: 5, user: default_user),
-  inter_mae:     Account.create!(name: "Inter - Maria", account_type: AccountType.find_by(code: "CREDIT"), closing_day: 20, due_day: 10, user: default_user),
-  santander:     Account.create!(name: "Santander - Família", account_type: AccountType.find_by(code: "CREDIT"), closing_day: 25, due_day: 15, user: default_user),
+  nubank_pai:    Account.create!(name: "Nubank - João", account_type: AccountType.find_by(code: "CREDIT_CARD"), closing_day: 15, due_day: 5, user: default_user),
+  inter_mae:     Account.create!(name: "Inter - Maria", account_type: AccountType.find_by(code: "CREDIT_CARD"), closing_day: 20, due_day: 10, user: default_user),
+  santander:     Account.create!(name: "Santander - Família", account_type: AccountType.find_by(code: "CREDIT_CARD"), closing_day: 25, due_day: 15, user: default_user),
   
   # Poupança
   poupanca:      Account.create!(name: "Poupança Emergência", account_type: AccountType.find_by(code: "SAVINGS"), user: default_user),
@@ -110,7 +110,7 @@ end
 
 # Função helper para associar transação de cartão à fatura correta
 def associar_com_fatura(transaction, statements, accounts)
-  return unless transaction.from_account&.account_type&.code == "CREDIT"
+  return unless transaction.from_account&.account_type&.code == "CREDIT_CARD"
   
   # Determina qual mês da fatura baseado na data de fechamento
   closing_day = transaction.from_account.closing_day

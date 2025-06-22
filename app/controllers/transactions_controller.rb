@@ -48,7 +48,7 @@ class TransactionsController < ApplicationController
 
   def update
     # Reassociate with statement if account or date changed
-    if @transaction.from_account&.account_type&.code == "CREDIT"
+    if @transaction.from_account&.account_type&.code == "CREDIT_CARD"
       associate_with_credit_statement(@transaction)
     end
     
@@ -84,7 +84,7 @@ class TransactionsController < ApplicationController
     transaction.status = determine_automatic_status(transaction) if transaction.status.blank?
     
     # For credit cards, adjust payment_date automatically
-    if transaction.from_account&.account_type&.code == "CREDIT" && transaction.from_account.due_day.present?
+    if transaction.from_account&.account_type&.code == "CREDIT_CARD" && transaction.from_account.due_day.present?
       # Payment date is on statement due date (next month)
       event_date = transaction.event_date
       due_date = Date.new(event_date.year, event_date.month, transaction.from_account.due_day)
@@ -185,7 +185,7 @@ class TransactionsController < ApplicationController
     apply_intelligent_defaults(@transaction)
     
     # Auto-associate with statement if it's a credit card
-    if @transaction.from_account&.account_type&.code == "CREDIT"
+    if @transaction.from_account&.account_type&.code == "CREDIT_CARD"
       associate_with_credit_statement(@transaction)
     end
     
@@ -217,7 +217,7 @@ class TransactionsController < ApplicationController
         @transaction.recurrence_type = 'recurring'
         @transaction.recurring_commitment = recurring_commitment
         apply_intelligent_defaults(@transaction)
-        if @transaction.from_account&.account_type&.code == "CREDIT"
+        if @transaction.from_account&.account_type&.code == "CREDIT_CARD"
           associate_with_credit_statement(@transaction)
         end
         if @transaction.save
@@ -273,7 +273,7 @@ class TransactionsController < ApplicationController
 
         if success
           # Apply special logic for credit cards on each transaction
-          if Account.find(transaction_params[:from_account_id])&.account_type&.code == "CREDIT"
+          if Account.find(transaction_params[:from_account_id])&.account_type&.code == "CREDIT_CARD"
             account = Account.find(transaction_params[:from_account_id])
             
             # Pre-create all necessary credit statements for the installment period

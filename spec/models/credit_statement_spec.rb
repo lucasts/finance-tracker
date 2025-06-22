@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe CreditStatement, type: :model do
   let(:user) { create(:user) }
-  let(:credit_account_type) { AccountType.find_or_create_by!(code: 'CREDIT') { |at| at.assign_attributes(role: 'asset', name: 'Cartão de Crédito') } }
+  let(:credit_account_type) { AccountType.find_or_create_by!(code: 'CREDIT_CARD') { |at| at.assign_attributes(role: 'asset', name: 'Cartão de Crédito') } }
   let(:credit_account) { create(:account, account_type: credit_account_type, user: user) }
   let(:checking_account_type) { AccountType.find_or_create_by!(code: 'BANK') { |at| at.assign_attributes(role: 'asset', name: 'Conta Corrente') } }
   let(:checking_account) { create(:account, account_type: checking_account_type, user: user) }

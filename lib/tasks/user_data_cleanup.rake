@@ -58,7 +58,7 @@ namespace :user do
 
       # 4. Limpar faturas de cartão de crédito
       credit_statements_count = 0
-      user.accounts.joins(:account_type).where(account_types: { code: 'credit_card' }).each do |account|
+      user.accounts.joins(:account_type).where(account_types: { code: 'CREDIT_CARD' }).each do |account|
         statements_count = account.credit_statements.count
         if statements_count > 0
           puts "🗑️  Removendo #{statements_count} faturas do cartão #{account.name}..."

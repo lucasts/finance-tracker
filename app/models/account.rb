@@ -51,7 +51,7 @@ class Account < ApplicationRecord
 
   # Credit card specific methods
   def credit_card?
-    account_type&.code == "CREDIT"
+    account_type&.code == "CREDIT_CARD"
   end
 
   def ensure_credit_statement_for_period(period)

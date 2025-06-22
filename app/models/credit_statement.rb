@@ -18,7 +18,7 @@ class CreditStatement < ApplicationRecord
   private
 
   def account_must_be_credit_card
-    if account&.account_type&.code != "CREDIT"
+    if account&.account_type&.code != "CREDIT_CARD"
       errors.add(:account, "deve ser uma conta do tipo cartão de crédito")
     end
   end

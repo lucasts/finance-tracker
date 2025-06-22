@@ -4,11 +4,11 @@ FactoryBot.define do
     initialize_with { AccountType.find_by(role: 'asset') || AccountType.create!(name: 'Test Asset', code: 'TEST', role: 'asset') }
 
     trait :credit_card do
-      initialize_with { AccountType.find_by(code: 'CREDIT') || AccountType.create!(code: 'CREDIT', role: 'asset', name: 'Cartão de Crédito') }
+      initialize_with { AccountType.find_by(code: 'CREDIT_CARD') || AccountType.create!(code: 'CREDIT_CARD', role: 'asset', name: 'Cartão de Crédito') }
     end
     
     trait :asset do
-      initialize_with { AccountType.find_by(code: 'BANK') || AccountType.create!(code: 'BANK', role: 'asset', name: 'Conta Corrente') }
+      initialize_with { AccountType.find_by(code: 'CHECKING') || AccountType.create!(code: 'CHECKING', role: 'asset', name: 'Conta Corrente') }
     end
     
     trait :income do

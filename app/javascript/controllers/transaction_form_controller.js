@@ -156,7 +156,7 @@ export default class extends Controller {
   }
 
   updateForAccountType(account) {
-    if (account.type_code === 'CREDIT') {
+    if (account.type_code === 'CREDIT_CARD') {
       this.showCreditCardInfo(account)
       this.updatePaymentDateForCredit(account)
     } else {
@@ -344,7 +344,7 @@ export default class extends Controller {
     
     // Suggest credit card for larger amounts or online purchases
     if (amount > 200 || description.includes('online') || description.includes('amazon') || description.includes('ifood')) {
-      const creditAccounts = this.accountData.filter(acc => acc.type_code === 'CREDIT')
+      const creditAccounts = this.accountData.filter(acc => acc.type_code === 'CREDIT_CARD')
       if (creditAccounts.length > 0 && !this.fromAccountTarget.value) {
         // Don't auto-select, but could highlight in the future
       }
@@ -369,7 +369,7 @@ export default class extends Controller {
 
   filterAccountsForExpense() {
     // For expense: from_account should be asset accounts, to_account should be expense accounts
-    this.filterAccountOptions('from', ['BANK', 'CREDIT', 'CASH', 'SAVINGS'])
+    this.filterAccountOptions('from', ['CHECKING', 'CREDIT_CARD', 'CASH', 'SAVINGS'])
     this.filterAccountOptions('to', ['EXPENSE'])
   }
 
@@ -381,8 +381,8 @@ export default class extends Controller {
         this.filterAccountsForExpense()
     } else if (transactionType === 'transfer') {
         // For transfers: both accounts should be asset accounts
-      this.filterAccountOptions('from', ['BANK', 'CREDIT', 'CASH', 'SAVINGS'])
-      this.filterAccountOptions('to', ['BANK', 'CREDIT', 'CASH', 'SAVINGS'])
+      this.filterAccountOptions('from', ['CHECKING', 'CREDIT_CARD', 'CASH', 'SAVINGS'])
+      this.filterAccountOptions('to', ['CHECKING', 'CREDIT_CARD', 'CASH', 'SAVINGS'])
     } else {
         // Show all accounts if no transaction type selected
       this.showAllAccountOptions('from')
@@ -441,7 +441,7 @@ export default class extends Controller {
     // This would require dynamic updating of select options
     // For now, just update helper text based on account type
     
-    if (fromAccount.type_code === 'CREDIT') {
+    if (fromAccount.type_code === 'CREDIT_CARD') {
       this.toAccountHelperTarget.textContent = "Onde foi gasto o dinheiro do cartão"
     } else if (fromAccount.type_code === 'BANK') {
       this.toAccountHelperTarget.textContent = "Destino do pagamento"

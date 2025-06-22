@@ -12,7 +12,7 @@ class CreditStatementService
 
     # Finds or creates a credit statement for a specific account and period
     def find_or_create_statement(account, period)
-      return nil unless account&.account_type&.code == "CREDIT"
+      return nil unless account&.account_type&.code == "CREDIT_CARD"
       
       CreditStatement.find_or_create_by(account: account, month: period) do |statement|
         initialize_statement(statement, account, period)
@@ -21,7 +21,7 @@ class CreditStatementService
 
     # Creates statements for multiple future periods (useful for installments)
     def ensure_statements_for_periods(account, periods)
-      return [] unless account&.account_type&.code == "CREDIT"
+      return [] unless account&.account_type&.code == "CREDIT_CARD"
       
       periods.map do |period|
         find_or_create_statement(account, period)
@@ -30,7 +30,7 @@ class CreditStatementService
 
     # Creates statements for the next N months for an account
     def create_future_statements(account, months_ahead = 12)
-      return [] unless account&.account_type&.code == "CREDIT"
+      return [] unless account&.account_type&.code == "CREDIT_CARD"
       
       current_date = Date.current
       periods = (0..months_ahead).map do |offset|
@@ -57,7 +57,7 @@ class CreditStatementService
 
     # Checks if transaction is from a credit card
     def credit_card_transaction?(transaction)
-      transaction&.from_account&.account_type&.code == "CREDIT"
+      transaction&.from_account&.account_type&.code == "CREDIT_CARD"
     end
 
     # Calculates the statement period for a transaction based on closing day

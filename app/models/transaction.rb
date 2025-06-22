@@ -241,6 +241,6 @@ class Transaction < ApplicationRecord
 
   # Checks if this is a credit card transaction
   def credit_card_transaction?
-    from_account&.account_type&.code == "CREDIT"
+    from_account&.account_type&.code == "CREDIT_CARD"
   end
 end
