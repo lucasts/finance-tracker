@@ -7,6 +7,7 @@ class Account < ApplicationRecord
   has_many :transactions_from, class_name: "Transaction", foreign_key: :from_account_id, dependent: :restrict_with_error
   has_many :transactions_to, class_name: "Transaction", foreign_key: :to_account_id, dependent: :restrict_with_error
   has_many :import_sessions, dependent: :nullify
+  has_many :credit_statements, dependent: :destroy
 
   validates :name, presence: true
 
@@ -46,5 +47,22 @@ class Account < ApplicationRecord
 
   def net_transfers
     (transfers_in.sum(:amount) || 0.0) - (transfers_out.sum(:amount) || 0.0)
+  end
+
+  # Credit card specific methods
+  def credit_card?
+    account_type&.code == "CREDIT"
+  end
+
+  def ensure_credit_statement_for_period(period)
+    return nil unless credit_card?
+    
+    CreditStatementService.find_or_create_statement(self, period)
+  end
+
+  def create_future_statements(months_ahead = 12)
+    return [] unless credit_card?
+    
+    CreditStatementService.create_future_statements(self, months_ahead)
   end
 end

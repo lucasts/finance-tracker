@@ -29,6 +29,7 @@ class Transaction < ApplicationRecord
   before_validation :set_default_status, if: :new_record?
   before_save :auto_update_status_if_needed
   before_validation :normalize_amount_format
+  after_create :ensure_credit_statement
   
   scope :income, -> { where transaction_type: :income }
   scope :expense, -> { where transaction_type: :expense }
@@ -227,5 +228,19 @@ class Transaction < ApplicationRecord
       self.amount = self.amount.gsub('.', '').gsub(',', '.')
     end
     self.amount = self.amount.to_d if self.amount.present?
+  end
+
+  # Ensures credit statement exists for credit card transactions
+  def ensure_credit_statement
+    return unless credit_card_transaction?
+    return if credit_statement.present? # Already associated
+
+    statement = CreditStatementService.find_or_create_for_transaction(self)
+    update_column(:credit_statement_id, statement.id) if statement
+  end
+
+  # Checks if this is a credit card transaction
+  def credit_card_transaction?
+    from_account&.account_type&.code == "CREDIT"
   end
 end

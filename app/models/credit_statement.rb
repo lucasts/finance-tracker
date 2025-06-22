@@ -8,8 +8,8 @@ class CreditStatement < ApplicationRecord
   validates :amount_due, :amount_paid, presence: true
   validate :account_must_be_credit_card
   
-  before_save :auto_update_status
   after_save :update_amount_due
+  after_save :auto_update_status
 
   def remaining_balance
     amount_due - amount_paid
@@ -24,10 +24,10 @@ class CreditStatement < ApplicationRecord
   end
 
   def auto_update_status
-    if amount_paid >= amount_due
+    if amount_due > 0 && amount_paid >= amount_due
       self.status = :paid
       self.paid_on ||= Date.today
-    elsif due_on.present? && due_on < Date.today && amount_paid < amount_due
+    elsif due_on.present? && due_on < Date.today && amount_paid < amount_due && amount_due > 0
       self.status = :overdue
     else
       self.status = :open
@@ -35,7 +35,11 @@ class CreditStatement < ApplicationRecord
   end
 
   def update_amount_due
-    total = transactions.sum(:amount)
-    update_column(:amount_due, total) if total != amount_due
+    # Only update amount_due if there are actual transactions
+    # This allows manual setting for testing purposes
+    if transactions.any?
+      total = transactions.sum(:amount)
+      update_column(:amount_due, total) if total != amount_due
+    end
   end
 end

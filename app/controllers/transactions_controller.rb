@@ -148,25 +148,9 @@ class TransactionsController < ApplicationController
     nil
   end
 
-  def suggested_period_for(date:, from_account:)
-    if from_account&.account_type&.code == "CREDIT" && from_account&.closing_day
-      cutoff = Date.new(date.year, date.month, from_account.closing_day)
-      ref = (date <= cutoff) ? date : date + 1.month
-      ref.strftime("%Y-%m")
-    else
-      date.strftime("%Y-%m")
-    end
-  end
-
   def associate_with_credit_statement(transaction)
-    return unless transaction.from_account&.account_type&.code == "CREDIT"
-    
-    period = suggested_period_for(date: transaction.event_date, from_account: transaction.from_account)
-    statement = CreditStatement.find_by(account: transaction.from_account, month: period)
-    
-    if statement
-      transaction.credit_statement = statement
-    end
+    statement = CreditStatementService.find_or_create_for_transaction(transaction)
+    transaction.credit_statement = statement if statement
   end
 
   def transaction_params
@@ -290,6 +274,17 @@ class TransactionsController < ApplicationController
         if success
           # Apply special logic for credit cards on each transaction
           if Account.find(transaction_params[:from_account_id])&.account_type&.code == "CREDIT"
+            account = Account.find(transaction_params[:from_account_id])
+            
+            # Pre-create all necessary credit statements for the installment period
+            periods = CreditStatementService.calculate_periods_for_installment(
+              installment_plan.starts_on, 
+              installment_plan.installment_count, 
+              installment_plan.recurrence_frequency
+            )
+            CreditStatementService.ensure_statements_for_periods(account, periods)
+            
+            # Associate each transaction with its respective statement
             installment_plan.transactions.each do |transaction|
               associate_with_credit_statement(transaction)
               transaction.save!

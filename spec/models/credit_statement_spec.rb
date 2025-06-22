@@ -223,7 +223,7 @@ RSpec.describe CreditStatement, type: :model do
                         account: credit_account)
       
       expect(statement.remaining_balance).to eq(0)
-      expect(statement.status).to eq('paid')
+      expect(statement.status).to eq('open') # New statements with zero values should be open
     end
     
     it 'handles months in distant past' do
