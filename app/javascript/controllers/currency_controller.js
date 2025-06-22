@@ -10,7 +10,7 @@ export default class extends Controller {
   }
 
   disconnect() {
-    // Remove listener para evitar leaks
+    // Remove listener to avoid leaks
     this.inputTarget.removeEventListener('input', this.nativeCurrencyMask)
     if (this.mask) this.mask.destroy()
   }
@@ -18,33 +18,33 @@ export default class extends Controller {
   setupMask() {
     // Remove IMask, implement simple native currency mask
     this.inputTarget.addEventListener('input', this.nativeCurrencyMask.bind(this))
-    // Ao editar, formata o valor inicial se houver
+    // When editing, format the initial value if present
     if (this.inputTarget.value && this.inputTarget.value.match(/\d/)) {
       this.formatInitialValue()
     } else {
-      this.nativeCurrencyMask() // inicializa
+      this.nativeCurrencyMask() // initialize
     }
   }
 
   formatInitialValue() {
-    // Remove tudo que não for número, vírgula ou ponto
+    // Remove everything that is not a number, comma, or period
     let raw = this.inputTarget.value.replace(/[^\d,.]/g, '')
-    // Se já está no formato brasileiro (ex: 123,45), apenas normaliza
+    // If it's already in Brazilian format (e.g., 123,45), just normalize it
     if (raw.match(/^\d{1,3}(\.\d{3})*,\d{2}$/)) {
-      // Ex: 1.234,56 → 1234,56
+      // E.g.: 1.234,56 → 1234,56
       raw = raw.replace(/\./g, '')
       this.inputTarget.value = raw
       this.nativeCurrencyMask()
       return
     }
-    // Se está no formato americano (ex: 123.45), converte para brasileiro
+    // If it's in American format (e.g., 123.45), convert it to Brazilian format
     if (raw.match(/^\d+\.\d{2}$/)) {
       raw = raw.replace('.', ',')
       this.inputTarget.value = raw
       this.nativeCurrencyMask()
       return
     }
-    // Se for só número inteiro, multiplica por 100 para centavos
+    // If it's just an integer, multiply by 100 for cents
     if (raw.match(/^\d+$/)) {
       let value = raw.replace(/^0+(?!$)/, '')
       value = value.padStart(3, '0')
@@ -57,7 +57,7 @@ export default class extends Controller {
       this.updateHelper()
       return
     }
-    // fallback: tenta parsear float
+    // fallback: tries to parse float
     let value = Math.round(parseFloat(raw.replace(',', '.')) * 100).toString()
     if (isNaN(value) || value === 'NaN') value = '0'
     value = value.replace(/^0+(?!$)/, '')
@@ -74,15 +74,15 @@ export default class extends Controller {
   nativeCurrencyMask() {
     let value = this.inputTarget.value.replace(/\D/g, '')
     if (value.length === 0) value = '0'
-    // Remove zeros à esquerda, mas mantém pelo menos 3 dígitos para centavos
+    // Remove leading zeros, but keep at least 3 digits for cents
     value = value.replace(/^0+(?!$)/, '')
     value = value.padStart(3, '0')
-    // Separa centavos
+    // Separate cents
     let cents = value.slice(-2)
     let integer = value.slice(0, -2)
-    // Remove zeros à esquerda do inteiro
+    // Remove leading zeros from the integer part
     integer = integer.replace(/^0+(?!$)/, '')
-    // Adiciona separador de milhar
+    // Add thousand separator
     if (integer.length === 0) integer = '0'
     integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
     this.inputTarget.value = integer + ',' + cents
@@ -92,16 +92,16 @@ export default class extends Controller {
   updateHelper() {
     const helper = this.element.querySelector('[data-currency-helper]')
     if (helper) {
-      // Extrai valor numérico do input formatado
+      // Extract numeric value from formatted input
       const raw = this.inputTarget.value.replace(/\./g, '').replace(',', '.')
-      // Garante sempre duas casas decimais
+      // Ensure always two decimal places
       const value = Number.isNaN(Number(raw)) ? 0 : parseFloat(raw)
-      helper.textContent = value > 0 ? `Valor: ${(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 })}` : "Digite o valor"
+      helper.textContent = value > 0 ? `Value: ${(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 })}` : "Enter the value"
     }
   }
 
   get numericValue() {
-    // Extrai valor numérico do input formatado
+    // Extract numeric value from formatted input
     if (!this.inputTarget) return 0
     const raw = this.inputTarget.value.replace(/\./g, '').replace(',', '.')
     return parseFloat(raw) || 0

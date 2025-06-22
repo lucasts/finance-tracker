@@ -1,8 +1,8 @@
-# Serviço para importar e parsear arquivos CSV
+# Service to import and parse CSV files
 require 'csv'
 
 class CsvImportService
-  # Espera-se header: data,valor,descricao,categoria,status,tipo,parcela
+  # Expected header: date,value,description,category,status,type,installment
   def initialize(file_content)
     @file_content = file_content
   end

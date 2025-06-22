@@ -1,6 +1,6 @@
-# Serviço para sugerir matches heurísticos para ImportedTransaction
+# Service to suggest heuristic matches for ImportedTransaction
 class ImportMatchingService
-  # Recebe uma ImportedTransaction e sugere possíveis matches
+  # Receives an ImportedTransaction and suggests possible matches
   def initialize(imported_transaction)
     @imported_transaction = imported_transaction
   end
@@ -16,23 +16,23 @@ class ImportMatchingService
     desc_norm = desc.gsub(/[^a-z0-9]/, '')
     candidates = candidates.select do |tx|
       tx_desc = tx.description.to_s.downcase.gsub(/[^a-z0-9]/, '')
-      # Similaridade: pelo menos 6 caracteres em comum, ou similaridade >= 0.6
+      # Similarity: at least 6 characters in common, or similarity >= 0.6
       (tx_desc[0,8] == desc_norm[0,8]) ||
       (tx_desc.include?(desc_norm[0,6])) ||
       (desc_norm.include?(tx_desc[0,6])) ||
       (string_similarity(tx_desc, desc_norm) >= 0.6)
     end
 
-    # Parcelamento: regex para "05/12", "parcela 3 de 10", etc
+    # Installment: regex for "05/12", "parcela 3 de 10", etc
     installment_match = nil
-    if @imported_transaction.installment_info.present? || desc =~ /(\d{1,2}\/\d{1,2})|(parcela\s*\d+\s*(de|\/|-)\s*\d+)/i
-      base = desc.gsub(/(\d{1,2}\/\d{1,2})|(parcela\s*\d+\s*(de|\/|-)\s*\d+)/i, '').strip
+    if @imported_transaction.installment_info.present? || desc =~ /(\d{1,2}\/\d{1,2})|(parcela\s*\d+\s*(de|\/|-)*\d+)/i
+      base = desc.gsub(/(\d{1,2}\/\d{1,2})|(parcela\s*\d+\s*(de|\/|-)*\d+)/i, '').strip
       installment_match = InstallmentPlan.where(user_id: @imported_transaction.import_session.user_id)
         .where('LOWER(name) LIKE ?', "%#{base[0,8].downcase}%")
         .first
     end
 
-    # Recorrente: similaridade + valor aproximado
+    # Recurring: similarity + approximate value
     recurring_match = RecurringCommitment.where(user_id: @imported_transaction.import_session.user_id)
       .where('LOWER(name) LIKE ?', "%#{desc[0,8].downcase}%")
       .select { |rc| (rc.expected_amount.to_f - @imported_transaction.amount.to_f).abs <= [0.01, (rc.expected_amount.to_f * 0.10)].max }
@@ -47,7 +47,7 @@ class ImportMatchingService
 
   private
 
-  # Similaridade de strings (Jaccard simples)
+  # String similarity (simple Jaccard)
   def string_similarity(a, b)
     return 0 if a.blank? || b.blank?
     a_set = a.chars.to_set

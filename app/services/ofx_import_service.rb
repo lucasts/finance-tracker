@@ -1,4 +1,4 @@
-# Serviço para importar e parsear arquivos OFX
+# Service to import and parse OFX files
 require_relative '../../lib/ofx_simple_parser'
 
 class OfxImportService

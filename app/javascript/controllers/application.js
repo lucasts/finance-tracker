@@ -2,7 +2,7 @@ import { Application } from "@hotwired/stimulus"
 
 const application = Application.start()
 
-// Configure Stimulus development experience
+// Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
 application.debug = false
 window.Stimulus   = application
 

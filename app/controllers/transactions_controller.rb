@@ -10,10 +10,10 @@ class TransactionsController < ApplicationController
       selected_month = Date.today
     end
 
-    # Filtrar por usuário atual
+    # Filter by current user
     @transactions = current_user_scope(Transaction).in_competence_month(selected_month).order(event_date: :desc)
     
-    # Filtrar por plano de parcelamento se especificado
+    # Filter by installment plan if specified
     if params[:plan].present?
       @transactions = @transactions.where(installment_plan_id: params[:plan])
       @installment_plan = current_user_scope(InstallmentPlan).find_by(id: params[:plan])
@@ -30,11 +30,11 @@ class TransactionsController < ApplicationController
     @transaction.event_date = Date.current
     @transaction.payment_date = Date.current
     @transaction.recurrence_type = 'single'
-    # Status será determinado automaticamente baseado nas datas
+    # Status will be determined automatically based on dates
   end
 
   def create
-    # Verifica o tipo de recorrência e processa adequadamente
+    # Check recurrence type and process accordingly
     if params[:recurrence_type] == 'installment' || params[:create_installment_plan].present?
       create_installment_transaction
     elsif params[:recurrence_type] == 'recurring' || params[:create_recurring_commitment].present?
@@ -47,7 +47,7 @@ class TransactionsController < ApplicationController
   def edit; end
 
   def update
-    # Reasociar com fatura se mudou conta ou data
+    # Reassociate with statement if account or date changed
     if @transaction.from_account&.account_type&.code == "CREDIT"
       associate_with_credit_statement(@transaction)
     end
@@ -55,7 +55,7 @@ class TransactionsController < ApplicationController
     # Apply updated params
     @transaction.assign_attributes(transaction_params)
     
-    # Reaplica defaults inteligentes após mudanças
+    # Reapply intelligent defaults after changes
     apply_intelligent_defaults(@transaction)
     
     if @transaction.save
@@ -77,19 +77,19 @@ class TransactionsController < ApplicationController
   end
 
   def apply_intelligent_defaults(transaction)
-    # Se não especificou payment_date, usa event_date
+    # If payment_date not specified, use event_date
     transaction.payment_date ||= transaction.event_date
     
-    # Determina status automaticamente baseado nas regras de negócio
+    # Automatically determine status based on business rules
     transaction.status = determine_automatic_status(transaction) if transaction.status.blank?
     
-    # Para cartões de crédito, ajusta payment_date automaticamente
+    # For credit cards, adjust payment_date automatically
     if transaction.from_account&.account_type&.code == "CREDIT" && transaction.from_account.due_day.present?
-      # Payment date é no vencimento da fatura (próximo mês)
+      # Payment date is on statement due date (next month)
       event_date = transaction.event_date
       due_date = Date.new(event_date.year, event_date.month, transaction.from_account.due_day)
       
-      # Se já passou do fechamento deste mês, vai para o próximo
+      # If already past this month's closing, go to next
       if transaction.from_account.closing_day.present? && event_date.day > transaction.from_account.closing_day
         due_date = due_date.next_month
       else
@@ -99,7 +99,7 @@ class TransactionsController < ApplicationController
       transaction.payment_date = due_date
     end
     
-    # Auto-detecta categoria baseada na descrição se não foi especificada
+    # Auto-detect category based on description if not specified
     if transaction.category_id.blank? && transaction.description.present?
       suggested_category = suggest_category_from_description(transaction.description)
       transaction.category_id = suggested_category&.id if suggested_category
@@ -110,15 +110,15 @@ class TransactionsController < ApplicationController
     current_date = Date.current
     payment_date = transaction.payment_date || transaction.event_date
     
-    # Regras para determinar status automaticamente:
-    # 1. Se a data de pagamento for futura -> pending
-    # 2. Se for hoje ou passado -> confirmed (assumindo que aconteceu)
-    # 3. Para parcelamentos: primeiras parcelas confirmed, futuras pending
+    # Rules to determine status automatically:
+    # 1. If payment date is in the future -> pending
+    # 2. If today or past -> confirmed (assumed occurred)
+    # 3. For installments: first installments confirmed, future pending
     
     if payment_date > current_date
-      'pending'  # Transação futura
+      'pending'  # Future transaction
     else
-      'confirmed'  # Transação atual ou passada (assumindo que aconteceu)
+      'confirmed'  # Current or past transaction (assumed occurred)
     end
   end
 
@@ -127,7 +127,7 @@ class TransactionsController < ApplicationController
     
     desc = description.downcase
     
-    # Mapeamento de palavras-chave para categorias
+    # Keyword mapping for categories
     category_keywords = {
       'Supermercado' => ['mercado', 'supermercado', 'zaffari', 'carrefour', 'walmart', 'big'],
       'Farmácia' => ['farmácia', 'panvel', 'droga', 'medicamento', 'remédio'],
