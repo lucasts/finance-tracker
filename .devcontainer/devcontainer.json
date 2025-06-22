@@ -5,7 +5,7 @@
     "context": ".."
   },
   "forwardPorts": [3000],  
-  "postCreateCommand": "bundle install && yarn install && ./.devcontainer/setup-git.sh",
+  "postCreateCommand": "/bin/bash .devcontainer/setup-git.sh && bundle install && yarn install",
   "customizations": {
     "vscode": {
       "settings": {
