@@ -40,6 +40,19 @@ class CreditStatementService
       ensure_statements_for_periods(account, periods)
     end
 
+    # Updates the amount_due for a credit statement based on its transactions
+    def update_statement_amount(statement)
+      return false unless statement.is_a?(CreditStatement)
+      
+      total = statement.transactions.sum(:amount)
+      if total != statement.amount_due
+        statement.update_column(:amount_due, total)
+        true
+      else
+        false
+      end
+    end
+
     # Calculates which periods would be needed for an installment plan
     def calculate_periods_for_installment(start_date, installment_count, frequency = 'monthly')
       periods = []

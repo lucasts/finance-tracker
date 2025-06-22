@@ -30,6 +30,7 @@ class Transaction < ApplicationRecord
   before_save :auto_update_status_if_needed
   before_validation :normalize_amount_format
   after_create :ensure_credit_statement
+  after_save :update_credit_statement_amount
   
   scope :income, -> { where transaction_type: :income }
   scope :expense, -> { where transaction_type: :expense }
@@ -242,5 +243,13 @@ class Transaction < ApplicationRecord
   # Checks if this is a credit card transaction
   def credit_card_transaction?
     from_account&.account_type&.code == "CREDIT_CARD"
+  end
+
+  # Updates the credit statement amount when transaction is saved
+  def update_credit_statement_amount
+    return unless credit_statement.present?
+    
+    # Use the service to update the statement amount
+    CreditStatementService.update_statement_amount(credit_statement)
   end
 end
