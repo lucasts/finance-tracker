@@ -20,17 +20,14 @@ export default class extends Controller {
   ]
 
   connect() {
-    console.log("Recurrence controller connected")
     this.updateDisplay()
   }
 
   handleRepeatToggle() {
-    console.log("Repeat toggle changed:", this.repeatCheckboxTarget.checked)
     this.updateDisplay()
   }
 
   handleTypeChange() {
-    console.log("Type changed:", this.getSelectedRepeatType())
     this.updateDisplay()
   }
 
@@ -38,7 +35,6 @@ export default class extends Controller {
     const isRepeating = this.repeatCheckboxTarget.checked
     const selectedType = this.getSelectedRepeatType()
     
-    console.log("UpdateDisplay called:", { isRepeating, selectedType })
     
     // Show/hide repeat options
     if (isRepeating) {

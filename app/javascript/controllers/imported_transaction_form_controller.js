@@ -4,7 +4,6 @@ export default class extends Controller {
   static targets = ["amount", "amountHelper"]
 
   connect() {
-    console.log("ImportedTransactionForm controller connected")
     this.setupInitialState()
   }
 
