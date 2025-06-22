@@ -28,6 +28,7 @@ class Transaction < ApplicationRecord
   # Callbacks para automação do status
   before_validation :set_default_status, if: :new_record?
   before_save :auto_update_status_if_needed
+  before_validation :normalize_amount_format
   
   scope :income, -> { where transaction_type: :income }
   scope :expense, -> { where transaction_type: :expense }
@@ -219,5 +220,12 @@ class Transaction < ApplicationRecord
     else
       errors.add(:category_id, "Categoria obrigatória") if category_id.blank?
     end
+  end
+
+  def normalize_amount_format
+    if self.amount.is_a?(String)
+      self.amount = self.amount.gsub('.', '').gsub(',', '.')
+    end
+    self.amount = self.amount.to_d if self.amount.present?
   end
 end

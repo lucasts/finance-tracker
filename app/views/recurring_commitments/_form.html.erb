@@ -102,19 +102,18 @@
   <!-- Amount and Type -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <!-- Amount -->
-    <div class="form-control">
+    <div class="form-control" data-controller="currency">
       <%= form.label :default_amount, class: "label" do %>
         <span class="label-text">Valor Padrão</span>
       <% end %>
-      <div class="input-group">
-        <span class="input-group-text">R$</span>
-        <%= form.number_field :default_amount, 
-                              step: 0.01,
-                              class: "input input-bordered w-full",
-                              placeholder: "0,00" %>
-      </div>
+      <%= form.text_field :default_amount, 
+                          class: "input input-bordered w-full",
+                          placeholder: "0,00",
+                          data: { currency_target: "input" } %>
       <label class="label">
-        <span class="label-text-alt">Deixe em branco para valores variáveis</span>
+        <span class="label-text-alt" data-currency-helper>
+          Deixe em branco para valores variáveis
+        </span>
       </label>
     </div>
 

@@ -124,11 +124,16 @@ class InstallmentPlansController < ApplicationController
   end
   
   def installment_plan_params
-    params.require(:installment_plan).permit(
+    permitted = params.require(:installment_plan).permit(
       :name, :total_amount, :installment_count,
       :starts_on, :recurrence_frequency, :transaction_type,
       :account_id, :category_id, :notes, :active
     )
+    if permitted[:total_amount].is_a?(String)
+      permitted[:total_amount] = permitted[:total_amount].gsub('.', '').gsub(',', '.')
+    end
+    permitted[:total_amount] = permitted[:total_amount].to_d if permitted[:total_amount].present?
+    permitted
   end
   
   def calculate_next_due_date(plan)

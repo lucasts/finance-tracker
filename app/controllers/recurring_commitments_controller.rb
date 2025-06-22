@@ -153,11 +153,16 @@ class RecurringCommitmentsController < ApplicationController
   end
   
   def recurring_commitment_params
-    params.require(:recurring_commitment).permit(
+    permitted = params.require(:recurring_commitment).permit(
       :name, :amount, :frequency, :start_date, :end_date, :transaction_type,
       :account_id, :category_id, :notes, :active, :edit_strategy, :effective_date, :advanced_edit,
       :from_account_id, :to_account_id
     )
+    if permitted[:amount].is_a?(String)
+      permitted[:amount] = permitted[:amount].gsub('.', '').gsub(',', '.')
+    end
+    permitted[:amount] = permitted[:amount].to_d if permitted[:amount].present?
+    permitted
   end
   
   private

@@ -241,23 +241,21 @@
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="form-control">
+                <div class="form-control" data-controller="currency">
                   <%= f.label :amount, class: "label" do %>
                     <span class="label-text font-medium">Valor</span>
                   <% end %>
-                  <%= f.number_field :amount,
-                      value: number_with_precision(@imported_transaction.amount.abs, precision: 2),
+                  <%= f.text_field :amount,
+                      value: number_with_precision(@imported_transaction.amount.abs, precision: 2, delimiter: '.', separator: ','),
                       class: "input input-bordered w-full text-lg font-bold",
-                      step: 0.01,
-                      min: 0.01,
-                      placeholder: t('ui.transaction.form.amount_placeholder'),
+                      placeholder: "0,00",
                       data: {
-                        imported_transaction_form_target: "amount",
-                        action: "input->imported-transaction-form#handleAmountChange"
+                        currency_target: "input",
+                        imported_transaction_form_target: "amount"
                       } %>
                   <label class="label">
-                    <span class="label-text-alt text-base-content/60" data-imported-transaction-form-target="amountHelper">
-                      Informe o valor da transação (use vírgula para centavos)
+                    <span class="label-text-alt text-base-content/60" data-currency-helper>
+                      Informe o valor da transação
                     </span>
                   </label>
                 </div>

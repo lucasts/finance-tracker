@@ -46,21 +46,20 @@
                   }) %>
           </div>
           
-          <div class="form-control">
+          <div class="form-control" data-controller="currency">
             <label class="label">
               <span class="label-text">💵 <%= t('activerecord.attributes.transaction.amount') %></span>
             </label>
-            <%= form.number_field :amount, 
+            <%= form.text_field :amount, 
                   class: "input input-bordered w-full text-lg font-bold", 
-                  step: 0.01, 
-                  min: 0.01,
-                  placeholder: t('ui.transaction.form.amount_placeholder'),
+                  placeholder: "0,00",
                   data: {
+                    currency_target: "input",
                     transaction_form_target: "amount",
-                    action: "input->transaction-form#handleAmountChange"
+                    action: "input->transaction-form#handleAmountChange currency:complete->transaction-form#handleAmountChange"
                   } %>
             <label class="label">
-              <span class="label-text-alt text-base-content/60" data-transaction-form-target="amountHelper">
+              <span class="label-text-alt text-base-content/60" data-transaction-form-target="amountHelper" data-currency-helper>
                 <%= t('ui.transaction.form.amount_helper') %>
               </span>
             </label>

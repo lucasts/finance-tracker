@@ -170,13 +170,19 @@ class TransactionsController < ApplicationController
   end
 
   def transaction_params
-    params.require(:transaction).permit(
+    permitted = params.require(:transaction).permit(
       :description, :amount, :transaction_type, :event_date, :payment_date,
       :from_account_id, :to_account_id, :category_id, :installment,
       :recurrence_type, :credit_statement_id,
       :recurrence_frequency, :installment_number,
-      :status # permitir status para evitar warning e permitir atribuição explícita
+      :status
     )
+    # Normaliza amount para decimal (ex: '123,77' => 123.77)
+    if permitted[:amount].is_a?(String)
+      permitted[:amount] = permitted[:amount].gsub('.', '').gsub(',', '.')
+    end
+    permitted[:amount] = permitted[:amount].to_d if permitted[:amount].present?
+    permitted
   end
 
   # Novos métodos para o modelo robusto
