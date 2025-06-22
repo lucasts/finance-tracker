@@ -4,11 +4,11 @@ class ImportedTransactionsController < ApplicationController
 
   def edit
     @matches = ImportMatchingService.new(@imported_transaction).suggest_matches
-    # Tela de conciliação individual
+    # Individual reconciliation screen
   end
 
   def update
-    # Salva decisão de conciliação
+    # Save reconciliation decision
     action = params[:reconciliation_action]
     tx_params = params.require(:imported_transaction).permit(:description, :amount, :event_date, :payment_date, :category_id, :transaction_type)
     decision_data = tx_params.to_h
@@ -22,7 +22,7 @@ class ImportedTransactionsController < ApplicationController
     rec_entry.save!
 
     created_transaction = nil
-    # Se criar novo, cria transação no sistema
+    # If creating new, create transaction in the system
     if action == 'create_new'
       t = Transaction.create!(user: current_user,
         description: tx_params[:description],
@@ -39,10 +39,10 @@ class ImportedTransactionsController < ApplicationController
       created_transaction = t
     end
 
-    # Força atualização do status da imported_transaction
+    # Force update of imported_transaction status
     @imported_transaction.reload
 
-    # Redireciona para a tela de importação, mas com aviso e link se criou nova transação
+    # Redirect to import screen, but with notice and link if a new transaction was created
     if created_transaction
       redirect_to import_session_path(@import_session), notice: "Decisão de conciliação salva. <a href='#{transaction_path(created_transaction)}' target='_blank'>Ver transação criada</a>".html_safe
     else

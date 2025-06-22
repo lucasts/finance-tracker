@@ -41,7 +41,7 @@ class InstallmentPlansController < ApplicationController
     @installment_plan = current_user.installment_plans.build(installment_plan_params)
     
     if @installment_plan.save
-      # Gera a primeira parcela se a data de início já passou
+      # Generate the first installment if the start date has already passed
       if @installment_plan.starts_on <= Date.current
         generate_first_installment
       end

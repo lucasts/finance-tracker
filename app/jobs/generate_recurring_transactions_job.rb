@@ -1,12 +1,12 @@
-# Job para gerar transações recorrentes automaticamente
-# Executado periodicamente para criar novas transações baseadas em RecurringCommitments
+# Job to generate recurring transactions automatically
+# Executed periodically to create new transactions based on RecurringCommitments
 class GenerateRecurringTransactionsJob < ApplicationJob
   queue_as :default
 
   def perform(date = Date.current)
     Rails.logger.info "Starting GenerateRecurringTransactionsJob for date: #{date}"
     
-    # Busca compromissos recorrentes ativos
+    # Find active recurring commitments
     recurring_commitments = RecurringCommitment.where(status: :active)
     
     generated_count = 0

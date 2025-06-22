@@ -3,7 +3,7 @@ class OverviewController < ApplicationController
     @month = params[:month] || Date.today.strftime('%Y-%m')
     month_date = Date.strptime(@month, "%Y-%m")
     
-    # Filtrar por usuário atual
+    # Filter by current user
     user_transactions = current_user_scope(Transaction)
     
     @transactions = user_transactions.in_competence_month(month_date)
@@ -19,30 +19,30 @@ class OverviewController < ApplicationController
     @next_month = (current_date >> 1).strftime("%Y-%m")
     @selected_month_long = I18n.l(current_date, format: "%B de %Y")
 
-    # === FATURAS DE CARTÃO DE CRÉDITO ===
+    # === CREDIT CARD STATEMENTS ===
     load_credit_statements(month_date)
 
-    # === PRÓXIMOS COMPROMISSOS ===
+    # === UPCOMING COMMITMENTS ===
     @upcoming = user_transactions.upcoming_payments(10)
     
-    # === ANÁLISES E PROJEÇÕES ===
+    # === ANALYSIS AND PROJECTIONS ===
     @category_ranking = category_ranking(month_date)
     @projected_balance = projected_balance(@balance, @month)
     @balance_alert = balance_alert(@projected_balance)
     
-    # === PROJEÇÕES AUTOMÁTICAS POR CATEGORIA ===
+    # === AUTOMATIC PROJECTIONS BY CATEGORY ===
     @category_projections = generate_category_projections(month_date)
     
-    # === DADOS PARA GRÁFICOS ===
+    # === CHART DATA ===
     today = Date.today
     @month_end = Date.new(today.year, today.month, -1)
     @chart_options = chart_options
     
-    # === ESTATÍSTICAS ADICIONAIS ===
+    # === ADDITIONAL STATISTICS ===
     @monthly_stats = monthly_statistics(month_date)
     @savings_rate = calculate_savings_rate(@income_total, @expense_total)
 
-    # === PROJEÇÃO DE COMPROMISSOS RECORRENTES ===
+    # === RECURRING COMMITMENTS PROJECTION ===
     projection_service = RecurringProjectionService.new(as_of: month_date)
     @projected_transactions = projection_service.projected_transactions
   end
@@ -157,12 +157,12 @@ end
 private
 
 def load_credit_statements(month_date)
-  # Buscar todas as faturas de cartão para o mês atual
+  # Fetch all credit card statements for the current month
   @credit_statements = CreditStatement.includes(:account)
                                     .where(month: month_date.strftime('%Y-%m'))
                                     .order('accounts.name')
   
-  # Estatísticas das faturas
+  # Statement statistics
   @credit_stats = {
     total_due: @credit_statements.sum(:amount_due),
     total_paid: @credit_statements.sum(:amount_paid),
@@ -170,7 +170,7 @@ def load_credit_statements(month_date)
     overdue_count: @credit_statements.where(status: 'overdue').count
   }
   
-  # Próximas faturas a vencer (próximos 30 dias)
+  # Next statements due (next 30 days)
   @upcoming_statements = CreditStatement.includes(:account)
                                        .where(due_on: Date.today..30.days.from_now)
                                        .where.not(status: 'paid')
@@ -181,7 +181,7 @@ end
 def monthly_statistics(month_date)
   prev_month = month_date - 1.month
   
-  # Dados do mês anterior para comparação
+  # Previous month data for comparison
   prev_income = Transaction.income.confirmed.in_competence_month(prev_month).sum(:amount)
   prev_expense = Transaction.expense.confirmed.in_competence_month(prev_month).sum(:amount)
   
@@ -212,7 +212,7 @@ def largest_expense_this_month(month_date)
 end
 
 def generate_chart_data
-  # Gera dados para os últimos 12 meses
+  # Generate data for the last 12 months
   end_date = Date.today
   start_date = end_date - 11.months
   
@@ -227,12 +227,12 @@ def generate_chart_data
     month_str = month_date.strftime('%Y-%m')
     month_label = I18n.l(month_date, format: '%b/%y')
     
-    # Calcula receitas e despesas do mês (filtrado por usuário)
+    # Calculate income and expenses for the month (filtered by user)
     user_transactions = current_user_scope(Transaction)
     income = user_transactions.income.confirmed.in_competence_month(month_date).sum(:amount)
     expense = user_transactions.expense.confirmed.in_competence_month(month_date).sum(:amount)
     
-    # Calcula saldo do mês
+    # Calculate monthly balance
     monthly_balance = income - expense
     accumulated_balance += monthly_balance
     
@@ -273,7 +273,7 @@ def projected_balance(current_balance, month)
   month_date = Date.strptime(month, "%Y-%m")
   end_of_month = month_date.end_of_month
 
-  # Transações futuras do mês atual (depois de hoje) - filtrado por usuário
+  # Future transactions for current month (after today) - filtered by user
   future_transactions = current_user_scope(Transaction).where(
     status: ["pending", "confirmed"],
     event_date: (Date.current + 1.day)..end_of_month
@@ -281,7 +281,7 @@ def projected_balance(current_balance, month)
   future_income = future_transactions.where(transaction_type: "income").sum(:amount)
   future_expenses = future_transactions.where(transaction_type: "expense").sum(:amount)
 
-  # Inclui lançamentos previstos (projeção de compromissos recorrentes)
+  # Include projected transactions (recurring commitments projection)
   projection_service = RecurringProjectionService.new(as_of: month_date)
   projected_transactions = projection_service.projected_transactions
   projected_income = projected_transactions.select { |t| t[:amount].to_f > 0 }.sum { |t| t[:amount].to_f }
@@ -296,7 +296,7 @@ end
 def balance_alert(projected_balance)
   if projected_balance < 0
     "Atenção: balance projetado negativo após todos os compromissos!"
-  elsif projected_balance < 1000 # valor de alerta personalizável
+  elsif projected_balance < 1000 # customizable alert threshold
     "Alerta: balance projetado baixo!"
   else
     nil

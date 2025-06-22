@@ -1,4 +1,4 @@
-# Job para executar automações manuais do sistema
+# Job to execute manual system automations
 class AutomationJob < ApplicationJob
   queue_as :default
 
@@ -12,14 +12,14 @@ class AutomationJob < ApplicationJob
     }
 
     begin
-      # Executa geração de transações recorrentes
+      # Execute recurring transactions generation
       if job_types.include?('recurring')
         recurring_job = GenerateRecurringTransactionsJob.new
         recurring_result = recurring_job.perform(date)
         results[:recurring_transactions] = recurring_result[:generated_count] if recurring_result.is_a?(Hash)
       end
 
-      # Executa geração de parcelas
+      # Execute installment generation
       if job_types.include?('installments')
         installment_job = GenerateInstallmentTransactionsJob.new
         installment_result = installment_job.perform(date)
@@ -36,17 +36,17 @@ class AutomationJob < ApplicationJob
     end
   end
 
-  # Método de conveniência para executar automação completa
+  # Convenience method to execute full automation
   def self.run_daily_automation(date = Date.current)
     perform_later(['recurring', 'installments'], date)
   end
 
-  # Método para executar apenas transações recorrentes
+  # Method to execute only recurring transactions
   def self.run_recurring_only(date = Date.current)
     perform_later(['recurring'], date)
   end
 
-  # Método para executar apenas parcelas
+  # Method to execute only installments
   def self.run_installments_only(date = Date.current)
     perform_later(['installments'], date)
   end

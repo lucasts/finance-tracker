@@ -1,5 +1,5 @@
-# Service para análise de gastos variáveis
-# Analisa padrões de gastos e fornece insights sobre variabilidade de despesas
+# Service for variable expense analysis
+# Analyzes spending patterns and provides insights on expense variability
 class VariableExpenseAnalyzerService
   include ActiveModel::Model
   include ActiveModel::Attributes
@@ -33,30 +33,30 @@ class VariableExpenseAnalyzerService
     }
   end
 
-  # Método de conveniência para análise por conta
+  # Convenience method for account analysis
   def self.analyze_account(account_id, options = {})
     new(options.merge(account_id: account_id)).call
   end
 
-  # Método de conveniência para análise por categoria
+  # Convenience method for category analysis
   def self.analyze_category(category_id, options = {})
     new(options.merge(category_id: category_id)).call
   end
 
-  # Método de conveniência para análise geral
+  # Convenience method for general analysis
   def self.analyze_general(options = {})
     new(options).call
   end
 
-  # Método simples para projeção de gastos por categoria
+  # Simple method for expense projection by category
   def self.projected_expense_for_category(category, months_ahead = 1, user = nil)
     return 0 unless category
 
-    # Usar o usuário da categoria se não fornecido
+    # Use the category's user if not provided
     user ||= category.user
     return 0 unless user
 
-    # Buscar transações dos últimos 6 meses da categoria
+    # Fetch transactions from the last 6 months for this category
     start_date = 6.months.ago.beginning_of_month
     end_date = Date.current.end_of_month
     
@@ -67,12 +67,12 @@ class VariableExpenseAnalyzerService
                              .where(event_date: start_date..end_date)
                              .where(user: user)
     
-    # Calcular média mensal
+    # Calculate monthly average
     total_amount = transactions.sum(:amount)
     months_count = ((end_date.year * 12 + end_date.month) - (start_date.year * 12 + start_date.month) + 1)
     monthly_average = months_count > 0 ? total_amount / months_count : 0
     
-    # Projetar para os próximos meses
+    # Project for the next months
     (monthly_average * months_ahead).round(2)
   end
 
@@ -329,7 +329,7 @@ class VariableExpenseAnalyzerService
   end
 
   def generate_category_breakdown
-    return {} if category_id.present? # Não faz sentido quebrar por categoria se já estamos filtrando por uma
+    return {} if category_id.present? # Breaking down by category doesn't make sense if we're already filtering by one
 
     base_transactions
       .joins(:category)
@@ -374,7 +374,7 @@ class VariableExpenseAnalyzerService
   def calculate_trend(values)
     return { direction: 'stable', next_value: 0 } if values.size < 2
 
-    # Cálculo simples de tendência linear
+    # Simple linear trend calculation
     n = values.size
     x_sum = (1..n).sum
     y_sum = values.sum
@@ -399,11 +399,11 @@ class VariableExpenseAnalyzerService
   end
 
   def calculate_prediction_confidence(trend_data)
-    # Calcula confiança baseada na variabilidade dos dados
+    # Calculate confidence based on data variability
     amounts = trend_data.map { |d| d[:expense] + d[:income] }
     variability = calculate_variability_stats(amounts)
     
-    # Menor coeficiente de variação = maior confiança
+    # Lower coefficient of variation = higher confidence
     cv = variability[:coefficient_of_variation] || 100
     confidence = [100 - cv, 0].max
     
@@ -421,7 +421,7 @@ class VariableExpenseAnalyzerService
     recommendations = []
     variability = calculate_variability_metrics
     
-    # Recomendações baseadas na variabilidade de gastos
+    # Recommendations based on spending variability
     if variability[:expense_variability][:coefficient_of_variation].to_f > 50
       recommendations << {
         type: 'variability',
@@ -431,7 +431,7 @@ class VariableExpenseAnalyzerService
       }
     end
 
-    # Recomendações baseadas na tendência
+    # Recommendations based on trend
     predictions = generate_predictions
     if predictions.dig(:trend_direction, :expense) == 'increasing'
       recommendations << {
@@ -442,7 +442,7 @@ class VariableExpenseAnalyzerService
       }
     end
 
-    # Recomendações baseadas no período de comparação
+    # Recommendations based on comparison period
     comparison = generate_period_comparison
     if comparison.dig(:comparison, :expense_change).to_f > 20
       recommendations << {

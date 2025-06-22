@@ -4,7 +4,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  # Associações
+  # Associations
   has_many :transactions, dependent: :destroy
   has_many :accounts, dependent: :destroy
   has_many :categories, dependent: :destroy
@@ -18,7 +18,7 @@ class User < ApplicationRecord
   # Callbacks
   after_create :create_default_categories
 
-  # Métodos de negócio para cálculos financeiros
+  # Business methods for financial calculations
   def total_balance
     # In double-entry bookkeeping, only sum asset accounts (user's actual accounts)
     # External accounts (revenue/expense) are used for double-entry but don't represent user's wealth

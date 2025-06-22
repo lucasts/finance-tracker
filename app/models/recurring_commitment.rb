@@ -1,8 +1,8 @@
 class RecurringCommitment < ApplicationRecord
-  # Associação de usuário
+  # User association
   belongs_to :user
   
-  # Associações existentes
+  # Existing associations
   belongs_to :category
   belongs_to :from_account, class_name: 'Account'
   belongs_to :to_account, class_name: 'Account'
@@ -18,20 +18,20 @@ class RecurringCommitment < ApplicationRecord
 
   validate :accounts_must_be_different
 
-  # Scopes úteis
+  # Useful scopes
   scope :active_commitments, -> { where(status: :active) }
   scope :by_frequency, ->(freq) { where(recurrence_frequency: freq) }
   scope :monthly_commitments, -> { where(recurrence_frequency: 'monthly') }
   scope :with_default_amount, -> { where.not(default_amount: nil) }
 
-  # Commitments que ainda estão no período ativo
+  # Commitments that are still in the active period
   scope :current_active, -> do
     where(status: :active)
       .where('start_date <= ?', Date.current)
       .where('end_date IS NULL OR end_date >= ?', Date.current)
   end
 
-  # Próxima data de vencimento baseada na frequência
+  # Next due date based on frequency
   def next_occurrence_date(from_date = Date.current)
     return nil if closed? || (end_date && from_date > end_date)
 
@@ -47,14 +47,14 @@ class RecurringCommitment < ApplicationRecord
     end
   end
 
-  # Verifica se está ativo no período
+  # Check if it's active in the period
   def active_on?(date = Date.current)
     active? &&
       date >= start_date &&
       (end_date.nil? || date <= end_date)
   end
 
-  # Valor médio das transações associadas
+  # Average value of associated transactions
   def average_amount
     return default_amount if transactions.empty? && default_amount.present?
 
@@ -64,22 +64,22 @@ class RecurringCommitment < ApplicationRecord
     confirmed_transactions.average(:amount)&.round(2) || 0
   end
 
-  # Total gasto neste compromisso
+  # Total spent on this commitment
   def total_spent
     transactions.where(status: 'confirmed').sum(:amount)
   end
 
-  # Última transação registrada
+  # Last recorded transaction
   def last_transaction
     transactions.order(:payment_date).last
   end
 
-  # Próxima transação esperada (se houver)
+  # Next expected transaction (if any)
   def next_expected_transaction
     transactions.where('payment_date > ?', Date.current).order(:payment_date).first
   end
 
-  # Status resumido do compromisso
+  # Summary status of the commitment
   def summary_status
     return 'expired' if end_date && end_date < Date.current
     return 'inactive' unless active?
@@ -126,19 +126,19 @@ class RecurringCommitment < ApplicationRecord
     variable_categories.any? { |keyword| name.downcase.include?(keyword) || category.name.downcase.include?(keyword) }
   end
 
-  # Indica se o compromisso é de valor fixo (para compatibilidade com jobs/specs)
+  # Indicates if the commitment has a fixed value (for compatibility with jobs/specs)
   def fixed_amount?
     true
   end
 
-  # Valor esperado para compatibilidade com jobs/specs
+  # Expected value for compatibility with jobs/specs
   def expected_amount
     default_amount
   end
 
-  # Documentação:
-  # - O valor padrão pode ser sobrescrito por cada transação (recorrente variável)
-  # - O sistema gera transações periodicamente conforme frequência e status
+  # Documentation:
+  # - The default value can be overridden by each transaction (variable recurring)
+  # - The system generates transactions periodically according to frequency and status
 
   private
 

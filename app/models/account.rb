@@ -1,8 +1,8 @@
 class Account < ApplicationRecord
-  # Associação de usuário
+  # User association
   belongs_to :user
   
-  # Associações existentes
+  # Existing associations
   belongs_to :account_type
   has_many :transactions_from, class_name: "Transaction", foreign_key: :from_account_id, dependent: :restrict_with_error
   has_many :transactions_to, class_name: "Transaction", foreign_key: :to_account_id, dependent: :restrict_with_error
@@ -10,16 +10,16 @@ class Account < ApplicationRecord
 
   validates :name, presence: true
 
-  # Calcula o saldo da conta baseado nas transações
+  # Calculate account balance based on transactions
   def balance
-    # Entradas: receita + destino de transferência
+    # Inflows: income + transfer destination
     credits = transactions_to.confirmed.sum(:amount) || 0.0
-    # Saídas: despesa + origem de transferência
+    # Outflows: expense + transfer source
     debits = transactions_from.confirmed.sum(:amount) || 0.0
     credits - debits
   end
 
-  # Métodos auxiliares para diferentes tipos de transação
+  # Helper methods for different transaction types
   def income_transactions
     transactions_to.income.confirmed
   end

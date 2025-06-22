@@ -22,7 +22,7 @@ class ImportSessionsController < ApplicationController
       @import_session.account_id = params[:import_session][:account_id]
       @import_session.imported_at = nil
       if @import_session.save
-        # Parsing e criação de ImportedTransaction
+        # Parsing and creation of ImportedTransaction
         transactions =
           if @import_session.source_type == 'ofx'
             OfxImportService.new(@import_session.raw_file).parse

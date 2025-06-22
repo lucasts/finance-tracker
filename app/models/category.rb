@@ -1,11 +1,11 @@
 class Category < ApplicationRecord
-  # Associação de usuário
+  # User association
   belongs_to :user
   
   # Enum para tipo de categoria
   enum :category_type, { income: 0, expense: 1 }, default: :expense
   
-  # Associações existentes
+  # Existing associations
   has_many :transactions, dependent: :restrict_with_error
 
   validates :name, presence: true, length: { maximum: 255 }, uniqueness: { scope: :user_id }
@@ -43,7 +43,7 @@ class Category < ApplicationRecord
     monthly_totals.sum / monthly_totals.length
   end
 
-  # Projeção de gastos automática para esta categoria
+  # Automatic expense projection for this category
   def projected_expense(months_ahead = 1, user = nil)
     VariableExpenseAnalyzerService.projected_expense_for_category(self, months_ahead, user || self.user)
   end

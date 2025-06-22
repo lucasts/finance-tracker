@@ -1,13 +1,13 @@
-# InstallmentPlan - Planos de Parcelamento
+# InstallmentPlan - Installment Plans
 # 
-# Representa uma compra ou despesa dividida em parcelas fixas
-# (ex: compra de geladeira em 12x, financiamento de carro em 48x)
+# Represents a purchase or expense divided into fixed installments
+# (e.g., refrigerator purchase in 12x, car financing in 48x)
 # 
-# Status: active (ativo), paused (pausado), closed (encerrado)
-# Frequência: monthly (padrão), weekly, annual etc.
+# Status: active (active), paused (paused), closed (closed)
+# Frequency: monthly (default), weekly, annual etc.
 #
 class InstallmentPlan < ApplicationRecord
-  # Associação de usuário
+  # User association
   belongs_to :user
   belongs_to :category
   
@@ -30,7 +30,7 @@ class InstallmentPlan < ApplicationRecord
   scope :by_frequency, ->(freq) { where(recurrence_frequency: freq) }
   scope :monthly_plans, -> { where(recurrence_frequency: 'monthly') }
   
-  # Planos que ainda têm parcelas pendentes
+  # Plans that still have pending installments
   scope :with_pending_installments, -> do
     joins(:transactions)
       .where(transactions: { status: ['pending', 'confirmed'] })
@@ -38,13 +38,13 @@ class InstallmentPlan < ApplicationRecord
       .distinct
   end
   
-  # Calcula valor por parcela baseado no total
+  # Calculate value per installment based on total
   def installment_amount
     return 0 unless total_amount && installment_count > 0
     (total_amount / installment_count).round(2)
   end
   
-  # Data da próxima parcela baseada na frequência
+  # Date of next installment based on frequency
   def next_installment_date(installment_number)
     return nil if installment_number > installment_count
     
@@ -62,33 +62,33 @@ class InstallmentPlan < ApplicationRecord
     end
   end
   
-  # Valor total pago até agora
+  # Total amount paid so far
   def amount_paid
     transactions.where(status: 'confirmed').sum(:amount)
   end
   
-  # Valor pendente
+  # Pending amount
   def amount_pending
     (total_amount || 0) - amount_paid
   end
   
-  # Porcentagem paga
+  # Percentage paid
   def percentage_paid
     return 0 unless total_amount && total_amount > 0
     ((amount_paid / total_amount) * 100).round(1)
   end
   
-  # Número de parcelas pagas
+  # Number of paid installments
   def installments_paid
     transactions.where(status: 'confirmed').count
   end
   
-  # Número de parcelas pendentes
+  # Number of pending installments
   def installments_pending
     installment_count - installments_paid
   end
   
-  # Status resumido do plano
+  # Summary status of the plan
   def summary_status
     if installments_paid == installment_count
       'completed'
@@ -99,12 +99,12 @@ class InstallmentPlan < ApplicationRecord
     end
   end
   
-  # Data de conclusão prevista
+  # Expected completion date
   def expected_completion_date
     next_installment_date(installment_count)
   end
   
-  # Próxima parcela a vencer
+  # Next installment due
   def next_due_installment
     transactions
       .where(status: 'pending')
@@ -112,17 +112,17 @@ class InstallmentPlan < ApplicationRecord
       .first
   end
   
-  # Verifica se todas as parcelas foram criadas
+  # Check if all installments have been created
   def all_installments_created?
     transactions.count >= installment_count
   end
   
-  # Cria todas as transações do parcelamento
+  # Create all installment transactions
   def generate_installments!(transaction_params)
     return false if all_installments_created?
     
     (1..installment_count).each do |number|
-      # Verifica se a parcela já existe
+      # Check if the installment already exists
       next if transactions.exists?(installment_number: number)
       
       installment_date = next_installment_date(number)

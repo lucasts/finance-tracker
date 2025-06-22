@@ -177,7 +177,7 @@ class TransactionsController < ApplicationController
       :recurrence_frequency, :installment_number,
       :status
     )
-    # Normaliza amount para decimal (ex: '123,77' => 123.77)
+    # Normalize amount to decimal (ex: '123,77' => 123.77)
     if permitted[:amount].is_a?(String) && permitted[:amount].include?(',')
         permitted[:amount] = permitted[:amount].gsub('.', '').gsub(',', '.')
     end
@@ -185,7 +185,7 @@ class TransactionsController < ApplicationController
     permitted
   end
 
-  # Novos métodos para o modelo robusto
+  # New methods for the robust model
   def create_single_transaction
     @transaction = current_user.transactions.build(transaction_params)
     @transaction.recurrence_type = 'single'
@@ -200,7 +200,7 @@ class TransactionsController < ApplicationController
     # Apply intelligent defaults and validations
     apply_intelligent_defaults(@transaction)
     
-    # Auto-associar com fatura se for cartão de crédito
+    # Auto-associate with statement if it's a credit card
     if @transaction.from_account&.account_type&.code == "CREDIT"
       associate_with_credit_statement(@transaction)
     end
@@ -216,7 +216,7 @@ class TransactionsController < ApplicationController
     return create_single_transaction unless params[:create_recurring_commitment].present?
 
     ActiveRecord::Base.transaction do
-      # Criar o compromisso recorrente
+      # Create the recurring commitment
       recurring_commitment = current_user.recurring_commitments.build(
         name: transaction_params[:description],
         category_id: transaction_params[:category_id],
@@ -228,7 +228,7 @@ class TransactionsController < ApplicationController
       )
 
       if recurring_commitment.save
-        # Criar a primeira transação associada ao compromisso
+        # Create the first transaction associated with the commitment
         @transaction = current_user.transactions.build(transaction_params)
         @transaction.recurrence_type = 'recurring'
         @transaction.recurring_commitment = recurring_commitment
@@ -243,7 +243,7 @@ class TransactionsController < ApplicationController
         end
       else
         @transaction = Transaction.new(transaction_params)
-        # Adiciona os erros do compromisso recorrente ao objeto de transação para exibir no form
+        # Add the recurring commitment errors to the transaction object to display in the form
         recurring_commitment.errors.full_messages.each do |msg|
           @transaction.errors.add(:base, "Compromisso recorrente: #{msg}")
         end
@@ -279,7 +279,7 @@ class TransactionsController < ApplicationController
       )
 
       if installment_plan.save
-        # Criar todas as transações do parcelamento
+        # Create all installment transactions
         success = installment_plan.create_installment_transactions!(
           description_base: transaction_params[:description],
           transaction_type: transaction_params[:transaction_type],
@@ -288,7 +288,7 @@ class TransactionsController < ApplicationController
         )
 
         if success
-          # Aplicar lógica especial para cartões de crédito em cada transação
+          # Apply special logic for credit cards on each transaction
           if Account.find(transaction_params[:from_account_id])&.account_type&.code == "CREDIT"
             installment_plan.transactions.each do |transaction|
               associate_with_credit_statement(transaction)

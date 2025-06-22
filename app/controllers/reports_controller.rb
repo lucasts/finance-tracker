@@ -16,7 +16,7 @@ class ReportsController < ApplicationController
     load_monthly_trends
     load_savings_analysis
 
-    # Projeção de compromissos recorrentes para o mês
+    # Projection of recurring commitments for the month
     projection_service = RecurringProjectionService.new(as_of: @start_date)
     @projected_transactions = projection_service.projected_transactions
     @projected_expense_total = @projected_transactions.select { |t| t[:amount].to_f < 0 }.sum { |t| t[:amount].to_f.abs }

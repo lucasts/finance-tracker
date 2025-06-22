@@ -1,5 +1,5 @@
-# Service para edição avançada de compromissos recorrentes
-# Permite modificar compromissos existentes com diferentes estratégias
+# Service for advanced editing of recurring commitments
+# Allows modifying existing commitments with different strategies
 class RecurringCommitmentEditorService
   include ActiveModel::Model
   include ActiveModel::Attributes
@@ -14,10 +14,10 @@ class RecurringCommitmentEditorService
   validates :effective_date, presence: true
   validates :new_attributes, presence: true
 
-  # Estratégias de edição:
-  # - future_only: Aplica mudanças apenas às transações futuras
-  # - all_transactions: Aplica mudanças a todas as transações (passadas e futuras)
-  # - split_commitment: Cria um novo compromisso a partir da data efetiva
+  # Editing strategies:
+  # - future_only: Apply changes only to future transactions
+  # - all_transactions: Apply changes to all transactions (past and future)
+  # - split_commitment: Create a new commitment from the effective date
   
   def call
     return false unless valid?
@@ -42,10 +42,10 @@ class RecurringCommitmentEditorService
   private
 
   def edit_future_transactions_only
-    # Atualiza o compromisso com os novos atributos
+    # Update the commitment with new attributes
     recurring_commitment.update!(filtered_new_attributes)
     
-    # Atualiza transações futuras (incluindo a data efetiva)
+    # Update future transactions (including effective date)
     future_transactions = recurring_commitment.transactions.where('date >= ?', effective_date)
     
     future_transactions.find_each do |transaction|
@@ -56,10 +56,10 @@ class RecurringCommitmentEditorService
   end
 
   def edit_all_transactions
-    # Atualiza o compromisso com os novos atributos
+    # Update the commitment with new attributes
     recurring_commitment.update!(filtered_new_attributes)
     
-    # Atualiza todas as transações do compromisso
+    # Update all commitment transactions
     all_transactions = recurring_commitment.transactions
     
     all_transactions.find_each do |transaction|
@@ -70,18 +70,18 @@ class RecurringCommitmentEditorService
   end
 
   def split_commitment
-    # Desativa o compromisso original na data efetiva
+    # Deactivate the original commitment at the effective date
     original_end_date = effective_date - 1.day
     recurring_commitment.update!(end_date: original_end_date)
     
-    # Cria novo compromisso com os novos atributos
+    # Create new commitment with the new attributes
     new_commitment_attributes = recurring_commitment.attributes.except('id', 'created_at', 'updated_at')
                                                     .merge(filtered_new_attributes)
                                                     .merge(start_date: effective_date, end_date: nil)
     
     new_commitment = RecurringCommitment.create!(new_commitment_attributes)
     
-    # Move transações futuras para o novo compromisso
+    # Move future transactions to the new commitment
     future_transactions = recurring_commitment.transactions.where('date >= ?', effective_date)
     
     future_transactions.find_each do |transaction|
@@ -95,7 +95,7 @@ class RecurringCommitmentEditorService
   end
 
   def update_transaction_attributes(transaction)
-    # Atualiza atributos da transação baseados nos novos atributos do compromisso
+    # Update transaction attributes based on new commitment attributes
     transaction_updates = {}
     
     transaction_updates[:description] = new_attributes[:name] if new_attributes[:name].present?
@@ -108,16 +108,16 @@ class RecurringCommitmentEditorService
   end
 
   def filtered_new_attributes
-    # Remove atributos que não devem ser aplicados diretamente ao modelo
+    # Remove attributes that should not be applied directly to the model
     new_attributes.except('edit_strategy', 'effective_date')
   end
 
-  # Getter para o novo compromisso criado (quando strategy é split_commitment)
+  # Getter for the new commitment created (when strategy is split_commitment)
   def new_commitment
     @new_commitment
   end
 
-  # Métodos de conveniência para usar o service
+  # Convenience methods for using the service
   class << self
     def edit_future_only(commitment, new_attributes, effective_date = Date.current)
       new(

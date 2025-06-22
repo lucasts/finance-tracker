@@ -1,31 +1,31 @@
 class Transaction < ApplicationRecord
-  # Associações de usuário
+  # User associations
   belongs_to :user
   
-  # Associações existentes
+  # Existing associations
   belongs_to :from_account, class_name: "Account"
   belongs_to :to_account, class_name: "Account", optional: true
   belongs_to :category, optional: true
   belongs_to :credit_statement, optional: true
   
-  # Associações para o modelo robusto
+  # Associations for the robust model
   belongs_to :recurring_commitment, optional: true
   belongs_to :installment_plan, optional: true
 
   validates :description, :amount, :event_date, :payment_date, :transaction_type, presence: true
   validates :status, inclusion: { in: %w[pending confirmed cancelled] }
   
-  # Validação de exclusividade mútua - transação só pode pertencer a UM tipo
+  # Mutual exclusivity validation - transaction can only belong to ONE type
   validate :exclusive_association_validation
   
-  # Validação para garantir compatibilidade entre transaction_type e category_type
+  # Validation to ensure compatibility between transaction_type and category_type
   validate :category_type_compatibility
   
-  # Validações específicas para transferências
+  # Specific validations for transfers
   validate :accounts_for_transfer
   validate :category_for_transaction_type
   
-  # Callbacks para automação do status
+  # Callbacks for status automation
   before_validation :set_default_status, if: :new_record?
   before_save :auto_update_status_if_needed
   before_validation :normalize_amount_format
@@ -37,7 +37,7 @@ class Transaction < ApplicationRecord
   scope :confirmed, -> { where status: :confirmed }
   scope :cancelled, -> { where status: :cancelled }
   
-  # Scopes que trabalham com Date usando ranges (mais eficiente)
+  # Scopes that work with Date using ranges (more efficient)
   scope :in_competence_month, ->(date) { 
     month_start = date.beginning_of_month
     month_end = date.end_of_month
@@ -68,32 +68,32 @@ class Transaction < ApplicationRecord
   scope :from_recurring_commitment, ->(commitment) { where(recurring_commitment: commitment) }
   scope :from_installment_plan, ->(plan) { where(installment_plan: plan) }
   
-  # Deriva competência (YYYY-MM) a partir do event_date
+  # Derives competence (YYYY-MM) from event_date
   def competence_month
     event_date.strftime('%Y-%m') if event_date.present?
   end
 
-  # # Deriva o mês do pagamento (padrão: payment_date, fallback para event_date)
+  # Derives payment month (default: payment_date, fallback to event_date)
   def payment_month
     (payment_date || event_date)&.strftime('%Y-%m')
   end
   
-  # Método para determinar se a transação é futura
+  # Method to determine if the transaction is future
   def future_transaction?
     payment_date && payment_date > Date.current
   end
   
-  # Método para verificar se deveria estar pendente
+  # Method to check if it should be pending
   def should_be_pending?
     future_transaction? && !cancelled?
   end
   
-  # Método para verificar se deveria estar confirmada
+  # Method to check if it should be confirmed
   def should_be_confirmed?
     !future_transaction? && !cancelled?
   end
   
-  # Métodos auxiliares para classificação de transação
+  # Helper methods for transaction classification
   def single_transaction?
     recurrence_type == 'single'
   end
@@ -106,7 +106,7 @@ class Transaction < ApplicationRecord
     recurrence_type == 'installment' && installment_plan.present?
   end
   
-  # Status de parcelamento (se aplicável)
+  # Installment status (if applicable)
   def installment_status
     return nil unless installment_transaction?
     return nil unless installment_plan.present?
@@ -114,7 +114,7 @@ class Transaction < ApplicationRecord
     "#{installment_number}/#{installment_plan.installment_count}"
   end
   
-  # Nome do compromisso ou plano associado
+  # Name of associated commitment or plan
   def recurring_name
     return installment_plan.name if installment_transaction?
     return recurring_commitment.name if recurring_transaction?
@@ -130,10 +130,10 @@ class Transaction < ApplicationRecord
   end
   
   def auto_update_status_if_needed
-    # Só atualiza automaticamente se não foi explicitamente cancelada
+    # Only updates automatically if not explicitly cancelled
     return if cancelled?
     
-    # Se as datas mudaram, recalcula o status
+    # If dates changed, recalculate status
     if payment_date_changed? || event_date_changed?
       new_status = determine_automatic_status
       self.status = new_status unless status == 'cancelled'
@@ -145,24 +145,24 @@ class Transaction < ApplicationRecord
     check_date = payment_date || event_date
     
     if check_date && check_date > current_date
-      'pending'    # Transação futura
+      'pending'    # Future transaction
     else
-      # Para parcelas de planos de parcelamento, usar lógica diferente
+      # For installment plan transactions, use different logic
       if installment_plan.present? && installment_number.present?
-        # Primeira parcela pode ser confirmada se for no passado/presente
-        # Demais parcelas sempre pending até serem pagas manualmente
+        # First installment can be confirmed if in the past/present
+        # Other installments always pending until manually paid
         if installment_number == 1 && check_date <= current_date
           'confirmed'
         else
           'pending'
         end
       else
-        'confirmed'  # Transação atual ou passada (exceto parcelamentos)
+        'confirmed'  # Current or past transaction (except installments)
       end
     end
   end
   
-  # Validação de exclusividade mútua: uma transação só pode pertencer a um tipo
+  # Mutual exclusivity validation: a transaction can only belong to one type
   def exclusive_association_validation
     associations = [recurring_commitment_id, installment_plan_id].compact
     
@@ -170,7 +170,7 @@ class Transaction < ApplicationRecord
       errors.add(:base, "Transaction can only belong to one type: recurring commitment or installment plan")
     end
     
-    # Validar consistência entre recurrence_type e associações
+    # Validate consistency between recurrence_type and associations
     case recurrence_type
     when 'recurring'
       unless recurring_commitment_id.present?
@@ -191,7 +191,7 @@ class Transaction < ApplicationRecord
   
   def category_type_compatibility
     return unless category && transaction_type
-    return if transfer? # Transferências não têm categoria
+    return if transfer? # Transfers don't have category
     
     expected_category_type = transaction_type == 'income' ? 'income' : 'expense'
     

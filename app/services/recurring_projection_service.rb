@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Service para gerar projeções de lançamentos futuros de compromissos recorrentes
+# Service to generate projections of future transactions from recurring commitments
 class RecurringProjectionService
   DEFAULT_MONTHS_AHEAD = 3
 
@@ -9,7 +9,7 @@ class RecurringProjectionService
     @as_of = as_of
   end
 
-  # Retorna um array de hashes representando lançamentos previstos (não persistidos)
+  # Returns an array of hashes representing projected transactions (not persisted)
   def projected_transactions
     RecurringCommitment.where(status: :active).flat_map do |commitment|
       project_commitment(commitment)
@@ -19,13 +19,13 @@ class RecurringProjectionService
   private
 
   def project_commitment(commitment)
-    # Busca o último lançamento real deste compromisso
+    # Find the last real transaction for this commitment
     last_real = commitment.transactions.order(:event_date).last
     start_date = last_real&.event_date || commitment.start_date
     end_date = [@as_of.advance(months: @months_ahead).end_of_month, commitment.end_date].compact.min
     return [] if start_date > end_date
 
-    # Gera datas futuras para projeção
+    # Generate future dates for projection
     dates = []
     current = start_date.advance(months: 1)
     while current <= end_date

@@ -1,12 +1,12 @@
-# Job para gerar transações de parcelas automaticamente
-# Executado periodicamente para criar novas parcelas baseadas em InstallmentPlans
+# Job to generate installment transactions automatically
+# Executed periodically to create new installments based on InstallmentPlans
 class GenerateInstallmentTransactionsJob < ApplicationJob
   queue_as :default
 
   def perform(date = Date.current)
     Rails.logger.info "Starting GenerateInstallmentTransactionsJob for date: #{date}"
     
-    # Busca planos de parcelamento ativos que têm parcelas pendentes
+    # Find active installment plans with pending installments
     installment_plans = InstallmentPlan.joins("LEFT JOIN transactions ON transactions.installment_plan_id = installment_plans.id")
                                       .where(status: :active)
                                       .group('installment_plans.id')

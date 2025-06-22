@@ -2,6 +2,6 @@ class ReconciliationEntriesController < ApplicationController
   before_action :authenticate_user!
 
   def create
-    # Cria ou atualiza decisão de conciliação
+    # Create or update reconciliation decision
   end
 end
