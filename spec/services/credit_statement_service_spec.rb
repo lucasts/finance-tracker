@@ -58,7 +58,9 @@ RSpec.describe CreditStatementService, type: :service do
     it 'sets proper default values for new statements' do
       result = CreditStatementService.find_or_create_for_transaction(transaction)
       
-      expect(result.amount_due).to eq(0.0)
+      # When a statement is created for an existing transaction, 
+      # it should include that transaction's amount in amount_due
+      expect(result.amount_due).to eq(transaction.amount)
       expect(result.amount_paid).to eq(0.0)
       expect(result.status).to eq('open')
       expect(result.closed_on).to eq(Date.new(2024, 6, 15))

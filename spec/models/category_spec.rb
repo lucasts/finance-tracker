@@ -146,13 +146,11 @@ RSpec.describe Category, type: :model do
 
     describe '#expense_analysis' do
       it 'calls analysis service with correct parameters' do
-        analysis_service = double('VariableExpenseAnalysisService')
-        allow(VariableExpenseAnalysisService).to receive(:new).and_return(analysis_service)
-        allow(analysis_service).to receive(:call).and_return({ average: 150, variance: 25 })
+        allow(VariableExpenseAnalysisUnifiedService).to receive(:analyze_category).and_return({ average: 150, variance: 25 })
         
         result = category.expense_analysis(timeframe_months: 6, analysis_date: Date.current)
         
-        expect(VariableExpenseAnalysisService).to have_received(:new).with(
+        expect(VariableExpenseAnalysisUnifiedService).to have_received(:analyze_category).with(
           category,
           timeframe_months: 6,
           analysis_date: Date.current
@@ -163,23 +161,23 @@ RSpec.describe Category, type: :model do
 
     describe '#projected_expense' do
       it 'calls projection service correctly' do
-        allow(VariableExpenseAnalyzerService).to receive(:projected_expense_for_category)
+        allow(VariableExpenseAnalysisUnifiedService).to receive(:projected_expense_for_category)
           .and_return(250.0)
         
         result = category.projected_expense(2, user)
         
-        expect(VariableExpenseAnalyzerService).to have_received(:projected_expense_for_category)
+        expect(VariableExpenseAnalysisUnifiedService).to have_received(:projected_expense_for_category)
           .with(category, 2, user)
         expect(result).to eq(250.0)
       end
       
       it 'uses category user when not specified' do
-        allow(VariableExpenseAnalyzerService).to receive(:projected_expense_for_category)
+        allow(VariableExpenseAnalysisUnifiedService).to receive(:projected_expense_for_category)
           .and_return(250.0)
         
         category.projected_expense(1)
         
-        expect(VariableExpenseAnalyzerService).to have_received(:projected_expense_for_category)
+        expect(VariableExpenseAnalysisUnifiedService).to have_received(:projected_expense_for_category)
           .with(category, 1, category.user)
       end
     end

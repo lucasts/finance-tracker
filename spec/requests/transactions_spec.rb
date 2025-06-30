@@ -43,7 +43,7 @@ RSpec.describe 'Transactions', type: :request do
           category_id: category.id
         },
         create_installment_plan: 'true',
-        installments_count: 3
+        installment_count: 3
       }
 
       post transactions_path, params: params

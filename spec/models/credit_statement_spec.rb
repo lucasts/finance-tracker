@@ -80,15 +80,17 @@ RSpec.describe CreditStatement, type: :model do
     describe 'auto_update_status' do
       # Disable the update_amount_due callback for these tests to control exact values
       before do
-        allow_any_instance_of(CreditStatement).to receive(:update_amount_due)
+        allow_any_instance_of(CreditStatementCallbackService).to receive(:update_amount_due)
       end
       
-      let(:statement) { create(:credit_statement, 
-                              amount_due: 1000,
-                              amount_paid: 0,
-                              due_on: Date.current + 10.days,
-                              status: :open,
-                              account: credit_account) }
+      let(:statement) { 
+        create(:credit_statement, 
+               amount_due: 1000,
+               amount_paid: 0,
+               due_on: Date.current + 10.days,
+               status: :open,
+               account: credit_account)
+      }
 
       it 'updates status to paid when amount paid >= amount due' do
         statement.update(amount_paid: 1000)
@@ -128,9 +130,9 @@ RSpec.describe CreditStatement, type: :model do
                               account: credit_account) }
 
       it 'updates amount_due based on transaction sum' do
-        create(:transaction, amount: 200, credit_statement: statement, user: user)
-        create(:transaction, amount: 300, credit_statement: statement, user: user)
-        create(:transaction, amount: 150, credit_statement: statement, user: user)
+        create(:transaction, amount: 200, credit_statement: statement, user: user, status: 'confirmed', from_account: statement.account)
+        create(:transaction, amount: 300, credit_statement: statement, user: user, status: 'confirmed', from_account: statement.account)
+        create(:transaction, amount: 150, credit_statement: statement, user: user, status: 'confirmed', from_account: statement.account)
         
         statement.save
         expect(statement.reload.amount_due).to eq(650)
@@ -206,7 +208,7 @@ RSpec.describe CreditStatement, type: :model do
   describe 'edge cases' do
     it 'handles decimal values' do
       # Disable the update_amount_due callback for this test
-      allow_any_instance_of(CreditStatement).to receive(:update_amount_due)
+      allow_any_instance_of(CreditStatementCallbackService).to receive(:update_amount_due)
       
       statement = create(:credit_statement,
                         amount_due: 999.99,
@@ -264,16 +266,19 @@ RSpec.describe CreditStatement, type: :model do
                             account: credit_account) }
 
     it 'updates amount_due when transactions are added' do
-      create(:transaction, amount: 100, credit_statement: statement, user: user)
+      create(:transaction, amount: 100, credit_statement: statement, user: user, status: 'confirmed', from_account: statement.account)
       statement.save
       expect(statement.reload.amount_due).to eq(100)
       
-      create(:transaction, amount: 50, credit_statement: statement, user: user)
+      create(:transaction, amount: 50, credit_statement: statement, user: user, status: 'confirmed', from_account: statement.account)
       statement.save
       expect(statement.reload.amount_due).to eq(150)
     end
     
     it 'updates status automatically based on payments' do
+      # Disable update_amount_due callback for this test
+      allow_any_instance_of(CreditStatementCallbackService).to receive(:update_amount_due)
+      
       statement.update(amount_due: 200, amount_paid: 0)
       expect(statement.status).to eq('open')
       

@@ -322,13 +322,11 @@ RSpec.describe RecurringCommitment, type: :model do
 
     describe '#expense_analysis' do
       it 'calls analysis service when category is present' do
-        analysis_service = double('VariableExpenseAnalysisService')
-        allow(VariableExpenseAnalysisService).to receive(:new).and_return(analysis_service)
-        allow(analysis_service).to receive(:call).and_return({ average: 450, variance: 50 })
+        allow(VariableExpenseAnalysisUnifiedService).to receive(:analyze_category).and_return({ average: 450, variance: 50 })
         
         result = commitment.expense_analysis(timeframe_months: 6)
         
-        expect(VariableExpenseAnalysisService).to have_received(:new).with(
+        expect(VariableExpenseAnalysisUnifiedService).to have_received(:analyze_category).with(
           commitment.category,
           timeframe_months: 6
         )
