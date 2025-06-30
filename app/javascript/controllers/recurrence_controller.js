@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { FormattingUtils } from "../utilities/formatting_utils"
 
 // Connects to data-controller="recurrence"
 export default class extends Controller {
@@ -108,19 +109,12 @@ export default class extends Controller {
     lastDate.setMonth(lastDate.getMonth() + installmentsCount - 1)
     
     // Update preview
-    this.installmentValueTarget.textContent = this.formatCurrency(installmentValue)
+    this.installmentValueTarget.textContent = FormattingUtils.formatCurrency(installmentValue)
     this.firstDateTarget.textContent = this.formatDate(firstDate)
     this.lastDateTarget.textContent = this.formatDate(lastDate)
     
     // Show preview
     this.installmentPreviewTarget?.classList.remove('hidden')
-  }
-
-  formatCurrency(amount) {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(amount)
   }
 
   formatDate(date) {
