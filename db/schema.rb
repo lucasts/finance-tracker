@@ -153,7 +153,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_130000) do
     t.string "group_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "installment_count", default: 1
     t.date "starts_on"
     t.decimal "total_amount", precision: 15, scale: 2
     t.integer "installments_count"

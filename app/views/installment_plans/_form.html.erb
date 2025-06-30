@@ -213,8 +213,8 @@
       if (totalAmount > 0 && totalInstallments > 0 && installmentAmount > 0) {
         this.summaryTarget.style.display = 'block';
         this.summaryInstallmentsTarget.textContent = totalInstallments;
-        this.summaryAmountTarget.textContent = `R$ ${installmentAmount.toFixed(2).replace('.', ',')}`;
-        this.summaryTotalTarget.textContent = `R$ ${totalAmount.toFixed(2).replace('.', ',')}`;
+        this.summaryAmountTarget.textContent = CurrencyHelper.format(installmentAmount);
+        this.summaryTotalTarget.textContent = CurrencyHelper.format(totalAmount);
         
         const frequencyNames = {
           'monthly': 'Mensalmente',
@@ -254,7 +254,7 @@
         
         html += `<div class="flex justify-between">
           <span>Parcela ${i + 1}:</span>
-          <span>${date.toLocaleDateString('pt-BR')} - R$ ${installmentAmount.toFixed(2).replace('.', ',')}</span>
+          <span>${date.toLocaleDateString('pt-BR')} - ${CurrencyHelper.format(installmentAmount)}</span>
         </div>`;
       }
       

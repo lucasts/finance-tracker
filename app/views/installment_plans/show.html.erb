@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
           html += `<tr class="${statusClass}">`;
           html += `<td><div class="badge badge-outline">${installment.installment_number}/${data.plan.installment_count}</div></td>`;
           html += `<td>${new Date(installment.due_date).toLocaleDateString('pt-BR')}</td>`;
-          html += `<td class="font-semibold">R$ ${installment.amount.toFixed(2).replace('.', ',')}</td>`;
+          html += `<td class="font-semibold">${CurrencyHelper.format(installment.amount)}</td>`;
           html += `<td>${statusBadge}</td>`;
           html += `<td>${installment.paid_date ? new Date(installment.paid_date).toLocaleDateString('pt-BR') : '-'}</td>`;
           html += '</tr>';
