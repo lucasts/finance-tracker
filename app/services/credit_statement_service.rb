@@ -14,9 +14,19 @@ class CreditStatementService
     def find_or_create_statement(account, period)
       return nil unless account&.account_type&.code == "CREDIT_CARD"
       
-      CreditStatement.find_or_create_by(account: account, month: period) do |statement|
-        initialize_statement(statement, account, period)
-      end
+      existing = CreditStatement.find_by(account: account, month: period)
+      return existing if existing
+      
+      # Create new statement with defaults, skipping amount_due calculation initially
+      statement = CreditStatement.new(account: account, month: period)
+      initialize_statement(statement, account, period)
+      statement.skip_amount_update = true
+      statement.save!
+      
+      # Now enable updates and trigger a calculation to get the correct amount_due
+      statement.skip_amount_update = false
+      statement.save!
+      statement
     end
 
     # Creates statements for multiple future periods (useful for installments)
@@ -47,9 +57,9 @@ class CreditStatementService
       total = statement.transactions.sum(:amount)
       if total != statement.amount_due
         statement.update_column(:amount_due, total)
-        true
+        total  # Return the new amount
       else
-        false
+        statement.amount_due  # Return current amount
       end
     end
 
