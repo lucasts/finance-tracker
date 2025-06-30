@@ -7,6 +7,8 @@
 # Frequency: monthly (default), weekly, annual etc.
 #
 class InstallmentPlan < ApplicationRecord
+  include PaidAmountCalculations
+  
   # User association
   belongs_to :user
   belongs_to :category
@@ -62,23 +64,7 @@ class InstallmentPlan < ApplicationRecord
     end
   end
   
-  # Total amount paid so far
-  def amount_paid
-    transactions.where(status: 'confirmed').sum(:amount)
-  end
-  
-  # Pending amount
-  def amount_pending
-    (total_amount || 0) - amount_paid
-  end
-  
-  # Percentage paid
-  def percentage_paid
-    return 0 unless total_amount && total_amount > 0
-    ((amount_paid / total_amount) * 100).round(1)
-  end
-  
-  # Number of paid installments
+  # Number of paid installments (specific to installment plans)
   def installments_paid
     transactions.where(status: 'confirmed').count
   end

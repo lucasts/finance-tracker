@@ -1,4 +1,8 @@
 class RecurringCommitment < ApplicationRecord
+  include FinancialConstants
+  include AmountNormalization
+  include PaidAmountCalculations
+  
   # User association
   belongs_to :user
   
@@ -32,20 +36,16 @@ class RecurringCommitment < ApplicationRecord
   end
 
   # Next due date based on frequency
+  # Next due date based on frequency - unified and consistent
   def next_occurrence_date(from_date = Date.current)
     return nil if closed? || (end_date && from_date > end_date)
 
-    case recurrence_frequency
-    when 'weekly'
-      from_date.next_week
-    when 'monthly'
-      from_date.next_month
-    when 'annual'
-      from_date.next_year
-    else
-      from_date.next_month # default monthly
-    end
+    calculate_next_date_from(from_date)
   end
+  
+  # Alias for backward compatibility and naming consistency
+  alias_method :next_due_date, :next_occurrence_date
+  alias_method :next_occurrence_after, :next_occurrence_date
 
   # Check if it's active in the period
   def active_on?(date = Date.current)
@@ -64,10 +64,8 @@ class RecurringCommitment < ApplicationRecord
     confirmed_transactions.average(:amount)&.round(2) || 0
   end
 
-  # Total spent on this commitment
-  def total_spent
-    transactions.where(status: 'confirmed').sum(:amount)
-  end
+  # Alias for backward compatibility
+  alias_method :total_spent, :amount_paid
 
   # Last recorded transaction
   def last_transaction
@@ -94,36 +92,20 @@ class RecurringCommitment < ApplicationRecord
     'active'
   end
 
-  # Calculate next occurrence after a specific date
-  def next_occurrence_after(date)
-    case frequency
-    when 'weekly'
-      date + 1.week
-    when 'monthly'
-      date + 1.month
-    when 'quarterly'
-      date + 3.months
-    when 'yearly'
-      date + 1.year
-    else
-      date + 1.month # default to monthly
-    end
-  end
-
   # Get analysis for this commitment's spending pattern
   def expense_analysis(timeframe_months: 12)
     return nil unless category.present?
 
-    VariableExpenseAnalysisService.new(
+    VariableExpenseAnalysisUnifiedService.analyze_category(
       category,
       timeframe_months: timeframe_months
-    ).call
+    )
   end
 
   # Check if this commitment generates variable expenses that should be analyzed
   def generates_variable_expenses?
-    variable_categories = ['supermercado', 'farmácia', 'gasolina', 'consultas', 'mercado', 'combustível']
-    variable_categories.any? { |keyword| name.downcase.include?(keyword) || category.name.downcase.include?(keyword) }
+    FinancialConstants.variable_expense?(name) || 
+      FinancialConstants.variable_expense?(category.name)
   end
 
   # Indicates if the commitment has a fixed value (for compatibility with jobs/specs)
@@ -141,6 +123,26 @@ class RecurringCommitment < ApplicationRecord
   # - The system generates transactions periodically according to frequency and status
 
   private
+
+  # Unified date calculation method for consistency
+  def calculate_next_date_from(from_date)
+    # Use frequency attribute if available, fallback to recurrence_frequency
+    freq = respond_to?(:frequency) ? frequency : recurrence_frequency
+    
+    case freq
+    when 'weekly'
+      # For weekly frequency, go to the next week (Monday to Monday)
+      from_date.next_week
+    when 'monthly'
+      from_date + 1.month
+    when 'quarterly'
+      from_date + 3.months
+    when 'yearly', 'annual'
+      from_date + 1.year
+    else
+      from_date + 1.month # default to monthly
+    end
+  end
 
   def accounts_must_be_different
     if from_account_id == to_account_id

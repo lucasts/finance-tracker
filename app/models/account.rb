@@ -1,4 +1,7 @@
 class Account < ApplicationRecord
+  include BalanceCalculations
+  include MoneyParsingConcern
+  
   # User association
   belongs_to :user
   
@@ -11,14 +14,7 @@ class Account < ApplicationRecord
 
   validates :name, presence: true
 
-  # Calculate account balance based on transactions
-  def balance
-    # Inflows: income + transfer destination
-    credits = transactions_to.confirmed.sum(:amount) || 0.0
-    # Outflows: expense + transfer source
-    debits = transactions_from.confirmed.sum(:amount) || 0.0
-    credits - debits
-  end
+  alias_method :balance, :calculate_balance_from_transactions
 
   # Helper methods for different transaction types
   def income_transactions
@@ -37,17 +33,9 @@ class Account < ApplicationRecord
     transactions_from.transfer.confirmed
   end
 
-  def total_income
-    income_transactions.sum(:amount) || 0.0
-  end
-
-  def total_expenses
-    expense_transactions.sum(:amount) || 0.0
-  end
-
-  def net_transfers
-    (transfers_in.sum(:amount) || 0.0) - (transfers_out.sum(:amount) || 0.0)
-  end
+  alias_method :total_income, :total_income_amount
+  alias_method :total_expenses, :total_expense_amount  
+  alias_method :net_transfers, :net_transfer_amount
 
   # Credit card specific methods
   def credit_card?

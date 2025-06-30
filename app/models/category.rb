@@ -14,11 +14,11 @@ class Category < ApplicationRecord
 
   # Get variable expense analysis for this category
   def expense_analysis(timeframe_months: 12, analysis_date: Date.current)
-    VariableExpenseAnalysisService.new(
+    VariableExpenseAnalysisUnifiedService.analyze_category(
       self, 
       timeframe_months: timeframe_months, 
       analysis_date: analysis_date
-    ).call
+    )
   end
 
   # Check if this category typically has variable expenses
@@ -45,6 +45,6 @@ class Category < ApplicationRecord
 
   # Automatic expense projection for this category
   def projected_expense(months_ahead = 1, user = nil)
-    VariableExpenseAnalyzerService.projected_expense_for_category(self, months_ahead, user || self.user)
+    VariableExpenseAnalysisUnifiedService.projected_expense_for_category(self, months_ahead, user || self.user)
   end
 end

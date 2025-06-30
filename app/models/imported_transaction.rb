@@ -1,4 +1,6 @@
 class ImportedTransaction < ApplicationRecord
+  include AmountNormalization
+  
   belongs_to :import_session
   belongs_to :installment_plan, optional: true
   belongs_to :recurring_commitment, optional: true

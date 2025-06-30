@@ -1,4 +1,7 @@
 class Transaction < ApplicationRecord
+  include AmountNormalization
+  include MoneyParsingConcern
+  
   # User associations
   belongs_to :user
   
@@ -25,19 +28,11 @@ class Transaction < ApplicationRecord
   validate :accounts_for_transfer
   validate :category_for_transaction_type
   
-  # Callbacks for status automation
+  # Callbacks for status automation - refactored to use service
   before_validation :set_default_status, if: :new_record?
-  before_save :auto_update_status_if_needed
-  before_validation :normalize_amount_format
-  after_create :ensure_credit_statement
-  after_save :update_credit_statement_amount
-  
-  scope :income, -> { where transaction_type: :income }
-  scope :expense, -> { where transaction_type: :expense }
-  scope :transfer, -> { where transaction_type: :transfer }
-  scope :pending, -> { where status: :pending }
-  scope :confirmed, -> { where status: :confirmed }
-  scope :cancelled, -> { where status: :cancelled }
+  before_save :execute_before_save_operations
+  after_create :execute_after_create_operations
+  after_save :execute_after_save_operations
   
   # Scopes that work with Date using ranges (more efficient)
   scope :in_competence_month, ->(date) { 
@@ -123,8 +118,6 @@ class Transaction < ApplicationRecord
     nil
   end
   
-  private
-  
   def set_default_status
     return if status.present?
     
@@ -189,7 +182,17 @@ class Transaction < ApplicationRecord
     end
   end
   
-  private
+  # Helper method to determine if status should be auto-updated
+  def should_auto_update_status?
+    # Never update cancelled transactions
+    return false if status == 'cancelled'
+    
+    # Don't override explicit manual status changes (when status is changed but dates aren't)
+    return false if status_changed? && !payment_date_changed? && !event_date_changed?
+    
+    # Allow updates when dates change, regardless of current status
+    true
+  end
   
   def category_type_compatibility
     return unless category && transaction_type
@@ -224,13 +227,6 @@ class Transaction < ApplicationRecord
     end
   end
 
-  def normalize_amount_format
-    if self.amount.is_a?(String)
-      self.amount = self.amount.gsub('.', '').gsub(',', '.')
-    end
-    self.amount = self.amount.to_d if self.amount.present?
-  end
-
   # Ensures credit statement exists for credit card transactions
   def ensure_credit_statement
     return unless credit_card_transaction?
@@ -245,7 +241,22 @@ class Transaction < ApplicationRecord
     from_account&.account_type&.code == "CREDIT_CARD"
   end
 
-  # Updates the credit statement amount when transaction is saved
+  private
+
+  # Refactored callback methods using service pattern
+  def execute_before_save_operations
+    TransactionCallbackService.new(self).execute_before_save
+  end
+
+  def execute_after_create_operations
+    TransactionCallbackService.new(self).execute_after_create
+  end
+
+  def execute_after_save_operations
+    TransactionCallbackService.new(self).execute_after_save
+  end
+
+  # Legacy method kept for backward compatibility - delegated to service
   def update_credit_statement_amount
     return unless credit_statement.present?
     

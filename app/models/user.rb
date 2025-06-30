@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  include FinancialConstants
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -20,11 +21,24 @@ class User < ApplicationRecord
 
   # Business methods for financial calculations
   def total_balance
+    # OPTIMIZED: Single query instead of N+1
     # In double-entry bookkeeping, only sum asset accounts (user's actual accounts)
     # External accounts (revenue/expense) are used for double-entry but don't represent user's wealth
-    accounts.joins(:account_type)
-            .where(account_types: { role: 'asset' })
-            .sum { |account| account.balance || 0.0 }
+    
+    # Get all asset account IDs
+    asset_account_ids = accounts.joins(:account_type)
+                              .where(account_types: { role: 'asset' })
+                              .pluck(:id)
+    
+    return DEFAULT_ZERO_BALANCE if asset_account_ids.empty?
+    
+    # Calculate balance with 2 queries instead of N+1
+    credits = Transaction.where(to_account_id: asset_account_ids, status: 'confirmed')
+                        .sum(:amount) || DEFAULT_ZERO_BALANCE
+    debits = Transaction.where(from_account_id: asset_account_ids, status: 'confirmed')
+                       .sum(:amount) || DEFAULT_ZERO_BALANCE
+    
+    credits - debits
   end
 
   def monthly_income(date = Date.current)
