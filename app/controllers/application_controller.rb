@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  
   # Mandatory authentication in all controllers
   before_action :authenticate_user!
 

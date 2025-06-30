@@ -1,4 +1,8 @@
+require 'ostruct'
+
 class OverviewController < ApplicationController
+  include FinancialConstants
+  
   def index
     @month = params[:month] || Date.today.strftime('%Y-%m')
     month_date = Date.strptime(@month, "%Y-%m")
@@ -120,7 +124,6 @@ def chart_options
       intersect: false,
       y: {
         formatter: -> (value, opts) do
-          series_name = opts[:series][opts[:seriesIndex]][:name]
           "R$ #{value.to_s.gsub(/\B(?=(\d{3})+(?!\d))/, '.')}"
         end
       }
@@ -194,15 +197,15 @@ def monthly_statistics(month_date)
   }
 end
 
-def calculate_savings_rate(income, expense)
-  return 0 if income == 0
-  ((income - expense) / income * 100).round(1)
-end
+  def calculate_savings_rate(income, expense)
+    return FinancialConstants::DEFAULT_PERCENTAGE if income == 0
+    FinancialConstants.calculate_percentage(income - expense, income)
+  end
 
-def calculate_growth(current, previous)
-  return 0 if previous == 0
-  ((current - previous) / previous * 100).round(1)
-end
+  def calculate_growth(current, previous)
+    return 0 if previous == 0
+    FinancialConstants.calculate_percentage(current - previous, previous)
+  end
 
 def largest_expense_this_month(month_date)
   Transaction.expense.confirmed
@@ -224,7 +227,6 @@ def generate_chart_data
   
   (0..11).each do |i|
     month_date = start_date + i.months
-    month_str = month_date.strftime('%Y-%m')
     month_label = I18n.l(month_date, format: '%b/%y')
     
     # Calculate income and expenses for the month (filtered by user)
@@ -257,11 +259,12 @@ def category_ranking(month_date = nil)
     .expense
     .in_competence_month(month_date)
     .confirmed
-    .group(:category_id)
+    .joins(:category)
+    .group('categories.id, categories.name')
     .sum(:amount)
-    .sort_by { |_cat_id, amount| -amount }
+    .sort_by { |_key, amount| -amount }
     .first(5)
-    .map { |cat_id, amount| [Category.find(cat_id), amount] }
+    .map { |(id, name), amount| [OpenStruct.new(id: id, name: name), amount] }
 end
 
 # ...existing code...
@@ -293,20 +296,17 @@ end
 
 # ...existing code...
 
-def balance_alert(projected_balance)
-  if projected_balance < 0
-    "Atenção: balance projetado negativo após todos os compromissos!"
-  elsif projected_balance < 1000 # customizable alert threshold
-    "Alerta: balance projetado baixo!"
-  else
-    nil
+  def balance_alert(projected_balance)
+    if projected_balance < 0
+      "Atenção: balance projetado negativo após todos os compromissos!"
+    elsif projected_balance < FinancialConstants::LOW_BALANCE_THRESHOLD
+      "Alerta: balance projetado baixo!"
+    else
+      nil
+    end
   end
-end
 
 def generate_category_projections(month_date)
-  analyzer = VariableExpenseAnalyzerService.new
-  analyzer.user = current_user
-  
   current_user_scope(Category).map do |category|
     current_spent = current_user_scope(Transaction)
                       .in_competence_month(month_date)
@@ -314,14 +314,14 @@ def generate_category_projections(month_date)
                       .where(category: category)
                       .sum(:amount)
     
-    projected = analyzer.projected_expense_for_category(category.id, 1)
+    projected = VariableExpenseAnalysisUnifiedService.projected_expense_for_category(category, 1, current_user)
     
     {
       category: category,
       current_spent: current_spent,
       projected: projected,
       remaining: projected - current_spent,
-      percentage_used: projected > 0 ? (current_spent / projected * 100).round(1) : 0
+      percentage_used: projected > 0 ? FinancialConstants.calculate_percentage(current_spent, projected) : FinancialConstants::DEFAULT_PERCENTAGE
     }
   end.select { |projection| projection[:projected] > 0 }
      .sort_by { |projection| -projection[:projected] }

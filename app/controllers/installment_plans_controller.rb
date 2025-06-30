@@ -1,4 +1,6 @@
 class InstallmentPlansController < ApplicationController
+  include FinancialConstants
+  
   before_action :set_installment_plan, only: [:show, :edit, :update, :destroy, :toggle_active]
   
   def index
@@ -20,7 +22,7 @@ class InstallmentPlansController < ApplicationController
         total_paid: total_paid,
         remaining_amount: remaining_amount,
         next_due_date: next_due_date,
-        progress_percentage: (paid_installments.to_f / plan.installment_count * 100).round(1)
+        progress_percentage: FinancialConstants.calculate_percentage(paid_installments.to_f, plan.installment_count)
       }
     end
   end
@@ -129,10 +131,8 @@ class InstallmentPlansController < ApplicationController
       :starts_on, :recurrence_frequency, :transaction_type,
       :account_id, :category_id, :notes, :active
     )
-    if permitted[:total_amount].is_a?(String)
-      permitted[:total_amount] = permitted[:total_amount].gsub('.', '').gsub(',', '.')
-    end
-    permitted[:total_amount] = permitted[:total_amount].to_d if permitted[:total_amount].present?
+    
+    permitted[:total_amount] = InstallmentPlan.normalize_amount_param(permitted[:total_amount]) if permitted[:total_amount].present?
     permitted
   end
   
@@ -165,7 +165,7 @@ class InstallmentPlansController < ApplicationController
     {
       paid_installments: paid_installments,
       installment_count: plan.installment_count,
-      progress_percentage: (paid_installments.to_f / plan.installment_count * 100).round(1),
+      progress_percentage: FinancialConstants.calculate_percentage(paid_installments.to_f, plan.installment_count),
       total_paid: total_paid,
       total_amount: plan.total_amount,
       remaining_installments: plan.installment_count - paid_installments,

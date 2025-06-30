@@ -110,7 +110,7 @@ class RecurringCommitmentsController < ApplicationController
     effective_date = params[:recurring_commitment][:effective_date]&.to_date || Date.current
     new_attributes = recurring_commitment_params.except(:edit_strategy, :effective_date, :advanced_edit)
     
-    editor_service = RecurringCommitmentEditorService.new(
+    editor_service = RecurringCommitmentEditorUnifiedService.new(
       recurring_commitment: @recurring_commitment,
       edit_strategy: edit_strategy,
       effective_date: effective_date,
@@ -158,10 +158,8 @@ class RecurringCommitmentsController < ApplicationController
       :account_id, :category_id, :notes, :active, :edit_strategy, :effective_date, :advanced_edit,
       :from_account_id, :to_account_id
     )
-    if permitted[:amount].is_a?(String)
-      permitted[:amount] = permitted[:amount].gsub('.', '').gsub(',', '.')
-    end
-    permitted[:amount] = permitted[:amount].to_d if permitted[:amount].present?
+    
+    permitted[:amount] = RecurringCommitment.normalize_amount_param(permitted[:amount]) if permitted[:amount].present?
     permitted
   end
   

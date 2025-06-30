@@ -161,11 +161,8 @@ class TransactionsController < ApplicationController
       :recurrence_frequency, :installment_number,
       :status
     )
-    # Normalize amount to decimal (ex: '123,77' => 123.77)
-    if permitted[:amount].is_a?(String) && permitted[:amount].include?(',')
-        permitted[:amount] = permitted[:amount].gsub('.', '').gsub(',', '.')
-    end
-    permitted[:amount] = permitted[:amount].to_d if permitted[:amount].present?
+    
+    permitted[:amount] = Transaction.normalize_amount_param(permitted[:amount]) if permitted[:amount].present?
     permitted
   end
 
@@ -243,9 +240,9 @@ class TransactionsController < ApplicationController
   def create_installment_transaction
     return create_single_transaction unless params[:create_installment_plan].present?
 
-    installments_count = params[:installments_count].to_i
+    installment_count = params[:installment_count].to_i
     
-    if installments_count < 2 || installments_count > 60
+    if installment_count < 2 || installment_count > 60
       @transaction = Transaction.new(transaction_params)
       @transaction.errors.add(:base, "Número de parcelas deve estar entre 2 e 60")
       render :new, status: :unprocessable_entity
@@ -255,9 +252,9 @@ class TransactionsController < ApplicationController
     ActiveRecord::Base.transaction do
       # Criar o plano de parcelamento
       installment_plan = current_user.installment_plans.build(
-        name: "#{transaction_params[:description]} (#{installments_count}x)",
+        name: "#{transaction_params[:description]} (#{installment_count}x)",
         category_id: transaction_params[:category_id],
-        installment_count: installments_count,
+        installment_count: installment_count,
         total_amount: transaction_params[:amount],
         starts_on: transaction_params[:event_date]
       )
@@ -292,7 +289,7 @@ class TransactionsController < ApplicationController
           end
 
           redirect_to transactions_path, notice: t('messages.transaction.installments_created', 
-                                                   count: installments_count)
+                                                   count: installment_count)
         else
           raise ActiveRecord::Rollback
         end

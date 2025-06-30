@@ -1,4 +1,6 @@
 class ReportsController < ApplicationController
+  include FinancialConstants
+  
   def index
     @selected_month = params[:month] || Date.current.strftime("%Y-%m")
     @start_date = Date.parse("#{@selected_month}-01")
@@ -56,7 +58,7 @@ class ReportsController < ApplicationController
     # Calculate percentages
     if @expense_total > 0
       @category_percentages = @category_breakdown.map do |category, amount|
-        [category, amount, (amount / @expense_total * 100).round(1)]
+        [category, amount, FinancialConstants.calculate_percentage(amount, @expense_total)]
       end
     else
       @category_percentages = []
@@ -98,7 +100,7 @@ class ReportsController < ApplicationController
         income: income,
         expenses: expenses,
         balance: income - expenses,
-        savings_rate: income > 0 ? ((income - expenses) / income * 100).round(1) : 0
+        savings_rate: income > 0 ? FinancialConstants.calculate_percentage(income - expenses, income) : FinancialConstants::DEFAULT_PERCENTAGE
       }
     end
   end
@@ -106,9 +108,9 @@ class ReportsController < ApplicationController
   def load_savings_analysis
     # Current month savings rate
     if @income_total > 0
-      @savings_rate = ((@income_total - @expense_total) / @income_total * 100).round(1)
+      @savings_rate = FinancialConstants.calculate_percentage(@income_total - @expense_total, @income_total)
     else
-      @savings_rate = 0
+      @savings_rate = FinancialConstants::DEFAULT_PERCENTAGE
     end
 
     # Average savings rate over last 6 months
@@ -116,9 +118,9 @@ class ReportsController < ApplicationController
     avg_expenses = @monthly_trends.sum { |m| m[:expenses] } / @monthly_trends.size
     
     if avg_income > 0
-      @avg_savings_rate = ((avg_income - avg_expenses) / avg_income * 100).round(1)
+      @avg_savings_rate = FinancialConstants.calculate_percentage(avg_income - avg_expenses, avg_income)
     else
-      @avg_savings_rate = 0
+      @avg_savings_rate = FinancialConstants::DEFAULT_PERCENTAGE
     end
 
     # Identify best and worst months
@@ -133,7 +135,7 @@ class ReportsController < ApplicationController
     @end_date = params[:end_date]&.to_date || Date.current
     @analysis_type = params[:analysis_type] || 'monthly'
     
-    @analysis_result = VariableExpenseAnalyzerService.new(
+    @analysis_result = VariableExpenseAnalysisUnifiedService.new(
       account_id: @account_id,
       category_id: @category_id,
       start_date: @start_date,
