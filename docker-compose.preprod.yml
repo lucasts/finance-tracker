@@ -16,7 +16,9 @@ services:
       - "6380:6379"
 
   app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.preprod
     command: bundle exec rails s -b 0.0.0.0 -p 3001 -e preprod
     env_file:
       - .env.preprod
@@ -32,7 +34,9 @@ services:
       - redis
 
   sidekiq:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.preprod
     command: bundle exec sidekiq -e preprod
     env_file:
       - .env.preprod
