@@ -34,4 +34,24 @@
 /node_modules/
 /app/assets/builds/*
 !/app/assets/builds/.keep
-/public/assets
+
+# Ignore development and test files
+/spec/
+/test/
+/.rspec
+/coverage/
+
+# Ignore documentation
+/doc/
+/README.md
+*.md
+
+# Ignore development tools
+/.vscode/
+/.idea/
+*.swp
+*.swo
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
