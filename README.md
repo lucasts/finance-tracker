@@ -1,62 +1,62 @@
 # 💰 Orzeny Finance Tracker
 
-Sistema completo de gestão financeira familiar com separação entre competência de cartão de crédito e fluxo de caixa real, projeções futuras e automação de transações recorrentes.
+Complete family financial management system with separation between credit card competence and real cash flow, future projections, and recurring transaction automation.
 
-## 🎯 Funcionalidades Principais
+## 🎯 Main Features
 
-### ✨ Gestão Avançada de Transações
-- **Separação Temporal**: Distinção clara entre data do evento e data de pagamento
-- **Cartões de Crédito**: Controle completo de faturas com fechamento e vencimento
-- **Parcelamentos Inteligentes**: Planos de parcelamento com geração automática
-- **Transações Recorrentes**: Automação completa de receitas e despesas fixas
+### ✨ Advanced Transaction Management
+- **Temporal Separation**: Clear distinction between event date and payment date
+- **Credit Cards**: Complete invoice control with closing and due dates
+- **Smart Installments**: Installment plans with automatic generation
+- **Recurring Transactions**: Complete automation of fixed income and expenses
 
-### 📊 Análises e Relatórios
-- **Fluxo de Caixa Real**: Visão precisa do dinheiro disponível
-- **Competência vs Caixa**: Relatórios separados para análises distintas
-- **Projeções Futuras**: Previsões baseadas em compromissos recorrentes
-- **Dashboards Interativos**: Múltiplas visualizações dos dados financeiros
+### 📊 Analysis and Reports
+- **Real Cash Flow**: Accurate view of available money
+- **Competence vs Cash**: Separate reports for distinct analyses
+- **Future Projections**: Forecasts based on recurring commitments
+- **Interactive Dashboards**: Multiple data visualizations
 
-### 🤖 Automação Inteligente
-- **Background Jobs**: Processamento automático via Sidekiq
-- **Jobs Recorrentes**: Geração automática de transações mensais/anuais
-- **Processamento de Parcelas**: Criação automática de parcelas futuras
-- **Atualização de Faturas**: Cálculo automático de valores de cartão
+### 🤖 Smart Automation
+- **Background Jobs**: Automatic processing via Sidekiq
+- **Recurring Jobs**: Automatic generation of monthly/annual transactions
+- **Installment Processing**: Automatic creation of future installments
+- **Invoice Updates**: Automatic calculation of card values
 
-## 🚀 Ambientes
+## 🚀 Environments
 
-### 🔨 Desenvolvimento Local
+### 🔨 Local Development
 ```bash
-# Setup inicial
+# Initial setup
 ./bin/setup
 
-# Servidor de desenvolvimento
+# Development server
 ./bin/dev
 
-# Testes
+# Tests
 bundle exec rspec
 ```
 
-### 📊 Dados de Demonstração
-O setup padrão carrega apenas dados essenciais. Para demonstrações ou desenvolvimento com dados ricos:
+### 📊 Demo Data
+The default setup loads only essential data. For demonstrations or development with rich data:
 
 ```bash
-# Carregar dados de demonstração (recomendado para demos)
+# Load demo data (recommended for demos)
 rails db:seed:demo
 
-# Reset completo com dados de demonstração
+# Complete reset with demo data
 rails db:seed:demo_full
 ```
 
-**📋 [Ver documentação completa dos dados](DEMO_DATA_MANAGEMENT.md)**
+**📋 [View complete data documentation](DEMO_DATA_MANAGEMENT.md)**
 
-### 🎯 Pré-produção (Heroku-like)
-Ambiente completo que simula produção:
+### 🎯 Pre-production (Heroku-like)
+Complete environment that simulates production:
 
 ```bash
-# Iniciar ambiente completo
+# Start complete environment
 ./run-pre-prod.sh
 
-# Utilitários
+# Utilities
 ./preprod-utils.sh help
 ./preprod-utils.sh start
 ./preprod-utils.sh console
@@ -66,34 +66,34 @@ Ambiente completo que simula produção:
 ./health-check.sh
 ```
 
-**Serviços incluídos:**
-- PostgreSQL (porta 5433)
-- Redis (porta 6380)
+**Included services:**
+- PostgreSQL (port 5433)
+- Redis (port 6380)
 - Sidekiq + Web UI
-- MailCatcher (porta 1080)
-- App Rails (porta 3001)
+- MailCatcher (port 1080)
+- Rails App (port 3001)
 
-[📖 **Documentação completa do ambiente**](PREPROD.md)
+[📖 **Complete environment documentation**](PREPROD.md)
 
-## 🤖 Automação
+## 🤖 Automation
 
 ### Background Jobs
 ```ruby
-# Transações recorrentes (salários, aluguel, etc)
+# Recurring transactions (salaries, rent, etc)
 GenerateRecurringTransactionsJob.perform_later
 
-# Parcelas de parcelamentos
+# Installment parcels
 GenerateInstallmentTransactionsJob.perform_later
 ```
 
-## 🚀 Deploy Pronto
+## 🚀 Ready to Deploy
 
 ### Heroku
 ```bash
-# Criar app
-heroku create meu-finance-tracker
+# Create app
+heroku create my-finance-tracker
 
-# Configurar addons
+# Configure addons
 heroku addons:create heroku-postgresql
 heroku addons:create heroku-redis
 
@@ -104,4 +104,4 @@ heroku run rails db:migrate
 
 ---
 
-**✅ MVP Completo | ✅ Ambiente Pré-produção | ✅ Automação Operacional**
+**✅ Complete MVP | ✅ Pre-production Environment | ✅ Operational Automation**

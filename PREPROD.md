@@ -1,45 +1,45 @@
-# Ambiente de Pré-produção - Orzeny Finance Tracker
+# Pre-production Environment - Orzeny Finance Tracker
 
-## 🎯 Objetivo
+## 🎯 Objective
 
-Este ambiente de pré-produção foi projetado para simular um ambiente de produção similar ao Heroku, permitindo testes completos antes do deploy real.
+This pre-production environment was designed to simulate a production environment similar to Heroku, allowing complete testing before real deployment.
 
-## 🏗️ Arquitetura
+## 🏗️ Architecture
 
-### Serviços Docker
-- **PostgreSQL 15**: Banco de dados principal
-- **Redis 7**: Cache e queue para background jobs
-- **Rails App**: Aplicação principal (porta 3001)
-- **Sidekiq**: Processamento de background jobs
-- **MailCatcher**: Servidor de email para testes (porta 1080)
+### Docker Services
+- **PostgreSQL 15**: Main database
+- **Redis 7**: Cache and queue for background jobs
+- **Rails App**: Main application (port 3001)
+- **Sidekiq**: Background job processing
+- **MailCatcher**: Email server for testing (port 1080)
 
-### Portas Expostas
-- `3001`: Aplicação Rails
+### Exposed Ports
+- `3001`: Rails application
 - `5433`: PostgreSQL
 - `6380`: Redis
 - `1080`: MailCatcher Web UI
 - `1025`: MailCatcher SMTP
 
-## 🚀 Como Usar
+## 🚀 How to Use
 
-### Inicialização Completa
+### Complete Initialization
 ```bash
-# Primeira vez ou reset completo
+# First time or complete reset
 ./run-pre-prod.sh
 ```
 
-### Comandos Utilitários
+### Utility Commands
 ```bash
-# Ver ajuda
+# View help
 ./preprod-utils.sh help
 
-# Comandos mais usados
-./preprod-utils.sh start     # Inicia ambiente
-./preprod-utils.sh stop      # Para ambiente
-./preprod-utils.sh logs      # Ver logs
+# Most used commands
+./preprod-utils.sh start     # Start environment
+./preprod-utils.sh stop      # Stop environment
+./preprod-utils.sh logs      # View logs
 ./preprod-utils.sh console   # Rails console
-./preprod-utils.sh jobs      # Executar jobs manualmente
-./preprod-utils.sh reset     # Reset completo do banco
+./preprod-utils.sh jobs      # Execute jobs manually
+./preprod-utils.sh reset     # Complete database reset
 ```
 
 ### Health Check
@@ -47,53 +47,53 @@ Este ambiente de pré-produção foi projetado para simular um ambiente de produ
 ./health-check.sh
 ```
 
-## 🔧 Configurações
+## 🔧 Configuration
 
-### Variáveis de Ambiente
-O ambiente usa `.env.preprod` que simula configurações Heroku-like:
-- Database URL formato Heroku
+### Environment Variables
+The environment uses `.env.preprod` which simulates Heroku-like configurations:
+- Database URL in Heroku format
 - Redis URL
 - Feature flags
-- Configurações de performance
+- Performance configurations
 
 ### Background Jobs
-- **Sidekiq** configurado com Redis
-- Jobs automáticos via `config/schedule.rb`
-- Web UI disponível em `/sidekiq`
+- **Sidekiq** configured with Redis
+- Automatic jobs via `config/schedule.rb`
+- Web UI available at `/sidekiq`
 
 ### Email Testing
-- MailCatcher captura todos os emails
-- Interface web em `http://localhost:1080`
-- SMTP simulado na porta 1025
+- MailCatcher captures all emails
+- Web interface at `http://localhost:1080`
+- Simulated SMTP on port 1025
 
-## 📊 Monitoramento
+## 📊 Monitoring
 
-### URLs Importantes
+### Important URLs
 - **App**: http://localhost:3001
 - **Sidekiq**: http://localhost:3001/sidekiq
 - **MailCatcher**: http://localhost:1080
 
-### Dados de Teste
-O ambiente carrega automaticamente dados realistas via `db/seeds/demo_realistic.rb`:
-- Contas bancárias e cartões
-- 12 meses de transações
-- Parcelamentos ativos
-- Compromissos recorrentes
+### Test Data
+The environment automatically loads realistic data via `db/seeds/demo_realistic.rb`:
+- Bank accounts and credit cards
+- 12 months of transactions
+- Active installment plans
+- Recurring commitments
 
-## 🔄 Automação
+## 🔄 Automation
 
-### Jobs Configurados
+### Configured Jobs
 1. **GenerateRecurringTransactionsJob**
-   - Produção: Diário às 6:00
-   - Preprod: A cada 30 minutos (para testes)
+   - Production: Daily at 6:00 AM
+   - Preprod: Every 30 minutes (for testing)
 
 2. **GenerateInstallmentTransactionsJob**
-   - Produção: Diário às 6:30
-   - Preprod: A cada hora
+   - Production: Daily at 6:30 AM
+   - Preprod: Every hour
 
-### Comandos Manuais
+### Manual Commands
 ```bash
-# Executar jobs específicos
+# Execute specific jobs
 ./preprod-utils.sh jobs
 
 # Via Rails console
@@ -104,87 +104,87 @@ O ambiente carrega automaticamente dados realistas via `db/seeds/demo_realistic.
 
 ## 🛠️ Troubleshooting
 
-### Container não inicia
+### Container won't start
 ```bash
-# Verificar logs
+# Check logs
 ./preprod-utils.sh logs
 
-# Rebuild completo
+# Complete rebuild
 ./preprod-utils.sh stop
 ./run-pre-prod.sh
 ```
 
-### Banco de dados
+### Database issues
 ```bash
-# Conectar diretamente
+# Connect directly
 ./preprod-utils.sh db
 
-# Reset completo
+# Complete reset
 ./preprod-utils.sh reset
 ```
 
 ### Performance
 ```bash
-# Ver status detalhado
+# View detailed status
 ./preprod-utils.sh status
 
-# Health check completo
+# Complete health check
 ./health-check.sh
 ```
 
-## 🎯 Diferenças do Heroku Real
+## 🎯 Differences from Real Heroku
 
-### Similitudes
-✅ PostgreSQL como database  
-✅ Redis para background jobs  
-✅ Sidekiq para processamento  
-✅ Variáveis de ambiente  
-✅ Procfile para definir processos  
-✅ Asset compilation automática  
-✅ Logs estruturados  
+### Similarities
+✅ PostgreSQL as database  
+✅ Redis for background jobs  
+✅ Sidekiq for processing  
+✅ Environment variables  
+✅ Procfile to define processes  
+✅ Automatic asset compilation  
+✅ Structured logs  
 
-### Diferenças (limitações locais)
-❌ SSL/TLS (desabilitado para desenvolvimento)  
-❌ CDN para assets  
-❌ Dyno scaling automático  
-❌ Add-ons externos (SendGrid, etc)  
-❌ Heroku Scheduler (simulado com whenever)  
+### Differences (local limitations)
+❌ SSL/TLS (disabled for development)  
+❌ CDN for assets  
+❌ Automatic dyno scaling  
+❌ External add-ons (SendGrid, etc)  
+❌ Heroku Scheduler (simulated with whenever)  
 
-## 🔒 Segurança
+## 🔒 Security
 
-Para desenvolvimento local:
-- SSL desabilitado
-- Senhas padrão nos bancos
-- Secret keys fixas
-- CORS permissivo
+For local development:
+- SSL disabled
+- Default database passwords
+- Fixed secret keys
+- Permissive CORS
 
-**⚠️ NÃO usar em produção real!**
+**⚠️ DO NOT use in real production!**
 
 ## 📝 Logs
 
-Todos os containers logam para STDOUT/STDERR, permitindo:
+All containers log to STDOUT/STDERR, allowing:
 ```bash
-# Logs específicos
+# Specific logs
 docker-compose -f docker-compose.preprod.yml logs app
 docker-compose -f docker-compose.preprod.yml logs sidekiq
 
-# Logs em tempo real
+# Real-time logs
 ./preprod-utils.sh logs
 ```
 
-## 🎉 Pronto para Produção
+## 🎉 Ready for Production
 
-Este ambiente prepara a aplicação para deploy em:
+This environment prepares the application for deployment on:
 - Heroku
 - Railway
 - Render
 - DigitalOcean App Platform
-- Qualquer PaaS compatível com Rails
+- Any Rails-compatible PaaS
 
-Todos os aspectos críticos são testados:
-- Conexões de banco
+All critical aspects are tested:
+- Database connections
 - Background jobs
 - Asset pipeline
 - Email delivery
-- Variáveis de ambiente
-- Performance básica
+- Environment variables
+- Basic performance

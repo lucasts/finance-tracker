@@ -1,69 +1,69 @@
 #!/bin/bash
-# Ambiente de Pré-produção - Orzeny Finance Tracker
-# Simula um ambiente Heroku-like
+# Pre-production Environment - Orzeny Finance Tracker
+# Simulates a Heroku-like environment
 
-set -e  # Para em caso de erro
+set -e  # Stop on error
 
-echo "🚀 Iniciando ambiente de pré-produção Orzeny Finance Tracker..."
-echo "📦 Este ambiente simula uma configuração similar ao Heroku"
+echo "🚀 Starting Orzeny Finance Tracker pre-production environment..."
+echo "📦 This environment simulates a Heroku-like configuration"
 echo ""
 
-# Verificar se docker-compose está disponível
+# Check if docker-compose is available
 if ! command -v docker-compose &> /dev/null; then
     if command -v docker &> /dev/null && docker compose version &> /dev/null; then
-        echo "ℹ️  Usando 'docker compose' ao invés de 'docker-compose'"
+        echo "ℹ️  Using 'docker compose' instead of 'docker-compose'"
         DOCKER_COMPOSE="docker compose"
     else
-        echo "❌ Docker Compose não encontrado. Instale Docker e Docker Compose."
+        echo "❌ Docker Compose not found. Install Docker and Docker Compose."
         exit 1
     fi
 else
     DOCKER_COMPOSE="docker-compose"
 fi
 
-# Para containers se estiverem rodando
-echo "🛑 Parando containers existentes..."
+# Stop containers if running
+echo "🛑 Stopping existing containers..."
 $DOCKER_COMPOSE -f docker-compose.preprod.yml down --remove-orphans
 
-# Build e start
-echo "🔨 Construindo e iniciando containers..."
+# Build and start
+echo "🔨 Building and starting containers..."
 $DOCKER_COMPOSE -f docker-compose.preprod.yml up --build -d
 
-# Aguarda DB ficar pronto
-echo "⏳ Aguardando banco de dados ficar pronto..."
+# Wait for DB to be ready
+echo "⏳ Waiting for database to be ready..."
 sleep 15
 
-# Setup do banco
-echo "📊 Configurando banco de dados..."
+# Database setup
+echo "📊 Setting up database..."
 $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails db:create db:migrate
 
-# Seeds realistas
-echo "🌱 Carregando configurações basicas da app ..."
+# Basic app setup
+echo "🌱 Loading basic app configurations..."
 $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails db:seed
 
-# Compila assets
-echo "🎨 Compilando assets..."
+# Compile assets
+echo "🎨 Compiling assets..."
 $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails assets:precompile
 
 echo ""
-echo "✅ Ambiente de pré-produção pronto!"
+echo "✅ Pre-production environment ready!"
 echo ""
-echo "🌐 Aplicação: http://localhost:3001"
+echo "🌐 Application: http://localhost:3001"
 echo "📊 PostgreSQL: localhost:5433 (postgres/postgres)"
 echo "📦 Redis: localhost:6380"
 echo "📧 MailCatcher: http://localhost:1080"
 echo "⚙️  Sidekiq Web UI: http://localhost:3001/sidekiq"
 echo ""
-echo "🔍 Para ver logs:"
+echo "🔍 To view logs:"
 echo "   $DOCKER_COMPOSE -f docker-compose.preprod.yml logs -f app"
 echo ""
-echo "🛑 Para parar:"
+echo "🛑 To stop:"
 echo "   $DOCKER_COMPOSE -f docker-compose.preprod.yml down"
 echo ""
 
-# Mostra status dos containers
-echo "📋 Status dos containers:"
+# Show container status
+echo "📋 Container status:"
 $DOCKER_COMPOSE -f docker-compose.preprod.yml ps
 
 echo ""
-echo "🎯 Ambiente pronto para testes de pré-produção!"
+echo "🎯 Environment ready for pre-production testing!"

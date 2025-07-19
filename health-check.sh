@@ -1,6 +1,6 @@
 #!/bin/bash
-# Script de Health Check para ambiente de pré-produção
-# Simula checks que seriam feitos em produção
+# Health Check script for pre-production environment
+# Simulates checks that would be performed in production
 
 set -e
 
@@ -8,89 +8,89 @@ HEALTH_CHECK_URL="http://localhost:3001"
 SIDEKIQ_WEB_URL="http://localhost:3001/sidekiq"
 MAILCATCHER_URL="http://localhost:1080"
 
-echo "🏥 Health Check - Ambiente Pré-produção"
-echo "========================================"
+echo "🏥 Health Check - Pre-production Environment"
+echo "============================================="
 
-# Verificar se containers estão rodando
-echo "📦 Verificando containers..."
+# Check if containers are running
+echo "📦 Checking containers..."
 if command -v docker-compose &> /dev/null; then
     DOCKER_COMPOSE="docker-compose"
 elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
     DOCKER_COMPOSE="docker compose"
 else
-    echo "❌ Docker Compose não encontrado"
+    echo "❌ Docker Compose not found"
     exit 1
 fi
 
 CONTAINERS_STATUS=$($DOCKER_COMPOSE -f docker-compose.preprod.yml ps --format json 2>/dev/null || echo "[]")
 
 if [ "$CONTAINERS_STATUS" = "[]" ]; then
-    echo "❌ Nenhum container em execução"
-    echo "💡 Execute: ./run-pre-prod.sh"
+    echo "❌ No containers running"
+    echo "💡 Run: ./run-pre-prod.sh"
     exit 1
 fi
 
-echo "✅ Containers rodando"
+echo "✅ Containers running"
 
-# Verificar conectividade da aplicação
-echo "🌐 Verificando aplicação web..."
+# Check application connectivity
+echo "🌐 Checking web application..."
 if curl -s -o /dev/null -w "%{http_code}" "$HEALTH_CHECK_URL" | grep -q "200\|302"; then
-    echo "✅ Aplicação web respondendo"
+    echo "✅ Web application responding"
 else
-    echo "⚠️  Aplicação web não está respondendo"
+    echo "⚠️  Web application not responding"
 fi
 
-# Verificar banco de dados
-echo "🗄️  Verificando banco de dados..."
+# Check database
+echo "🗄️  Checking database..."
 DB_CHECK=$($DOCKER_COMPOSE -f docker-compose.preprod.yml exec -T db psql -U postgres -d orzeny_preprod -c "SELECT 1;" 2>/dev/null || echo "FAIL")
 if [[ "$DB_CHECK" == *"1"* ]]; then
-    echo "✅ PostgreSQL conectando"
+    echo "✅ PostgreSQL connecting"
 else
-    echo "❌ PostgreSQL com problemas"
+    echo "❌ PostgreSQL has issues"
 fi
 
-# Verificar Redis
-echo "📦 Verificando Redis..."
+# Check Redis
+echo "📦 Checking Redis..."
 REDIS_CHECK=$($DOCKER_COMPOSE -f docker-compose.preprod.yml exec -T redis redis-cli ping 2>/dev/null || echo "FAIL")
 if [ "$REDIS_CHECK" = "PONG" ]; then
-    echo "✅ Redis respondendo"
+    echo "✅ Redis responding"
 else
-    echo "❌ Redis com problemas"
+    echo "❌ Redis has issues"
 fi
 
-# Verificar Sidekiq
-echo "⚙️  Verificando Sidekiq..."
+# Check Sidekiq
+echo "⚙️  Checking Sidekiq..."
 if curl -s -o /dev/null -w "%{http_code}" "$SIDEKIQ_WEB_URL" | grep -q "200"; then
-    echo "✅ Sidekiq Web UI acessível"
+    echo "✅ Sidekiq Web UI accessible"
 else
-    echo "⚠️  Sidekiq Web UI não acessível"
+    echo "⚠️  Sidekiq Web UI not accessible"
 fi
 
-# Verificar MailCatcher
-echo "📧 Verificando MailCatcher..."
+# Check MailCatcher
+echo "📧 Checking MailCatcher..."
 if curl -s -o /dev/null -w "%{http_code}" "$MAILCATCHER_URL" | grep -q "200"; then
-    echo "✅ MailCatcher acessível"
+    echo "✅ MailCatcher accessible"
 else
-    echo "⚠️  MailCatcher não acessível"
+    echo "⚠️  MailCatcher not accessible"
 fi
 
-# Estatísticas do sistema
+# System statistics
 echo ""
-echo "📊 Estatísticas do Sistema:"
-echo "============================"
+echo "📊 System Statistics:"
+echo "===================="
 
-# Uso de memória dos containers
-echo "💾 Uso de memória por container:"
+# Container memory usage
+echo "💾 Memory usage per container:"
 $DOCKER_COMPOSE -f docker-compose.preprod.yml exec -T app ps aux --sort=-%mem | head -n 10
 
 echo ""
-echo "🎯 URLs importantes:"
-echo "==================="
-echo "🌐 Aplicação: $HEALTH_CHECK_URL"
+echo "🎯 Important URLs:"
+echo "================="
+echo "🌐 Application: $HEALTH_CHECK_URL"
 echo "⚙️  Sidekiq: $SIDEKIQ_WEB_URL"
 echo "📧 MailCatcher: $MAILCATCHER_URL"
 echo "🗄️  PostgreSQL: localhost:5433"
 echo "📦 Redis: localhost:6380"
 
 echo ""
-echo "✅ Health check concluído!"
+echo "✅ Health check completed!"

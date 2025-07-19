@@ -1,14 +1,14 @@
 #!/bin/bash
-# Utilitários para o ambiente de pré-produção
+# Utilities for pre-production environment
 
 set -e
 
-# Verificar se docker-compose está disponível
+# Check if docker-compose is available
 if ! command -v docker-compose &> /dev/null; then
     if command -v docker &> /dev/null && docker compose version &> /dev/null; then
         DOCKER_COMPOSE="docker compose"
     else
-        echo "❌ Docker Compose não encontrado."
+        echo "❌ Docker Compose not found."
         exit 1
     fi
 else
@@ -16,84 +16,84 @@ else
 fi
 
 show_help() {
-    echo "🔧 Utilitários Pré-produção - Orzeny Finance Tracker"
+    echo "🔧 Pre-production Utilities - Orzeny Finance Tracker"
     echo ""
-    echo "Comandos disponíveis:"
-    echo "  start     - Inicia o ambiente de pré-produção"
-    echo "  stop      - Para todos os containers"
-    echo "  restart   - Reinicia o ambiente"
-    echo "  logs      - Mostra logs da aplicação"
-    echo "  console   - Abre console Rails no ambiente preprod"
-    echo "  shell     - Abre shell no container da aplicação"
-    echo "  db        - Conecta ao PostgreSQL"
-    echo "  redis     - Conecta ao Redis"
-    echo "  jobs      - Força execução dos jobs recorrentes"
-    echo "  reset     - Reseta o banco e recarrega seeds"
-    echo "  test      - Executa testes no ambiente preprod"
-    echo "  status    - Mostra status dos containers"
+    echo "Available commands:"
+    echo "  start     - Start pre-production environment"
+    echo "  stop      - Stop all containers"
+    echo "  restart   - Restart environment"
+    echo "  logs      - Show application logs"
+    echo "  console   - Open Rails console in preprod environment"
+    echo "  shell     - Open shell in application container"
+    echo "  db        - Connect to PostgreSQL"
+    echo "  redis     - Connect to Redis"
+    echo "  jobs      - Force execution of recurring jobs"
+    echo "  reset     - Reset database and reload seeds"
+    echo "  test      - Run tests in preprod environment"
+    echo "  status    - Show container status"
     echo ""
 }
 
 case "${1:-help}" in
     "start")
-        echo "🚀 Iniciando ambiente de pré-produção..."
+        echo "🚀 Starting pre-production environment..."
         ./run-pre-prod.sh
         ;;
     "stop")
-        echo "🛑 Parando ambiente de pré-produção..."
+        echo "🛑 Stopping pre-production environment..."
         $DOCKER_COMPOSE -f docker-compose.preprod.yml down
         ;;
     "restart")
-        echo "🔄 Reiniciando ambiente..."
+        echo "🔄 Restarting environment..."
         $DOCKER_COMPOSE -f docker-compose.preprod.yml restart
         ;;
     "logs")
-        echo "📋 Logs da aplicação:"
+        echo "📋 Application logs:"
         $DOCKER_COMPOSE -f docker-compose.preprod.yml logs -f app
         ;;
     "console")
-        echo "💬 Abrindo console Rails (preprod)..."
+        echo "💬 Opening Rails console (preprod)..."
         $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails console
         ;;
     "shell")
-        echo "🐚 Abrindo shell no container..."
+        echo "🐚 Opening shell in container..."
         $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app bash
         ;;
     "db")
-        echo "🗄️  Conectando ao PostgreSQL..."
+        echo "🗄️  Connecting to PostgreSQL..."
         $DOCKER_COMPOSE -f docker-compose.preprod.yml exec db psql -U postgres orzeny_preprod
         ;;
     "redis")
-        echo "📦 Conectando ao Redis..."
+        echo "📦 Connecting to Redis..."
         $DOCKER_COMPOSE -f docker-compose.preprod.yml exec redis redis-cli
         ;;
     "jobs")
-        echo "⚙️  Executando jobs recorrentes..."
+        echo "⚙️  Executing recurring jobs..."
         $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails runner "
-            puts '🔄 Executando GenerateRecurringTransactionsJob...'
+            puts '🔄 Executing GenerateRecurringTransactionsJob...'
             GenerateRecurringTransactionsJob.perform_now
-            puts '✅ Job de transações recorrentes executado!'
+            puts '✅ Recurring transactions job executed!'
             
-            puts '🔄 Executando GenerateInstallmentTransactionsJob...'
+            puts '🔄 Executing GenerateInstallmentTransactionsJob...'
             GenerateInstallmentTransactionsJob.perform_now
-            puts '✅ Job de parcelamentos executado!'
+            puts '✅ Installments job executed!'
         "
         ;;
     "reset")
-        echo "🗑️  Resetando banco de dados..."
+        echo "🗑️  Resetting database..."
         $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails db:drop db:create db:migrate
-        echo "🌱 Recarregando seeds realistas..."
+        echo "🌱 Reloading realistic seeds..."
         $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails runner "load 'db/seeds/demo_realistic.rb'"
         ;;
     "test")
-        echo "🧪 Executando testes no ambiente preprod..."
+        echo "🧪 Running tests in preprod environment..."
         $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app bundle exec rspec
         ;;
     "status")
-        echo "📊 Status dos containers:"
+        echo "📊 Container status:"
         $DOCKER_COMPOSE -f docker-compose.preprod.yml ps
         echo ""
-        echo "📋 Uso de recursos:"
+        echo "📋 Resource usage:"
         $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app ps aux
         ;;
     "help"|*)
