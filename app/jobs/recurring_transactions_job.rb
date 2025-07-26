@@ -39,19 +39,19 @@ class RecurringTransactionsJob < ApplicationJob
       commitment.expected_amount || commitment.average_amount
     end
 
-    Transaction.create(
+    CreateTransactionService.call(
       description: commitment.name,
       amount: amount,
       transaction_type: template_transaction&.transaction_type || determine_transaction_type(commitment),
       event_date: occurrence_date,
       payment_date: occurrence_date,
-      from_account: commitment.from_account,
-      to_account: commitment.to_account,
       category: commitment.category,
       recurring_commitment: commitment,
-      recurrence_type: 'recurring',
-      status: occurrence_date > Date.current ? 'pending' : 'confirmed',
-      user: commitment.user
+      user: commitment.user,
+      entries_attributes: [
+        { account_id: commitment.to_account_id, entry_type: 'debit', amount: amount },
+        { account_id: commitment.from_account_id, entry_type: 'credit', amount: amount }
+      ]
     )
   end
 

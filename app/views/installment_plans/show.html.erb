@@ -124,7 +124,13 @@
         <div class="font-semibold">Frequência</div>
         <div><%= @installment_plan.recurrence_frequency.capitalize %></div>
         <div class="text-base-content/70">
-          <%= @installment_plan.transactions.first&.from_account&.name || 'N/A' %> • <%= @installment_plan.category.name %>
+          <% first_transaction = @installment_plan.transactions.first %>
+          <% if first_transaction %>
+            <% credit_entry = first_transaction.entries.find { |e| e.entry_type == 'credit' } %>
+            <%= credit_entry&.account&.name || 'N/A' %> • <%= @installment_plan.category.name %>
+          <% else %>
+            <%= @installment_plan.category.name %>
+          <% end %>
         </div>
       </div>
     </div>

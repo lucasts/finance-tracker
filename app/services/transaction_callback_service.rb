@@ -25,7 +25,12 @@ class TransactionCallbackService
   private
 
   def ensure_credit_statement
-    return unless @transaction.from_account&.credit_card?
+    # Find if any of the credit entries come from a credit card account
+    credit_card_account = @transaction.entries.joins(:account)
+      .where(entry_type: 'credit', accounts: { account_type: AccountType.find_by(code: 'CREDIT_CARD') })
+      .first&.account
+    
+    return unless credit_card_account&.credit_card?
     return if @transaction.credit_statement.present? # Already associated
     
     statement = CreditStatementService.find_or_create_for_transaction(@transaction)
@@ -33,7 +38,12 @@ class TransactionCallbackService
   end
 
   def update_credit_statement_amount
-    return unless @transaction.from_account&.credit_card?
+    # Find if any of the credit entries come from a credit card account
+    credit_card_account = @transaction.entries.joins(:account)
+      .where(entry_type: 'credit', accounts: { account_type: AccountType.find_by(code: 'CREDIT_CARD') })
+      .first&.account
+    
+    return unless credit_card_account&.credit_card?
     
     # Find the credit statement for this transaction
     statement = CreditStatementService.find_or_create_for_transaction(@transaction)
@@ -41,7 +51,12 @@ class TransactionCallbackService
   end
 
   def should_update_credit_statement?
-    @transaction.from_account&.credit_card? && 
+    # Check if any credit entry comes from a credit card account
+    has_credit_card_entry = @transaction.entries.joins(:account)
+      .where(entry_type: 'credit', accounts: { account_type: AccountType.find_by(code: 'CREDIT_CARD') })
+      .exists?
+    
+    has_credit_card_entry && 
       (@transaction.saved_change_to_amount? || @transaction.saved_change_to_status?)
   end
 

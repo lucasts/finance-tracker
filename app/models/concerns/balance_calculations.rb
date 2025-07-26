@@ -4,23 +4,13 @@
 module BalanceCalculations
   extend ActiveSupport::Concern
   
+  # This concern is now deprecated as balance is cached in the 'balance' column.
+  # The methods are kept for reference but should not be used.
+
   # Calculate balance based on transactions to/from this account
   def calculate_balance_from_transactions
-    # Inflows: income + transfer destination (transactions TO this account)
-    credits = if respond_to?(:transactions_to)
-                transactions_to.confirmed.sum(:amount) || 0.0
-              else
-                0.0
-              end
-    
-    # Outflows: expense + transfer source (transactions FROM this account)
-    debits = if respond_to?(:transactions_from)
-               transactions_from.confirmed.sum(:amount) || 0.0
-             else
-               0.0
-             end
-    
-    credits - debits
+    # DEPRECATED
+    0.0
   end
   
   # Cache-friendly balance calculation (if cached_balance column exists)

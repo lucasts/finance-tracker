@@ -21,7 +21,20 @@ RSpec.describe RecurringTransactionsJob, type: :job do
   end
 
   it 'does not generate if transaction already exists for the date' do
-    Transaction.create!(description: commitment.name, amount: 100, event_date: occurrence_date, payment_date: occurrence_date, user: user, category: category, from_account: account, recurring_commitment: commitment, transaction_type: 'expense', recurrence_type: 'recurring')
+    CreateTransactionService.call(
+      description: commitment.name, 
+      amount: 100, 
+      event_date: occurrence_date, 
+      payment_date: occurrence_date, 
+      user: user, 
+      category: category, 
+      recurring_commitment: commitment, 
+      transaction_type: 'expense',
+      entries_attributes: [
+        { account_id: create(:account, user: user).id, entry_type: 'debit', amount: 100 },
+        { account_id: account.id, entry_type: 'credit', amount: 100 }
+      ]
+    )
     expect {
       described_class.perform_now
     }.not_to change { Transaction.count }

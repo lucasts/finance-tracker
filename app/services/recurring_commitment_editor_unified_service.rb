@@ -49,6 +49,8 @@ class RecurringCommitmentEditorUnifiedService
       transaction_updates = extract_transaction_attributes
       
       if transaction.update(transaction_updates)
+        # Update accounts if provided
+        update_transaction_accounts(transaction, new_attributes[:from_account_id], new_attributes[:to_account_id])
         { success: true, updated_transactions: [transaction], updated_commitment: nil }
       else
         { success: false, errors: transaction.errors.full_messages }
@@ -73,6 +75,8 @@ class RecurringCommitmentEditorUnifiedService
 
       future_transactions.find_each do |tx|
         if tx.update(transaction_updates)
+          # Update accounts if provided
+          update_transaction_accounts(tx, new_attributes[:from_account_id], new_attributes[:to_account_id])
           updated_transactions << tx
         else
           raise ActiveRecord::RecordInvalid.new(tx)
@@ -101,6 +105,8 @@ class RecurringCommitmentEditorUnifiedService
 
       all_transactions.find_each do |tx|
         if tx.update(transaction_updates)
+          # Update accounts if provided
+          update_transaction_accounts(tx, new_attributes[:from_account_id], new_attributes[:to_account_id])
           updated_transactions << tx
         else
           raise ActiveRecord::RecordInvalid.new(tx)
@@ -143,6 +149,8 @@ class RecurringCommitmentEditorUnifiedService
       updated_transactions = []
       future_transactions.find_each do |tx|
         if tx.update(transaction_updates)
+          # Update accounts if provided
+          update_transaction_accounts(tx, new_attributes[:from_account_id], new_attributes[:to_account_id])
           updated_transactions << tx
         else
           raise ActiveRecord::RecordInvalid.new(tx)
@@ -179,9 +187,26 @@ class RecurringCommitmentEditorUnifiedService
     transaction_attrs[:description] = new_attributes[:name] if new_attributes[:name].present?
     transaction_attrs[:amount] = new_attributes[:amount] if new_attributes[:amount].present?
     transaction_attrs[:category_id] = new_attributes[:category_id] if new_attributes[:category_id].present?
-    transaction_attrs[:from_account_id] = new_attributes[:from_account_id] if new_attributes[:from_account_id].present?
-    transaction_attrs[:to_account_id] = new_attributes[:to_account_id] if new_attributes[:to_account_id].present?
+    
+    # Note: from_account_id and to_account_id are no longer direct transaction attributes
+    # They are handled through entries. For updating existing transactions, we need to
+    # update the associated entries instead.
     
     transaction_attrs
+  end
+
+  def update_transaction_accounts(transaction, from_account_id, to_account_id)
+    # Helper method to update transaction accounts via entries
+    return unless from_account_id.present? || to_account_id.present?
+
+    transaction.entries.destroy_all
+    
+    # Create new entries
+    if from_account_id && to_account_id
+      transaction.entries.create!([
+        { account_id: to_account_id, entry_type: 'debit', amount: transaction.amount },
+        { account_id: from_account_id, entry_type: 'credit', amount: transaction.amount }
+      ])
+    end
   end
 end

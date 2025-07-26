@@ -71,8 +71,14 @@
                 <% end %>
               </div>
             </td>
-            <td><%= tx.from_account.name %></td>
-            <td><%= tx.to_account&.name %></td>
+            <td>
+              <% credit_entry = tx.entries.find { |e| e.entry_type == 'credit' } %>
+              <%= credit_entry&.account&.name || 'N/A' %>
+            </td>
+            <td>
+              <% debit_entry = tx.entries.find { |e| e.entry_type == 'debit' } %>
+              <%= debit_entry&.account&.name || 'N/A' %>
+            </td>
             <td>
               <% if tx.category.present? %>
                 <%= tx.category.name %>

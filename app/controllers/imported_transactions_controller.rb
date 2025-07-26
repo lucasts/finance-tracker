@@ -24,16 +24,40 @@ class ImportedTransactionsController < ApplicationController
     created_transaction = nil
     # If creating new, create transaction in the system
     if action == 'create_new'
-      t = Transaction.create!(user: current_user,
+      # Determine accounts based on transaction type
+      amount = tx_params[:amount].to_d.abs
+      transaction_type = tx_params[:transaction_type]
+      account_id = @imported_transaction.import_session.account_id
+      
+      # Find or create appropriate external account
+      external_account = Account.find_or_create_by(
+        user: current_user,
+        name: transaction_type == 'income' ? 'Receitas Externas' : 'Gastos Externos',
+        account_type: AccountType.find_by(code: transaction_type == 'income' ? 'INCOME_SOURCE' : 'EXPENSE_DESTINATION')
+      )
+
+      # Set the correct account IDs
+      if transaction_type == 'income'
+        from_account_id = external_account.id
+        to_account_id = account_id
+      else
+        from_account_id = account_id
+        to_account_id = external_account.id
+      end
+
+      t = CreateTransactionService.call(
+        user: current_user,
         description: tx_params[:description],
-        amount: tx_params[:amount],
+        amount: amount,
         event_date: tx_params[:event_date],
         payment_date: tx_params[:payment_date],
-        from_account_id: @imported_transaction.import_session.account_id,
-        to_account_id: nil,
         category_id: tx_params[:category_id],
-        transaction_type: tx_params[:transaction_type],
-        status: 'confirmed')
+        transaction_type: transaction_type,
+        entries_attributes: [
+          { account_id: to_account_id, entry_type: 'debit', amount: amount },
+          { account_id: from_account_id, entry_type: 'credit', amount: amount }
+        ]
+      )
       rec_entry.linked_transaction = t
       rec_entry.save!
       created_transaction = t

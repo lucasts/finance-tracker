@@ -43,8 +43,11 @@ class CreditStatementCallbackService
   end
 
   def calculate_total_amount_due
+    # Sum all transactions that have a credit entry from the credit card account
+    # and are associated with this statement
     Transaction
-      .where(from_account: @statement.account)
+      .joins(:entries)
+      .where(entries: { account: @statement.account, entry_type: 'credit' })
       .where(credit_statement: @statement)
       .where(status: ['confirmed', 'pending'])
       .sum(:amount) || 0.0

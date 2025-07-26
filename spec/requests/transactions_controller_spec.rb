@@ -499,8 +499,8 @@ RSpec.describe TransactionsController, type: :request do
           patch transaction_path(transfer_transaction), params: update_transfer_params
           transfer_transaction.reload
           expect(transfer_transaction.transaction_type).to eq('transfer')
-          expect(transfer_transaction.from_account).to eq(from_account)
-          expect(transfer_transaction.to_account).to eq(to_account)
+          expect(transfer_transaction.primary_credit_account).to eq(from_account)
+          expect(transfer_transaction.primary_debit_account).to eq(to_account)
           expect(transfer_transaction.category).to be_nil
         end
 

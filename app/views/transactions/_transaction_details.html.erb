@@ -122,14 +122,20 @@
             🏦 Contas
           </h4>
           <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-base-content/60">Origem:</span>
-              <span class="font-medium"><%= transaction.from_account.name %></span>
-            </div>
-            <% if transaction.to_account %>
+            <% credit_entry = transaction.entries.find { |e| e.entry_type == 'credit' } %>
+            <% debit_entry = transaction.entries.find { |e| e.entry_type == 'debit' } %>
+            
+            <% if credit_entry %>
+              <div class="flex justify-between">
+                <span class="text-base-content/60">Origem:</span>
+                <span class="font-medium"><%= credit_entry.account.name %></span>
+              </div>
+            <% end %>
+            
+            <% if debit_entry %>
               <div class="flex justify-between">
                 <span class="text-base-content/60">Destino:</span>
-                <span class="font-medium"><%= transaction.to_account.name %></span>
+                <span class="font-medium"><%= debit_entry.account.name %></span>
               </div>
             <% end %>
           </div>

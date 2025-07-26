@@ -6,8 +6,12 @@ class CreditStatementService
     def find_or_create_for_transaction(transaction)
       return nil unless credit_card_transaction?(transaction)
       
+      # Find the credit card account from the transaction entries
+      credit_card_account = find_credit_card_account(transaction)
+      return nil unless credit_card_account
+      
       period = calculate_period_for_transaction(transaction)
-      find_or_create_statement(transaction.from_account, period)
+      find_or_create_statement(credit_card_account, period)
     end
 
     # Finds or creates a credit statement for a specific account and period
@@ -78,17 +82,24 @@ class CreditStatementService
 
     private
 
-    # Checks if transaction is from a credit card
+    # Finds the credit card account from transaction entries
+    def find_credit_card_account(transaction)
+      transaction.entries.joins(:account).find do |entry|
+        entry.entry_type == 'credit' && entry.account.account_type.code == "CREDIT_CARD"
+      end&.account
+    end
+
+    # Checks if transaction involves a credit card
     def credit_card_transaction?(transaction)
-      transaction&.from_account&.account_type&.code == "CREDIT_CARD"
+      find_credit_card_account(transaction).present?
     end
 
     # Calculates the statement period for a transaction based on closing day
     def calculate_period_for_transaction(transaction)
       date = transaction.event_date
-      account = transaction.from_account
+      account = find_credit_card_account(transaction)
       
-      if account.closing_day.present?
+      if account&.closing_day.present?
         cutoff = Date.new(date.year, date.month, account.closing_day)
         ref_date = (date <= cutoff) ? date : date + 1.month
         ref_date.strftime("%Y-%m")

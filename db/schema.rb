@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_08_130000) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_20_011916) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -28,6 +28,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_130000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.decimal "balance", precision: 10, scale: 2, default: "0.0", null: false
     t.index ["account_type_id"], name: "index_accounts_on_account_type_id"
     t.index ["user_id"], name: "index_accounts_on_user_id"
   end
@@ -56,6 +57,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_130000) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "month"], name: "index_credit_statements_on_account_id_and_month", unique: true
     t.index ["account_id"], name: "index_credit_statements_on_account_id"
+  end
+
+  create_table "entries", force: :cascade do |t|
+    t.integer "transaction_id", null: false
+    t.integer "account_id", null: false
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.string "entry_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_entries_on_account_id"
+    t.index ["transaction_id", "account_id"], name: "index_entries_on_transaction_id_and_account_id"
+    t.index ["transaction_id"], name: "index_entries_on_transaction_id"
   end
 
   create_table "import_sessions", force: :cascade do |t|
@@ -106,9 +119,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_130000) do
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.integer "category_id", null: false
+    t.integer "from_account_id"
+    t.integer "to_account_id"
     t.index ["category_id"], name: "index_installment_plans_on_category_id"
+    t.index ["from_account_id"], name: "index_installment_plans_on_from_account_id"
     t.index ["recurrence_frequency"], name: "index_installment_plans_on_recurrence_frequency"
     t.index ["status"], name: "index_installment_plans_on_status"
+    t.index ["to_account_id"], name: "index_installment_plans_on_to_account_id"
     t.index ["user_id"], name: "index_installment_plans_on_user_id"
   end
 
@@ -162,8 +179,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_130000) do
     t.string "description"
     t.decimal "amount"
     t.date "event_date"
-    t.integer "from_account_id", null: false
-    t.integer "to_account_id"
     t.integer "category_id"
     t.integer "installment"
     t.integer "status", default: 0
@@ -182,12 +197,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_130000) do
     t.integer "transaction_type", default: 1, null: false
     t.index ["category_id"], name: "index_transactions_on_category_id"
     t.index ["credit_statement_id"], name: "index_transactions_on_credit_statement_id"
-    t.index ["from_account_id"], name: "index_transactions_on_from_account_id"
     t.index ["installment_number"], name: "index_transactions_on_installment_number"
     t.index ["installment_plan_id"], name: "index_transactions_on_installment_plan_id"
     t.index ["recurrence_pattern"], name: "index_transactions_on_recurrence_pattern"
     t.index ["recurring_commitment_id"], name: "index_transactions_on_recurring_commitment_id"
-    t.index ["to_account_id"], name: "index_transactions_on_to_account_id"
     t.index ["transaction_group_id"], name: "index_transactions_on_transaction_group_id"
     t.index ["transaction_type"], name: "index_transactions_on_transaction_type"
     t.index ["user_id"], name: "index_transactions_on_user_id"
@@ -209,11 +222,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_130000) do
   add_foreign_key "accounts", "users"
   add_foreign_key "categories", "users"
   add_foreign_key "credit_statements", "accounts"
+  add_foreign_key "entries", "accounts"
+  add_foreign_key "entries", "transactions"
   add_foreign_key "import_sessions", "users"
   add_foreign_key "imported_transactions", "import_sessions"
   add_foreign_key "imported_transactions", "installment_plans"
   add_foreign_key "imported_transactions", "recurring_commitments"
   add_foreign_key "imported_transactions", "transactions", column: "matched_transaction_id"
+  add_foreign_key "installment_plans", "accounts", column: "from_account_id"
+  add_foreign_key "installment_plans", "accounts", column: "to_account_id"
   add_foreign_key "installment_plans", "categories"
   add_foreign_key "installment_plans", "users"
   add_foreign_key "reconciliation_entries", "imported_transactions"
@@ -223,8 +240,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_130000) do
   add_foreign_key "recurring_commitments", "accounts", column: "to_account_id"
   add_foreign_key "recurring_commitments", "categories"
   add_foreign_key "recurring_commitments", "users"
-  add_foreign_key "transactions", "accounts", column: "from_account_id"
-  add_foreign_key "transactions", "accounts", column: "to_account_id"
   add_foreign_key "transactions", "categories"
   add_foreign_key "transactions", "credit_statements"
   add_foreign_key "transactions", "installment_plans"

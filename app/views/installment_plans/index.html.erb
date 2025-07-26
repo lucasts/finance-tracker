@@ -89,7 +89,10 @@
           <div class="text-sm text-base-content/70 mb-4">
             <% first_transaction = plan.transactions.first %>
             <% if first_transaction %>
-              <div><strong>Conta:</strong> <%= first_transaction.from_account&.name || 'N/A' %></div>
+              <% if first_transaction %>
+                <% credit_entry = first_transaction.entries.find { |e| e.entry_type == 'credit' } %>
+                <div><strong>Conta:</strong> <%= credit_entry&.account&.name || 'N/A' %></div>
+              <% end %>
               <div><strong>Categoria:</strong> <%= first_transaction.category&.name || 'N/A' %></div>
             <% else %>
               <div><strong>Conta:</strong> N/A</div>

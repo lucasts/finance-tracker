@@ -34,31 +34,35 @@ class TransactionsController < ApplicationController
   end
 
   def create
-    # Check recurrence type and process accordingly
-    if params[:recurrence_type] == 'installment' || params[:create_installment_plan].present?
-      create_installment_transaction
-    elsif params[:recurrence_type] == 'recurring' || params[:create_recurring_commitment].present?
-      create_recurring_transaction
+    @transaction = CreateTransactionService.call(
+      **transaction_params_for_service,
+      user: current_user
+    )
+
+    Rails.logger.debug "Transaction params for service: #{transaction_params_for_service.inspect}"
+
+    if @transaction.persisted?
+          # Handle credit card statement association if necessary
+    if @transaction.credit_card_transaction?
+      associate_with_credit_statement(@transaction)
+      @transaction.save # Re-save to store statement association
+    end
+      redirect_to transactions_path, notice: 'Transaction was successfully created.'
     else
-      create_single_transaction
+      render :new, status: :unprocessable_entity
     end
   end
 
   def edit; end
 
   def update
-    # Reassociate with statement if account or date changed
-    if @transaction.from_account&.account_type&.code == "CREDIT_CARD"
-      associate_with_credit_statement(@transaction)
-    end
-    
-    # Apply updated params
-    @transaction.assign_attributes(transaction_params)
-    
-    # Reapply intelligent defaults after changes
-    apply_intelligent_defaults(@transaction)
-    
-    if @transaction.save
+    # For updates, we might need a different service or approach
+    # For now, let's focus on creation. This part will need refactoring.
+    if @transaction.update(transaction_params)
+      if @transaction.credit_card_transaction?
+        associate_with_credit_statement(@transaction)
+        @transaction.save
+      end
       redirect_to transactions_path, notice: t('messages.transaction.updated')
     else
       render :edit, status: :unprocessable_entity
@@ -76,94 +80,64 @@ class TransactionsController < ApplicationController
     @transaction = current_user_scope(Transaction).find(params[:id])
   end
 
-  def apply_intelligent_defaults(transaction)
-    # If payment_date not specified, use event_date
-    transaction.payment_date ||= transaction.event_date
+  def transaction_params_for_service
+    # This method prepares the params for the CreateTransactionService
+    base_params = params.require(:transaction).permit(
+      :description, 
+      :amount, 
+      :event_date, 
+      :payment_date, 
+      :transaction_type,
+      :category_id
+    )
     
-    # Automatically determine status based on business rules
-    transaction.status = determine_automatic_status(transaction) if transaction.status.blank?
+    entries_attrs = build_entries_from_form(params[:transaction])
     
-    # For credit cards, adjust payment_date automatically
-    if transaction.from_account&.account_type&.code == "CREDIT_CARD" && transaction.from_account.due_day.present?
-      # Payment date is on statement due date (next month)
-      event_date = transaction.event_date
-      due_date = Date.new(event_date.year, event_date.month, transaction.from_account.due_day)
-      
-      # If already past this month's closing, go to next
-      if transaction.from_account.closing_day.present? && event_date.day > transaction.from_account.closing_day
-        due_date = due_date.next_month
-      else
-        due_date = due_date.next_month
-      end
-      
-      transaction.payment_date = due_date
-    end
+    # Add category if provided
+    category = Category.find_by(id: base_params[:category_id]) if base_params[:category_id].present?
     
-    # Auto-detect category based on description if not specified
-    if transaction.category_id.blank? && transaction.description.present?
-      suggested_category = suggest_category_from_description(transaction.description)
-      transaction.category_id = suggested_category&.id if suggested_category
-    end
+    base_params.except(:category_id).merge(
+      entries_attributes: entries_attrs,
+      category: category
+    )
   end
 
-  def determine_automatic_status(transaction)
-    current_date = Date.current
-    payment_date = transaction.payment_date || transaction.event_date
-    
-    # Rules to determine status automatically:
-    # 1. If payment date is in the future -> pending
-    # 2. If today or past -> confirmed (assumed occurred)
-    # 3. For installments: first installments confirmed, future pending
-    
-    if payment_date > current_date
-      'pending'  # Future transaction
-    else
-      'confirmed'  # Current or past transaction (assumed occurred)
+  def build_entries_from_form(params)
+    # This method translates from/to account IDs from the form into debit/credit entries
+    from_account_id = params[:from_account_id]
+    to_account_id = params[:to_account_id]
+    amount = params[:amount].to_d
+
+    unless from_account_id && to_account_id && amount > 0
+      # Add an error to the model instance if params are invalid
+      @transaction ||= current_user.transactions.new
+      @transaction.errors.add(:base, "Both from and to accounts must be selected, and amount must be positive.")
+      return [] # Return empty to fail validation in the service
     end
+
+    [
+      { account_id: to_account_id, entry_type: 'debit', amount: amount },
+      { account_id: from_account_id, entry_type: 'credit', amount: amount }
+    ]
   end
 
-  def suggest_category_from_description(description)
-    return nil if description.blank?
-    
-    desc = description.downcase
-    
-    # Keyword mapping for categories
-    category_keywords = {
-      'Supermercado' => ['mercado', 'supermercado', 'zaffari', 'carrefour', 'walmart', 'big'],
-      'Farmácia' => ['farmácia', 'panvel', 'droga', 'medicamento', 'remédio'],
-      'Combustível' => ['posto', 'gasolina', 'álcool', 'combustível', 'ipiranga', 'shell'],
-      'Restaurante' => ['restaurante', 'ifood', 'uber eats', 'pizza', 'lanche', 'café'],
-      'Saúde' => ['médico', 'dentista', 'hospital', 'consulta', 'exame'],
-      'Educação' => ['escola', 'faculdade', 'curso', 'material escolar', 'mensalidade'],
-      'Transporte' => ['uber', '99', 'ônibus', 'taxi', 'passagem', 'transporte'],
-      'Lazer' => ['cinema', 'teatro', 'parque', 'viagem', 'netflix', 'spotify']
-    }
-    
-    category_keywords.each do |category_name, keywords|
-      if keywords.any? { |keyword| desc.include?(keyword) }
-        return Category.find_by(name: category_name)
-      end
-    end
-    
-    nil
+  # Keep the original transaction_params for the update action for now
+  def transaction_params
+    params.require(:transaction).permit(
+      :description, 
+      :amount, 
+      :event_date, 
+      :payment_date, 
+      :transaction_type,
+      :from_account_id, # Still needed for the form
+      :to_account_id    # Still needed for the form
+    )
   end
 
   def associate_with_credit_statement(transaction)
+    # Use the service to find or create the statement
     statement = CreditStatementService.find_or_create_for_transaction(transaction)
-    transaction.credit_statement = statement if statement
-  end
-
-  def transaction_params
-    permitted = params.require(:transaction).permit(
-      :description, :amount, :transaction_type, :event_date, :payment_date,
-      :from_account_id, :to_account_id, :category_id, :installment,
-      :recurrence_type, :credit_statement_id,
-      :recurrence_frequency, :installment_number,
-      :status
-    )
-    
-    permitted[:amount] = Transaction.normalize_amount_param(permitted[:amount]) if permitted[:amount].present?
-    permitted
+    transaction.update_column(:credit_statement_id, statement.id) if statement
   end
 
   # New methods for the robust model
@@ -182,7 +156,7 @@ class TransactionsController < ApplicationController
     apply_intelligent_defaults(@transaction)
     
     # Auto-associate with statement if it's a credit card
-    if @transaction.from_account&.account_type&.code == "CREDIT_CARD"
+    if @transaction.credit_card_transaction?
       associate_with_credit_statement(@transaction)
     end
     
@@ -214,7 +188,7 @@ class TransactionsController < ApplicationController
         @transaction.recurrence_type = 'recurring'
         @transaction.recurring_commitment = recurring_commitment
         apply_intelligent_defaults(@transaction)
-        if @transaction.from_account&.account_type&.code == "CREDIT_CARD"
+        if @transaction.credit_card_transaction?
           associate_with_credit_statement(@transaction)
         end
         if @transaction.save
@@ -261,12 +235,12 @@ class TransactionsController < ApplicationController
 
       if installment_plan.save
         # Create all installment transactions
-        success = installment_plan.create_installment_transactions!(
+        success = installment_plan.create_installment_transactions!({
           description_base: transaction_params[:description],
           transaction_type: transaction_params[:transaction_type],
           from_account_id: transaction_params[:from_account_id],
           to_account_id: transaction_params[:to_account_id]
-        )
+        })
 
         if success
           # Apply special logic for credit cards on each transaction
@@ -303,20 +277,6 @@ class TransactionsController < ApplicationController
     @transaction = Transaction.new(transaction_params) if @transaction.nil?
     @transaction.errors.add(:base, "Erro ao criar parcelamento")
     render :new, status: :unprocessable_entity
-  end
-
-  def validate_account_ownership(transaction)
-    if transaction.from_account_id.present?
-      from_account = current_user_scope(Account).find_by(id: transaction.from_account_id)
-      return false unless from_account
-    end
-    
-    if transaction.to_account_id.present?
-      to_account = current_user_scope(Account).find_by(id: transaction.to_account_id)
-      return false unless to_account
-    end
-    
-    true
   end
 
 end

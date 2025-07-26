@@ -4,7 +4,6 @@ FactoryBot.define do
     event_date { Faker::Date.backward(days: 14) }
     payment_date { event_date }
     association :user
-    status { %w[pending confirmed cancelled].sample }
     description { Faker::Lorem.sentence }
     
     # Default to expense transaction
@@ -13,40 +12,52 @@ FactoryBot.define do
     # Use transient attributes to ensure user consistency
     transient do
       user_for_association { user }
+      from_account { association(:account, :asset, user: user_for_association) }
+      to_account { association(:account, :expense_destination, user: user_for_association) }
     end
     
-    from_account { association(:account, :asset, user: user_for_association) }
-    to_account { association(:account, :expense_destination, user: user_for_association) }
     category { association(:category, :expense, user: user_for_association) }
+    
+    # Create entries after the transaction is built
+    after(:build) do |transaction, evaluator|
+      transaction.entries.build([
+        { account_id: evaluator.to_account.id, entry_type: 'debit', amount: transaction.amount },
+        { account_id: evaluator.from_account.id, entry_type: 'credit', amount: transaction.amount }
+      ])
+    end
     
     trait :income do
       transaction_type { 'income' }
-      from_account { association(:account, :income_source, user: user_for_association) }
-      to_account { association(:account, :asset, user: user_for_association) }
+      transient do
+        from_account { association(:account, :income_source, user: user_for_association) }
+        to_account { association(:account, :asset, user: user_for_association) }
+      end
       category { association(:category, :income, user: user_for_association) }
     end
     
     trait :expense do
       transaction_type { 'expense' }
-      from_account { association(:account, :asset, user: user_for_association) }
-      to_account { association(:account, :expense_destination, user: user_for_association) }
+      transient do
+        from_account { association(:account, :asset, user: user_for_association) }
+        to_account { association(:account, :expense_destination, user: user_for_association) }
+      end
       category { association(:category, :expense, user: user_for_association) }
     end
     
     trait :transfer do
       transaction_type { 'transfer' }
-      from_account { association(:account, :asset, user: user_for_association) }
-      to_account { association(:account, :asset, user: user_for_association) }
+      transient do
+        from_account { association(:account, :asset, user: user_for_association) }
+        to_account { association(:account, :asset, user: user_for_association) }
+      end
       category { nil }  # Transfers don't have categories
     end
     
     trait :pending do
-      status { 'pending' }
       payment_date { 1.week.from_now }
     end
     
     trait :confirmed do
-      status { 'confirmed' }
       payment_date { 1.week.ago }
     end
     

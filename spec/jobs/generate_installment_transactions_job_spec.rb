@@ -16,7 +16,7 @@ RSpec.describe GenerateInstallmentTransactionsJob, type: :job do
 
   it 'does not generate if all installments already exist' do
     3.times do |i|
-      create(:transaction, :installment, user: user, category: category, from_account: account, installment_plan: plan, event_date: Date.current + i.months, transaction_type: 'expense')
+      create(:transaction, :installment, user: user, category: category, installment_plan: plan, event_date: Date.current + i.months, transaction_type: 'expense', from_account: account)
     end
     expect {
       described_class.perform_now(Date.current)

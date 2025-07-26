@@ -32,11 +32,22 @@ class User < ApplicationRecord
     
     return DEFAULT_ZERO_BALANCE if asset_account_ids.empty?
     
-    # Calculate balance with 2 queries instead of N+1
-    credits = Transaction.where(to_account_id: asset_account_ids, status: 'confirmed')
-                        .sum(:amount) || DEFAULT_ZERO_BALANCE
-    debits = Transaction.where(from_account_id: asset_account_ids, status: 'confirmed')
-                       .sum(:amount) || DEFAULT_ZERO_BALANCE
+    # Calculate balance using the new entries system
+    # Credits to asset accounts (money coming in)
+    credits = Entry.joins(:account)
+                  .where(accounts: { id: asset_account_ids })
+                  .where(entry_type: 'debit')
+                  .joins('JOIN transactions ON entries.transaction_id = transactions.id')
+                  .where(transactions: { status: 'confirmed' })
+                  .sum(:amount) || DEFAULT_ZERO_BALANCE
+    
+    # Debits from asset accounts (money going out)
+    debits = Entry.joins(:account)
+                 .where(accounts: { id: asset_account_ids })
+                 .where(entry_type: 'credit')
+                 .joins('JOIN transactions ON entries.transaction_id = transactions.id')
+                 .where(transactions: { status: 'confirmed' })
+                 .sum(:amount) || DEFAULT_ZERO_BALANCE
     
     credits - debits
   end

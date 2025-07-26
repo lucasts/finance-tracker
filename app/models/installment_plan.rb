@@ -8,10 +8,15 @@
 #
 class InstallmentPlan < ApplicationRecord
   include PaidAmountCalculations
+  include MoneyParsingConcern
   
   # User association
   belongs_to :user
+  
+  # Existing associations
   belongs_to :category
+  belongs_to :from_account, class_name: 'Account'
+  belongs_to :to_account, class_name: 'Account'
   
   has_many :transactions, dependent: :nullify
   
@@ -148,31 +153,42 @@ class InstallmentPlan < ApplicationRecord
           amount = total_amount - paid_so_far
         end
         
-        transaction = Transaction.new(
+        # Use CreateTransactionService to create the transaction with proper entries
+        transaction = CreateTransactionService.call(
           description: "#{transaction_params[:description_base]} (#{number}/#{installment_count})",
           amount: amount.round(2),
           transaction_type: transaction_params[:transaction_type],
-          from_account_id: transaction_params[:from_account_id],
-          to_account_id: transaction_params[:to_account_id],
-          category: category,
-          installment_plan: self,
-          installment_number: number,
-          payment_date: installment_date,
           event_date: installment_date,
-          recurrence_type: 'installment',
-          user: user  # Add the user from the installment plan
+          payment_date: installment_date,
+          category: category,
+          entries_attributes: [
+            { account_id: transaction_params[:to_account_id], entry_type: 'debit', amount: amount.round(2) },
+            { account_id: transaction_params[:from_account_id], entry_type: 'credit', amount: amount.round(2) }
+          ],
+          user: user
         )
+        
+        # Associate with installment plan
+        if transaction.persisted?
+          transaction.update!(
+            installment_plan: self,
+            installment_number: number,
+            recurrence_type: 'installment'
+          )
+        else
+          raise ActiveRecord::RecordInvalid, transaction
+        end
         
         # Aplicar lógica de status específica para parcelas
         # Primeira parcela: confirmed se for atual/passada, senão pending
         # Demais parcelas: sempre pending
-        if number == 1 && installment_date <= Date.current
-          transaction.status = 'confirmed'
+        status = if number == 1 && installment_date <= Date.current
+          'confirmed'
         else
-          transaction.status = 'pending'
+          'pending'
         end
         
-        transaction.save!
+        transaction.update!(status: status) if transaction.persisted?
       end
     end
     

@@ -57,7 +57,47 @@ accounts = {
 
 # === MAPEAMENTO DAS CATEGORIAS PADRÃO ===
 puts "Carregando categorias padrão do usuário..."
-categories = Category.where(user: default_user).index_by(&:name)
+$categories = Category.where(user: default_user).index_by(&:name)
+
+# Função helper para criar transações usando o novo serviço
+def create_transaction(**params)
+  from_account = params.delete(:from_account)
+  to_account = params.delete(:to_account)
+  category_name = params.delete(:category_name)
+  
+  # Remove parâmetros obsoletos
+  params.delete(:recurrence_type)
+  params.delete(:status)
+
+  # Adiciona payment_date padrão se não fornecido
+  params[:payment_date] ||= params[:event_date]
+
+  # Adiciona a categoria se o nome for fornecido
+  params[:category] = $categories[category_name] if category_name.present? && $categories[category_name]
+
+  # Constrói os lançamentos de entrada/saída
+  params[:entries_attributes] = [
+    { account_id: to_account.id, entry_type: 'debit', amount: params[:amount] },
+    { account_id: from_account.id, entry_type: 'credit', amount: params[:amount] }
+  ]
+
+  # Chama o serviço
+  transaction = CreateTransactionService.call(**params)
+
+  # Associa com a fatura de crédito, se aplicável
+  if from_account.account_type.code == "CREDIT_CARD"
+    statement = CreditStatementService.find_or_create_for_transaction(transaction)
+    transaction.update_column(:credit_statement_id, statement.id) if statement
+  end
+
+  transaction
+end
+
+# Função helper para associar transação com fatura de cartão (compatibilidade)
+def associar_com_fatura(transaction, statements, accounts)
+  # Esta função não é mais necessária pois a associação já é feita na create_transaction
+  # Mantida apenas para compatibilidade com o código existente
+end
 
 # === FATURAS DE CARTÃO DE CRÉDITO (CRIAR ANTES DAS TRANSAÇÕES) ===
 puts "Criando faturas de cartão..."
@@ -108,33 +148,6 @@ statements = {}
   )
 end
 
-# Função helper para associar transação de cartão à fatura correta
-def associar_com_fatura(transaction, statements, accounts)
-  return unless transaction.from_account&.account_type&.code == "CREDIT_CARD"
-  
-  # Determina qual mês da fatura baseado na data de fechamento
-  closing_day = transaction.from_account.closing_day
-  event_date = transaction.event_date
-  
-  # Se comprou antes do fechamento, vai para fatura do mesmo mês
-  # Se comprou depois do fechamento, vai para fatura do mês seguinte
-  cutoff = Date.new(event_date.year, event_date.month, closing_day)
-  fatura_mes = (event_date <= cutoff) ? event_date : event_date + 1.month
-  
-  # Encontra a fatura correspondente
-  account_key = case transaction.from_account
-  when accounts[:nubank_pai] then :nubank_pai
-  when accounts[:inter_mae] then :inter_mae
-  when accounts[:santander] then :santander
-  end
-  
-  if account_key && statements[account_key]
-    offset = ((fatura_mes.year - Date.today.year) * 12) + (fatura_mes.month - Date.today.month)
-    fatura = statements[account_key][offset]
-    transaction.update!(credit_statement: fatura) if fatura
-  end
-end
-
 # === GERAÇÃO DE TRANSAÇÕES REALISTAS ===
 puts "Gerando transações para 12 meses..."
 
@@ -150,49 +163,40 @@ meses_gerados = []
   # === RECEITAS MENSAIS (PAI E MÃE) ===
   
   # Salário do pai - R$ 4.000 (dia 5)
-  Transaction.create!(
+  create_transaction(
     description: "Salário - João Silva",
     amount: 4000.00,
     transaction_type: "income",
     event_date: Date.new(mes_atual.year, mes_atual.month, 5),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, 5),
     from_account: accounts[:empresa_pai],
     to_account: accounts[:itau_pai],
-    category: categories["Salário"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Salário",
     user: default_user
   )
   
   # Salário da mãe - R$ 8.500 (dia 10)
-  Transaction.create!(
+  create_transaction(
     description: "Salário - Maria Silva",
     amount: 8500.00,
     transaction_type: "income",
     event_date: Date.new(mes_atual.year, mes_atual.month, 10),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, 10),
     from_account: accounts[:empresa_mae],
     to_account: accounts[:bradesco_mae],
-    category: categories["Salário"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Salário",
     user: default_user
   )
   
   # Freelance ocasional (30% de chance por mês)
   if rand < 0.3
     valor_freelance = rand(800..2500)
-    Transaction.create!(
+    create_transaction(
       description: "Trabalho freelance - Consultoria",
       amount: valor_freelance,
       transaction_type: "income",
       event_date: Date.new(mes_atual.year, mes_atual.month, rand(15..25)),
-      payment_date: Date.new(mes_atual.year, mes_atual.month, rand(15..25)),
       from_account: accounts[:freelance],
       to_account: [accounts[:itau_pai], accounts[:bradesco_mae]].sample,
-      category: categories["Outras Receitas"],
-      recurrence_type: "single",
-      status: "confirmed",
+      category_name: "Outras Receitas",
       user: default_user
     )
   end
@@ -200,77 +204,62 @@ meses_gerados = []
   # === DESPESAS FIXAS MENSAIS ===
   
   # Escola dos 3 filhos - R$ 2.800 (dia 8)
-  Transaction.create!(
+  create_transaction(
     description: "Mensalidade escolar - 3 filhos",
     amount: 2800.00,
     transaction_type: "expense",
     event_date: Date.new(mes_atual.year, mes_atual.month, 8),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, 8),
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:escola],
-    category: categories["Educação"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Educação",
     user: default_user
   )
   
   # Plano de saúde família - R$ 1.450 (dia 12)
-  Transaction.create!(
+  create_transaction(
     description: "Plano de saúde familiar - Unimed",
     amount: 1450.00,
     transaction_type: "expense",
     event_date: Date.new(mes_atual.year, mes_atual.month, 12),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, 12),
     from_account: accounts[:itau_pai],
     to_account: accounts[:saude],
-    category: categories["Saúde"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Saúde",
     user: default_user
   )
   
   # Aluguel/Financiamento casa - R$ 2.200 (dia 10)
-  Transaction.create!(
+  create_transaction(
     description: "Financiamento habitacional - Caixa",
     amount: 2200.00,
     transaction_type: "expense",
     event_date: Date.new(mes_atual.year, mes_atual.month, 10),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, 10),
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:banco],
-    category: categories["Habitação"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Habitação",
     user: default_user
   )
   
   # Internet e TV - R$ 180 (dia 15)
-  Transaction.create!(
+  create_transaction(
     description: "Internet + TV - Claro",
     amount: 180.00,
     transaction_type: "expense",
     event_date: Date.new(mes_atual.year, mes_atual.month, 15),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, 15),
     from_account: accounts[:itau_pai],
     to_account: accounts[:casa],
-    category: categories["Serviços e Assinaturas"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Serviços e Assinaturas",
     user: default_user
   )
   
   # Celular família - R$ 220 (dia 20)
-  Transaction.create!(
+  create_transaction(
     description: "Plano celular família - Vivo",
     amount: 220.00,
     transaction_type: "expense",
     event_date: Date.new(mes_atual.year, mes_atual.month, 20),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, 20),
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:casa],
-    category: categories["Serviços e Assinaturas"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Serviços e Assinaturas",
     user: default_user
   )
   
@@ -289,22 +278,16 @@ meses_gerados = []
     
     mercados = ["Zaffari", "Big", "Carrefour", "Extra", "Walmart"]
     
-    transaction = Transaction.create!(
+    create_transaction(
       description: "Supermercado #{mercados.sample} - Compras família",
       amount: valor_compra,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, dia_compra),
-      payment_date: Date.new(mes_atual.year, mes_atual.month, dia_compra),
       from_account: [accounts[:itau_pai], accounts[:bradesco_mae], accounts[:nubank_pai]].sample,
       to_account: accounts[:mercado],
-      category: categories["Supermercado"],
-      recurrence_type: "single",
-      status: "confirmed",
-    user: default_user
+      category_name: "Supermercado",
+      user: default_user
     )
-    
-    # Associar com fatura se for cartão de crédito
-    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === COMBUSTÍVEL (2-3 VEZES POR MÊS) ===
@@ -317,22 +300,16 @@ meses_gerados = []
     
     postos = ["Ipiranga", "Shell", "Petrobras", "Texaco"]
     
-    transaction = Transaction.create!(
+    create_transaction(
       description: "Combustível - Posto #{postos.sample}",
       amount: valor_combustivel,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, dia_abastecimento),
-      payment_date: Date.new(mes_atual.year, mes_atual.month, dia_abastecimento),
       from_account: [accounts[:itau_pai], accounts[:nubank_pai]].sample,
       to_account: accounts[:posto],
-      category: categories["Transporte"],
-      recurrence_type: "single",
-      status: "confirmed",
-    user: default_user
+      category_name: "Transporte",
+      user: default_user
     )
-    
-    # Associar com fatura se for cartão de crédito
-    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === FARMÁCIA (1-2 VEZES POR MÊS) ===
@@ -341,22 +318,16 @@ meses_gerados = []
     valor_farmacia = rand(45..250)
     farmacias = ["Panvel", "Droga Raia", "Drogasil", "Pague Menos"]
     
-    transaction = Transaction.create!(
+    create_transaction(
       description: "Farmácia #{farmacias.sample} - Medicamentos",
       amount: valor_farmacia,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, rand(5..25)),
-      payment_date: Date.new(mes_atual.year, mes_atual.month, rand(5..25)),
       from_account: [accounts[:bradesco_mae], accounts[:inter_mae]].sample,
       to_account: accounts[:farmacia],
-      category: categories["Saúde"],
-      recurrence_type: "single",
-      status: "confirmed",
-    user: default_user
+      category_name: "Saúde",
+      user: default_user
     )
-    
-    # Associar com fatura se for cartão de crédito
-    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === RESTAURANTES E DELIVERY (6-10 VEZES POR MÊS) ===
@@ -369,22 +340,16 @@ meses_gerados = []
       "Açaí família", "Churrascaria", "iFood - Burguer King", "Sorveteria"
     ]
     
-    transaction = Transaction.create!(
+    create_transaction(
       description: opcoes_delivery.sample,
       amount: valor_refeicao,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
-      payment_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
       from_account: [accounts[:nubank_pai], accounts[:inter_mae], accounts[:santander]].sample,
       to_account: accounts[:lazer],
-      category: categories["Restaurante e Delivery"],
-      recurrence_type: "single",
-      status: "confirmed",
-    user: default_user
+      category_name: "Restaurante e Delivery",
+      user: default_user
     )
-    
-    # Associar com fatura se for cartão de crédito
-    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === TRANSPORTE URBANO ===
@@ -393,22 +358,16 @@ meses_gerados = []
     valor_transporte = rand(15..85)
     tipos_transporte = ["Uber", "99", "Táxi", "Ônibus", "Estacionamento"]
     
-    transaction = Transaction.create!(
+    create_transaction(
       description: "Transporte - #{tipos_transporte.sample}",
       amount: valor_transporte,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
-      payment_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
       from_account: [accounts[:itau_pai], accounts[:bradesco_mae], accounts[:nubank_pai]].sample,
       to_account: accounts[:transporte],
-      category: categories["Transporte"],
-      recurrence_type: "single",
-      status: "confirmed",
-    user: default_user
+      category_name: "Transporte",
+      user: default_user
     )
-    
-    # Associar com fatura se for cartão de crédito
-    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === LAZER E ENTRETENIMENTO ===
@@ -421,22 +380,16 @@ meses_gerados = []
       "Boliche", "Escape room", "Netflix", "Spotify", "Amazon Prime"
     ]
     
-    transaction = Transaction.create!(
+    create_transaction(
       description: atividades.sample,
       amount: valor_lazer,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
-      payment_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
       from_account: [accounts[:inter_mae], accounts[:santander], accounts[:nubank_pai]].sample,
       to_account: accounts[:lazer],
-      category: categories["Serviços e Assinaturas"],
-      recurrence_type: "single",
-      status: "confirmed",
-    user: default_user
+      category_name: "Serviços e Assinaturas",
+      user: default_user
     )
-    
-    # Associar com fatura se for cartão de crédito
-    associar_com_fatura(transaction, statements, accounts)
   end
   
   # === ROUPAS E CALÇADOS (OCASIONAL) ===
@@ -446,22 +399,16 @@ meses_gerados = []
       valor_roupa = rand(120..450)
       lojas = ["C&A", "Renner", "Riachuelo", "Zara", "Nike", "Adidas", "Centauro"]
       
-      transaction = Transaction.create!(
+      create_transaction(
         description: "Roupas - #{lojas.sample}",
         amount: valor_roupa,
         transaction_type: "expense",
         event_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
-        payment_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
         from_account: [accounts[:santander], accounts[:inter_mae]].sample,
         to_account: accounts[:vestuario],
-        category: categories["Compras Diversas"],
-        recurrence_type: "single",
-        status: "confirmed",
-    user: default_user
+        category_name: "Compras Diversas",
+        user: default_user
       )
-      
-      # Associar com fatura se for cartão de crédito
-      associar_com_fatura(transaction, statements, accounts)
     end
   end
   
@@ -470,62 +417,50 @@ meses_gerados = []
   fator_sazonal = [1.2, 1.1, 0.9, 0.8, 0.8, 0.9, 1.0, 1.1, 1.0, 0.9, 1.0, 1.3][mes_atual.month - 1]
   valor_energia = (rand(280..450) * fator_sazonal).round(2)
   
-  Transaction.create!(
+  create_transaction(
     description: "Conta de luz - CEEE",
     amount: valor_energia,
     transaction_type: "expense",
     event_date: Date.new(mes_atual.year, mes_atual.month, rand(15..25)),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, rand(15..25)),
     from_account: accounts[:itau_pai],
     to_account: accounts[:casa],
-    category: categories["Habitação"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Habitação",
     user: default_user
   )
   
   # Água e esgoto
   valor_agua = rand(120..180)
-  Transaction.create!(
+  create_transaction(
     description: "Conta de água - DMAE",
     amount: valor_agua,
     transaction_type: "expense",
     event_date: Date.new(mes_atual.year, mes_atual.month, rand(18..28)),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, rand(18..28)),
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:casa],
-    category: categories["Habitação"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Habitação",
     user: default_user
   )
   
   # === ACADEMIA E ATIVIDADES FÍSICAS ===
-  Transaction.create!(
+  create_transaction(
     description: "Academia Smart Fit - João",
     amount: 79.90,
     transaction_type: "expense",
     event_date: Date.new(mes_atual.year, mes_atual.month, 5),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, 5),
     from_account: accounts[:itau_pai],
     to_account: accounts[:saude],
-    category: categories["Bem-estar"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Bem-estar",
     user: default_user
   )
   
-  Transaction.create!(
+  create_transaction(
     description: "Pilates - Maria",
     amount: 180.00,
     transaction_type: "expense",
     event_date: Date.new(mes_atual.year, mes_atual.month, 8),
-    payment_date: Date.new(mes_atual.year, mes_atual.month, 8),
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:saude],
-    category: categories["Bem-estar"],
-    recurrence_type: "single",
-    status: "confirmed",
+    category_name: "Bem-estar",
     user: default_user
   )
 end
@@ -542,7 +477,9 @@ tv_plan = InstallmentPlan.create!(user: default_user,
   total_amount: 3800.00,
   status: "active",
   notes: "Smart TV Samsung 65\" comprada na Black Friday",
-  category: categories["Compras Diversas"]
+  category: $categories["Compras Diversas"],
+  from_account_id: accounts[:santander].id,
+  to_account_id: accounts[:vestuario].id
 )
 
 # Use proper model method to create installment transactions
@@ -562,7 +499,9 @@ carro_plan = InstallmentPlan.create!(user: default_user,
   total_amount: 42720.00,
   status: "active",
   notes: "Fiat Cronos 2020 - financiamento de 48x",
-  category: categories["Compras Diversas"]
+  category: $categories["Compras Diversas"],
+  from_account_id: accounts[:bradesco_mae].id,
+  to_account_id: accounts[:banco].id
 )
 
 # Use proper model method to create installment transactions
@@ -582,7 +521,9 @@ moveis_plan = InstallmentPlan.create!(user: default_user,
   total_amount: 24000.00,
   status: "active",
   notes: "Móveis planejados para cozinha e quartos",
-  category: categories["Compras Diversas"]
+  category: $categories["Compras Diversas"],
+  from_account_id: accounts[:santander].id,
+  to_account_id: accounts[:casa].id
 )
 
 # Use proper model method to create installment transactions
@@ -602,7 +543,9 @@ emprestimo_plan = InstallmentPlan.create!(user: default_user,
   total_amount: 12000.00,
   status: "active",
   notes: "Empréstimo para reforma da casa",
-  category: categories["Finanças"]
+  category: $categories["Finanças"],
+  from_account_id: accounts[:itau_pai].id,
+  to_account_id: accounts[:banco].id
 )
 
 # Use proper model method to create installment transactions
@@ -623,7 +566,7 @@ salario_joao = RecurringCommitment.create!(user: default_user,
   recurrence_frequency: "monthly",
   start_date: 12.months.ago.beginning_of_month + 5.days,
   status: "active",
-  category: categories["Salário"],
+  category: $categories["Salário"],
   from_account: accounts[:empresa_pai],
   to_account: accounts[:itau_pai],
   notes: "Salário mensal como Gerente de TI"
@@ -636,7 +579,7 @@ salario_maria = RecurringCommitment.create!(user: default_user,
   recurrence_frequency: "monthly",
   start_date: 12.months.ago.beginning_of_month + 10.days,
   status: "active",
-  category: categories["Salário"],
+  category: $categories["Salário"],
   from_account: accounts[:empresa_mae],
   to_account: accounts[:bradesco_mae],
   notes: "Salário mensal como Consultora de RH"
@@ -649,7 +592,7 @@ aluguel = RecurringCommitment.create!(user: default_user,
   recurrence_frequency: "monthly",
   start_date: 12.months.ago.beginning_of_month + 10.days,
   status: "active",
-  category: categories["Habitação"],
+  category: $categories["Habitação"],
   from_account: accounts[:itau_pai],
   to_account: accounts[:casa],
   notes: "Aluguel mensal do apartamento de 3 quartos"
@@ -662,7 +605,7 @@ escola_filhos = RecurringCommitment.create!(user: default_user,
   recurrence_frequency: "monthly",
   start_date: 12.months.ago.beginning_of_month + 15.days,
   status: "active",
-  category: categories["Educação"],
+  category: $categories["Educação"],
   from_account: accounts[:bradesco_mae],
   to_account: accounts[:escola],
   notes: "Mensalidade dos dois filhos na escola particular"
@@ -675,7 +618,7 @@ internet_tv = RecurringCommitment.create!(user: default_user,
   recurrence_frequency: "monthly",
   start_date: 12.months.ago.beginning_of_month + 20.days,
   status: "active",
-  category: categories["Serviços e Assinaturas"],
+  category: $categories["Serviços e Assinaturas"],
   from_account: accounts[:itau_pai],
   to_account: accounts[:casa],
   notes: "Plano 300MB + canais premium"
@@ -688,7 +631,7 @@ academia = RecurringCommitment.create!(user: default_user,
   recurrence_frequency: "monthly",
   start_date: 12.months.ago.beginning_of_month + 8.days,
   status: "active",
-  category: categories["Bem-estar"],
+  category: $categories["Bem-estar"],
   from_account: accounts[:itau_pai],
   to_account: accounts[:saude],
   notes: "Plano casal na academia Smart Fit"
@@ -701,7 +644,7 @@ freelance_joao = RecurringCommitment.create!(user: default_user,
   recurrence_frequency: "monthly",
   start_date: 6.months.ago.beginning_of_month + 25.days,
   status: "active",
-  category: categories["Outras Receitas"],
+  category: $categories["Outras Receitas"],
   from_account: accounts[:freelance],
   to_account: accounts[:itau_pai],
   notes: "Consultoria em desenvolvimento de sistemas"
@@ -712,22 +655,10 @@ puts "Compromissos recorrentes criados: #{RecurringCommitment.count}"
 # === GERAR TRANSAÇÕES DOS COMPROMISSOS RECORRENTES ===
 puts "Gerando transações recorrentes usando o job oficial..."
 
-# Use the official job to generate recurring transactions for the past months
-# This ensures we use the proper model methods and business logic
-(1..12).each do |months_ago|
-  target_date = months_ago.months.ago.beginning_of_month
-  
-  # Generate transactions for each day of the month to catch all recurring commitments
-  (1..target_date.end_of_month.day).each do |day|
-    check_date = Date.new(target_date.year, target_date.month, day)
-    next if check_date > Date.current # Don't generate future transactions
-    
-    # Run the job for this specific date
-    result = GenerateRecurringTransactionsJob.new.perform(check_date)
-    if result[:generated_count] > 0
-      puts "  Generated #{result[:generated_count]} recurring transactions for #{check_date}"
-    end
-  end
+# Execute the job a few times to generate some recurring transactions
+# The job logic will determine which transactions should be generated
+3.times do
+  GenerateRecurringTransactionsJob.new.perform
 end
 
 puts "Transações recorrentes geradas automaticamente!"
@@ -749,7 +680,7 @@ CreditStatement.all.each do |fatura|
   if fatura.status == 'paid' && total_fatura > 0
     conta_origem = fatura.account.name.include?('João') ? accounts[:itau_pai] : accounts[:bradesco_mae]
     
-    Transaction.create!(
+    create_transaction(
       description: "Pagamento fatura #{fatura.account.name}",
       amount: total_fatura,
       transaction_type: "expense",
@@ -757,7 +688,7 @@ CreditStatement.all.each do |fatura|
       payment_date: fatura.paid_on,
       from_account: conta_origem,
       to_account: fatura.account,
-      category: categories["Finanças"],
+      category: $categories["Finanças"],
       recurrence_type: "single",
       status: "confirmed",
     user: default_user
@@ -797,17 +728,13 @@ puts "Criando transferências..."
     descricao = "Transferência para pagamento"
   end
   
-  Transaction.create!(
+  create_transaction(
     description: descricao,
     amount: valor_transferencia,
     transaction_type: "transfer",
     event_date: data_transferencia,
-    payment_date: data_transferencia,
     from_account: from_account,
     to_account: to_account,
-    category: nil,  # Transferências não têm categoria
-    recurrence_type: "single",
-    status: "confirmed",
     user: default_user
   )
 end
@@ -821,7 +748,7 @@ puts "Adicionando gastos extras e emergências..."
   valor_consulta = rand(200..600)
   medicos = ["Cardiologista", "Dermatologista", "Ortopedista", "Dentista", "Pediatra"]
   
-  Transaction.create!(
+  create_transaction(
     description: "Consulta #{medicos.sample} - particular",
     amount: valor_consulta,
     transaction_type: "expense",
@@ -829,7 +756,7 @@ puts "Adicionando gastos extras e emergências..."
     payment_date: data_consulta,
     from_account: accounts[:bradesco_mae],
     to_account: accounts[:saude],
-    category: categories["Saúde"],
+    category: $categories["Saúde"],
     recurrence_type: "single",
     status: "confirmed",
     user: default_user
@@ -842,7 +769,7 @@ end
   valor_manutencao = rand(300..1200)
   servicos = ["Revisão completa", "Troca de pneus", "Mecânica geral", "Funilaria"]
   
-  Transaction.create!(
+  create_transaction(
     description: "#{servicos.sample} - Honda Civic",
     amount: valor_manutencao,
     transaction_type: "expense",
@@ -850,7 +777,7 @@ end
     payment_date: data_manutencao,
     from_account: accounts[:itau_pai],
     to_account: accounts[:transporte],
-    category: categories["Manutenção"] || categories["Transporte"],
+    category: $categories["Manutenção"] || $categories["Transporte"],
     recurrence_type: "single",
     status: "confirmed",
     user: default_user
@@ -859,7 +786,7 @@ end
 
 # Viagem de família (1x nos últimos 12 meses)
 data_viagem = Date.today - rand(90..300).days
-transaction = Transaction.create!(
+transaction = create_transaction(
   description: "Viagem família - Gramado/RS",
   amount: 2800.00,
   transaction_type: "expense",
@@ -867,7 +794,7 @@ transaction = Transaction.create!(
   payment_date: data_viagem,
   from_account: accounts[:santander],
   to_account: accounts[:lazer],
-  category: categories["Lazer"],
+  category: $categories["Lazer"],
   recurrence_type: "single",
   status: "confirmed",
     user: default_user
@@ -878,7 +805,7 @@ associar_com_fatura(transaction, statements, accounts)
 
 # Alguns gastos de emergência que deixaram o mês negativo
 mes_negativo_1 = Date.today - 4.months
-transaction = Transaction.create!(
+transaction = create_transaction(
   description: "Troca de geladeira - emergência",
   amount: 2400.00,
   transaction_type: "expense",
@@ -886,7 +813,7 @@ transaction = Transaction.create!(
   payment_date: mes_negativo_1,
   from_account: accounts[:nubank_pai],
   to_account: accounts[:casa],
-  category: categories["Compras Diversas"],
+  category: $categories["Compras Diversas"],
   recurrence_type: "single",
   status: "confirmed",
     user: default_user
@@ -896,7 +823,7 @@ transaction = Transaction.create!(
 associar_com_fatura(transaction, statements, accounts)
 
 mes_negativo_2 = Date.today - 7.months
-transaction = Transaction.create!(
+transaction = create_transaction(
   description: "Dentista emergência - tratamento canal",
   amount: 1800.00,
   transaction_type: "expense",
@@ -904,7 +831,7 @@ transaction = Transaction.create!(
   payment_date: mes_negativo_2,
   from_account: accounts[:inter_mae],
   to_account: accounts[:saude],
-  category: categories["Saúde"],
+  category: $categories["Saúde"],
   recurrence_type: "single",
   status: "confirmed",
     user: default_user
@@ -917,7 +844,7 @@ associar_com_fatura(transaction, statements, accounts)
 puts "Criando compromissos futuros..."
 
 # Próxima viagem de família (planejada)
-Transaction.create!(
+create_transaction(
   description: "Viagem família - Florianópolis (planejada)",
   amount: 3200.00,
   transaction_type: "expense",
@@ -925,14 +852,14 @@ Transaction.create!(
   payment_date: Date.today + 45.days,
   from_account: accounts[:poupanca],
   to_account: accounts[:lazer],
-  category: categories["Lazer"],
+  category: $categories["Lazer"],
   recurrence_type: "single",
   status: "pending",
     user: default_user
 )
 
 # Material escolar próximo ano
-Transaction.create!(
+create_transaction(
   description: "Material escolar 2025 - 3 filhos",
   amount: 1200.00,
   transaction_type: "expense",
@@ -940,7 +867,7 @@ Transaction.create!(
   payment_date: Date.today + 60.days,
   from_account: accounts[:bradesco_mae],
   to_account: accounts[:escola],
-  category: categories["Educação"],
+  category: $categories["Educação"],
   recurrence_type: "single",
   status: "pending",
     user: default_user
@@ -976,3 +903,5 @@ meses_gerados.each do |mes_str|
 end
 
 puts "\nSeed realista finalizado com sucesso! 🎉"
+
+puts "=== SEEDING DEMO DATA COMPLETED ==="

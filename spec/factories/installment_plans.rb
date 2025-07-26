@@ -8,5 +8,7 @@ FactoryBot.define do
     status { 'active' }
     association :user
     association :category
+    association :from_account, factory: :account
+    association :to_account, factory: :account
   end
 end

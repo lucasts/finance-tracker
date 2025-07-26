@@ -83,17 +83,46 @@ class ImportSessionsController < ApplicationController
           default_category = Category.where(user: current_user).first || Category.first
           
           # Create new transaction with proper field mapping
-          transaction = Transaction.create!(
+          # Determine accounts based on transaction type
+          amount = imported_tx.amount.abs
+          transaction_type = imported_tx.amount >= 0 ? 'income' : 'expense'
+          
+          # For income: external source -> user account
+          # For expense: user account -> external destination
+          if transaction_type == 'income'
+            from_account_id = nil # External source (we'll create a default one)
+            to_account_id = @import_session.account.id
+          else
+            from_account_id = @import_session.account.id
+            to_account_id = nil # External destination (we'll create a default one)
+          end
+
+          # Find or create appropriate external account
+          external_account = Account.find_or_create_by(
             user: current_user,
-            from_account: @import_session.account,
-            to_account: nil,
+            name: transaction_type == 'income' ? 'Receitas Externas' : 'Gastos Externos',
+            account_type: AccountType.find_by(code: transaction_type == 'income' ? 'INCOME_SOURCE' : 'EXPENSE_DESTINATION')
+          )
+
+          # Set the correct account IDs
+          if transaction_type == 'income'
+            from_account_id = external_account.id
+          else
+            to_account_id = external_account.id
+          end
+
+          transaction = CreateTransactionService.call(
+            user: current_user,
             category: default_category,
             description: imported_tx.description,
-            amount: imported_tx.amount,
+            amount: amount,
             event_date: imported_tx.event_date || imported_tx.payment_date || Date.current,
             payment_date: imported_tx.payment_date || imported_tx.event_date || Date.current,
-            transaction_type: imported_tx.amount >= 0 ? 'income' : 'expense',
-            status: 'confirmed'
+            transaction_type: transaction_type,
+            entries_attributes: [
+              { account_id: to_account_id, entry_type: 'debit', amount: amount },
+              { account_id: from_account_id, entry_type: 'credit', amount: amount }
+            ]
           )
           
           # Create reconciliation entry

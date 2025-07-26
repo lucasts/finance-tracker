@@ -11,8 +11,7 @@ RSpec.describe Account, type: :model do
   describe 'associations' do
     it { should belong_to(:user) }
     it { should belong_to(:account_type) }
-    it { should have_many(:transactions_from).class_name('Transaction').with_foreign_key('from_account_id') }
-    it { should have_many(:transactions_to).class_name('Transaction').with_foreign_key('to_account_id') }
+    it { should have_many(:transactions) }
     it { should have_many(:import_sessions) }
   end
 

@@ -7,30 +7,29 @@ class Account < ApplicationRecord
   
   # Existing associations
   belongs_to :account_type
-  has_many :transactions_from, class_name: "Transaction", foreign_key: :from_account_id, dependent: :restrict_with_error
-  has_many :transactions_to, class_name: "Transaction", foreign_key: :to_account_id, dependent: :restrict_with_error
   has_many :import_sessions, dependent: :nullify
   has_many :credit_statements, dependent: :destroy
 
-  validates :name, presence: true
+  has_many :entries, dependent: :destroy
+  has_many :transactions, through: :entries, source: :transaction_record
 
-  alias_method :balance, :calculate_balance_from_transactions
+  validates :name, presence: true
 
   # Helper methods for different transaction types
   def income_transactions
-    transactions_to.income.confirmed
+    transactions.income.confirmed
   end
 
   def expense_transactions
-    transactions_from.expense.confirmed
+    transactions.expense.confirmed
   end
 
   def transfers_in
-    transactions_to.transfer.confirmed
+    transactions.transfer.confirmed
   end
 
   def transfers_out
-    transactions_from.transfer.confirmed
+    transactions.transfer.confirmed
   end
 
   alias_method :total_income, :total_income_amount

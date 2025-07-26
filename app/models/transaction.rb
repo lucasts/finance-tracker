@@ -6,8 +6,6 @@ class Transaction < ApplicationRecord
   belongs_to :user
   
   # Existing associations
-  belongs_to :from_account, class_name: "Account"
-  belongs_to :to_account, class_name: "Account", optional: true
   belongs_to :category, optional: true
   belongs_to :credit_statement, optional: true
   
@@ -15,8 +13,14 @@ class Transaction < ApplicationRecord
   belongs_to :recurring_commitment, optional: true
   belongs_to :installment_plan, optional: true
 
+  has_many :entries, foreign_key: 'transaction_id', dependent: :destroy, inverse_of: :transaction_record
+  has_many :accounts, through: :entries
+
+  accepts_nested_attributes_for :entries
+
   validates :description, :amount, :event_date, :payment_date, :transaction_type, presence: true
   validates :status, inclusion: { in: %w[pending confirmed cancelled] }
+  validate :balance_of_entries
   
   # Mutual exclusivity validation - transaction can only belong to ONE type
   validate :exclusive_association_validation
@@ -25,7 +29,6 @@ class Transaction < ApplicationRecord
   validate :category_type_compatibility
   
   # Specific validations for transfers
-  validate :accounts_for_transfer
   validate :category_for_transaction_type
   
   # Callbacks for status automation - refactored to use service
@@ -208,17 +211,6 @@ class Transaction < ApplicationRecord
     end
   end
 
-  def accounts_for_transfer
-    if transfer?
-      if from_account_id.blank? || to_account_id.blank?
-        errors.add(:base, "É necessário informar conta de origem e destino para transferências")
-      end
-      if from_account_id == to_account_id
-        errors.add(:base, "Conta de origem e destino não podem ser iguais em uma transferência")
-      end
-    end
-  end
-
   def category_for_transaction_type
     if transfer?
       errors.add(:category_id, "Transferência não deve ter categoria") if category_id.present?
@@ -237,8 +229,34 @@ class Transaction < ApplicationRecord
   end
 
   # Checks if this is a credit card transaction
+  # Entry-based methods for double-entry bookkeeping
+  def debit_entries
+    entries.where(entry_type: 'debit')
+  end
+
+  def credit_entries
+    entries.where(entry_type: 'credit')
+  end
+
+  def debit_accounts
+    debit_entries.includes(:account).map(&:account)
+  end
+
+  def credit_accounts
+    credit_entries.includes(:account).map(&:account)
+  end
+
+  # For simple transactions with one debit and one credit
+  def primary_debit_account
+    debit_entries.first&.account
+  end
+
+  def primary_credit_account
+    credit_entries.first&.account
+  end
+
   def credit_card_transaction?
-    from_account&.account_type&.code == "CREDIT_CARD"
+    entries.joins(:account).where(accounts: { account_type: AccountType.where(code: "CREDIT_CARD") }).where(entry_type: 'credit').exists?
   end
 
   private
@@ -262,5 +280,19 @@ class Transaction < ApplicationRecord
     
     # Use the service to update the statement amount
     CreditStatementService.update_statement_amount(credit_statement)
+  end
+
+  def balance_of_entries
+    return if entries.empty?
+
+    total = entries.reduce(0) do |sum, entry|
+      if entry.debit?
+        sum + entry.amount
+      else
+        sum - entry.amount
+      end
+    end
+
+    errors.add(:base, 'The sum of debits and credits must be zero.') unless total.zero?
   end
 end
