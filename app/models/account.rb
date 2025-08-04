@@ -1,5 +1,4 @@
 class Account < ApplicationRecord
-  include BalanceCalculations
   include MoneyParsingConcern
   
   # User association
