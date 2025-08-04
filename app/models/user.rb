@@ -21,35 +21,10 @@ class User < ApplicationRecord
 
   # Business methods for financial calculations
   def total_balance
-    # OPTIMIZED: Single query instead of N+1
-    # In double-entry bookkeeping, only sum asset accounts (user's actual accounts)
-    # External accounts (revenue/expense) are used for double-entry but don't represent user's wealth
-    
-    # Get all asset account IDs
-    asset_account_ids = accounts.joins(:account_type)
-                              .where(account_types: { role: 'asset' })
-                              .pluck(:id)
-    
-    return DEFAULT_ZERO_BALANCE if asset_account_ids.empty?
-    
-    # Calculate balance using the new entries system
-    # Credits to asset accounts (money coming in)
-    credits = Entry.joins(:account)
-                  .where(accounts: { id: asset_account_ids })
-                  .where(entry_type: 'debit')
-                  .joins('JOIN transactions ON entries.transaction_id = transactions.id')
-                  .where(transactions: { status: 'confirmed' })
-                  .sum(:amount) || DEFAULT_ZERO_BALANCE
-    
-    # Debits from asset accounts (money going out)
-    debits = Entry.joins(:account)
-                 .where(accounts: { id: asset_account_ids })
-                 .where(entry_type: 'credit')
-                 .joins('JOIN transactions ON entries.transaction_id = transactions.id')
-                 .where(transactions: { status: 'confirmed' })
-                 .sum(:amount) || DEFAULT_ZERO_BALANCE
-    
-    credits - debits
+    # Sum balances from all asset accounts (user's actual accounts)
+    accounts.joins(:account_type)
+            .where(account_types: { role: 'asset' })
+            .sum(&:balance)
   end
 
   def monthly_income(date = Date.current)

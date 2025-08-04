@@ -237,7 +237,23 @@ RSpec.describe AccountsController, type: :request do
     end
 
     context 'with associated transactions' do
-      let!(:transaction) { create(:transaction, :confirmed, user: user, from_account: account) }
+      let!(:category) { create(:category, user: user) }
+      let!(:to_account) { create(:account, user: user) }
+      let!(:transaction) do
+        CreateTransactionService.call(
+          user: user,
+          description: "Test transaction",
+          amount: 100,
+          event_date: Date.current,
+          payment_date: Date.current,
+          transaction_type: 'expense',
+          category: category,
+          entries_attributes: [
+            { account_id: to_account.id, entry_type: 'debit', amount: 100 },
+            { account_id: account.id, entry_type: 'credit', amount: 100 }
+          ]
+        )
+      end
 
       it 'handles dependent destroy properly' do
         expect {

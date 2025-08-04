@@ -34,19 +34,30 @@ class TransactionsController < ApplicationController
   end
 
   def create
+    # Check if creating installment plan or recurring commitment
+    if params[:create_installment_plan].present?
+      create_installment_transaction
+    elsif params[:create_recurring_commitment].present?
+      create_recurring_transaction  
+    else
+      create_single_transaction
+    end
+  end
+
+  def create_single_transaction
+    service_params = transaction_params_for_service.to_h.symbolize_keys
+    
     @transaction = CreateTransactionService.call(
-      **transaction_params_for_service,
+      **service_params,
       user: current_user
     )
 
-    Rails.logger.debug "Transaction params for service: #{transaction_params_for_service.inspect}"
-
     if @transaction.persisted?
-          # Handle credit card statement association if necessary
-    if @transaction.credit_card_transaction?
-      associate_with_credit_statement(@transaction)
-      @transaction.save # Re-save to store statement association
-    end
+      # Handle credit card statement association if necessary
+      if @transaction.credit_card_transaction?
+        associate_with_credit_statement(@transaction)
+        @transaction.save # Re-save to store statement association
+      end
       redirect_to transactions_path, notice: 'Transaction was successfully created.'
     else
       render :new, status: :unprocessable_entity
@@ -129,6 +140,7 @@ class TransactionsController < ApplicationController
       :event_date, 
       :payment_date, 
       :transaction_type,
+      :category_id,
       :from_account_id, # Still needed for the form
       :to_account_id    # Still needed for the form
     )
@@ -142,25 +154,70 @@ class TransactionsController < ApplicationController
 
   # New methods for the robust model
   def create_single_transaction
-    @transaction = current_user.transactions.build(transaction_params)
-    @transaction.recurrence_type = 'single'
+    # Build basic transaction attributes (excluding from_account_id/to_account_id)
+    transaction_attrs = transaction_params_for_service.except(:from_account_id, :to_account_id)
+    transaction_attrs[:user] = current_user
+    transaction_attrs[:recurrence_type] = 'single'
     
-    # Validate that accounts belong to current user
-    unless validate_account_ownership(@transaction)
-      @transaction.errors.add(:base, "Conta não encontrada ou não autorizada")
+    # Validate accounts belong to current user
+    from_account_id = transaction_params[:from_account_id]
+    to_account_id = transaction_params[:to_account_id]
+    
+    if from_account_id.present? && !current_user.accounts.exists?(id: from_account_id)
+      @transaction = current_user.transactions.build(transaction_attrs)
+      @transaction.errors.add(:base, "Conta de origem não encontrada ou não autorizada")
       render :new, status: :unprocessable_entity
       return
     end
     
-    # Apply intelligent defaults and validations
-    apply_intelligent_defaults(@transaction)
-    
-    # Auto-associate with statement if it's a credit card
-    if @transaction.credit_card_transaction?
-      associate_with_credit_statement(@transaction)
+    if to_account_id.present? && !current_user.accounts.exists?(id: to_account_id)
+      @transaction = current_user.transactions.build(transaction_attrs)
+      @transaction.errors.add(:base, "Conta de destino não encontrada ou não autorizada")
+      render :new, status: :unprocessable_entity
+      return
     end
     
-    if @transaction.save
+    # Build entries based on transaction type
+    entries = build_entries_for_transaction(transaction_attrs, from_account_id, to_account_id)
+    
+    # For transfers, ensure both accounts are provided and different
+    if transaction_attrs[:transaction_type] == 'transfer'
+      if !from_account_id.present? || !to_account_id.present?
+        @transaction = current_user.transactions.build(transaction_attrs)
+        @transaction.errors.add(:base, "Transferência deve ter conta de origem e destino")
+        render :new, status: :unprocessable_entity
+        return
+      end
+      
+      if from_account_id == to_account_id
+        @transaction = current_user.transactions.build(transaction_attrs)
+        @transaction.errors.add(:base, "Conta de origem e destino não podem ser iguais")
+        render :new, status: :unprocessable_entity
+        return
+      end
+    end
+    
+    # Ensure we have valid entries
+    if entries.empty?
+      @transaction = current_user.transactions.build(transaction_attrs)
+      @transaction.errors.add(:base, "Não foi possível criar as entradas de dupla entrada para esta transação")
+      render :new, status: :unprocessable_entity
+      return
+    end
+    
+    # Use the CreateTransactionService
+    @transaction = CreateTransactionService.call(
+      description: transaction_attrs[:description],
+      amount: transaction_attrs[:amount],
+      event_date: transaction_attrs[:event_date],
+      payment_date: transaction_attrs[:payment_date],
+      transaction_type: transaction_attrs[:transaction_type],
+      user: current_user,
+      category: transaction_attrs[:category],
+      entries_attributes: entries
+    )
+    
+    if @transaction.persisted? && @transaction.errors.empty?
       redirect_to transactions_path, notice: t('messages.transaction.created')
     else
       render :new, status: :unprocessable_entity
@@ -217,7 +274,13 @@ class TransactionsController < ApplicationController
     installment_count = params[:installment_count].to_i
     
     if installment_count < 2 || installment_count > 60
-      @transaction = Transaction.new(transaction_params)
+      @transaction = current_user.transactions.build(
+        description: transaction_params[:description],
+        amount: transaction_params[:amount],
+        event_date: transaction_params[:event_date],
+        payment_date: transaction_params[:payment_date],
+        transaction_type: transaction_params[:transaction_type]
+      )
       @transaction.errors.add(:base, "Número de parcelas deve estar entre 2 e 60")
       render :new, status: :unprocessable_entity
       return
@@ -225,12 +288,15 @@ class TransactionsController < ApplicationController
 
     ActiveRecord::Base.transaction do
       # Criar o plano de parcelamento
+      category = Category.find_by(id: transaction_params[:category_id])
       installment_plan = current_user.installment_plans.build(
         name: "#{transaction_params[:description]} (#{installment_count}x)",
-        category_id: transaction_params[:category_id],
+        category: category,
         installment_count: installment_count,
         total_amount: transaction_params[:amount],
-        starts_on: transaction_params[:event_date]
+        starts_on: transaction_params[:event_date],
+        from_account_id: transaction_params[:from_account_id],
+        to_account_id: transaction_params[:to_account_id]
       )
 
       if installment_plan.save
@@ -268,7 +334,13 @@ class TransactionsController < ApplicationController
           raise ActiveRecord::Rollback
         end
       else
-        @transaction = Transaction.new(transaction_params)
+        @transaction = current_user.transactions.build(
+          description: transaction_params[:description],
+          amount: transaction_params[:amount],
+          event_date: transaction_params[:event_date],
+          payment_date: transaction_params[:payment_date],
+          transaction_type: transaction_params[:transaction_type]
+        )
         @transaction.errors.add(:base, "Erro ao criar plano de parcelamento: #{installment_plan.errors.full_messages.join(', ')}")
         render :new, status: :unprocessable_entity
       end
@@ -277,6 +349,73 @@ class TransactionsController < ApplicationController
     @transaction = Transaction.new(transaction_params) if @transaction.nil?
     @transaction.errors.add(:base, "Erro ao criar parcelamento")
     render :new, status: :unprocessable_entity
+  end
+
+  private
+
+  def build_entries_for_transaction(transaction_attrs, from_account_id, to_account_id)
+    case transaction_attrs[:transaction_type]
+    when 'income'
+      # For income: money comes to an account (debit to receiving account)
+      # The credit side is from a revenue account
+      receiving_account_id = to_account_id || from_account_id
+      revenue_account_id = from_account_id || find_or_create_category_account(transaction_attrs[:category]&.id, 'income')
+      
+      if receiving_account_id.present? && revenue_account_id.present?
+        [
+          { account_id: receiving_account_id, entry_type: 'debit', amount: transaction_attrs[:amount] },
+          { account_id: revenue_account_id, entry_type: 'credit', amount: transaction_attrs[:amount] }
+        ]
+      else
+        []
+      end
+    when 'expense'
+      # For expense: money leaves an account (credit from paying account)
+      # The debit side goes to an expense account
+      paying_account_id = from_account_id
+      expense_account_id = to_account_id || find_or_create_category_account(transaction_attrs[:category]&.id, 'expense')
+      
+      if paying_account_id.present? && expense_account_id.present?
+        [
+          { account_id: expense_account_id, entry_type: 'debit', amount: transaction_attrs[:amount] },
+          { account_id: paying_account_id, entry_type: 'credit', amount: transaction_attrs[:amount] }
+        ]
+      else
+        []
+      end
+    when 'transfer'
+      # For transfer: straightforward debit to destination, credit from source
+      if from_account_id.present? && to_account_id.present?
+        [
+          { account_id: to_account_id, entry_type: 'debit', amount: transaction_attrs[:amount] },
+          { account_id: from_account_id, entry_type: 'credit', amount: transaction_attrs[:amount] }
+        ]
+      else
+        []
+      end
+    else
+      []
+    end
+  end
+
+  def find_or_create_category_account(category_id, type)
+    return nil unless category_id.present?
+    
+    category = Category.find_by(id: category_id, user: current_user)
+    return nil unless category
+    
+    # Look for existing account matching the category name and type
+    target_role = type == 'income' ? 'income' : 'expense'
+    account_type = AccountType.find_by(role: target_role)
+    return nil unless account_type
+    
+    # Find or create account for this category
+    account = current_user.accounts.find_or_create_by(
+      name: category.name,
+      account_type: account_type
+    )
+    
+    account.id
   end
 
 end

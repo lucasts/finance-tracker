@@ -30,6 +30,7 @@ class Transaction < ApplicationRecord
   
   # Specific validations for transfers
   validate :category_for_transaction_type
+  validate :transfer_accounts_validation
   
   # Callbacks for status automation - refactored to use service
   before_validation :set_default_status, if: :new_record?
@@ -229,34 +230,17 @@ class Transaction < ApplicationRecord
   end
 
   # Checks if this is a credit card transaction
-  # Entry-based methods for double-entry bookkeeping
-  def debit_entries
-    entries.where(entry_type: 'debit')
-  end
-
-  def credit_entries
-    entries.where(entry_type: 'credit')
-  end
-
-  def debit_accounts
-    debit_entries.includes(:account).map(&:account)
-  end
-
-  def credit_accounts
-    credit_entries.includes(:account).map(&:account)
-  end
-
-  # For simple transactions with one debit and one credit
-  def primary_debit_account
-    debit_entries.first&.account
-  end
-
-  def primary_credit_account
-    credit_entries.first&.account
-  end
-
   def credit_card_transaction?
     entries.joins(:account).where(accounts: { account_type: AccountType.where(code: "CREDIT_CARD") }).where(entry_type: 'credit').exists?
+  end
+
+  # Helper methods for double-entry system
+  def primary_credit_account
+    entries.where(entry_type: 'credit').first&.account
+  end
+
+  def primary_debit_account
+    entries.where(entry_type: 'debit').first&.account
   end
 
   private
@@ -286,13 +270,38 @@ class Transaction < ApplicationRecord
     return if entries.empty?
 
     total = entries.reduce(0) do |sum, entry|
+      amount = entry.amount || 0
       if entry.debit?
-        sum + entry.amount
+        sum + amount
       else
-        sum - entry.amount
+        sum - amount
       end
     end
 
     errors.add(:base, 'The sum of debits and credits must be zero.') unless total.zero?
+  end
+
+  def transfer_accounts_validation
+    return unless transfer?
+    
+    # Check if we have exactly 2 entries for transfers
+    if entries.size != 2
+      errors.add(:base, 'É necessário informar conta de origem e destino para transferências')
+      return
+    end
+    
+    debit_entry = entries.find { |e| e.entry_type == 'debit' }
+    credit_entry = entries.find { |e| e.entry_type == 'credit' }
+    
+    # Check if both entries exist and have account_ids
+    unless debit_entry && credit_entry && debit_entry.account_id && credit_entry.account_id
+      errors.add(:base, 'É necessário informar conta de origem e destino para transferências')
+      return
+    end
+    
+    # Check if account_ids are different
+    if debit_entry.account_id == credit_entry.account_id
+      errors.add(:base, 'Conta de origem e destino não podem ser iguais em uma transferência')
+    end
   end
 end

@@ -29,9 +29,26 @@ class InstallmentPlan < ApplicationRecord
   }
   validates :starts_on, presence: true
   validates :status, presence: true
-  validates :total_amount, numericality: { greater_than: 0 }, allow_blank: true
+  validates :total_amount, presence: true, numericality: { greater_than: 0 }
+  validate :total_amount_valid_number
   
   enum :status, { active: 0, paused: 1, closed: 2 }
+  
+  # Override setter to prevent automatic conversion of invalid strings
+  def total_amount=(value)
+    if value.is_a?(String) && value.present?
+      # Check if it's a valid number string first
+      normalized = value.gsub(/\.(?=\d{3}(\D|$))/, '').gsub(',', '.')
+      begin
+        super(BigDecimal(normalized))
+      rescue ArgumentError
+        # Keep the original invalid string so validation can catch it
+        super(value)
+      end
+    else
+      super(value)
+    end
+  end
   
   scope :active_plans, -> { where(status: :active) }
   scope :by_frequency, ->(freq) { where(recurrence_frequency: freq) }
@@ -154,17 +171,41 @@ class InstallmentPlan < ApplicationRecord
         end
         
         # Use CreateTransactionService to create the transaction with proper entries
+        transaction_type = transaction_params[:transaction_type] || 'expense'
+        
+        # Build entries based on transaction type
+        entries_attributes = case transaction_type
+        when 'income'
+          [
+            { account_id: transaction_params[:to_account_id], entry_type: 'debit', amount: amount.round(2) },
+            { account_id: transaction_params[:from_account_id], entry_type: 'credit', amount: amount.round(2) }
+          ]
+        when 'expense'
+          [
+            { account_id: transaction_params[:from_account_id], entry_type: 'debit', amount: amount.round(2) },
+            { account_id: transaction_params[:to_account_id], entry_type: 'credit', amount: amount.round(2) }
+          ]
+        when 'transfer'
+          [
+            { account_id: transaction_params[:to_account_id], entry_type: 'debit', amount: amount.round(2) },
+            { account_id: transaction_params[:from_account_id], entry_type: 'credit', amount: amount.round(2) }
+          ]
+        else
+          # Default to expense pattern
+          [
+            { account_id: transaction_params[:from_account_id], entry_type: 'debit', amount: amount.round(2) },
+            { account_id: transaction_params[:to_account_id], entry_type: 'credit', amount: amount.round(2) }
+          ]
+        end
+        
         transaction = CreateTransactionService.call(
           description: "#{transaction_params[:description_base]} (#{number}/#{installment_count})",
           amount: amount.round(2),
-          transaction_type: transaction_params[:transaction_type],
+          transaction_type: transaction_type,
           event_date: installment_date,
           payment_date: installment_date,
           category: category,
-          entries_attributes: [
-            { account_id: transaction_params[:to_account_id], entry_type: 'debit', amount: amount.round(2) },
-            { account_id: transaction_params[:from_account_id], entry_type: 'credit', amount: amount.round(2) }
-          ],
+          entries_attributes: entries_attributes,
           user: user
         )
         
@@ -239,5 +280,20 @@ class InstallmentPlan < ApplicationRecord
     overdue_installments = transactions.where(status: 'pending')
                                      .where('payment_date < ?', Date.current)
     overdue_installments.any?
+  end
+
+  private
+
+  def total_amount_valid_number
+    original_value = read_attribute_before_type_cast(:total_amount)
+    if original_value.is_a?(String) && original_value.present?
+      # Try to parse as a number
+      normalized = original_value.gsub(/\.(?=\d{3}(\D|$))/, '').gsub(',', '.')
+      begin
+        BigDecimal(normalized)
+      rescue ArgumentError
+        errors.add(:total_amount, 'deve ser um número válido')
+      end
+    end
   end
 end

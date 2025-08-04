@@ -15,8 +15,24 @@ RSpec.describe InstallmentPlan, type: :model do
            .is_greater_than(0)
            .is_less_than_or_equal_to(120) }
     
-    it { should validate_numericality_of(:total_amount)
-           .is_greater_than(0) }
+    it 'validates total_amount is a number greater than 0' do
+      plan = build(:installment_plan, total_amount: 'abcd')
+      expect(plan).not_to be_valid
+      # When invalid string is provided, it should be treated as invalid
+      expect(plan.errors[:total_amount]).not_to be_empty
+      
+      plan = build(:installment_plan, total_amount: 0)
+      expect(plan).not_to be_valid
+      expect(plan.errors[:total_amount]).not_to be_empty
+      
+      plan = build(:installment_plan, total_amount: -100)
+      expect(plan).not_to be_valid  
+      expect(plan.errors[:total_amount]).not_to be_empty
+      
+      plan = build(:installment_plan, total_amount: 100.50)
+      plan.valid? # Trigger validation
+      expect(plan.errors[:total_amount]).to be_empty
+    end
     
     it { should validate_inclusion_of(:recurrence_frequency)
            .in_array(%w[weekly monthly quarterly annual]) }

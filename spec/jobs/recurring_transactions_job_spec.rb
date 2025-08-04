@@ -30,9 +30,10 @@ RSpec.describe RecurringTransactionsJob, type: :job do
       category: category, 
       recurring_commitment: commitment, 
       transaction_type: 'expense',
+      recurrence_type: 'recurring',
       entries_attributes: [
-        { account_id: create(:account, user: user).id, entry_type: 'debit', amount: 100 },
-        { account_id: account.id, entry_type: 'credit', amount: 100 }
+        { account_id: commitment.to_account.id, entry_type: 'debit', amount: 100 },
+        { account_id: commitment.from_account.id, entry_type: 'credit', amount: 100 }
       ]
     )
     expect {

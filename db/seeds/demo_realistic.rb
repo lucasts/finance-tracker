@@ -75,11 +75,33 @@ def create_transaction(**params)
   # Adiciona a categoria se o nome for fornecido
   params[:category] = $categories[category_name] if category_name.present? && $categories[category_name]
 
-  # Constrói os lançamentos de entrada/saída
-  params[:entries_attributes] = [
-    { account_id: to_account.id, entry_type: 'debit', amount: params[:amount] },
-    { account_id: from_account.id, entry_type: 'credit', amount: params[:amount] }
-  ]
+  # Determina o tipo de transação se não foi especificado
+  transaction_type = params[:transaction_type] || 'expense'
+
+  # Constrói os lançamentos baseados no tipo de transação
+  params[:entries_attributes] = case transaction_type
+  when 'income'
+    [
+      { account_id: to_account.id, entry_type: 'debit', amount: params[:amount] },
+      { account_id: from_account.id, entry_type: 'credit', amount: params[:amount] }
+    ]
+  when 'expense'
+    [
+      { account_id: from_account.id, entry_type: 'debit', amount: params[:amount] },
+      { account_id: to_account.id, entry_type: 'credit', amount: params[:amount] }
+    ]
+  when 'transfer'
+    [
+      { account_id: to_account.id, entry_type: 'debit', amount: params[:amount] },
+      { account_id: from_account.id, entry_type: 'credit', amount: params[:amount] }
+    ]
+  else
+    # Default para expense
+    [
+      { account_id: from_account.id, entry_type: 'debit', amount: params[:amount] },
+      { account_id: to_account.id, entry_type: 'credit', amount: params[:amount] }
+    ]
+  end
 
   # Chama o serviço
   transaction = CreateTransactionService.call(**params)

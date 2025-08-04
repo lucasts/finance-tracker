@@ -45,6 +45,31 @@ class ImportedTransactionsController < ApplicationController
         to_account_id = external_account.id
       end
 
+      # Build entries based on transaction type
+      entries_attributes = case transaction_type
+      when 'income'
+        [
+          { account_id: to_account_id, entry_type: 'debit', amount: amount },
+          { account_id: from_account_id, entry_type: 'credit', amount: amount }
+        ]
+      when 'expense'
+        [
+          { account_id: from_account_id, entry_type: 'debit', amount: amount },
+          { account_id: to_account_id, entry_type: 'credit', amount: amount }
+        ]
+      when 'transfer'
+        [
+          { account_id: to_account_id, entry_type: 'debit', amount: amount },
+          { account_id: from_account_id, entry_type: 'credit', amount: amount }
+        ]
+      else
+        # Default to expense pattern
+        [
+          { account_id: from_account_id, entry_type: 'debit', amount: amount },
+          { account_id: to_account_id, entry_type: 'credit', amount: amount }
+        ]
+      end
+
       t = CreateTransactionService.call(
         user: current_user,
         description: tx_params[:description],
@@ -53,10 +78,7 @@ class ImportedTransactionsController < ApplicationController
         payment_date: tx_params[:payment_date],
         category_id: tx_params[:category_id],
         transaction_type: transaction_type,
-        entries_attributes: [
-          { account_id: to_account_id, entry_type: 'debit', amount: amount },
-          { account_id: from_account_id, entry_type: 'credit', amount: amount }
-        ]
+        entries_attributes: entries_attributes
       )
       rec_entry.linked_transaction = t
       rec_entry.save!

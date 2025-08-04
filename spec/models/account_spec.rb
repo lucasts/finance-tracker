@@ -32,6 +32,7 @@ RSpec.describe Account, type: :model do
   describe 'balance calculation' do
     let(:account) { create(:account, user: user, account_type: account_type) }
     let(:other_account) { create(:account, user: user, account_type: account_type) }
+    let(:income_source_account) { create(:account, :income_source, user: user) }
     let(:income_category) { create(:category, :income, user: user) }
     let(:expense_category) { create(:category, :expense, user: user) }
 
@@ -46,59 +47,168 @@ RSpec.describe Account, type: :model do
       end
 
       it 'calculates balance with income transactions (to account)' do
-        create(:transaction, :income, :confirmed, to_account: account, 
-               category: income_category, amount: 1000, user: user)
+        CreateTransactionService.call(
+          amount: 1000,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Income transaction',
+          transaction_type: 'income',
+          category: income_category,
+          entries_attributes: [
+            { account_id: income_source_account.id, entry_type: 'credit', amount: 1000 },
+            { account_id: account.id, entry_type: 'debit', amount: 1000 }
+          ]
+        )
         
         expect(account.balance).to eq(1000.0)
       end
 
       it 'calculates balance with expense transactions (from account)' do
-        create(:transaction, :expense, :confirmed, from_account: account, 
-               to_account: other_account, category: expense_category, amount: 300, user: user)
+        CreateTransactionService.call(
+          amount: 300,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Expense transaction',
+          transaction_type: 'expense',
+          category: expense_category,
+          entries_attributes: [
+            { account_id: account.id, entry_type: 'credit', amount: 300 },
+            { account_id: other_account.id, entry_type: 'debit', amount: 300 }
+          ]
+        )
         
         expect(account.balance).to eq(-300.0)
       end
 
       it 'calculates balance with transfer in (to account)' do
-        create(:transaction, :transfer, :confirmed, from_account: other_account, 
-               to_account: account, amount: 500, user: user)
+        CreateTransactionService.call(
+          amount: 500,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Transfer in',
+          transaction_type: 'transfer',
+          entries_attributes: [
+            { account_id: other_account.id, entry_type: 'credit', amount: 500 },
+            { account_id: account.id, entry_type: 'debit', amount: 500 }
+          ]
+        )
         
         expect(account.balance).to eq(500.0)
       end
 
       it 'calculates balance with transfer out (from account)' do
-        create(:transaction, :transfer, :confirmed, from_account: account, 
-               to_account: other_account, amount: 200, user: user)
+        CreateTransactionService.call(
+          amount: 200,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Transfer out',
+          transaction_type: 'transfer',
+          entries_attributes: [
+            { account_id: account.id, entry_type: 'credit', amount: 200 },
+            { account_id: other_account.id, entry_type: 'debit', amount: 200 }
+          ]
+        )
         
         expect(account.balance).to eq(-200.0)
       end
 
       it 'calculates balance with mixed transaction types' do
         # Income: +1000
-        create(:transaction, :income, :confirmed, to_account: account, 
-               category: income_category, amount: 1000, user: user)
+        CreateTransactionService.call(
+          amount: 1000,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Income',
+          transaction_type: 'income',
+          category: income_category,
+          entries_attributes: [
+            { account_id: income_source_account.id, entry_type: 'credit', amount: 1000 },
+            { account_id: account.id, entry_type: 'debit', amount: 1000 }
+          ]
+        )
         
         # Expense: -300
-        create(:transaction, :expense, :confirmed, from_account: account, 
-               to_account: other_account, category: expense_category, amount: 300, user: user)
+        CreateTransactionService.call(
+          amount: 300,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Expense',
+          transaction_type: 'expense',
+          category: expense_category,
+          entries_attributes: [
+            { account_id: account.id, entry_type: 'credit', amount: 300 },
+            { account_id: other_account.id, entry_type: 'debit', amount: 300 }
+          ]
+        )
         
         # Transfer in: +200
-        create(:transaction, :transfer, :confirmed, from_account: other_account, 
-               to_account: account, amount: 200, user: user)
+        CreateTransactionService.call(
+          amount: 200,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Transfer in',
+          transaction_type: 'transfer',
+          entries_attributes: [
+            { account_id: other_account.id, entry_type: 'credit', amount: 200 },
+            { account_id: account.id, entry_type: 'debit', amount: 200 }
+          ]
+        )
         
         # Transfer out: -150
-        create(:transaction, :transfer, :confirmed, from_account: account, 
-               to_account: other_account, amount: 150, user: user)
+        CreateTransactionService.call(
+          amount: 150,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Transfer out',
+          transaction_type: 'transfer',
+          entries_attributes: [
+            { account_id: account.id, entry_type: 'credit', amount: 150 },
+            { account_id: other_account.id, entry_type: 'debit', amount: 150 }
+          ]
+        )
         
         # Balance: 1000 - 300 + 200 - 150 = 750
         expect(account.balance).to eq(750.0)
       end
 
       it 'only includes confirmed transactions' do
-        create(:transaction, :income, :confirmed, to_account: account, 
-               category: income_category, amount: 1000, user: user)
-        create(:transaction, :expense, :pending, from_account: account, 
-               to_account: other_account, category: expense_category, amount: 300, user: user)
+        # Create confirmed income transaction
+        CreateTransactionService.call(
+          amount: 1000,
+          event_date: Date.current,
+          payment_date: Date.current - 1.day, # Past date for confirmed status
+          user: user,
+          description: 'Confirmed income',
+          transaction_type: 'income',
+          category: income_category,
+          entries_attributes: [
+            { account_id: income_source_account.id, entry_type: 'credit', amount: 1000 },
+            { account_id: account.id, entry_type: 'debit', amount: 1000 }
+          ]
+        )
+        
+        # Create pending expense transaction
+        CreateTransactionService.call(
+          amount: 300,
+          event_date: Date.current,
+          payment_date: Date.current + 1.day, # Future date for pending status
+          user: user,
+          description: 'Pending expense',
+          transaction_type: 'expense',
+          category: expense_category,
+          entries_attributes: [
+            { account_id: account.id, entry_type: 'credit', amount: 300 },
+            { account_id: other_account.id, entry_type: 'debit', amount: 300 }
+          ]
+        )
         
         # Only confirmed transaction should count
         expect(account.balance).to eq(1000.0)
@@ -108,14 +218,59 @@ RSpec.describe Account, type: :model do
     describe 'helper methods' do
       before do
         # Setup test transactions
-        create(:transaction, :income, :confirmed, to_account: account, 
-               category: income_category, amount: 1000, user: user)
-        create(:transaction, :expense, :confirmed, from_account: account, 
-               to_account: other_account, category: expense_category, amount: 300, user: user)
-        create(:transaction, :transfer, :confirmed, from_account: other_account, 
-               to_account: account, amount: 200, user: user)
-        create(:transaction, :transfer, :confirmed, from_account: account, 
-               to_account: other_account, amount: 150, user: user)
+        CreateTransactionService.call(
+          amount: 1000,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Income',
+          transaction_type: 'income',
+          category: income_category,
+          entries_attributes: [
+            { account_id: income_source_account.id, entry_type: 'credit', amount: 1000 },
+            { account_id: account.id, entry_type: 'debit', amount: 1000 }
+          ]
+        )
+        
+        CreateTransactionService.call(
+          amount: 300,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Expense',
+          transaction_type: 'expense',
+          category: expense_category,
+          entries_attributes: [
+            { account_id: account.id, entry_type: 'credit', amount: 300 },
+            { account_id: other_account.id, entry_type: 'debit', amount: 300 }
+          ]
+        )
+        
+        CreateTransactionService.call(
+          amount: 200,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Transfer in',
+          transaction_type: 'transfer',
+          entries_attributes: [
+            { account_id: other_account.id, entry_type: 'credit', amount: 200 },
+            { account_id: account.id, entry_type: 'debit', amount: 200 }
+          ]
+        )
+        
+        CreateTransactionService.call(
+          amount: 150,
+          event_date: Date.current,
+          payment_date: Date.current,
+          user: user,
+          description: 'Transfer out',
+          transaction_type: 'transfer',
+          entries_attributes: [
+            { account_id: account.id, entry_type: 'credit', amount: 150 },
+            { account_id: other_account.id, entry_type: 'debit', amount: 150 }
+          ]
+        )
       end
 
       describe '#total_income' do

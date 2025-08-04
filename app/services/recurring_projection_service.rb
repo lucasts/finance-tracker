@@ -40,7 +40,9 @@ class RecurringProjectionService
         amount: commitment.default_amount,
         description: commitment.name,
         category_id: commitment.category_id,
-        account_id: commitment.from_account_id,
+        account_id: commitment.from_account_id, # Mantém compatibilidade
+        from_account_id: commitment.from_account_id, # Para compatibilidade legacy
+        to_account_id: commitment.to_account_id,
         recurring_commitment_id: commitment.id,
         projected: true
       }

@@ -49,7 +49,9 @@ RSpec.describe CreditStatementService, type: :service do
     it 'returns nil for non-credit card transactions' do
       bank_account_type = AccountType.find_or_create_by!(code: 'BANK') { |at| at.assign_attributes(role: 'asset', name: 'Conta Corrente') }
       bank_account = create(:account, account_type: bank_account_type, user: user)
-      transaction.update!(from_account: bank_account)
+      
+      # Update entries instead of from_account directly
+      transaction.entries.where(entry_type: 'credit').first.update!(account: bank_account)
       
       result = CreditStatementService.find_or_create_for_transaction(transaction)
       expect(result).to be_nil

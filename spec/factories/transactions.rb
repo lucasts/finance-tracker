@@ -9,9 +9,10 @@ FactoryBot.define do
     # Default to expense transaction
     transaction_type { 'expense' }
     
-    # Use transient attributes to ensure user consistency
+    # Use transient attributes to ensure user consistency and handle account parameters
     transient do
       user_for_association { user }
+      # Default accounts that can be overridden
       from_account { association(:account, :asset, user: user_for_association) }
       to_account { association(:account, :expense_destination, user: user_for_association) }
     end
@@ -20,10 +21,38 @@ FactoryBot.define do
     
     # Create entries after the transaction is built
     after(:build) do |transaction, evaluator|
-      transaction.entries.build([
-        { account_id: evaluator.to_account.id, entry_type: 'debit', amount: transaction.amount },
-        { account_id: evaluator.from_account.id, entry_type: 'credit', amount: transaction.amount }
-      ])
+      # Skip if entries already exist (to avoid duplication)
+      next if transaction.entries.any?
+      
+      # Skip if accounts are nil (for validation tests)
+      next unless evaluator.from_account && evaluator.to_account
+      
+      # Build entries based on transaction type
+      entries_data = case transaction.transaction_type
+      when 'income'
+        [
+          { account_id: evaluator.from_account.id, entry_type: 'credit', amount: transaction.amount },
+          { account_id: evaluator.to_account.id, entry_type: 'debit', amount: transaction.amount }
+        ]
+      when 'expense'
+        [
+          { account_id: evaluator.from_account.id, entry_type: 'credit', amount: transaction.amount },
+          { account_id: evaluator.to_account.id, entry_type: 'debit', amount: transaction.amount }
+        ]
+      when 'transfer'
+        [
+          { account_id: evaluator.from_account.id, entry_type: 'credit', amount: transaction.amount },
+          { account_id: evaluator.to_account.id, entry_type: 'debit', amount: transaction.amount }
+        ]
+      else
+        # Default to expense pattern
+        [
+          { account_id: evaluator.from_account.id, entry_type: 'credit', amount: transaction.amount },
+          { account_id: evaluator.to_account.id, entry_type: 'credit', amount: transaction.amount }
+        ]
+      end
+      
+      transaction.entries.build(entries_data)
     end
     
     trait :income do

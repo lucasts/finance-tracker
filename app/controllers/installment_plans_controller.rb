@@ -5,7 +5,7 @@ class InstallmentPlansController < ApplicationController
   
   def index
     @installment_plans = current_user_scope(InstallmentPlan).includes(
-                           transactions: [:from_account, :to_account, :category]
+                           transactions: [:entries, :category]
                          ).order(created_at: :desc)
     
     @plan_summaries = @installment_plans.map do |plan|

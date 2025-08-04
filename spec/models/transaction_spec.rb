@@ -13,19 +13,13 @@ RSpec.describe Transaction, type: :model do
     it { should validate_presence_of(:transaction_type) }
     
     it 'validates transaction_type inclusion' do
-      income_transaction = build(:transaction, :income, user: user, 
-                                from_account: create(:account, user: user),
-                                category: create(:category, :income, user: user))
+      income_transaction = create(:transaction, :income, user: user)
       expect(income_transaction).to be_valid
       
-      expense_transaction = build(:transaction, :expense, user: user,
-                                 from_account: create(:account, user: user),
-                                 category: create(:category, :expense, user: user))
+      expense_transaction = create(:transaction, :expense, user: user)
       expect(expense_transaction).to be_valid
       
-      transfer_transaction = build(:transaction, :transfer, user: user,
-                                  from_account: create(:account, user: user),
-                                  to_account: create(:account, user: user))
+      transfer_transaction = create(:transaction, :transfer, user: user)
       expect(transfer_transaction).to be_valid
       
       # Test that invalid transaction_type raises an error
@@ -40,12 +34,12 @@ RSpec.describe Transaction, type: :model do
       let(:expense_category) { create(:category, category_type: 'expense', user: user) }
 
       it 'allows income transaction with income category' do
-        transaction = build(:transaction, :income, category: income_category, user: user)
+        transaction = create(:transaction, :income, category: income_category, user: user)
         expect(transaction).to be_valid
       end
 
       it 'allows expense transaction with expense category' do
-        transaction = build(:transaction, :expense, category: expense_category, user: user)
+        transaction = create(:transaction, :expense, category: expense_category, user: user)
         expect(transaction).to be_valid
       end
 
@@ -64,37 +58,50 @@ RSpec.describe Transaction, type: :model do
 
     describe 'transfer validations' do
       it 'allows transfer without category' do
-        from_account = create(:account, user: user)
-        to_account = create(:account, user: user)
-        transaction = build(:transaction, :transfer, from_account: from_account, to_account: to_account, category: nil, user: user)
+        transaction = create(:transaction, :transfer, user: user)
         expect(transaction).to be_valid
       end
 
       it 'rejects transfer with category' do
-        from_account = create(:account, user: user)
-        to_account = create(:account, user: user)
-        transaction = build(:transaction, :transfer, from_account: from_account, to_account: to_account, category: create(:category, user: user), user: user)
+        transaction = build(:transaction, :transfer, category: create(:category, user: user), user: user)
         expect(transaction).not_to be_valid
         expect(transaction.errors[:category_id]).to include('Transferência não deve ter categoria')
       end
 
       it 'requires both from_account and to_account for transfers' do
-        transaction = build(:transaction, :transfer, to_account: nil, user: user)
+        # Build a transfer with missing to_account via entries
+        from_account = create(:account, user: user)
+        transaction = build(:transaction, transaction_type: 'transfer', user: user, category: nil)
+        transaction.entries.build([
+          { account_id: from_account.id, entry_type: 'credit', amount: 100 }
+          # Missing debit entry
+        ])
+        
         expect(transaction).not_to be_valid
         expect(transaction.errors[:base]).to include('É necessário informar conta de origem e destino para transferências')
       end
 
       it 'rejects transfer with same from_account and to_account' do
         account = create(:account, user: user)
-        transaction = build(:transaction, :transfer, from_account: account, to_account: account, user: user)
+        transaction = Transaction.new(
+          transaction_type: 'transfer',
+          user: user,
+          category: nil,
+          amount: 100,
+          description: 'Test transfer',
+          event_date: Date.current,
+          payment_date: Date.current
+        )
+        # Build two entries with the same account (which should be invalid)
+        transaction.entries.build({ account_id: account.id, entry_type: 'debit', amount: 100 })
+        transaction.entries.build({ account_id: account.id, entry_type: 'credit', amount: 100 })
+        
         expect(transaction).not_to be_valid
         expect(transaction.errors[:base]).to include('Conta de origem e destino não podem ser iguais em uma transferência')
       end
 
       it 'allows transfer with different accounts' do
-        from_account = create(:account, user: user)
-        to_account = create(:account, user: user)
-        transaction = build(:transaction, :transfer, from_account: from_account, to_account: to_account, user: user)
+        transaction = create(:transaction, :transfer, user: user)
         expect(transaction).to be_valid
       end
     end
@@ -121,12 +128,23 @@ RSpec.describe Transaction, type: :model do
 
   describe 'associations' do
     it { should belong_to(:user) }
-    it { should belong_to(:from_account).class_name('Account') }
-    it { should belong_to(:to_account).class_name('Account').optional }
     it { should belong_to(:category).optional }
     it { should belong_to(:credit_statement).optional }
     it { should belong_to(:recurring_commitment).optional }
     it { should belong_to(:installment_plan).optional }
+    it { should have_many(:entries) }
+    it { should have_many(:accounts).through(:entries) }
+    
+    # Legacy compatibility methods should exist and work
+    it 'has many entries' do
+      transaction = create(:transaction, user: user)
+      expect(transaction.entries.count).to eq(2)
+    end
+
+    it 'has many accounts through entries' do
+      transaction = create(:transaction, user: user)
+      expect(transaction.accounts.count).to eq(2)
+    end
   end
 
   describe 'scopes' do
@@ -227,14 +245,12 @@ RSpec.describe Transaction, type: :model do
 
   describe 'mutual exclusivity validations' do
     it 'allows single transaction without associations' do
-      transaction = build(:transaction, 
+      transaction = create(:transaction, 
         :expense,  # This will include a proper expense category
         recurrence_type: 'single',
         recurring_commitment: nil,
         installment_plan: nil,
-        user: user,
-        from_account: create(:account, user: user),
-        category: create(:category, :expense, user: user)
+        user: user
       )
       expect(transaction).to be_valid
     end
@@ -273,28 +289,36 @@ RSpec.describe Transaction, type: :model do
 
   describe 'automatic status callbacks' do
     it 'sets status automatically for future transactions' do
-      transaction = build(:transaction, 
-        :expense,  # This will include a proper expense category
+      transaction = CreateTransactionService.call(
+        amount: 100,
+        event_date: Date.current,
         payment_date: 1.week.from_now,
-        status: nil,
         user: user,
-        from_account: create(:account, user: user),
-        category: create(:category, :expense, user: user)
+        description: 'Future transaction',
+        transaction_type: 'expense',
+        category: create(:category, :expense, user: user),
+        entries_attributes: [
+          { account_id: create(:account, user: user).id, entry_type: 'debit', amount: 100 },
+          { account_id: create(:account, :expense_destination, user: user).id, entry_type: 'credit', amount: 100 }
+        ]
       )
-      transaction.save!
       expect(transaction.status).to eq('pending')
     end
 
     it 'sets status automatically for past transactions' do
-      transaction = build(:transaction, 
-        :expense,  # This will include a proper expense category
+      transaction = CreateTransactionService.call(
+        amount: 100,
+        event_date: Date.current,
         payment_date: 1.week.ago,
-        status: nil,
         user: user,
-        from_account: create(:account, user: user),
-        category: create(:category, :expense, user: user)
+        description: 'Past transaction',
+        transaction_type: 'expense',
+        category: create(:category, :expense, user: user),
+        entries_attributes: [
+          { account_id: create(:account, user: user).id, entry_type: 'debit', amount: 100 },
+          { account_id: create(:account, :expense_destination, user: user).id, entry_type: 'credit', amount: 100 }
+        ]
       )
-      transaction.save!
       expect(transaction.status).to eq('confirmed')
     end
 
@@ -321,59 +345,49 @@ RSpec.describe Transaction, type: :model do
 
   describe 'edge cases' do
     it 'aceita valores extremos' do
-      transaction = build(:transaction, 
-        :expense,  # This will include a proper expense category
+      transaction = create(:transaction, 
+        :expense,
         amount: 999999999.99,
-        user: user,
-        from_account: create(:account, user: user),
-        category: create(:category, :expense, user: user)
+        user: user
       )
       expect(transaction).to be_valid
     end
 
     it 'aceita datas distantes no passado' do
-      transaction = build(:transaction, 
-        :expense,  # This will include a proper expense category
+      transaction = create(:transaction, 
+        :expense,
         event_date: Date.new(1900, 1, 1),
         payment_date: Date.new(1900, 1, 1),
-        user: user,
-        from_account: create(:account, user: user),
-        category: create(:category, :expense, user: user)
+        user: user
       )
       expect(transaction).to be_valid
     end
 
     it 'aceita datas distantes no futuro' do
-      transaction = build(:transaction, 
-        :expense,  # This will include a proper expense category
+      transaction = create(:transaction, 
+        :expense,
         event_date: Date.new(2099, 12, 31),
         payment_date: Date.new(2099, 12, 31),
-        user: user,
-        from_account: create(:account, user: user),
-        category: create(:category, :expense, user: user)
+        user: user
       )
       expect(transaction).to be_valid
     end
 
     it 'accepts very long descriptions' do
       long_description = 'A' * 1000
-      transaction = build(:transaction, 
-        :expense,  # This will include a proper expense category
+      transaction = create(:transaction, 
+        :expense,
         description: long_description,
-        user: user,
-        from_account: create(:account, user: user),
-        category: create(:category, :expense, user: user)
+        user: user
       )
       expect(transaction).to be_valid
     end
 
     it 'accepts decimal values with precision' do
-      transaction = build(:transaction,
-        :expense,  # This will include a proper expense category
+      transaction = create(:transaction,
+        :expense,
         amount: 123.456789,
-        user: user,
-        from_account: create(:account, user: user),
-        category: create(:category, :expense, user: user)
+        user: user
       )
       expect(transaction).to be_valid
     end

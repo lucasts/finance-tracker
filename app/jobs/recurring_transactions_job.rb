@@ -30,53 +30,88 @@ class RecurringTransactionsJob < ApplicationJob
   private
 
   def generate_transaction_for_commitment(commitment, occurrence_date)
-    # Use the most recent transaction as a template for account information
-    template_transaction = commitment.transactions.order(:event_date).last
+    Rails.logger.info "Processing recurring commitment: #{commitment.name}"
     
-    amount = if commitment.fixed_amount?
-      commitment.expected_amount
-    else
-      commitment.expected_amount || commitment.average_amount
+    # Get the most recent transaction from this commitment as template
+    template_transaction = commitment.transactions.order(created_at: :desc).first
+    amount = template_transaction&.amount || commitment.default_amount || 0
+    
+    if amount <= 0
+      Rails.logger.warn "Invalid amount for commitment #{commitment.name}: #{amount}"
+      return Transaction.new # Return an invalid transaction
     end
 
+    # Determine transaction type from commitment or category
+    transaction_type = determine_transaction_type(commitment)
+    
+    # Use CreateTransactionService to ensure proper double-entry
     CreateTransactionService.call(
-      description: commitment.name,
       amount: amount,
-      transaction_type: template_transaction&.transaction_type || determine_transaction_type(commitment),
       event_date: occurrence_date,
       payment_date: occurrence_date,
+      user: commitment.user,
+      description: "#{commitment.name} - #{occurrence_date.strftime('%m/%Y')}",
+      transaction_type: transaction_type,
+      recurrence_type: 'recurring',
       category: commitment.category,
       recurring_commitment: commitment,
-      user: commitment.user,
-      entries_attributes: [
-        { account_id: commitment.to_account_id, entry_type: 'debit', amount: amount },
-        { account_id: commitment.from_account_id, entry_type: 'credit', amount: amount }
-      ]
+      entries_attributes: build_entries_for_commitment(commitment, amount, transaction_type)
     )
   end
 
-  def determine_transaction_type(commitment)
-    # Analyze category to determine if it's income or expense
-    category_name = commitment.category.name.downcase
+  def build_entries_for_commitment(commitment, amount, transaction_type)
+    # Use the accounts directly from the commitment
+    from_account = commitment.from_account
+    to_account = commitment.to_account
     
-    income_keywords = ['salário', 'freelance', 'renda', 'receita', 'dividend']
-    expense_keywords = ['aluguel', 'conta', 'assinatura', 'mensalidade', 'plano']
-    
-    if income_keywords.any? { |keyword| category_name.include?(keyword) }
-      'income'
-    elsif expense_keywords.any? { |keyword| category_name.include?(keyword) }
-      'expense'
+    case transaction_type
+    when 'income'
+      [
+        { account_id: to_account.id, entry_type: 'debit', amount: amount },
+        { account_id: from_account.id, entry_type: 'credit', amount: amount }
+      ]
+    when 'expense'
+      [
+        { account_id: to_account.id, entry_type: 'debit', amount: amount },
+        { account_id: from_account.id, entry_type: 'credit', amount: amount }
+      ]
+    when 'transfer'
+      [
+        { account_id: to_account.id, entry_type: 'debit', amount: amount },
+        { account_id: from_account.id, entry_type: 'credit', amount: amount }
+      ]
     else
-      'expense' # default to expense for recurring commitments
+      # Default to expense pattern
+      [
+        { account_id: to_account.id, entry_type: 'debit', amount: amount },
+        { account_id: from_account.id, entry_type: 'credit', amount: amount }
+      ]
     end
   end
 
-  def default_account_for_commitment(commitment)
-    # Return the most commonly used account for this category
-    Account.joins(:transactions_from)
-           .where(transactions: { category: commitment.category })
-           .group('accounts.id')
-           .order('COUNT(transactions.id) DESC')
-           .first || Account.first
+  def find_destination_account(commitment, transaction_type)
+    # Find appropriate destination account based on category type
+    case transaction_type
+    when 'income'
+      # For income, destination should be an asset account (like checking)
+      commitment.user.accounts.joins(:account_type).where(account_types: { role: 'asset' }).first
+    when 'expense'
+      # For expense, destination should be an expense account
+      commitment.user.accounts.joins(:account_type).where(account_types: { role: 'expense' }).first ||
+        AccountType.find_by(role: 'expense')&.accounts&.create!(name: 'General Expense', user: commitment.user)
+    else
+      # Default to first asset account
+      commitment.user.accounts.joins(:account_type).where(account_types: { role: 'asset' }).first
+    end
+  end
+
+  def determine_transaction_type(commitment)
+    # Most recurring commitments are expenses (bills, subscriptions)
+    # Use category type to determine if it's income or expense
+    if commitment.category&.income?
+      'income'
+    else
+      'expense'
+    end
   end
 end

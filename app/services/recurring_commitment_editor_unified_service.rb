@@ -199,14 +199,31 @@ class RecurringCommitmentEditorUnifiedService
     # Helper method to update transaction accounts via entries
     return unless from_account_id.present? || to_account_id.present?
 
+    # Clear existing entries
     transaction.entries.destroy_all
     
-    # Create new entries
+    # Create new entries based on transaction type
     if from_account_id && to_account_id
-      transaction.entries.create!([
-        { account_id: to_account_id, entry_type: 'debit', amount: transaction.amount },
-        { account_id: from_account_id, entry_type: 'credit', amount: transaction.amount }
-      ])
+      case transaction.transaction_type
+      when 'income'
+        # For income: revenue account (from) credits, user account (to) debits
+        transaction.entries.create!([
+          { account_id: to_account_id, entry_type: 'debit', amount: transaction.amount },
+          { account_id: from_account_id, entry_type: 'credit', amount: transaction.amount }
+        ])
+      when 'expense'
+        # For expense: user account (from) credits, expense account (to) debits  
+        transaction.entries.create!([
+          { account_id: to_account_id, entry_type: 'debit', amount: transaction.amount },
+          { account_id: from_account_id, entry_type: 'credit', amount: transaction.amount }
+        ])
+      when 'transfer'
+        # For transfer: from account credits, to account debits
+        transaction.entries.create!([
+          { account_id: to_account_id, entry_type: 'debit', amount: transaction.amount },
+          { account_id: from_account_id, entry_type: 'credit', amount: transaction.amount }
+        ])
+      end
     end
   end
 end

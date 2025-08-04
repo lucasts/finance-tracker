@@ -1,21 +1,17 @@
 # TODO - Finance Tracker
 
-## Pendente
+## Pending
 
-### Segurança
+### Security
 - [ ] Rate limiting (rack-attack)
-- [ ] Auditoria de alterações (paper_trail)
-- [ ] Sanitização XSS
+- [ ] Change auditing (paper_trail)
+- [ ] XSS sanitization
 
 ### Performance
-- [ ] Cache dashboard
-- [ ] Paginação listas grandes
+- [ ] Dashboard caching
+- [ ] Pagination for large lists
 
 ### Features
 - [ ] PWA support
-- [ ] Sistema notificações
-- [ ] Monitoramento (Sentry)
-
----
-
-**Nota:** Todos os problemas de qualidade de código foram resolvidos (456/456 testes passando).
+- [ ] Notification system
+- [ ] Monitoring (Sentry)

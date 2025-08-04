@@ -22,13 +22,51 @@ RSpec.describe User, type: :model do
     let(:expense_category) { create(:category, :expense, user: user) }
 
     before do
-      # Creates some transactions for testing
-      create(:transaction, :income, :confirmed, user: user, to_account: checking_account, 
-             category: income_category, amount: 1000, event_date: Date.current)
-      create(:transaction, :expense, :confirmed, user: user, from_account: checking_account, 
-             category: expense_category, amount: 300, event_date: Date.current)
-      create(:transaction, :expense, :confirmed, user: user, from_account: credit_account, 
-             category: expense_category, amount: 200, event_date: Date.current)
+      # Creates some transactions for testing using CreateTransactionService
+      CreateTransactionService.call(
+        user: user,
+        description: "Income transaction",
+        amount: 1000,
+        event_date: Date.current,
+        payment_date: Date.current,
+        transaction_type: 'income',
+        category: income_category,
+        status: 'confirmed',
+        entries_attributes: [
+          { account_id: checking_account.id, entry_type: 'debit', amount: 1000 },
+          { account_id: create(:account, :income_source, user: user).id, entry_type: 'credit', amount: 1000 }
+        ]
+      )
+      
+      CreateTransactionService.call(
+        user: user,
+        description: "Expense from checking",
+        amount: 300,
+        event_date: Date.current,
+        payment_date: Date.current,
+        transaction_type: 'expense',
+        category: expense_category,
+        status: 'confirmed',
+        entries_attributes: [
+          { account_id: create(:account, :expense_destination, user: user).id, entry_type: 'debit', amount: 300 },
+          { account_id: checking_account.id, entry_type: 'credit', amount: 300 }
+        ]
+      )
+      
+      CreateTransactionService.call(
+        user: user,
+        description: "Expense from credit",
+        amount: 200,
+        event_date: Date.current,
+        payment_date: Date.current,
+        transaction_type: 'expense',
+        category: expense_category,
+        status: 'confirmed',
+        entries_attributes: [
+          { account_id: create(:account, :expense_destination, user: user).id, entry_type: 'debit', amount: 200 },
+          { account_id: credit_account.id, entry_type: 'credit', amount: 200 }
+        ]
+      )
     end
 
     describe '#total_balance' do

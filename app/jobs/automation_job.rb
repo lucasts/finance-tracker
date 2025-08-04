@@ -15,14 +15,14 @@ class AutomationJob < ApplicationJob
       # Execute recurring transactions generation
       if job_types.include?('recurring')
         recurring_job = GenerateRecurringTransactionsJob.new
-        recurring_result = recurring_job.perform(date)
+        recurring_result = recurring_job.perform()
         results[:recurring_transactions] = recurring_result[:generated_count] if recurring_result.is_a?(Hash)
       end
 
       # Execute installment generation
       if job_types.include?('installments')
         installment_job = GenerateInstallmentTransactionsJob.new
-        installment_result = installment_job.perform(date)
+        installment_result = installment_job.perform()
         results[:installment_transactions] = installment_result[:generated_count] if installment_result.is_a?(Hash)
       end
 

@@ -3,8 +3,9 @@ require 'rails_helper'
 RSpec.describe AutomationJob, type: :job do
   let!(:user) { create(:user) }
   let!(:category) { create(:category, user: user) }
-  let!(:account) { create(:account, user: user) }
-  let!(:commitment) { create(:recurring_commitment, user: user, category: category, status: :active, start_date: Date.current - 1.month) }
+  let!(:from_account) { create(:account, user: user) }
+  let!(:to_account) { create(:account, user: user) }
+  let!(:commitment) { create(:recurring_commitment, user: user, category: category, status: :active, start_date: Date.current - 1.month, from_account: from_account, to_account: to_account) }
   let!(:plan) { create(:installment_plan, user: user, category: category, status: :active, installment_count: 2) }
 
   it 'executes both jobs and returns count of generated transactions' do

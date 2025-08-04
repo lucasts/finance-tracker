@@ -21,13 +21,16 @@ module AmountNormalization
       if value.is_a?(String) && value.present?
         # Remove thousand separators (dots) and convert comma to decimal point
         normalized = value.gsub(/\.(?=\d{3}(\D|$))/, '').gsub(',', '.')
-        self.send("#{field}=", BigDecimal(normalized))
+        begin
+          self.send("#{field}=", BigDecimal(normalized))
+        rescue ArgumentError
+          # For invalid strings, leave the original value so validation can catch it
+          # Don't set to 0 automatically
+        end
       elsif value.is_a?(String)
-        self.send("#{field}=", BigDecimal('0'))
+        # Empty strings are set to nil to allow presence validation to work
+        self.send("#{field}=", nil)
       end
-    rescue ArgumentError
-      # If conversion fails, set to 0
-      self.send("#{field}=", BigDecimal('0'))
     end
   end
   

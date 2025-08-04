@@ -83,7 +83,10 @@ class VariableExpenseAnalysisUnifiedService
     @base_transactions ||= begin
       scope = user.transactions.confirmed.where(event_date: start_date..end_date)
       scope = scope.where(category_id: category_id) if category_id.present?
-      scope = scope.where(from_account_id: account_id) if account_id.present?
+      if account_id.present?
+        # Filter transactions that have entries from the specified account
+        scope = scope.joins(:entries).where(entries: { account_id: account_id, entry_type: 'credit' }).distinct
+      end
       scope
     end
   end
