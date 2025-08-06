@@ -14,25 +14,25 @@
     <div class="alert alert-success">
       <div class="flex-1">
         <label class="label-text"><%= t('ui.transaction.types.income').pluralize %></label>
-        <p class="text-xl font-bold"><%= number_to_currency(income_total) %></p>
+        <p class="text-xl font-bold"><%= format_money_unified(income_total) %></p>
       </div>
     </div>
     <div class="alert alert-error">
       <div class="flex-1">
         <label class="label-text"><%= t('ui.transaction.types.expense').pluralize %></label>
-        <p class="text-xl font-bold"><%= number_to_currency(expense_total) %></p>
+        <p class="text-xl font-bold"><%= format_money_unified(expense_total) %></p>
       </div>
     </div>
     <div class="alert alert-warning">
       <div class="flex-1">
         <label class="label-text"><%= t('ui.transaction.types.transfer').pluralize %></label>
-        <p class="text-xl font-bold"><%= number_to_currency(transfer_total) %></p>
+        <p class="text-xl font-bold"><%= format_money_unified(transfer_total) %></p>
       </div>
     </div>
     <div class="alert alert-info">
       <div class="flex-1">
         <label class="label-text"><%= t('ui.filters.balance') %></label>
-        <p class="text-xl font-bold"><%= number_to_currency(balance) %></p>
+        <p class="text-xl font-bold"><%= format_money_unified(balance) %></p>
       </div>
     </div>
   </div>
@@ -113,11 +113,13 @@
 <% end %>
 
 <!-- Transaction Details Modal -->
-<input type="checkbox" id="transaction_modal" class="modal-toggle" data-modal-target="modal">
-<div class="modal" data-action="click->modal#closeOnBackdrop">
+<dialog id="transaction_modal" class="modal" data-modal-target="dialog">
   <div class="modal-box max-w-4xl w-11/12" data-modal-target="content">
     <!-- Content will be loaded here -->
   </div>
-</div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 
 </div> <!-- Close modal controller div -->
