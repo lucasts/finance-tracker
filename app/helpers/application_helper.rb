@@ -2,15 +2,15 @@ module ApplicationHelper
   
   # Helper methods for money formatting
   def format_currency(amount, options = {})
-    MoneyFormattingHelper.format_money_display(amount, options)
+    MoneyFormattingConcern.format_money_display(amount, options)
   end
 
   def format_currency_compact(amount)
-    MoneyFormattingHelper.format_money_display(amount, show_currency: false)
+    MoneyFormattingConcern.format_money_display(amount, show_currency: false)
   end
 
   def parse_money(value)
-    MoneyFormattingHelper.parse_money_string(value)
+    MoneyParsingConcern.parse_money_string(value)
   end
 
   def file_size_human(size_in_bytes)

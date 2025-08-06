@@ -270,8 +270,6 @@ grep -r "CreditStatementsHelper\|credit_statements_helper" app/ spec/
 # 1. Execute testes para confirmar estado atual
 bundle exec rspec
 
-# 2. Faça commit do estado atual
-git add -A && git commit -m "Before refactoring: [describe change]"
 ```
 
 ### Após Cada Mudança:
@@ -280,7 +278,6 @@ git add -A && git commit -m "Before refactoring: [describe change]"
 bundle exec rspec
 
 # 2. Verifique se a aplicação inicia
-./bin/rails server
 
 # 3. Faça commit das mudanças
 git add -A && git commit -m "Refactor: [describe what was changed]"
