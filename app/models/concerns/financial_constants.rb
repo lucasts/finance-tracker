@@ -139,4 +139,73 @@ module FinancialConstants
     text = name_or_category.to_s.downcase
     NON_ESSENTIAL_CATEGORIES.any? { |keyword| text.include?(keyword) }
   end
+
+  # Safe type conversion methods
+  def self.safe_to_decimal(value, default = DEFAULT_ZERO_BALANCE)
+    return default if value.nil? || value == ''
+    
+    case value
+    when BigDecimal
+      value
+    when Numeric
+      BigDecimal(value.to_s)
+    when String
+      # Direct parsing for string values
+      begin
+        # Remove currency symbols and normalize separators
+        clean_value = value.to_s.strip
+          .gsub(/[R$\s]/, '') # Remove currency symbols and spaces
+          .gsub(/\.(?=\d{3})/, '') # Remove thousand separators (dots before 3 digits)
+          .gsub(',', '.') # Convert decimal separator
+        
+        BigDecimal(clean_value)
+      rescue ArgumentError
+        BigDecimal(default.to_s)
+      end
+    else
+      BigDecimal(default.to_s)
+    end
+  end
+
+  def self.safe_to_float(value, default = DEFAULT_ZERO_BALANCE)
+    safe_to_decimal(value, default).to_f
+  end
+
+  def self.safe_to_integer(value, default = 0)
+    return default if value.nil? || value == ''
+    
+    case value
+    when Integer
+      value
+    when Numeric
+      value.to_i
+    when String
+      begin
+        value.strip.to_i
+      rescue
+        default
+      end
+    else
+      default
+    end
+  end
+
+  def self.safe_to_date(value, default = nil)
+    return default if value.nil? || value == ''
+    
+    case value
+    when Date
+      value
+    when Time, DateTime
+      value.to_date
+    when String
+      begin
+        Date.parse(value)
+      rescue ArgumentError
+        default
+      end
+    else
+      default
+    end
+  end
 end
