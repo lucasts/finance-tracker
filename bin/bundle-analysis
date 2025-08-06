@@ -1,0 +1,365 @@
+#!/usr/bin/env ruby
+
+# Bundle Analysis CLI Tool
+# Usage: ./bin/bundle-analysis [options]
+
+require 'json'
+require 'optparse'
+require 'pathname'
+
+class BundleAnalysisCLI
+  def initialize
+    @options = {
+      format: 'console',
+      output: nil,
+      analyze_assets: true,
+      check_compression: true,
+      recommendations: true
+    }
+    
+    @asset_paths = [
+      'app/assets/builds/',
+      'app/javascript/',
+      'public/assets/',
+      'vendor/javascript/'
+    ]
+  end
+
+  def run(args)
+    parse_options(args)
+    
+    puts "🔍 Analyzing JavaScript bundles..."
+    
+    analysis = perform_analysis
+    output_results(analysis)
+  end
+
+  private
+
+  def parse_options(args)
+    OptionParser.new do |opts|
+      opts.banner = "Usage: #{$0} [options]"
+      
+      opts.on('-f', '--format FORMAT', ['console', 'json', 'csv'], 
+              'Output format (console, json, csv)') do |format|
+        @options[:format] = format
+      end
+      
+      opts.on('-o', '--output FILE', 'Output file path') do |file|
+        @options[:output] = file
+      end
+      
+      opts.on('--[no-]assets', 'Analyze asset files') do |assets|
+        @options[:analyze_assets] = assets
+      end
+      
+      opts.on('--[no-]compression', 'Check compression ratios') do |compression|
+        @options[:check_compression] = compression
+      end
+      
+      opts.on('-h', '--help', 'Show this help') do
+        puts opts
+        exit
+      end
+    end.parse!(args)
+  end
+
+  def perform_analysis
+    analysis = {
+      timestamp: Time.now.iso8601,
+      project_info: gather_project_info,
+      bundle_stats: analyze_bundles,
+      asset_stats: @options[:analyze_assets] ? analyze_assets : nil,
+      recommendations: @options[:recommendations] ? generate_recommendations : []
+    }
+
+    analysis
+  end
+
+  def gather_project_info
+    {
+      rails_version: Rails::VERSION::STRING,
+      ruby_version: RUBY_VERSION,
+      node_version: `node --version 2>/dev/null`.strip,
+      npm_version: `npm --version 2>/dev/null`.strip,
+      bundler_version: Bundler::VERSION
+    }
+  end
+
+  def analyze_bundles
+    stats = {
+      javascript_files: [],
+      css_files: [],
+      total_size: 0,
+      total_files: 0
+    }
+
+    @asset_paths.each do |path|
+      next unless Dir.exist?(path)
+      
+      analyze_directory(path, stats)
+    end
+
+    stats[:average_file_size] = stats[:total_files] > 0 ? 
+      stats[:total_size] / stats[:total_files] : 0
+
+    stats
+  end
+
+  def analyze_directory(path, stats)
+    Dir.glob(File.join(path, '**', '*')).each do |file|
+      next unless File.file?(file)
+      
+      file_info = analyze_file(file)
+      next unless file_info
+      
+      if file_info[:type] == 'javascript'
+        stats[:javascript_files] << file_info
+      elsif file_info[:type] == 'css'
+        stats[:css_files] << file_info
+      end
+      
+      stats[:total_size] += file_info[:size]
+      stats[:total_files] += 1
+    end
+  end
+
+  def analyze_file(file_path)
+    return nil unless should_analyze_file?(file_path)
+    
+    size = File.size(file_path)
+    relative_path = Pathname.new(file_path).relative_path_from(Pathname.new(Dir.pwd))
+    
+    {
+      path: relative_path.to_s,
+      size: size,
+      size_kb: (size / 1024.0).round(2),
+      type: determine_file_type(file_path),
+      compressed_size: check_compressed_size(file_path),
+      last_modified: File.mtime(file_path).iso8601
+    }
+  end
+
+  def should_analyze_file?(file_path)
+    extensions = %w[.js .mjs .css .scss .sass]
+    extension = File.extname(file_path).downcase
+    
+    # Skip source maps and minified files for now
+    return false if file_path.include?('.map') || file_path.include?('.min.')
+    
+    extensions.include?(extension)
+  end
+
+  def determine_file_type(file_path)
+    extension = File.extname(file_path).downcase
+    
+    case extension
+    when '.js', '.mjs'
+      'javascript'
+    when '.css', '.scss', '.sass'
+      'css'
+    else
+      'unknown'
+    end
+  end
+
+  def check_compressed_size(file_path)
+    return nil unless @options[:check_compression]
+    
+    # Check if gzipped version exists
+    gzipped_path = "#{file_path}.gz"
+    if File.exist?(gzipped_path)
+      {
+        gzip: File.size(gzipped_path),
+        ratio: ((File.size(file_path) - File.size(gzipped_path)) / File.size(file_path).to_f * 100).round(1)
+      }
+    else
+      nil
+    end
+  end
+
+  def analyze_assets
+    # Analyze Rails asset pipeline output
+    assets_dir = 'public/assets'
+    return nil unless Dir.exist?(assets_dir)
+    
+    manifest_path = File.join(assets_dir, '.sprockets-manifest-*.json')
+    manifest_files = Dir.glob(manifest_path)
+    
+    return nil if manifest_files.empty?
+    
+    manifest = JSON.parse(File.read(manifest_files.first))
+    
+    {
+      manifest_files: manifest['files'].keys.count,
+      total_compiled_size: manifest['files'].values.sum { |file| file['size'] || 0 },
+      largest_files: manifest['files'].sort_by { |_, file| -(file['size'] || 0) }.first(10)
+    }
+  end
+
+  def generate_recommendations
+    recommendations = []
+    
+    # Size-based recommendations
+    large_files = find_large_files
+    if large_files.any?
+      recommendations << {
+        type: 'size_optimization',
+        priority: 'high',
+        title: 'Large files detected',
+        description: "#{large_files.count} files are larger than 100KB",
+        files: large_files.map { |f| f[:path] },
+        suggestion: 'Consider code splitting or compression'
+      }
+    end
+    
+    # Compression recommendations
+    if @options[:check_compression]
+      uncompressed_files = find_uncompressed_files
+      if uncompressed_files.any?
+        recommendations << {
+          type: 'compression',
+          priority: 'medium',
+          title: 'Missing compression',
+          description: "#{uncompressed_files.count} files lack gzip compression",
+          files: uncompressed_files.map { |f| f[:path] },
+          suggestion: 'Enable gzip compression in your web server'
+        }
+      end
+    end
+    
+    # Bundle splitting recommendations
+    js_files = get_all_javascript_files
+    if js_files.count == 1 && js_files.first[:size] > 500_000 # > 500KB
+      recommendations << {
+        type: 'bundle_splitting',
+        priority: 'high',
+        title: 'Monolithic bundle detected',
+        description: 'Single large JavaScript bundle detected',
+        suggestion: 'Consider implementing code splitting for better caching'
+      }
+    end
+    
+    recommendations
+  end
+
+  def find_large_files
+    all_files = get_all_files
+    all_files.select { |file| file[:size] > 100_000 } # > 100KB
+  end
+
+  def find_uncompressed_files
+    all_files = get_all_files
+    all_files.select { |file| file[:compressed_size].nil? && file[:size] > 10_000 } # > 10KB
+  end
+
+  def get_all_files
+    @bundle_stats ||= analyze_bundles
+    (@bundle_stats[:javascript_files] + @bundle_stats[:css_files])
+  end
+
+  def get_all_javascript_files
+    @bundle_stats ||= analyze_bundles
+    @bundle_stats[:javascript_files]
+  end
+
+  def output_results(analysis)
+    case @options[:format]
+    when 'json'
+      output_json(analysis)
+    when 'csv'
+      output_csv(analysis)
+    else
+      output_console(analysis)
+    end
+  end
+
+  def output_json(analysis)
+    json = JSON.pretty_generate(analysis)
+    
+    if @options[:output]
+      File.write(@options[:output], json)
+      puts "📄 Analysis saved to #{@options[:output]}"
+    else
+      puts json
+    end
+  end
+
+  def output_csv(analysis)
+    require 'csv'
+    
+    output = @options[:output] || 'bundle_analysis.csv'
+    
+    CSV.open(output, 'w') do |csv|
+      csv << ['File', 'Type', 'Size (KB)', 'Compressed Size (KB)', 'Compression Ratio (%)']
+      
+      all_files = get_all_files
+      all_files.each do |file|
+        compressed_info = file[:compressed_size]
+        csv << [
+          file[:path],
+          file[:type],
+          file[:size_kb],
+          compressed_info ? (compressed_info[:gzip] / 1024.0).round(2) : 'N/A',
+          compressed_info ? compressed_info[:ratio] : 'N/A'
+        ]
+      end
+    end
+    
+    puts "📊 CSV analysis saved to #{output}"
+  end
+
+  def output_console(analysis)
+    puts "\n" + "=" * 60
+    puts "📊 BUNDLE ANALYSIS REPORT"
+    puts "=" * 60
+    
+    # Project info
+    puts "\n📋 Project Information:"
+    analysis[:project_info].each do |key, value|
+      puts "  #{key.to_s.ljust(15)}: #{value}"
+    end
+    
+    # Bundle stats
+    stats = analysis[:bundle_stats]
+    puts "\n📦 Bundle Statistics:"
+    puts "  Total files     : #{stats[:total_files]}"
+    puts "  Total size      : #{(stats[:total_size] / 1024.0).round(2)} KB"
+    puts "  Average size    : #{(stats[:average_file_size] / 1024.0).round(2)} KB"
+    puts "  JavaScript files: #{stats[:javascript_files].count}"
+    puts "  CSS files       : #{stats[:css_files].count}"
+    
+    # Largest files
+    puts "\n📈 Largest Files:"
+    largest = get_all_files.sort_by { |f| -f[:size] }.first(5)
+    largest.each do |file|
+      puts "  #{file[:path].ljust(40)} #{file[:size_kb].to_s.rjust(8)} KB"
+    end
+    
+    # Recommendations
+    if analysis[:recommendations].any?
+      puts "\n💡 Recommendations:"
+      analysis[:recommendations].each do |rec|
+        puts "  #{rec[:priority].upcase}: #{rec[:title]}"
+        puts "    #{rec[:description]}"
+        puts "    Suggestion: #{rec[:suggestion]}"
+        puts ""
+      end
+    else
+      puts "\n✅ No optimization recommendations at this time!"
+    end
+    
+    puts "=" * 60
+  end
+end
+
+# Run CLI if called directly
+if __FILE__ == $0
+  begin
+    cli = BundleAnalysisCLI.new
+    cli.run(ARGV)
+  rescue => e
+    puts "❌ Error: #{e.message}"
+    exit 1
+  end
+end
