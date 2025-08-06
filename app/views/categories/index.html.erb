@@ -18,7 +18,7 @@
         <% @categories.each do |cat| %>
           <tr>
             <td><strong><%= cat.name %></strong></td>
-            <td class="text-sm text-gray-600">
+            <td class="text-sm text-base-content/80">
               <%= cat.description.present? ? truncate(cat.description, length: 80) : "—" %>
             </td>
             <td>

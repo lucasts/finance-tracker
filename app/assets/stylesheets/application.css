@@ -19,6 +19,7 @@
 @import 'components/form_controls';
 @import 'components/status_badges';
 @import 'components/loading_states';
+@import 'components/accessibility';
 
 /* Custom styles for transaction form */
 

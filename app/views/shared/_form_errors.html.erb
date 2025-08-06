@@ -1,5 +1,5 @@
 <% if object && object.errors.any? %>
-  <div class="mb-4 bg-red-100 text-red-700 p-4 rounded shadow-sm">
+  <div class="mb-4 bg-error/10 text-error p-4 rounded shadow-sm border-l-4 border-error" role="alert">
     <h2 class="font-semibold">Erros:</h2>
     <ul class="mt-2 list-disc pl-5 text-sm">
       <% object.errors.full_messages.each do |msg| %>
