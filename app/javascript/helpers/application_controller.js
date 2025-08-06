@@ -62,8 +62,30 @@ export default class ApplicationController extends Controller {
   }
 
   // Announce to screen readers
-  announce(message) {
-    this.dom.announceToScreenReader(message);
+  announce(message, priority = 'polite') {
+    this.dom.announceToScreenReader(message, priority);
+    this.log(`Screen reader announcement: ${message}`);
+  }
+
+  // Specific announcement methods
+  announceError(message) {
+    this.dom.announceFormError(this.identifier, message);
+    this.log(`Error announcement: ${message}`);
+  }
+
+  announceSuccess(message) {
+    this.dom.announceSuccess(message);
+    this.log(`Success announcement: ${message}`);
+  }
+
+  announceLoading(message = 'Carregando...') {
+    this.dom.announceLoading(message);
+    this.log(`Loading announcement: ${message}`);
+  }
+
+  announceContentChange(message) {
+    this.dom.announceContentChange(message);
+    this.log(`Content change announcement: ${message}`);
   }
 
   // Enhanced event dispatch with bubbling

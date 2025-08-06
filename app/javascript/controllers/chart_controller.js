@@ -84,10 +84,12 @@ export default class extends Controller {
       
       await this.chart.render()
       this.dispatch("chart-rendered", { chart: this.chart })
+      this.announceSuccess("Gráfico carregado com sucesso")
       console.log("Chart rendered successfully")
       
     } catch (error) {
       console.error("Failed to initialize chart", error)
+      this.announceError("Falha ao carregar gráfico: " + error.message)
       this.showError("Erro ao carregar gráfico: " + error.message)
     }
   }

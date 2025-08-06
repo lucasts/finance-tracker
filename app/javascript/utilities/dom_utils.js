@@ -203,6 +203,50 @@ export class DOMUtils {
       return false;
     }
   }
+
+  // Screen reader announcements
+  static announceToScreenReader(message, priority = 'polite') {
+    // Create or get the announcement region
+    let announcer = document.getElementById('sr-announcer');
+    if (!announcer) {
+      announcer = this.createElement('div', {
+        id: 'sr-announcer',
+        'aria-live': priority,
+        'aria-atomic': 'true',
+        class: 'sr-only',
+        style: 'position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;'
+      });
+      document.body.appendChild(announcer);
+    }
+
+    // Clear previous message and announce new one
+    announcer.textContent = '';
+    // Small delay to ensure screen readers pick up the change
+    setTimeout(() => {
+      announcer.textContent = message;
+    }, 100);
+  }
+
+  // Announce form validation errors
+  static announceFormError(fieldName, errorMessage) {
+    const message = `Erro no campo ${fieldName}: ${errorMessage}`;
+    this.announceToScreenReader(message, 'assertive');
+  }
+
+  // Announce successful operations
+  static announceSuccess(message) {
+    this.announceToScreenReader(`Sucesso: ${message}`, 'polite');
+  }
+
+  // Announce loading states
+  static announceLoading(message = 'Carregando...') {
+    this.announceToScreenReader(message, 'polite');
+  }
+
+  // Announce when content changes
+  static announceContentChange(message) {
+    this.announceToScreenReader(message, 'polite');
+  }
 }
 
 // Clear DOM cache on Turbo navigation

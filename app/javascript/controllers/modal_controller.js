@@ -67,7 +67,7 @@ export default class extends Controller {
       this.setInitialFocus()
     }
 
-    console.log("Modal aberto")
+    this.announce("Modal aberto")
     this.dispatch("opened", { modalId: this.idValue })
     console.log("Modal opened")
   }
@@ -90,7 +90,7 @@ export default class extends Controller {
       this.previouslyFocusedElement.focus()
     }
 
-    console.log("Modal fechado")
+    this.announce("Modal fechado")
     this.dispatch("closed", { modalId: this.idValue })
     console.log("Modal closed")
   }

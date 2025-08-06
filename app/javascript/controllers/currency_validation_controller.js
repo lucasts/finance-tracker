@@ -63,6 +63,7 @@ export default class extends Controller {
         this.errorTarget.textContent = errors[0]
         this.errorTarget.classList.remove('hidden')
         this.inputTarget.classList.add('input-error')
+        this.announceError(errors[0])
       } else {
         this.errorTarget.classList.add('hidden')
         this.inputTarget.classList.remove('input-error')

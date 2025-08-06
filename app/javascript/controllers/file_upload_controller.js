@@ -39,6 +39,7 @@ export default class extends ApplicationController {
     
     if (!validationResult.isValid) {
       this.showError(validationResult.error)
+      this.announceError(validationResult.error)
       this.clearFileInput()
       return
     }
@@ -47,6 +48,10 @@ export default class extends ApplicationController {
     if (this.showPreviewValue) {
       this.updatePreview(files)
     }
+
+    // Announce successful file selection
+    const fileText = files.length === 1 ? 'arquivo selecionado' : 'arquivos selecionados'
+    this.announceSuccess(`${files.length} ${fileText}: ${files.map(f => f.name).join(', ')}`)
 
     // Enable submit button
     this.enableSubmit()
