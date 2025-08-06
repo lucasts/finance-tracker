@@ -1,5 +1,5 @@
 # Unified money handling concern - includes all money-related functionality
-# This provides backward compatibility while organizing code into focused concerns
+# Organizes money parsing, formatting and validation into focused concerns
 module MoneyConcern
   extend ActiveSupport::Concern
 

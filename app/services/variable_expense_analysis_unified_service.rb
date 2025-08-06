@@ -37,7 +37,7 @@ class VariableExpenseAnalysisUnifiedService
     { success: false, errors: ["Analysis failed: #{e.message}"] }
   end
 
-  # Class method for simple category analysis (backward compatibility)
+  # Class method for simple category analysis (public API convenience method)
   def self.analyze_category(category, timeframe_months: 12, analysis_date: Date.current)
     service = new(
       user: category.user,

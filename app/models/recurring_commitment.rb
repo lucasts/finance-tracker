@@ -61,6 +61,12 @@ class RecurringCommitment < ApplicationRecord
     confirmed_transactions.average(:amount)&.round(2) || 0
   end
 
+  # Total amount spent on this commitment
+  def total_spent
+    confirmed_transactions = transactions.where(status: 'confirmed')
+    confirmed_transactions.sum(:amount)&.round(2) || 0
+  end
+
   # Last recorded transaction
   def last_transaction
     transactions.order(:payment_date).last
@@ -102,12 +108,7 @@ class RecurringCommitment < ApplicationRecord
       FinancialConstants.variable_expense?(category.name)
   end
 
-  # Indicates if the commitment has a fixed value (for compatibility with jobs/specs)
-  def fixed_amount?
-    true
-  end
-
-  # Expected value for compatibility with jobs/specs
+  # Expected value for matching imported transactions
   def expected_amount
     default_amount
   end
