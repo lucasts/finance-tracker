@@ -19,10 +19,10 @@ module AmountNormalization
       next if value.nil?
       
       if value.is_a?(String) && value.present?
-        # Remove thousand separators (dots) and convert comma to decimal point
-        normalized = value.gsub(/\.(?=\d{3}(\D|$))/, '').gsub(',', '.')
+        # Use MoneyParsingConcern for consistent parsing
         begin
-          self.send("#{field}=", BigDecimal(normalized))
+          normalized_value = self.class.parse_money_string(value)
+          self.send("#{field}=", normalized_value)
         rescue ArgumentError
           # For invalid strings, leave the original value so validation can catch it
           # Don't set to 0 automatically
@@ -37,14 +37,22 @@ module AmountNormalization
   class_methods do
     # Class method to normalize amount parameters in controllers
     def normalize_amount_param(param_value)
-      return param_value if param_value.is_a?(Numeric)
-      return 0 if param_value.blank?
+      return param_value if param_value.nil?
       
-      # Remove thousand separators (dots) and convert comma to decimal point
-      normalized = param_value.to_s.gsub(/\.(?=\d{3}(\D|$))/, '').gsub(',', '.')
-      BigDecimal(normalized)
-    rescue ArgumentError
-      BigDecimal('0')
+      if param_value.is_a?(String) && param_value.present?
+        # Use MoneyParsingConcern for consistent parsing
+        begin
+          parse_money_string(param_value)
+        rescue ArgumentError
+          # For invalid strings, return original so validation can catch it
+          param_value
+        end
+      elsif param_value.is_a?(String)
+        # Empty strings are returned as nil
+        nil
+      else
+        param_value
+      end
     end
   end
 end

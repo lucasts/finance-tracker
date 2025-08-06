@@ -1,9 +1,12 @@
-# Money parsing concern - focused only on parsing money strings to BigDecimal
-# Part of the money handling system refactor
-module MoneyParsingConcern
+# Unified money handling concern - includes all money-related functionality
+# This provides backward compatibility while organizing code into focused concerns
+module MoneyConcern
   extend ActiveSupport::Concern
 
-  # Class methods for controllers and services
+  # Include all specialized concerns for instance methods
+  include MoneyNormalizationConcern
+
+  # Class methods with all money-related functionality
   class_methods do
     # Parse money string to BigDecimal (consolidated from multiple places)
     def parse_money_string(value)
@@ -54,6 +57,43 @@ module MoneyParsingConcern
       is_negative ? -result : result
     rescue ArgumentError, TypeError
       BigDecimal('0')
+    end
+
+    # Format money for display
+    def format_money_display(value, options = {})
+      return "R$ 0,00" if value.blank? || value.to_f.zero?
+      
+      # Convert to BigDecimal for precision
+      amount = value.is_a?(BigDecimal) ? value : BigDecimal(value.to_s)
+      
+      # Format with Brazilian currency pattern
+      formatted = "%.2f" % amount.to_f
+      formatted = formatted.gsub('.', ',')
+      
+      # Add thousands separator
+      integer_part, decimal_part = formatted.split(',')
+      integer_part.gsub!(/(\d)(?=(\d{3})+(?!\d))/, '\1.')
+      
+      currency_symbol = options[:currency] || "R$"
+      "#{currency_symbol} #{integer_part},#{decimal_part}"
+    end
+
+    # Validate money format
+    def valid_money_format?(value)
+      return false if value.blank?
+      return true if value.is_a?(Numeric)
+      return false unless value.is_a?(String)
+      
+      # Allow various money formats
+      value.to_s.match?(/^\s*[R$€£¥]?\s*[\d.,\-]+\s*$/)
+    end
+
+    # Extract currency symbol from string
+    def extract_currency_symbol(value)
+      return "" if value.blank?
+      
+      currency_match = value.to_s.match(/^[^\d.,\-]*([R$€£¥]+)/)
+      currency_match ? currency_match[1] : ""
     end
   end
 end
