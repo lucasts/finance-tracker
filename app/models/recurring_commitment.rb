@@ -43,10 +43,6 @@ class RecurringCommitment < ApplicationRecord
 
     calculate_next_date_from(from_date)
   end
-  
-  # Alias for backward compatibility and naming consistency
-  alias_method :next_due_date, :next_occurrence_date
-  alias_method :next_occurrence_after, :next_occurrence_date
 
   # Check if it's active in the period
   def active_on?(date = Date.current)
@@ -64,9 +60,6 @@ class RecurringCommitment < ApplicationRecord
 
     confirmed_transactions.average(:amount)&.round(2) || 0
   end
-
-  # Alias for backward compatibility
-  alias_method :total_spent, :amount_paid
 
   # Last recorded transaction
   def last_transaction

@@ -1,5 +1,6 @@
 class ImportedTransaction < ApplicationRecord
   include AmountNormalization
+  include FinancialConstants
   
   belongs_to :import_session
   belongs_to :installment_plan, optional: true

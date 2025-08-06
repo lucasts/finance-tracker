@@ -1,6 +1,7 @@
 class Transaction < ApplicationRecord
   include AmountNormalization
-  include MoneyParsingConcern
+  include MoneyConcern
+  include FinancialConstants
   
   # User associations
   belongs_to :user
@@ -128,17 +129,6 @@ class Transaction < ApplicationRecord
     self.status = determine_automatic_status
   end
   
-  def auto_update_status_if_needed
-    # Only updates automatically if not explicitly cancelled
-    return if cancelled?
-    
-    # If dates changed, recalculate status
-    if payment_date_changed? || event_date_changed?
-      new_status = determine_automatic_status
-      self.status = new_status unless status == 'cancelled'
-    end
-  end
-  
   def determine_automatic_status
     current_date = Date.current
     check_date = payment_date || event_date
@@ -220,18 +210,11 @@ class Transaction < ApplicationRecord
     end
   end
 
-  # Ensures credit statement exists for credit card transactions
-  def ensure_credit_statement
-    return unless credit_card_transaction?
-    return if credit_statement.present? # Already associated
-
-    statement = CreditStatementService.find_or_create_for_transaction(self)
-    update_column(:credit_statement_id, statement.id) if statement
-  end
-
   # Checks if this is a credit card transaction
   def credit_card_transaction?
-    entries.joins(:account).where(accounts: { account_type: AccountType.where(code: "CREDIT_CARD") }).where(entry_type: 'credit').exists?
+    entries.joins(:account)
+      .where(entry_type: 'credit', accounts: { account_type: AccountType.find_by(code: 'CREDIT_CARD') })
+      .exists?
   end
 
   # Helper methods for double-entry system
@@ -247,23 +230,15 @@ class Transaction < ApplicationRecord
 
   # Refactored callback methods using service pattern
   def execute_before_save_operations
-    TransactionCallbackService.new(self).execute_before_save
+    TransactionCallbackService.call(transaction: self, operation: :before_save)
   end
 
   def execute_after_create_operations
-    TransactionCallbackService.new(self).execute_after_create
+    TransactionCallbackService.call(transaction: self, operation: :after_create)
   end
 
   def execute_after_save_operations
-    TransactionCallbackService.new(self).execute_after_save
-  end
-
-  # Legacy method kept for backward compatibility - delegated to service
-  def update_credit_statement_amount
-    return unless credit_statement.present?
-    
-    # Use the service to update the statement amount
-    CreditStatementService.update_statement_amount(credit_statement)
+    TransactionCallbackService.call(transaction: self, operation: :after_save)
   end
 
   def balance_of_entries

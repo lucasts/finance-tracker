@@ -8,7 +8,7 @@
 #
 class InstallmentPlan < ApplicationRecord
   include PaidAmountCalculations
-  include MoneyParsingConcern
+  include MoneyConcern
   
   # User association
   belongs_to :user
@@ -37,10 +37,10 @@ class InstallmentPlan < ApplicationRecord
   # Override setter to prevent automatic conversion of invalid strings
   def total_amount=(value)
     if value.is_a?(String) && value.present?
-      # Check if it's a valid number string first
-      normalized = value.gsub(/\.(?=\d{3}(\D|$))/, '').gsub(',', '.')
+      # Use MoneyParsingConcern for consistent parsing
       begin
-        super(BigDecimal(normalized))
+        parsed_value = self.class.parse_money_string(value)
+        super(parsed_value)
       rescue ArgumentError
         # Keep the original invalid string so validation can catch it
         super(value)
@@ -264,7 +264,7 @@ class InstallmentPlan < ApplicationRecord
         amount: transaction.amount,
         due_date: transaction.payment_date,
         status: transaction.status,
-        paid_date: transaction.status == 'confirmed' ? transaction.updated_at.to_date : nil,
+        paid_date: transaction.status == 'confirmed' ? FinancialConstants.safe_to_date(transaction.updated_at) : nil,
         description: transaction.description
       }
     end
@@ -287,10 +287,9 @@ class InstallmentPlan < ApplicationRecord
   def total_amount_valid_number
     original_value = read_attribute_before_type_cast(:total_amount)
     if original_value.is_a?(String) && original_value.present?
-      # Try to parse as a number
-      normalized = original_value.gsub(/\.(?=\d{3}(\D|$))/, '').gsub(',', '.')
+      # Use MoneyParsingConcern for consistent parsing and validation
       begin
-        BigDecimal(normalized)
+        self.class.parse_money_string(original_value)
       rescue ArgumentError
         errors.add(:total_amount, 'deve ser um número válido')
       end

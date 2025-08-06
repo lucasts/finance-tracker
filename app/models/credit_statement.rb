@@ -1,6 +1,7 @@
 class CreditStatement < ApplicationRecord
   include AmountNormalization
-  include MoneyParsingConcern
+  include MoneyConcern
+  include FinancialConstants
   
   belongs_to :account
   has_many :transactions, dependent: :nullify
@@ -80,6 +81,6 @@ class CreditStatement < ApplicationRecord
 
   # Refactored callback method using service pattern
   def execute_after_save_operations
-    CreditStatementCallbackService.new(self).execute_after_save
+    CreditStatementCallbackService.call(credit_statement: self, operation: :after_save)
   end
 end
