@@ -1,12 +1,26 @@
 module ApplicationHelper
   
-  # Helper methods for money formatting
-  def format_currency(amount, options = {})
-    MoneyFormattingConcern.format_money_display(amount, options)
-  end
-
-  def format_currency_compact(amount)
-    MoneyFormattingConcern.format_money_display(amount, show_currency: false)
+  # Unified money formatting helper - replaces all number_to_currency calls
+  def format_money_unified(amount, options = {})
+    return content_tag(:span, 'R$ 0,00', class: 'text-muted') if amount.blank? || amount.zero?
+    
+    defaults = {
+      unit: 'R$ ',
+      separator: ',', 
+      delimiter: '.',
+      precision: 2
+    }
+    
+    formatted = number_to_currency(amount, defaults.merge(options))
+    
+    # Add semantic CSS classes based on amount
+    css_class = case
+                when amount > 0 then 'money-positive'
+                when amount < 0 then 'money-negative'  
+                else 'money-neutral'
+                end
+                
+    content_tag(:span, formatted, class: "money-display #{css_class}")
   end
 
   def parse_money(value)
