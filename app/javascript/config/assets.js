@@ -8,14 +8,17 @@ export const ASSET_CONFIG = {
     chartLibrary: 'apexcharts',
     currencyFormatting: 'unified',
     darkMode: false, // Future enhancement
-    offlineSupport: false // Future enhancement
+    offlineSupport: true, // Enable offline functionality
+    intelligentCaching: true
   },
 
   // Performance settings
   performance: {
     lazyLoadImages: true,
     preloadCriticalAssets: true,
-    enableServiceWorker: false // Future enhancement
+    enableServiceWorker: true, // Enable service worker for caching
+    bundleSplitting: true,
+    compressionEnabled: true
   },
 
   // Chart configuration
