@@ -145,7 +145,7 @@ RSpec.describe CsvImportService, type: :service do
         service = CsvImportService.new(csv_content)
         result = service.parse
         
-        # Single positive value, uses legacy inference, infers income
+        # Single positive value with no type specified, infers income
         expect(result[0][:transaction_type]).to eq('income')
       end
       

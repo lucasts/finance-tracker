@@ -135,7 +135,7 @@ RSpec.describe Transaction, type: :model do
     it { should have_many(:entries) }
     it { should have_many(:accounts).through(:entries) }
     
-    # Legacy compatibility methods should exist and work
+    # Additional association tests for comprehensive coverage
     it 'has many entries' do
       transaction = create(:transaction, user: user)
       expect(transaction.entries.count).to eq(2)
