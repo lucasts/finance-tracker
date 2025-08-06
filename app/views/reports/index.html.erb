@@ -283,21 +283,21 @@
       </div>
 
       <!-- Timeline Visualizations -->
-      <div class="mt-6">
+      <div class="mt-6" data-controller="chart">
         <h4 class="font-semibold mb-4">📈 Visualizações de Timeline</h4>
         
         <!-- Chart Controls -->
         <div class="flex flex-wrap gap-2 mb-4">
-          <button class="btn btn-sm btn-primary" onclick="showChart('expense-trends')">
+          <button class="btn btn-sm btn-primary" data-action="click->chart#show" data-chart-type="expense-trends">
             Tendência de Despesas
           </button>
-          <button class="btn btn-sm btn-outline" onclick="showChart('income-vs-expense')">
+          <button class="btn btn-sm btn-outline" data-action="click->chart#show" data-chart-type="income-vs-expense">
             Receitas vs Despesas
           </button>
-          <button class="btn btn-sm btn-outline" onclick="showChart('savings-rate')">
+          <button class="btn btn-sm btn-outline" data-action="click->chart#show" data-chart-type="savings-rate">
             Taxa de Poupança
           </button>
-          <button class="btn btn-sm btn-outline" onclick="showChart('category-breakdown')">
+          <button class="btn btn-sm btn-outline" data-action="click->chart#show" data-chart-type="category-breakdown">
             Gastos por Categoria
           </button>
         </div>
@@ -305,7 +305,7 @@
         <!-- Chart Container -->
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <div id="timeline-chart" style="min-height: 350px;">
+            <div data-chart-target="container" id="timeline-chart" style="min-height: 350px;">
               <div class="flex items-center justify-center h-80">
                 <div class="text-center">
                   <div class="text-4xl mb-4">📊</div>
@@ -315,6 +315,7 @@
             </div>
           </div>
         </div>
+      </div>
         
         <!-- Progress Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
