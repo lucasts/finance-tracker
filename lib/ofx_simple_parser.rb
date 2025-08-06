@@ -21,6 +21,7 @@ class OfxSimpleParser
       fit_id = extract_tag('FITID', block)
       amount_str = extract_tag('TRNAMT', block)
       begin
+        # Use consistent money parsing (simplified approach for lib context)
         amount = BigDecimal(amount_str)
       rescue ArgumentError, TypeError
         raise StandardError, "Invalid amount in OFX: '#{amount_str}'"
@@ -29,14 +30,16 @@ class OfxSimpleParser
       memo = extract_tag('MEMO', block)
       name = extract_tag('NAME', block)
       trntype = extract_tag('TRNTYPE', block)
-      tx_hash = Transaction.new(fit_id: fit_id, amount: amount, posted_at: posted_at, memo: memo, name: name, trntype: trntype).to_h
-      tx_hash['amount'] = amount.to_f if tx_hash['amount']
-      transaction = Transaction.new(fit_id: fit_id, amount: amount, posted_at: posted_at, memo: memo, name: name, trntype: trntype)
-      def transaction.to_h
-        h = super
-        h['amount'] = h['amount'].to_f if h['amount']
-        h
-      end
+      
+      # Create transaction with consistent data
+      transaction = Transaction.new(
+        fit_id: fit_id, 
+        amount: amount,
+        posted_at: posted_at, 
+        memo: memo, 
+        name: name, 
+        trntype: trntype
+      )
       transactions << transaction
     end
     Account.new(bank_id: bank_id, account_id: account_id, balance: balance, transactions: transactions)

@@ -4,6 +4,10 @@
 class RecurringProjectionService
   DEFAULT_MONTHS_AHEAD = 3
 
+  def self.call(months_ahead: DEFAULT_MONTHS_AHEAD, as_of: Date.today)
+    new(months_ahead: months_ahead, as_of: as_of).projected_transactions
+  end
+
   def initialize(months_ahead: DEFAULT_MONTHS_AHEAD, as_of: Date.today)
     @months_ahead = months_ahead
     @as_of = as_of
@@ -40,8 +44,7 @@ class RecurringProjectionService
         amount: commitment.default_amount,
         description: commitment.name,
         category_id: commitment.category_id,
-        account_id: commitment.from_account_id, # Mantém compatibilidade
-        from_account_id: commitment.from_account_id, # Para compatibilidade legacy
+        account_id: commitment.from_account_id,
         to_account_id: commitment.to_account_id,
         recurring_commitment_id: commitment.id,
         projected: true
