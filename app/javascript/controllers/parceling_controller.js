@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { FormattingUtils } from "../utilities/formatting_utils"
+import FormatUtils from "../utilities/format_utils"
 
 export default class extends Controller {
   static targets = ["toggle", "section", "installmentsCount", "preview", "installmentValue", "firstDate", "lastDate", "createInstallments"]
@@ -64,7 +64,8 @@ export default class extends Controller {
   calculateInstallment() {
     // Get the amount field value from the main form
     const amountInput = document.querySelector('input[name="transaction[amount]"]')
-    const totalAmount = amountInput ? parseFloat(amountInput.value) : 0
+    // Use MoneyFormatter.parse to correctly handle Brazilian currency format
+    const totalAmount = amountInput ? MoneyFormatter.parse(amountInput.value) : 0
     
     const installmentsCount = parseInt(this.installmentsCountTarget.value)
 
@@ -102,16 +103,16 @@ export default class extends Controller {
     this.addUpdateAnimation()
 
     // Update preview
-    this.installmentValueTarget.textContent = FormattingUtils.formatCurrency(installmentValue)
-    this.firstDateTarget.textContent = FormattingUtils.formatDate(firstDate)
-    this.lastDateTarget.textContent = FormattingUtils.formatDate(lastDate)
+    this.installmentValueTarget.textContent = MoneyFormatter.format(installmentValue)
+    this.firstDateTarget.textContent = FormatUtils.formatDate(firstDate)
+    this.lastDateTarget.textContent = FormatUtils.formatDate(lastDate)
 
     // Prepare data for backend
     const installmentData = {
       total_amount: totalAmount,
       installment_count: installmentsCount, // ✅ FIXED: Using installment_count for consistency
       installment_value: installmentValue,
-      start_date: FormattingUtils.formatDateForBackend(firstDate)
+      start_date: FormatUtils.formatDateForBackend(firstDate)
     }
 
     this.createInstallmentsTarget.value = JSON.stringify(installmentData)

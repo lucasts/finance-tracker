@@ -74,7 +74,8 @@ export default class extends Controller {
   }
 
   handleAmountChange() {
-    const amount = parseFloat(this.amountTarget.value)
+    // Use MoneyFormatter.parse to correctly handle Brazilian currency format
+    const amount = MoneyFormatter.parse(this.amountTarget.value)
     
     if (amount > 0) {
       const formattedAmount = new Intl.NumberFormat('pt-BR', {
@@ -340,7 +341,8 @@ export default class extends Controller {
 
   suggestExpenseAccounts(description) {
     // Suggest from_account based on amount and description
-    const amount = parseFloat(this.amountTarget.value) || 0
+    // Use MoneyFormatter.parse to correctly handle Brazilian currency format
+    const amount = MoneyFormatter.parse(this.amountTarget.value) || 0
     
     // Suggest credit card for larger amounts or online purchases
     if (amount > 200 || description.includes('online') || description.includes('amazon') || description.includes('ifood')) {
@@ -464,7 +466,8 @@ export default class extends Controller {
   validateForm() {
     // Basic validation
     const hasDescription = this.descriptionTarget.value.trim().length > 0
-    const hasAmount = parseFloat(this.amountTarget.value) > 0
+    // Use MoneyFormatter.parse to correctly handle Brazilian currency format
+    const hasAmount = MoneyFormatter.parse(this.amountTarget.value) > 0
     const hasEventDate = this.eventDateTarget.value.length > 0
     const hasFromAccount = this.fromAccountTarget.value.length > 0
     const hasTransactionType = this.getSelectedTransactionType() !== null

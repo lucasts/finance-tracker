@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { FormattingUtils } from "../utilities/formatting_utils"
+import FormatUtils from "../utilities/format_utils"
 
 // Connects to data-controller="recurrence"
 export default class extends Controller {
@@ -99,7 +99,8 @@ export default class extends Controller {
       return
     }
 
-    const totalAmount = parseFloat(amountField.value)
+    // Use MoneyFormatter.parse to correctly handle Brazilian currency format
+    const totalAmount = MoneyFormatter.parse(amountField.value)
     const installmentValue = totalAmount / installmentsCount
     const startDate = new Date(eventDateField.value)
     
@@ -109,7 +110,7 @@ export default class extends Controller {
     lastDate.setMonth(lastDate.getMonth() + installmentsCount - 1)
     
     // Update preview
-    this.installmentValueTarget.textContent = FormattingUtils.formatCurrency(installmentValue)
+    this.installmentValueTarget.textContent = MoneyFormatter.format(installmentValue)
     this.firstDateTarget.textContent = this.formatDate(firstDate)
     this.lastDateTarget.textContent = this.formatDate(lastDate)
     
