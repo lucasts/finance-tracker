@@ -25,7 +25,7 @@ class ImportedTransactionsController < ApplicationController
     # If creating new, create transaction in the system
     if action == 'create_new'
       # Determine accounts based on transaction type
-      amount = tx_params[:amount].to_d.abs
+      amount = FinancialConstants.safe_to_decimal(tx_params[:amount]).abs
       transaction_type = tx_params[:transaction_type]
       account_id = @imported_transaction.import_session.account_id
       

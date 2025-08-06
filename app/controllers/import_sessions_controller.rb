@@ -25,9 +25,9 @@ class ImportSessionsController < ApplicationController
         # Parsing and creation of ImportedTransaction
         transactions =
           if @import_session.source_type == 'ofx'
-            OfxImportService.new(@import_session.raw_file).parse
+            OfxImportService.call(file_content: @import_session.raw_file)
           else
-            CsvImportService.new(@import_session.raw_file).parse
+            CsvImportService.call(file_content: @import_session.raw_file)
           end
         transactions.each do |tx|
           @import_session.imported_transactions.create!(tx)

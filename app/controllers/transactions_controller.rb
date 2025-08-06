@@ -117,7 +117,7 @@ class TransactionsController < ApplicationController
     # This method translates from/to account IDs from the form into debit/credit entries
     from_account_id = params[:from_account_id]
     to_account_id = params[:to_account_id]
-    amount = params[:amount].to_d
+    amount = FinancialConstants.safe_to_decimal(params[:amount])
 
     unless from_account_id && to_account_id && amount > 0
       # Add an error to the model instance if params are invalid
@@ -271,7 +271,7 @@ class TransactionsController < ApplicationController
   def create_installment_transaction
     return create_single_transaction unless params[:create_installment_plan].present?
 
-    installment_count = params[:installment_count].to_i
+    installment_count = FinancialConstants.safe_to_integer(params[:installment_count])
     
     if installment_count < 2 || installment_count > 60
       @transaction = current_user.transactions.build(

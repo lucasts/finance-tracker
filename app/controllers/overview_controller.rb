@@ -47,8 +47,7 @@ class OverviewController < ApplicationController
     @savings_rate = calculate_savings_rate(@income_total, @expense_total)
 
     # === RECURRING COMMITMENTS PROJECTION ===
-    projection_service = RecurringProjectionService.new(as_of: month_date)
-    @projected_transactions = projection_service.projected_transactions
+    @projected_transactions = RecurringProjectionService.call(as_of: month_date)
   end
 end
 
@@ -193,7 +192,7 @@ def monthly_statistics(month_date)
     expense_growth: calculate_growth(@expense_total, prev_expense),
     largest_expense: largest_expense_this_month(month_date),
     transaction_count: @transactions.confirmed.count,
-    avg_transaction: @transactions.confirmed.average(:amount)&.to_f || 0
+    avg_transaction: FinancialConstants.safe_to_float(@transactions.confirmed.average(:amount), 0)
   }
 end
 
@@ -239,9 +238,9 @@ def generate_chart_data
     accumulated_balance += monthly_balance
     
     months << month_label
-    income_data << income.to_f
-    expense_data << expense.to_f
-    balance_data << accumulated_balance.to_f
+    income_data << FinancialConstants.safe_to_float(income)
+    expense_data << FinancialConstants.safe_to_float(expense)
+    balance_data << FinancialConstants.safe_to_float(accumulated_balance)
   end
   
   {
@@ -285,10 +284,13 @@ def projected_balance(current_balance, month)
   future_expenses = future_transactions.where(transaction_type: "expense").sum(:amount)
 
   # Include projected transactions (recurring commitments projection)
-  projection_service = RecurringProjectionService.new(as_of: month_date)
-  projected_transactions = projection_service.projected_transactions
-  projected_income = projected_transactions.select { |t| t[:amount].to_f > 0 }.sum { |t| t[:amount].to_f }
-  projected_expenses = projected_transactions.select { |t| t[:amount].to_f < 0 }.sum { |t| t[:amount].to_f.abs }
+  projected_transactions = RecurringProjectionService.call(as_of: month_date)
+  projected_income = projected_transactions
+    .select { |t| FinancialConstants.safe_to_decimal(t[:amount]) > 0 }
+    .sum { |t| FinancialConstants.safe_to_decimal(t[:amount]) }
+  projected_expenses = projected_transactions
+    .select { |t| FinancialConstants.safe_to_decimal(t[:amount]) < 0 }
+    .sum { |t| FinancialConstants.safe_to_decimal(t[:amount]).abs }
 
   projected = base_balance + future_income - future_expenses + projected_income - projected_expenses
   projected

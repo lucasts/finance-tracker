@@ -22,7 +22,7 @@ class InstallmentPlansController < ApplicationController
         total_paid: total_paid,
         remaining_amount: remaining_amount,
         next_due_date: next_due_date,
-        progress_percentage: FinancialConstants.calculate_percentage(paid_installments.to_f, plan.installment_count)
+        progress_percentage: FinancialConstants.calculate_percentage(FinancialConstants.safe_to_float(paid_installments), plan.installment_count)
       }
     end
   end
@@ -165,7 +165,7 @@ class InstallmentPlansController < ApplicationController
     {
       paid_installments: paid_installments,
       installment_count: plan.installment_count,
-      progress_percentage: FinancialConstants.calculate_percentage(paid_installments.to_f, plan.installment_count),
+      progress_percentage: FinancialConstants.calculate_percentage(FinancialConstants.safe_to_float(paid_installments), plan.installment_count),
       total_paid: total_paid,
       total_amount: plan.total_amount,
       remaining_installments: plan.installment_count - paid_installments,

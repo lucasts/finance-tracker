@@ -19,10 +19,13 @@ class ReportsController < ApplicationController
     load_savings_analysis
 
     # Projection of recurring commitments for the month
-    projection_service = RecurringProjectionService.new(as_of: @start_date)
-    @projected_transactions = projection_service.projected_transactions
-    @projected_expense_total = @projected_transactions.select { |t| t[:amount].to_f < 0 }.sum { |t| t[:amount].to_f.abs }
-    @projected_income_total = @projected_transactions.select { |t| t[:amount].to_f > 0 }.sum { |t| t[:amount].to_f }
+    @projected_transactions = RecurringProjectionService.call(as_of: @start_date)
+    @projected_expense_total = @projected_transactions
+      .select { |t| FinancialConstants.safe_to_decimal(t[:amount]) < 0 }
+      .sum { |t| FinancialConstants.safe_to_decimal(t[:amount]).abs }
+    @projected_income_total = @projected_transactions
+      .select { |t| FinancialConstants.safe_to_decimal(t[:amount]) > 0 }
+      .sum { |t| FinancialConstants.safe_to_decimal(t[:amount]) }
     @projected_balance = @balance + @projected_income_total - @projected_expense_total
   end
 
@@ -131,8 +134,8 @@ class ReportsController < ApplicationController
   def variable_expenses_analysis
     @account_id = params[:account_id]
     @category_id = params[:category_id]
-    @start_date = params[:start_date]&.to_date || 6.months.ago
-    @end_date = params[:end_date]&.to_date || Date.current
+    @start_date = FinancialConstants.safe_to_date(params[:start_date], 6.months.ago)
+    @end_date = FinancialConstants.safe_to_date(params[:end_date], Date.current)
     @analysis_type = params[:analysis_type] || 'monthly'
     
     @analysis_result = VariableExpenseAnalysisUnifiedService.new(

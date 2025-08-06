@@ -98,8 +98,8 @@ class AutomationController < ApplicationController
   private
 
   def set_date_range
-    @start_date = params[:start_date]&.to_date || Date.current.beginning_of_month
-    @end_date = params[:end_date]&.to_date || Date.current.end_of_month
+    @start_date = FinancialConstants.safe_to_date(params[:start_date], Date.current.beginning_of_month)
+    @end_date = FinancialConstants.safe_to_date(params[:end_date], Date.current.end_of_month)
   end
 
   def calculate_automation_stats
