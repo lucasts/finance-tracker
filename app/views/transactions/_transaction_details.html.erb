@@ -70,7 +70,7 @@
           else 'neutral'
           end
         %>">
-          <%= number_to_currency(transaction.amount, unit: 'R$', separator: ',', delimiter: '.') %>
+          <%= format_money_unified(transaction.amount) %>
         </div>
         <div class="stat-desc">
           <span class="badge badge-<%= 

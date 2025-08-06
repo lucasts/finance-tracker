@@ -54,14 +54,21 @@
                   class: "input input-bordered w-full text-lg font-bold", 
                   placeholder: "0,00",
                   data: {
-                    currency_target: "input",
+                    controller: "currency-input currency-validation",
+                    currency_input_target: "input",
+                    currency_validation_target: "input",
+                    currency_validation_required_value: true,
                     transaction_form_target: "amount",
-                    action: "input->transaction-form#handleAmountChange currency:complete->transaction-form#handleAmountChange"
+                    action: "input->transaction-form#handleAmountChange"
                   } %>
             <label class="label">
-              <span class="label-text-alt text-base-content/60" data-transaction-form-target="amountHelper" data-currency-helper>
+              <span class="label-text-alt text-base-content/60" 
+                    data-transaction-form-target="amountHelper" 
+                    data-currency-validation-target="helper">
                 <%= t('ui.transaction.form.amount_helper') %>
               </span>
+              <span class="label-text-alt text-error hidden" 
+                    data-currency-validation-target="error"></span>
             </label>
           </div>
 
@@ -308,7 +315,7 @@
                         current: transaction.installment_number || 1, 
                         total: transaction.installment_plan&.installment_count || 1) %>
                   <% if transaction.installment_plan&.total_amount.present? %>
-                    <br><%= t('ui.transaction.installments.total_value', amount: number_to_currency(transaction.installment_plan.total_amount)) %>
+                    <br><%= t('ui.transaction.installments.total_value', amount: format_money_unified(transaction.installment_plan.total_amount)) %>
                   <% end %>
                 </div>
               </div>

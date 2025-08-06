@@ -97,14 +97,14 @@
               <%= 
                 case tx.transaction_type
                 when 'transfer'
-                  "🔄 #{number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.')}"
+                  "🔄 #{format_money_unified(tx.amount)}"
                 else
-                  number_to_currency(tx.amount, unit: 'R$', separator: ',', delimiter: '.')
+                  format_money_unified(tx.amount)
                 end
               %>
             </td>
             <td class="text-right text-base-content/60">
-              <%= number_to_currency(running_balance, unit: 'R$', separator: ',', delimiter: '.') %>
+              <%= format_money_unified(running_balance) %>
             </td>
             <td class="text-right">
               <div class="flex gap-1 justify-end">

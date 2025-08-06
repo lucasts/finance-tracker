@@ -196,7 +196,7 @@
                 </td>
                 <td>
                   <div class="font-mono font-semibold <%= tx.amount >= 0 ? 'text-success' : 'text-error' %>">
-                    <%= number_to_currency(tx.amount, unit: 'R$') %>
+                    <%= format_money_unified(tx.amount) %>
                   </div>
                 </td>
                 <td>

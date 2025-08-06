@@ -1,7 +1,17 @@
 <div class="container mx-auto px-4 py-8">
   <!-- Header -->
-  <div class="flex justify-between items-center mb-8">
-    <div>
+  <div class="flex justify-between items-center mb    <!-- Tabela de importações -->
+    <div class="card bg-base-100 shadow-xl" 
+         data-controller="table-filter"
+         data-table-filter-target="table">
+      <div class="card-body p-0">
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr class="bg-base-200">
+                <th class="font-semibold">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />div>
       <h1 class="text-3xl font-bold text-base-content flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -76,7 +86,8 @@
                      placeholder="Buscar por nome do arquivo..." 
                      class="input input-bordered flex-1" 
                      id="search-input"
-                     onkeyup="filterTable()">
+                     data-table-filter-target="searchInput"
+                     data-action="input->table-filter#handleSearch">
               <span class="bg-base-200 px-3 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -85,14 +96,20 @@
             </div>
           </div>
           <div class="form-control">
-            <select class="select select-bordered" id="status-filter" onchange="filterTable()">
+            <select class="select select-bordered" 
+                    id="status-filter" 
+                    data-table-filter-target="statusFilter"
+                    data-action="change->table-filter#handleStatusChange">
               <option value="">Todos os status</option>
               <option value="completed">Concluídas</option>
               <option value="pending">Pendentes</option>
             </select>
           </div>
           <div class="form-control">
-            <select class="select select-bordered" id="type-filter" onchange="filterTable()">
+            <select class="select select-bordered" 
+                    id="type-filter" 
+                    data-table-filter-target="typeFilter"
+                    data-action="change->table-filter#handleTypeChange">
               <option value="">Todos os tipos</option>
               <option value="OFX">OFX</option>
               <option value="CSV">CSV</option>
@@ -134,6 +151,7 @@
             <tbody>
               <% @import_sessions.each do |session| %>
                 <tr class="hover import-row" 
+                    data-table-filter-target="row"
                     data-filename="<%= session.original_filename.downcase %>"
                     data-status="<%= session.imported_at ? 'completed' : 'pending' %>"
                     data-type="<%= session.source_type.upcase %>">
@@ -211,28 +229,3 @@
     </div>
   <% end %>
 </div>
-
-<script>
-function filterTable() {
-  const searchInput = document.getElementById('search-input').value.toLowerCase();
-  const statusFilter = document.getElementById('status-filter').value;
-  const typeFilter = document.getElementById('type-filter').value;
-  const rows = document.querySelectorAll('.import-row');
-  
-  rows.forEach(row => {
-    const filename = row.dataset.filename;
-    const status = row.dataset.status;
-    const type = row.dataset.type;
-    
-    const matchesSearch = filename.includes(searchInput);
-    const matchesStatus = !statusFilter || status === statusFilter;
-    const matchesType = !typeFilter || type === typeFilter;
-    
-    if (matchesSearch && matchesStatus && matchesType) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
-  });
-}
-</script>

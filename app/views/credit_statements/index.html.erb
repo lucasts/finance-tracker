@@ -22,8 +22,8 @@
             <tr>
               <td class="font-medium"><%= cs.account.name %></td>
               <td><%= cs.month %></td>
-              <td class="text-right font-semibold"><%= number_to_currency(cs.amount_due) %></td>
-              <td class="text-right"><%= number_to_currency(cs.amount_paid) %></td>
+              <td class="text-right font-semibold"><%= format_money_unified(cs.amount_due) %></td>
+              <td class="text-right"><%= format_money_unified(cs.amount_paid) %></td>
               <td>
                 <span class="badge badge-<%= cs.status == 'paid' ? 'success' : cs.status == 'overdue' ? 'error' : 'warning' %>">
                   <%= t("activerecord.attributes.credit_statement.statuses.#{cs.status}") %>

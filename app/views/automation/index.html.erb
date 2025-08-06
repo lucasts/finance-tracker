@@ -78,7 +78,7 @@
 </div>
 
 <!-- Manual Actions -->
-<div class="card bg-base-100 shadow mb-8">
+<div class="card bg-base-100 shadow mb-8" data-controller="automation">
   <div class="card-body">
     <h2 class="card-title mb-4">🎮 Ações Manuais</h2>
     
@@ -86,7 +86,7 @@
     <div class="mb-4 p-4 bg-info/10 rounded-lg border border-info/20">
       <h3 class="font-medium text-info mb-2">📅 Data para Testes</h3>
       <div class="flex gap-2 items-center">
-        <input type="date" id="test_date" class="input input-bordered input-sm" value="<%= Date.current.next_month.change(day: 5).to_s %>" />
+        <input type="date" data-automation-target="testDate" class="input input-bordered input-sm" value="<%= Date.current.next_month.change(day: 5).to_s %>" />
         <span class="text-sm text-base-content/70">Selecione uma data futura para teste (ex: 05/07/2025)</span>
       </div>
     </div>
@@ -99,8 +99,8 @@
           <p class="text-sm text-base-content/70 mb-4">
             Executa todas as automações (transações recorrentes + parcelas) para a data selecionada.
           </p>
-          <button id="run_daily" class="btn btn-primary w-full">
-            🤖 Executar Tudo
+                    <button data-action="click->automation#submit" data-url="<%= run_daily_automation_index_path %>" class="btn btn-primary w-full">
+            ⚡ Executar Diário
           </button>
         </div>
       </div>
@@ -112,7 +112,7 @@
           <p class="text-sm text-base-content/70 mb-4">
             Gera apenas transações de compromissos recorrentes para a data selecionada.
           </p>
-          <button id="run_recurring" class="btn btn-success w-full">
+          <button data-action="click->automation#submit" data-url="<%= run_recurring_automation_index_path %>" class="btn btn-success w-full">
             🔄 Gerar Recorrentes
           </button>
         </div>
@@ -125,56 +125,13 @@
           <p class="text-sm text-base-content/70 mb-4">
             Gera apenas parcelas de parcelamentos para a data selecionada.
           </p>
-          <button id="run_installments" class="btn btn-warning w-full">
+          <button data-action="click->automation#submit" data-url="<%= run_installments_automation_index_path %>" class="btn btn-warning w-full">
             📊 Gerar Parcelas
           </button>
-        </div>
       </div>
     </div>
 
-    <!-- Script para submeter o formulário com a data personalizada -->
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        function submitWithDate(url) {
-          const testDate = document.getElementById('test_date').value;
-          const form = document.createElement('form');
-          form.method = 'post';
-          form.action = url;
-          
-          const dateInput = document.createElement('input');
-          dateInput.type = 'hidden';
-          dateInput.name = 'test_date';
-          dateInput.value = testDate;
-          
-          const tokenInput = document.createElement('input');
-          tokenInput.type = 'hidden';
-          tokenInput.name = 'authenticity_token';
-          tokenInput.value = document.querySelector('meta[name="csrf-token"]').content;
-          
-          form.appendChild(dateInput);
-          form.appendChild(tokenInput);
-          document.body.appendChild(form);
-          
-          if (confirm(`Executar automação para a data ${testDate}?`)) {
-            form.submit();
-          }
-          
-          document.body.removeChild(form);
-        }
-        
-        document.getElementById('run_daily').addEventListener('click', function() {
-          submitWithDate('<%= run_daily_automation_index_path %>');
-        });
-        
-        document.getElementById('run_recurring').addEventListener('click', function() {
-          submitWithDate('<%= run_recurring_automation_index_path %>');
-        });
-        
-        document.getElementById('run_installments').addEventListener('click', function() {
-          submitWithDate('<%= run_installments_automation_index_path %>');
-        });
-      });
-    </script>
+    <!-- Automation controller manages form submission -->
   </div>
 </div>
 
@@ -320,17 +277,11 @@
       <p class="text-base-content/60 mb-4">
         Execute uma das ações manuais acima para ver os resultados aqui.
       </p>
-      <button class="btn btn-primary" onclick="location.reload()">
+      <button class="btn btn-primary" 
+              data-controller="page-action"
+              data-action="click->page-action#reload">
         🔄 Atualizar Status
       </button>
     </div>
   </div>
 </div>
-
-<script>
-// Auto-refresh status every 30 seconds
-setInterval(function() {
-  // In a real implementation, you'd fetch job status via AJAX
-  console.log('Checking automation status...');
-}, 30000);
-</script>

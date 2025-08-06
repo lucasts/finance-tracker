@@ -43,7 +43,7 @@
                 <label class="text-sm font-medium text-base-content/70">Valor</label>
                 <div class="p-3 bg-base-100 rounded-lg border">
                   <div class="font-mono font-bold text-lg <%= @imported_transaction.amount >= 0 ? 'text-success' : 'text-error' %>">
-                    <%= number_to_currency(@imported_transaction.amount, unit: 'R$') %>
+                    <%= format_money_unified(@imported_transaction.amount) %>
                   </div>
                 </div>
               </div>
@@ -126,7 +126,7 @@
                         <div class="text-xs text-base-content/70 mt-1">
                           <%= l(tx.event_date, format: :short) if tx.event_date %> •
                           <span class="<%= tx.amount >= 0 ? 'text-success' : 'text-error' %>">
-                            <%= number_to_currency(tx.amount, unit: 'R$') %>
+                            <%= format_money_unified(tx.amount) %>
                           </span>
                           <% if tx.category %>
                             • <span class="badge badge-outline badge-xs"><%= tx.category.name %></span>
@@ -250,11 +250,16 @@
                       class: "input input-bordered w-full text-lg font-bold",
                       placeholder: "0,00",
                       data: {
-                        currency_target: "input",
-                        imported_transaction_form_target: "amount"
+                        controller: "currency-input currency-validation",
+                        currency_input_target: "input",
+                        currency_validation_target: "input helper",
+                        imported_transaction_form_target: "amount",
+                        action: "input->imported-transaction-form#handleAmountChange"
                       } %>
                   <label class="label">
-                    <span class="label-text-alt text-base-content/60" data-currency-helper>
+                    <span class="label-text-alt text-base-content/60" 
+                          data-currency-helper
+                          data-imported-transaction-form-target="amountHelper">
                       Informe o valor da transação
                     </span>
                   </label>
