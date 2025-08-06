@@ -2,6 +2,10 @@
 require_relative '../../lib/ofx_simple_parser'
 
 class OfxImportService
+  def self.call(file_content:)
+    new(file_content).parse
+  end
+
   def initialize(file_content)
     @file_content = file_content
   end
@@ -34,9 +38,9 @@ class OfxImportService
       begin
         desc = tx.memo.presence || tx.name.presence
         description = desc.nil? || desc.to_s.strip.empty? ? nil : desc
-        amount = tx.amount.nil? ? nil : BigDecimal(tx.amount.to_s)
-        event_date = tx.posted_at ? tx.posted_at.to_date : nil
-        payment_date = tx.posted_at ? tx.posted_at.to_date : nil
+        amount = tx.amount.nil? ? nil : FinancialConstants.safe_to_decimal(tx.amount)
+        event_date = FinancialConstants.safe_to_date(tx.posted_at)
+        payment_date = FinancialConstants.safe_to_date(tx.posted_at)
         
         # Apply OFX normalization based on analysis
         normalized_data = normalize_ofx_transaction_data(tx, amount, analysis)
@@ -92,8 +96,8 @@ class OfxImportService
       # Common OFX pattern: negative amounts = debits (expenses), positive = credits (income)
       analysis[:normalization_strategy] = :negative_to_positive_with_type
     else
-      # Legacy fallback
-      analysis[:normalization_strategy] = :legacy_ofx
+      # Default to using amount sign with robust inference
+      analysis[:normalization_strategy] = :negative_to_positive_with_type
     end
     
     analysis
@@ -117,14 +121,15 @@ class OfxImportService
         { amount: amount, transaction_type: 'expense' }
       end
       
-    when :legacy_ofx
-      # Keep legacy behavior for compatibility
-      transaction_type = amount && amount >= 0 ? 'income' : 'expense'
-      { amount: amount, transaction_type: transaction_type }
-      
     else
-      # No normalization
-      { amount: amount, transaction_type: 'expense' }
+      # Default normalization: use amount sign
+      if amount && amount < 0
+        { amount: amount.abs, transaction_type: 'expense' }
+      elsif amount && amount > 0
+        { amount: amount, transaction_type: 'income' }
+      else
+        { amount: amount, transaction_type: 'expense' }
+      end
     end
   end
 

@@ -2,6 +2,10 @@
 
 # Service para gerenciar operações de callback de Transaction de forma organizada
 class TransactionCallbackService
+  def self.call(transaction:, operation:)
+    new(transaction).send("execute_#{operation}")
+  end
+
   def initialize(transaction)
     @transaction = transaction
   end
@@ -10,11 +14,13 @@ class TransactionCallbackService
   def execute_after_create
     ensure_credit_statement
     update_credit_statement_amount
+    update_account_balances
   end
 
   # Executa todas as operações necessárias após save
   def execute_after_save
     update_credit_statement_amount if should_update_credit_statement?
+    update_account_balances if should_update_account_balances?
   end
 
   # Executa operações necessárias antes de save
@@ -68,5 +74,16 @@ class TransactionCallbackService
     if @transaction.respond_to?(:determine_automatic_status)
       @transaction.status = @transaction.determine_automatic_status
     end
+  end
+
+  def update_account_balances
+    # Update balance cache for all accounts involved in this transaction
+    @transaction.accounts.each(&:update_balance_cache!)
+  end
+
+  def should_update_account_balances?
+    # Update balances when transaction status changes (affects confirmed/pending)
+    # or when the transaction is new/modified
+    @transaction.saved_change_to_status? || @transaction.saved_change_to_amount?
   end
 end

@@ -100,7 +100,7 @@ class VariableExpenseAnalysisUnifiedService
       date_range: {
         start: start_date,
         end: end_date,
-        days: (end_date - start_date).to_i + 1
+        days: FinancialConstants.safe_to_integer((end_date - start_date)) + 1
       },
       filters: {
         category: category_id ? Category.find(category_id).name : 'All categories',
@@ -169,7 +169,7 @@ class VariableExpenseAnalysisUnifiedService
     amounts = base_transactions.pluck(:amount)
     return {} if amounts.empty?
 
-    mean = amounts.sum.to_f / amounts.size
+    mean = FinancialConstants.safe_to_float(amounts.sum) / amounts.size
     variance = amounts.map { |amount| (amount - mean) ** 2 }.sum / amounts.size
     
     {
@@ -255,7 +255,7 @@ class VariableExpenseAnalysisUnifiedService
   def calculate_standard_deviation(amounts)
     return 0 if amounts.size <= 1
     
-    mean = amounts.sum.to_f / amounts.size
+    mean = FinancialConstants.safe_to_float(amounts.sum) / amounts.size
     variance = amounts.map { |amount| (amount - mean) ** 2 }.sum / (amounts.size - 1)
     Math.sqrt(variance)
   end
@@ -299,7 +299,7 @@ class VariableExpenseAnalysisUnifiedService
   def calculate_volatility(amounts)
     return 0 if amounts.size < 2
     
-    mean = amounts.sum.to_f / amounts.size
+    mean = FinancialConstants.safe_to_float(amounts.sum) / amounts.size
     variance = amounts.map { |amount| (amount - mean) ** 2 }.sum / amounts.size
     Math.sqrt(variance) / mean
   end

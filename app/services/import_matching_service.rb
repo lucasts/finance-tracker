@@ -6,11 +6,15 @@ class ImportMatchingService
   end
 
   def suggest_matches
+    imported_amount = FinancialConstants.safe_to_decimal(@imported_transaction.amount).abs
+    amount_tolerance = [FinancialConstants::AMOUNT_ABSOLUTE_TOLERANCE, imported_amount * FinancialConstants::AMOUNT_PERCENTAGE_TOLERANCE].max
+    imported_date = FinancialConstants.safe_to_date(@imported_transaction.event_date)
+    
     candidates = Transaction.where(user_id: @imported_transaction.import_session.user_id)
-      .where('ABS(amount - ?) <= ?', @imported_transaction.amount.to_f.abs, [0.01, (@imported_transaction.amount.to_f.abs * 0.05)].max)
+      .where('ABS(amount - ?) <= ?', imported_amount, amount_tolerance)
       .where('event_date BETWEEN ? AND ?',
-        (@imported_transaction.event_date.to_date - 3),
-        (@imported_transaction.event_date.to_date + 3))
+        (imported_date - FinancialConstants::DATE_TOLERANCE_DAYS),
+        (imported_date + FinancialConstants::DATE_TOLERANCE_DAYS))
 
     desc = @imported_transaction.description.to_s.downcase
     desc_norm = desc.gsub(/[^a-z0-9]/, '')
@@ -33,9 +37,14 @@ class ImportMatchingService
     end
 
     # Recurring: similarity + approximate value
+    imported_amount = FinancialConstants.safe_to_decimal(@imported_transaction.amount)
     recurring_match = RecurringCommitment.where(user_id: @imported_transaction.import_session.user_id)
       .where('LOWER(name) LIKE ?', "%#{desc[0,8].downcase}%")
-      .select { |rc| (rc.expected_amount.to_f - @imported_transaction.amount.to_f).abs <= [0.01, (rc.expected_amount.to_f * 0.10)].max }
+      .select do |rc| 
+        expected_amount = FinancialConstants.safe_to_decimal(rc.expected_amount)
+        tolerance = [FinancialConstants::AMOUNT_ABSOLUTE_TOLERANCE, expected_amount * FinancialConstants::RECURRING_AMOUNT_TOLERANCE].max
+        (expected_amount - imported_amount).abs <= tolerance
+      end
       .first
 
     {
@@ -54,6 +63,6 @@ class ImportMatchingService
     b_set = b.chars.to_set
     inter = a_set & b_set
     union = a_set | b_set
-    inter.size.to_f / union.size
+    FinancialConstants.safe_to_float(inter.size) / union.size
   end
 end

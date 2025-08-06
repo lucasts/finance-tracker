@@ -129,9 +129,9 @@ class InstallmentDateCalculatorService
 
     case frequency
     when 'daily'
-      (target_date - start_date).to_i + 1
+      FinancialConstants.safe_to_integer(target_date - start_date) + 1
     when 'weekly'
-      ((target_date - start_date) / 7).to_i + 1
+      FinancialConstants.safe_to_integer((target_date - start_date) / 7) + 1
     when 'monthly'
       months_diff = (target_date.year - start_date.year) * 12 + target_date.month - start_date.month
       months_diff + 1

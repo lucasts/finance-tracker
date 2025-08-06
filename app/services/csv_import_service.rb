@@ -2,6 +2,10 @@
 require 'csv'
 
 class CsvImportService
+  def self.call(file_content:)
+    new(file_content).parse
+  end
+
   # Expected header: date,value,description,category,status,type,installment
   def initialize(file_content)
     @file_content = file_content
@@ -104,8 +108,8 @@ class CsvImportService
       # Bank has both negative values AND type column (mixed pattern - prioritize type column)
       analysis[:normalization_strategy] = :use_type_column
     else
-      # No clear pattern, use legacy logic
-      analysis[:normalization_strategy] = :legacy_inference
+      # Default to inferring from amount sign
+      analysis[:normalization_strategy] = :negative_to_positive_with_type
     end
     
     analysis
@@ -129,13 +133,16 @@ class CsvImportService
       normalized_type = normalize_type_column_value(type_value)
       { amount: amount&.abs, transaction_type: normalized_type }
       
-    when :legacy_inference
-      # Use existing logic
-      { amount: amount, transaction_type: row['tipo'] || infer_type(row) }
-      
     else
-      # No normalization
-      { amount: amount, transaction_type: row['tipo'] || 'expense' }
+      # Default normalization: use amount sign and infer type
+      transaction_type = row['tipo'] || infer_type(row)
+      if amount && amount < 0
+        { amount: amount.abs, transaction_type: 'expense' }
+      elsif amount && amount > 0
+        { amount: amount, transaction_type: transaction_type == 'expense' ? 'expense' : 'income' }
+      else
+        { amount: amount, transaction_type: transaction_type || 'expense' }
+      end
     end
   end
 
@@ -168,7 +175,7 @@ class CsvImportService
   def parse_amount_for_analysis(valor)
     return nil if valor.nil? || valor.to_s.strip.empty?
     begin
-      BigDecimal(valor.to_s.strip)
+      FinancialConstants.safe_to_decimal(valor)
     rescue ArgumentError, TypeError
       nil
     end
@@ -176,11 +183,11 @@ class CsvImportService
 
   def parse_amount(valor)
     return nil if valor.nil? || valor.to_s.strip.empty?
-    BigDecimal(valor.to_s.strip)
+    FinancialConstants.safe_to_decimal(valor)
   end
 
   def infer_type(row)
-    v = row['valor'].to_f
+    v = FinancialConstants.safe_to_float(row['valor'])
     v > 0 ? 'income' : 'expense'
   end
 end

@@ -2,6 +2,10 @@
 
 # Service para gerenciar operações de callback de CreditStatement de forma organizada
 class CreditStatementCallbackService
+  def self.call(credit_statement:, operation:)
+    new(credit_statement).send("execute_#{operation}")
+  end
+
   def initialize(credit_statement)
     @statement = credit_statement
   end
