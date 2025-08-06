@@ -3,6 +3,8 @@
 
 import { application } from "controllers/application"
 import ASSET_CONFIG from "config/assets"
+import intelligentCache from "services/intelligent_cache"
+import performanceUtils from "utilities/performance_utils"
 
 class AppInitializer {
   constructor() {
@@ -56,8 +58,16 @@ class AppInitializer {
       application.start();
     }
 
+    // Initialize intelligent caching system
+    console.log('📦 Setting up intelligent caching...');
+    this.setupCachePreloading();
+
     // Set up global error handling
     this.setupErrorHandling();
+
+    // Initialize performance monitoring
+    console.log('📊 Setting up performance monitoring...');
+    this.setupPerformanceMonitoring();
   }
 
   async initializeFeatureModules() {
@@ -140,6 +150,97 @@ class AppInitializer {
       console.error('Unhandled promise rejection:', event.reason);
       this.logError('promise', event.reason);
     });
+  }
+
+  setupCachePreloading() {
+    // Preload critical application data
+    intelligentCache.preload([
+      {
+        key: 'currency-formatter-config',
+        loader: () => Promise.resolve(this.config.currency),
+        priority: 3
+      },
+      {
+        key: 'user-preferences',
+        loader: () => this.loadUserPreferences(),
+        priority: 2
+      }
+    ]);
+
+    // Set up cache invalidation on navigation
+    document.addEventListener('turbo:before-cache', () => {
+      intelligentCache.invalidateByTag('temporary');
+    });
+  }
+
+  setupPerformanceMonitoring() {
+    // Monitor cache performance
+    setInterval(() => {
+      const insights = performanceUtils.getPerformanceInsights();
+      console.debug('Performance insights:', insights);
+      
+      // Auto-optimize based on insights
+      if (insights.recommendations.length > 0) {
+        console.info('Performance recommendations:', insights.recommendations);
+      }
+    }, 60000); // Every minute
+
+    // Smart preloading based on user behavior
+    this.setupBehaviorTracking();
+  }
+
+  setupBehaviorTracking() {
+    let navigationPattern = [];
+    
+    document.addEventListener('turbo:load', () => {
+      const currentPath = window.location.pathname;
+      navigationPattern.push({
+        path: currentPath,
+        timestamp: Date.now()
+      });
+
+      // Keep only last 10 navigation events
+      if (navigationPattern.length > 10) {
+        navigationPattern = navigationPattern.slice(-10);
+      }
+
+      // Analyze patterns and preload likely next pages
+      this.analyzeAndPreload(navigationPattern);
+    });
+  }
+
+  analyzeAndPreload(pattern) {
+    // Simple pattern analysis - in production this would be more sophisticated
+    const recentPaths = pattern.slice(-3).map(p => p.path);
+    const commonPatterns = [
+      ['/transactions', '/accounts'],
+      ['/accounts', '/transactions'],
+      ['/overview', '/transactions'],
+      ['/import_sessions', '/transactions']
+    ];
+
+    for (const [from, to] of commonPatterns) {
+      if (recentPaths.includes(from) && !recentPaths.includes(to)) {
+        // Preload likely next page data
+        this.preloadPageData(to);
+      }
+    }
+  }
+
+  preloadPageData(path) {
+    // This would preload critical data for the path
+    // For now, just log the intention
+    console.debug(`Would preload data for: ${path}`);
+  }
+
+  loadUserPreferences() {
+    // Load user preferences from localStorage or API
+    const stored = localStorage.getItem('user-preferences');
+    return stored ? JSON.parse(stored) : {
+      theme: 'auto',
+      animations: true,
+      currency: 'BRL'
+    };
   }
 
   logError(type, error) {

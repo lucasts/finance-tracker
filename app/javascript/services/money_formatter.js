@@ -1,6 +1,9 @@
 // MoneyFormatter - Unified money formatting service
 // Replaces multiple inconsistent implementations across the app
 
+import intelligentCache from 'services/intelligent_cache';
+import performanceUtils from 'utilities/performance_utils';
+
 export class MoneyFormatter {
   static DEFAULTS = {
     locale: 'pt-BR',
@@ -14,6 +17,17 @@ export class MoneyFormatter {
       return 'R$ 0,00'
     }
 
+    // Use intelligent caching for formatting operations
+    const cacheKey = `format:${amount}:${JSON.stringify(options)}`;
+    return performanceUtils.measureAndCache(
+      'money-format',
+      () => this._formatInternal(amount, options),
+      { key: cacheKey, ttl: 10 * 60 * 1000 } // 10 minutes cache
+    );
+  }
+
+  // Internal formatting logic (cached)
+  static _formatInternal(amount, options = {}) {
     const value = typeof amount === 'string' ? this.parse(amount) : Number(amount)
     
     if (isNaN(value)) {
@@ -40,6 +54,20 @@ export class MoneyFormatter {
     if (typeof input === 'number') return input
     if (!input || input === '') return 0
 
+    // Cache parse operations for frequently used values
+    const cacheKey = `parse:${input}`;
+    return intelligentCache.get(cacheKey) ?? (() => {
+      const result = this._parseInternal(input);
+      intelligentCache.set(cacheKey, result, { 
+        ttl: 5 * 60 * 1000, // 5 minutes
+        tags: ['money-parse']
+      });
+      return result;
+    })();
+  }
+
+  // Internal parsing logic
+  static _parseInternal(input) {
     // Remove currency symbols and normalize
     const normalized = input.toString()
       .replace(/[R$\s]/g, '')                    // Remove R$ and spaces
