@@ -243,13 +243,13 @@ RSpec.describe RecurringCommitment, type: :model do
       end
     end
 
-    describe '#total_spent' do
+    describe '#amount_paid' do
       it 'sums only confirmed transactions' do
         create(:transaction, :recurring, :confirmed, amount: 300, recurring_commitment: commitment, user: user)
         create(:transaction, :recurring, :confirmed, amount: 200, recurring_commitment: commitment, user: user)
         create(:transaction, :recurring, :pending, amount: 100, recurring_commitment: commitment, user: user)
         
-        expect(commitment.total_spent).to eq(500)
+        expect(commitment.amount_paid).to eq(500)
       end
     end
 

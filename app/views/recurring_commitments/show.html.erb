@@ -205,8 +205,7 @@
   <div class="card bg-base-100 shadow mt-6">
     <div class="card-body">
       <h3 class="card-title mb-4">🔮 Lançamentos Previstos (Projeção)</h3>
-      <% projection_service = RecurringProjectionService.new(as_of: Date.current) %>
-      <% projected = projection_service.projected_transactions.select { |t| t[:recurring_commitment_id] == @recurring_commitment.id } %>
+      <% projected = RecurringProjectionService.call(as_of: Date.current).select { |t| t[:recurring_commitment_id] == @recurring_commitment.id } %>
       <% if projected.any? %>
         <ul class="space-y-2">
           <% projected.each do |proj| %>

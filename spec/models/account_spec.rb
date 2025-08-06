@@ -273,15 +273,15 @@ RSpec.describe Account, type: :model do
         )
       end
 
-      describe '#total_income' do
+      describe '#total_income_amount' do
         it 'sums income transactions to this account' do
-          expect(account.total_income).to eq(1000.0)
+          expect(account.total_income_amount).to eq(1000.0)
         end
       end
 
-      describe '#total_expenses' do
+      describe '#total_expense_amount' do
         it 'sums expense transactions from this account' do
-          expect(account.total_expenses).to eq(300.0)
+          expect(account.total_expense_amount).to eq(300.0)
         end
       end
 
@@ -301,9 +301,9 @@ RSpec.describe Account, type: :model do
         end
       end
 
-      describe '#net_transfers' do
+      describe '#net_transfer_amount' do
         it 'calculates net transfer amount (in - out)' do
-          expect(account.net_transfers).to eq(50.0) # 200 - 150
+          expect(account.net_transfer_amount).to eq(50.0) # 200 - 150
         end
       end
     end
