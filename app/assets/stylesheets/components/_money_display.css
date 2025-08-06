@@ -1,0 +1,52 @@
+/* Money Display Components */
+
+.money-display {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.money-positive {
+  color: hsl(var(--su));
+}
+
+.money-negative {
+  color: hsl(var(--er));
+}
+
+.money-neutral {
+  color: hsl(var(--bc) / 0.7);
+}
+
+/* Currency Input Components */
+.input-error {
+  border-color: hsl(var(--er));
+}
+
+.input-error:focus {
+  border-color: hsl(var(--er));
+  outline: 2px solid hsl(var(--er) / 0.2);
+}
+
+.currency-helper {
+  font-size: 0.75rem;
+  color: hsl(var(--bc) / 0.6);
+  transition: color 0.2s ease;
+}
+
+.currency-helper.active {
+  color: hsl(var(--p));
+}
+
+/* Loading States */
+.money-loading {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: hsl(var(--b3));
+  border-radius: 0.5rem;
+  width: 4rem;
+  height: 1rem;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}

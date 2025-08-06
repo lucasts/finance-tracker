@@ -112,20 +112,12 @@ def chart_options
       {
         title: {
           text: 'Valores (R$)'
-        },
-        labels: {
-          formatter: -> (value) { "R$ #{value.to_s.gsub(/\B(?=(\d{3})+(?!\d))/, '.')}" }
         }
       }
     ],
     tooltip: {
       shared: true,
-      intersect: false,
-      y: {
-        formatter: -> (value, opts) do
-          "R$ #{value.to_s.gsub(/\B(?=(\d{3})+(?!\d))/, '.')}"
-        end
-      }
+      intersect: false
     },
     legend: {
       position: 'top',

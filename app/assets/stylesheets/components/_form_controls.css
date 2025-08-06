@@ -1,0 +1,99 @@
+/* Form Control Components */
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label-required::after {
+  content: " *";
+  color: hsl(var(--er));
+}
+
+/* Input States */
+.input-success {
+  border-color: hsl(var(--su));
+}
+
+.input-success:focus {
+  border-color: hsl(var(--su));
+  outline: 2px solid hsl(var(--su) / 0.2);
+}
+
+.input-warning {
+  border-color: hsl(var(--wa));
+}
+
+.input-warning:focus {
+  border-color: hsl(var(--wa));
+  outline: 2px solid hsl(var(--wa) / 0.2);
+}
+
+/* Form Validation Messages */
+.form-error {
+  color: hsl(var(--er));
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.form-success {
+  color: hsl(var(--su));
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.form-hint {
+  color: hsl(var(--bc) / 0.6);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* Loading form states */
+.form-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.form-loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: hsl(var(--b1) / 0.8);
+  border-radius: inherit;
+  z-index: 10;
+}
+
+/* Button Loading States */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  top: 50%;
+  left: 50%;
+  margin-left: -0.5rem;
+  margin-top: -0.5rem;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

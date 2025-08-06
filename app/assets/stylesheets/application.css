@@ -14,6 +14,12 @@
  *= require_self
  */
 
+/* Import component styles */
+@import 'components/money_display';
+@import 'components/form_controls';
+@import 'components/status_badges';
+@import 'components/loading_states';
+
 /* Custom styles for transaction form */
 
 .animate-fade-in {

@@ -1,0 +1,207 @@
+/* Status Badge Components */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.status-badge-success {
+  background-color: hsl(var(--su) / 0.1);
+  color: hsl(var(--su));
+  border: 1px solid hsl(var(--su) / 0.2);
+}
+
+.status-badge-error {
+  background-color: hsl(var(--er) / 0.1);
+  color: hsl(var(--er));
+  border: 1px solid hsl(var(--er) / 0.2);
+}
+
+.status-badge-warning {
+  background-color: hsl(var(--wa) / 0.1);
+  color: hsl(var(--wa));
+  border: 1px solid hsl(var(--wa) / 0.2);
+}
+
+.status-badge-info {
+  background-color: hsl(var(--in) / 0.1);
+  color: hsl(var(--in));
+  border: 1px solid hsl(var(--in) / 0.2);
+}
+
+.status-badge-neutral {
+  background-color: hsl(var(--n) / 0.1);
+  color: hsl(var(--n));
+  border: 1px solid hsl(var(--n) / 0.2);
+}
+
+/* Transaction Status Badges */
+.transaction-status-confirmed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  background-color: hsl(var(--su) / 0.1);
+  color: hsl(var(--su));
+  border: 1px solid hsl(var(--su) / 0.2);
+}
+
+.transaction-status-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  background-color: hsl(var(--wa) / 0.1);
+  color: hsl(var(--wa));
+  border: 1px solid hsl(var(--wa) / 0.2);
+}
+
+.transaction-status-cancelled {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  background-color: hsl(var(--er) / 0.1);
+  color: hsl(var(--er));
+  border: 1px solid hsl(var(--er) / 0.2);
+}
+
+/* Import Status Badges */
+.import-status-completed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  background-color: hsl(var(--su) / 0.1);
+  color: hsl(var(--su));
+  border: 1px solid hsl(var(--su) / 0.2);
+}
+
+.import-status-processing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  background-color: hsl(var(--in) / 0.1);
+  color: hsl(var(--in));
+  border: 1px solid hsl(var(--in) / 0.2);
+}
+
+.import-status-failed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  background-color: hsl(var(--er) / 0.1);
+  color: hsl(var(--er));
+  border: 1px solid hsl(var(--er) / 0.2);
+}
+
+/* Account Type Badges */
+.account-type-checking {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  background-color: hsl(var(--in) / 0.1);
+  color: hsl(var(--in));
+  border: 1px solid hsl(var(--in) / 0.2);
+}
+
+.account-type-savings {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  background-color: hsl(var(--su) / 0.1);
+  color: hsl(var(--su));
+  border: 1px solid hsl(var(--su) / 0.2);
+}
+
+.account-type-credit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  background-color: hsl(var(--wa) / 0.1);
+  color: hsl(var(--wa));
+  border: 1px solid hsl(var(--wa) / 0.2);
+}
+
+.account-type-investment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  background-color: hsl(var(--n) / 0.1);
+  color: hsl(var(--n));
+  border: 1px solid hsl(var(--n) / 0.2);
+}
+
+/* Interactive badges */
+.status-badge-clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-badge-clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px hsl(var(--b3));
+}
