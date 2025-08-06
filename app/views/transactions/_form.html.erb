@@ -1,35 +1,44 @@
-<%= form_with(model: transaction, local: true, data: { controller: "transaction-form" }) do |form| %>
+<%= form_with(model: transaction, local: true, data: { controller: "transaction-form" }, html: { role: "form", "aria-label" => "Formulário de transação financeira" }) do |form| %>
   <div class="space-y-6">
     
     <!-- Transaction Type Selection (moved to top for better UX) -->
     <div class="card bg-base-100 shadow-sm border border-base-300">
       <div class="card-body py-4">
         <h3 class="card-title text-lg mb-3">💰 <%= t('activerecord.attributes.transaction.transaction_type') %></h3>
-        <div class="flex gap-4">
-          <%= form.radio_button :transaction_type, "income", 
-                class: "radio radio-success", 
-                data: { 
-                  transaction_form_target: "transactionType",
-                  action: "change->transaction-form#handleTypeChange" 
-                } %>
-          <%= form.label :transaction_type_income, "📈 #{t('ui.transaction.types.income')}", class: "cursor-pointer flex items-center gap-2" %>
-          
-          <%= form.radio_button :transaction_type, "expense", 
-                class: "radio radio-error ml-6", 
-                data: { 
-                  transaction_form_target: "transactionType",
-                  action: "change->transaction-form#handleTypeChange" 
-                } %>
-          <%= form.label :transaction_type_expense, "📉 #{t('ui.transaction.types.expense')}", class: "cursor-pointer flex items-center gap-2" %>
-          
-          <%= form.radio_button :transaction_type, "transfer", 
-                class: "radio radio-warning ml-6", 
-                data: { 
-                  transaction_form_target: "transactionType",
-                  action: "change->transaction-form#handleTypeChange" 
-                } %>
-          <%= form.label :transaction_type_transfer, "🔄 #{t('ui.transaction.types.transfer')}", class: "cursor-pointer flex items-center gap-2" %>
-        </div>
+        <fieldset role="radiogroup" aria-labelledby="transaction-type-legend">
+          <legend id="transaction-type-legend" class="sr-only">Selecione o tipo de transação</legend>
+          <div class="flex gap-4">
+            <%= form.radio_button :transaction_type, "income", 
+                  class: "radio radio-success", 
+                  "aria-describedby" => "income-help",
+                  data: { 
+                    transaction_form_target: "transactionType",
+                    action: "change->transaction-form#handleTypeChange" 
+                  } %>
+            <%= form.label :transaction_type_income, "📈 #{t('ui.transaction.types.income')}", class: "cursor-pointer flex items-center gap-2" %>
+            <span id="income-help" class="sr-only">Receitas e entradas de dinheiro</span>
+            
+            <%= form.radio_button :transaction_type, "expense", 
+                  class: "radio radio-error ml-6", 
+                  "aria-describedby" => "expense-help",
+                  data: { 
+                    transaction_form_target: "transactionType",
+                    action: "change->transaction-form#handleTypeChange" 
+                  } %>
+            <%= form.label :transaction_type_expense, "📉 #{t('ui.transaction.types.expense')}", class: "cursor-pointer flex items-center gap-2" %>
+            <span id="expense-help" class="sr-only">Gastos e saídas de dinheiro</span>
+            
+            <%= form.radio_button :transaction_type, "transfer", 
+                  class: "radio radio-warning ml-6", 
+                  "aria-describedby" => "transfer-help",
+                  data: { 
+                    transaction_form_target: "transactionType",
+                    action: "change->transaction-form#handleTypeChange" 
+                  } %>
+            <%= form.label :transaction_type_transfer, "🔄 #{t('ui.transaction.types.transfer')}", class: "cursor-pointer flex items-center gap-2" %>
+            <span id="transfer-help" class="sr-only">Transferências entre contas</span>
+          </div>
+        </fieldset>
       </div>
     </div>
 
@@ -40,19 +49,28 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="lg:col-span-2">            <%= form_group(form, :description, 
                   placeholder: t('ui.transaction.form.description_placeholder'),
+                  "aria-label" => "Descrição da transação",
+                  "aria-describedby" => "description-help",
                   data: { 
                     transaction_form_target: "description",
                     action: "input->transaction-form#handleDescriptionChange"
                   }) %>
+            <div id="description-help" class="text-xs text-base-content/60 mt-1">
+              Descreva brevemente a transação (ex: Supermercado, Salário, etc.)
+            </div>
           </div>
           
           <div class="form-control" data-controller="currency">
-            <label class="label">
+            <label class="label" for="transaction_amount">
               <span class="label-text">💵 <%= t('activerecord.attributes.transaction.amount') %></span>
             </label>
             <%= form.text_field :amount, 
+                  id: "transaction_amount",
                   class: "input input-bordered w-full text-lg font-bold", 
                   placeholder: "0,00",
+                  "aria-label" => "Valor da transação em reais",
+                  "aria-describedby" => "amount-help",
+                  "aria-required" => "true",
                   data: {
                     controller: "currency-input currency-validation",
                     currency_input_target: "input",
@@ -63,23 +81,32 @@
                   } %>
             <label class="label">
               <span class="label-text-alt text-base-content/60" 
+                    id="amount-help"
                     data-transaction-form-target="amountHelper" 
                     data-currency-validation-target="helper">
-                <%= t('ui.transaction.form.amount_helper') %>
+                <%= t('ui.transaction.form.amount_helper') %> Digite apenas números, ex: 150.50
               </span>
               <span class="label-text-alt text-error hidden" 
-                    data-currency-validation-target="error"></span>
+                    data-currency-validation-target="error"
+                    role="alert"
+                    aria-live="polite"></span>
             </label>
           </div>
 
           <div class="form-control">
-            <label class="label">
+            <label class="label" for="transaction_event_date">
               <span class="label-text">📅 <%= t('ui.transaction.form.event_date_label') %></span>
-              <span class="label-text-alt text-base-content/60"><%= t('ui.transaction.form.event_date_helper') %></span>
+              <span class="label-text-alt text-base-content/60" id="event-date-help">
+                <%= t('ui.transaction.form.event_date_helper') %>
+              </span>
             </label>
             <%= form.date_field :event_date, 
+                  id: "transaction_event_date",
                   class: "input input-bordered w-full", 
                   value: transaction.event_date || Date.current,
+                  "aria-label" => "Data em que a transação ocorreu",
+                  "aria-describedby" => "event-date-help",
+                  "aria-required" => "true",
                   data: { 
                     transaction_form_target: "eventDate",
                     action: "change->transaction-form#handleDateChange"

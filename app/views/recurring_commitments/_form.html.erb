@@ -1,7 +1,7 @@
-<%= form_with model: recurring_commitment, local: true, class: "space-y-6", data: { controller: "recurring-form" } do |form| %>
+<%= form_with model: recurring_commitment, local: true, class: "space-y-6", html: { role: "form", "aria-label" => "Formulário de compromisso recorrente" }, data: { controller: "recurring-form" } do |form| %>
   <% if recurring_commitment.errors.any? %>
-    <div class="alert alert-error">
-      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+    <div class="alert alert-error" role="alert" aria-live="assertive">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
       <div>
@@ -20,14 +20,16 @@
     <div class="form-control">
       <label class="label">
         <span class="label-text font-medium">
-          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           Como aplicar as mudanças?
         </span>
       </label>
       
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <fieldset role="radiogroup" aria-labelledby="edit-strategy-legend">
+        <legend id="edit-strategy-legend" class="sr-only">Estratégia de edição do compromisso recorrente</legend>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <label class="card bg-base-200 cursor-pointer hover:bg-base-300 transition-colors">
           <div class="card-body p-4">
             <%= form.radio_button :edit_strategy, 'future_only', checked: true, class: "radio radio-primary", data: { target: "recurring-form.strategy" } %>

@@ -13,13 +13,13 @@
   <!-- Card principal -->
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
-      <%= form_with model: @import_session, url: import_sessions_path, local: true, html: { multipart: true, class: "space-y-6" } do |f| %>
+      <%= form_with model: @import_session, url: import_sessions_path, local: true, html: { multipart: true, class: "space-y-6", role: "form", "aria-label" => "Formulário de importação de extrato bancário" } do |f| %>
         
         <!-- Tipo de arquivo -->
         <div class="form-control">
-          <%= f.label :source_type, class: "label" do %>
+          <%= f.label :source_type, class: "label", for: "import_session_source_type" do %>
             <span class="label-text font-medium">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               Tipo de arquivo
@@ -28,17 +28,26 @@
           <%= f.select :source_type, 
               [['OFX (Open Financial Exchange)', 'ofx'], ['CSV (Comma Separated Values)', 'csv']], 
               { prompt: 'Selecione o tipo de arquivo...' }, 
-              { class: "select select-bordered w-full", required: true } %>
+              { 
+                id: "import_session_source_type",
+                class: "select select-bordered w-full", 
+                required: true,
+                "aria-label" => "Tipo de arquivo do extrato",
+                "aria-describedby" => "source-type-help",
+                "aria-required" => "true"
+              } %>
           <div class="label">
-            <span class="label-text-alt text-base-content/60">OFX é o formato padrão dos bancos. CSV requer mapeamento de campos.</span>
+            <span class="label-text-alt text-base-content/60" id="source-type-help">
+              OFX é o formato padrão dos bancos. CSV requer mapeamento de campos.
+            </span>
           </div>
         </div>
 
         <!-- Conta destino -->
         <div class="form-control">
-          <%= f.label :account_id, class: "label" do %>
+          <%= f.label :account_id, class: "label", for: "import_session_account_id" do %>
             <span class="label-text font-medium">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
               Conta destino
@@ -47,17 +56,26 @@
           <%= f.collection_select :account_id, 
               current_user.accounts, :id, :name, 
               { prompt: 'Selecione a conta...' }, 
-              { class: "select select-bordered w-full", required: true } %>
+              { 
+                id: "import_session_account_id",
+                class: "select select-bordered w-full", 
+                required: true,
+                "aria-label" => "Conta bancária de destino para importação",
+                "aria-describedby" => "account-help",
+                "aria-required" => "true"
+              } %>
           <div class="label">
-            <span class="label-text-alt text-base-content/60">Conta onde as transações serão importadas</span>
+            <span class="label-text-alt text-base-content/60" id="account-help">
+              Conta onde as transações serão importadas
+            </span>
           </div>
         </div>
 
         <!-- Upload do arquivo -->
         <div class="form-control">
-          <%= f.label :file, class: "label" do %>
+          <%= f.label :file, class: "label", for: "import_session_file" do %>
             <span class="label-text font-medium">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
               </svg>
               Arquivo de extrato
@@ -69,21 +87,27 @@
                data-file-upload-max-size-value="10485760"
                data-file-upload-show-preview-value="true">
             <%= f.file_field :file, 
+                id: "import_session_file",
                 class: "file-input file-input-bordered w-full", 
                 accept: ".ofx,.csv,.txt", 
                 required: true,
+                "aria-label" => "Selecionar arquivo de extrato bancário",
+                "aria-describedby" => "file-help",
+                "aria-required" => "true",
                 data: { 
                   file_upload_target: "input"
                 } %>
-            <div data-file-upload-target="preview" class="hidden mt-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+            <div data-file-upload-target="preview" class="hidden mt-2 p-3 bg-primary/5 border border-primary/20 rounded-lg" role="status" aria-live="polite">
               <!-- Preview content will be populated by controller -->
             </div>
-            <div data-file-upload-target="error" class="hidden mt-2 p-3 bg-error/10 border border-error/20 rounded-lg text-error text-sm">
+            <div data-file-upload-target="error" class="hidden mt-2 p-3 bg-error/10 border border-error/20 rounded-lg text-error text-sm" role="alert" aria-live="assertive">
               <!-- Error messages will be populated by controller -->
             </div>
           </div>
           <div class="label">
-            <span class="label-text-alt text-base-content/60">Formatos aceitos: .ofx, .csv, .txt (máx. 10MB)</span>
+            <span class="label-text-alt text-base-content/60" id="file-help">
+              Formatos aceitos: .ofx, .csv, .txt (máx. 10MB)
+            </span>
           </div>
         </div>
 
