@@ -46,4 +46,34 @@ RSpec.describe InstallmentProjectionService do
     # No installment date earlier than as_of
     expect(plan_proj.none? { |p| p[:date] < as_of }).to be true
   end
+
+  context 'horizonte limites' do
+    it 'corta projeções exatamente no dia limite do horizonte (months_ahead > 0)' do
+      as_of = Date.new(2025,1,15)
+      # months_ahead 1 => horizonte esperado até 2025-02-15 (não o fim inteiro de fevereiro)
+      plan = create(:installment_plan, user: user, category: category, from_account: from_account, to_account: to_account,
+                                       installment_count: 12, total_amount: 1200, starts_on: Date.new(2025,1,16), recurrence_frequency: 'weekly')
+
+      projections = InstallmentProjectionService.call(as_of: as_of, months_ahead: 1)
+      this_plan = projections.select { |p| p[:installment_plan_id] == plan.id }
+      horizon_cutoff = as_of.advance(months: 1) # 2025-02-15
+      # Todas as parcelas projetadas devem estar <= cutoff
+      expect(this_plan.all? { |p| p[:date] <= horizon_cutoff }).to be true
+      # E não deve existir parcela além do cutoff (ex: 2025-02-16 ou posteriores)
+      expect(this_plan.none? { |p| p[:date] > horizon_cutoff }).to be true
+    end
+
+    it 'inclui parcela exatamente no limite do horizonte' do
+      as_of = Date.new(2025,3,10)
+      # Criar plano semanal iniciando de forma que uma parcela caia exatamente em 2025-04-10 (horizonte 1 mês)
+      plan = create(:installment_plan, user: user, category: category, from_account: from_account, to_account: to_account,
+                                       installment_count: 10, total_amount: 1000, starts_on: Date.new(2025,3,13), recurrence_frequency: 'weekly')
+      horizon_limit = as_of.advance(months: 1) # 2025-04-10
+      projections = InstallmentProjectionService.call(as_of: as_of, months_ahead: 1)
+      this_plan = projections.select { |p| p[:installment_plan_id] == plan.id }
+      dates = this_plan.map { |p| p[:date] }
+      expect(dates).to include(horizon_limit), "Esperava incluir parcela no limite #{horizon_limit}, datas: #{dates.inspect}"
+      expect(dates.any? { |d| d > horizon_limit }).to be false
+    end
+  end
 end

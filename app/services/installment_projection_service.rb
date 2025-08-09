@@ -15,7 +15,8 @@ class InstallmentProjectionService
     @as_of = as_of
     horizon_date = as_of.advance(months: months_ahead)
   @months_ahead = months_ahead
-  @horizon_end = (months_ahead.zero? ? as_of.end_of_month : horizon_date.end_of_month)
+  # Horizon semantics: months_ahead 0 => end of current month; otherwise exact day-of-month advance
+  @horizon_end = (months_ahead.zero? ? as_of.end_of_month : horizon_date)
   end
 
   # Retorna array de hashes de projeções de parcelas
@@ -44,7 +45,7 @@ class InstallmentProjectionService
         # Skip past installments entirely; we only project future cash/competence
         next
       end
-      break if installment_date > @horizon_end
+  break if installment_date > @horizon_end
 
       projections << build_projection_hash(plan, number, installment_date, amount_per)
     end

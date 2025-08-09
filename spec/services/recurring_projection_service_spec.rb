@@ -88,4 +88,30 @@ RSpec.describe RecurringProjectionService do
     commitment.update(status: :paused)
     expect(service.projected_transactions).to be_empty
   end
+
+  context 'boundary horizon' do
+    it 'corta projeções na data exata de horizonte (não extrapola para fim do mês seguinte)' do
+      commitment = create(:recurring_commitment, user: user, category: category, from_account: from_account, to_account: to_account,
+                                 status: :active, recurrence_frequency: 'weekly', start_date: Date.new(2025, 1, 1), default_amount: 25)
+      as_of = Date.new(2025,1,10)
+      months_ahead = 1
+      horizon_limit = as_of.advance(months: months_ahead) # 2025-02-10
+      projections = RecurringProjectionService.call(as_of: as_of, months_ahead: months_ahead)
+      this_commitment = projections.select { |p| p[:recurring_commitment_id] == commitment.id }
+      expect(this_commitment.all? { |p| p[:date] <= horizon_limit }).to be true
+      expect(this_commitment.none? { |p| p[:date] > horizon_limit }).to be true
+    end
+
+    it 'inclui ocorrência exatamente no limite do horizonte' do
+      commitment = create(:recurring_commitment, user: user, category: category, from_account: from_account, to_account: to_account,
+                                 status: :active, recurrence_frequency: 'weekly', start_date: Date.new(2025, 3, 13), default_amount: 40)
+      as_of = Date.new(2025,3,10)
+      horizon_limit = as_of.advance(months: 1) # 2025-04-10
+      projections = RecurringProjectionService.call(as_of: as_of, months_ahead: 1)
+      this_commitment = projections.select { |p| p[:recurring_commitment_id] == commitment.id }
+      dates = this_commitment.map { |p| p[:date] }
+      expect(dates).to include(horizon_limit), "Esperava ocorrência em #{horizon_limit}, datas: #{dates.inspect}"
+      expect(dates.any? { |d| d > horizon_limit }).to be false
+    end
+  end
 end
