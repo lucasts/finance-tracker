@@ -41,7 +41,8 @@ class InstallmentProjectionService
       # For horizon zero (current month focus), allow projecting installments inside the month even if
       # the installment date is earlier in the month but after start and not yet materialized (edge case)
       if installment_date < @as_of
-        next unless @months_ahead.zero? && installment_date.month == @as_of.month && installment_date.year == @as_of.year
+        # Skip past installments entirely; we only project future cash/competence
+        next
       end
       break if installment_date > @horizon_end
 

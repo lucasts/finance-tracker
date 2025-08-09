@@ -33,13 +33,17 @@ RSpec.describe InstallmentProjectionService do
     expect(projections).to be_empty
   end
 
-  it 'respeita horizonte zero (fim do mês atual) projetando próximas parcelas dentro do mês' do
+  it 'respeita horizonte zero (fim do mês atual) projetando apenas parcelas futuras dentro do mês' do
     as_of = Date.new(2025,8,5)
     plan = create(:installment_plan, user: user, category: category, from_account: from_account, to_account: to_account,
-                                     installment_count: 12, total_amount: 1200, starts_on: Date.new(2025, 8, 1), recurrence_frequency: 'monthly')
+                                     installment_count: 5, total_amount: 500, starts_on: Date.new(2025, 8, 6), recurrence_frequency: 'weekly')
     projections = InstallmentProjectionService.call(as_of: as_of, months_ahead: 0)
     plan_proj = projections.select { |p| p[:installment_plan_id] == plan.id }
-  expect(plan_proj.map { |p| p[:installment_number] }).to include(1)
-  expect(plan_proj.all? { |p| p[:date].month == 8 }).to be true
+    # First projected installment is number 1 (since starts_on > as_of, it's future)
+    expect(plan_proj.map { |p| p[:installment_number] }).to include(1)
+    # All projected installments are within August horizon (months_ahead 0 => end_of_month)
+    expect(plan_proj.all? { |p| p[:date].month == 8 }).to be true
+    # No installment date earlier than as_of
+    expect(plan_proj.none? { |p| p[:date] < as_of }).to be true
   end
 end
