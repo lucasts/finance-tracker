@@ -106,6 +106,18 @@ Follow-ups (optional):
 - Introduce selective fragment caching for credit statement cards
 - Implement background warm-up job for chart cache (daily)
 
+### 🆕 Importação – Próximos Passos (Idempotência & Deduplicação)
+- [ ] Heurística de deduplicação entre arquivos diferentes (fingerprint cruzado por external_id/amount/data + janela de tolerância)
+- [ ] Marcar visualmente ImportedTransactions suspeitas de duplicação antes da conciliação
+- [ ] Auto-sugerir associação (match) quando similaridade > limiar (ex: descrição + valor + ±2 dias)
+- [ ] UI de reimport: ao detectar arquivo já importado mostrar diff/resumo em vez de redirecionar direto
+- [ ] Relatório de duplicados ignorados (data, valor, motivo) exportável
+- [ ] Job periódico para recalcular fingerprints se a regra evoluir (versionar algoritmo)
+- [ ] Tornar tolerâncias configuráveis por usuário (valor absoluto, % e janela de dias)
+- [ ] Suporte a idempotência também para CSV (mesmo digest + fingerprint linha)
+- [ ] Testes: cenário parcial (um novo e um duplicado no mesmo arquivo), caso external_id ausente, caso valores arredondados
+- [ ] Métrica: contador de duplicados prevenidos por período para dashboard interno
+
 
 ### Code Quality Improvements
 - [ ] Consolidate legacy money parsing implementations
