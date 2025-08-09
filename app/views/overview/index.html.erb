@@ -309,8 +309,7 @@
 <div class="card bg-base-100 shadow mb-6">
   <div class="card-body">
     <h2 class="card-title mb-4">Minhas Contas</h2>
-    <% accounts = current_user.accounts.includes(:account_type) %>
-    <% if accounts.any? %>
+  <% if @accounts.any? %>
       <div class="overflow-x-auto">
         <table class="table table-zebra w-full">
           <thead>
@@ -321,12 +320,13 @@
             </tr>
           </thead>
           <tbody>
-            <% accounts.each do |account| %>
+    <% @accounts.each do |account| %>
               <tr>
                 <td><%= account.name %></td>
                 <td><%= account.account_type.name %></td>
                 <td class="text-right font-semibold">
-                  R$ <%= number_with_precision(account.balance, precision: 2, delimiter: ".") %>
+      <% bal = @account_balances[account.id] || 0 %>
+      R$ <%= number_with_precision(bal, precision: 2, delimiter: ".") %>
                 </td>
               </tr>
             <% end %>
