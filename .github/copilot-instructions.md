@@ -12,6 +12,7 @@ These directives define how the AI assistant should behave for this repository.
 - Make commits atomic: one cohesive change (code + tests + docs together).
 - Run the full test suite before suggesting a commit (or at least affected subset if speeding up, then full before merge).
 - Add or update tests for any domain logic touched (models, services, projections, import heuristics).
+- Practice strict TDD: write or modify a failing (red) spec first for each new feature/change, then implement code to make it pass (green), then refactor while keeping tests green.
 - Preserve existing public APIs unless refactor commit states otherwise.
 - Validate double-entry: sum(debit amounts) == sum(credit amounts) for every created transaction.
 - Respect competence (event_date) vs cash (payment_date) separation in calculations.
@@ -80,9 +81,11 @@ refactor(transaction): extract TransactionBuilder to unify entry generation
 ## Interaction Guidance
 When the AI is asked to perform multi-step code changes:
 1. Read relevant files.
-2. Update tests first (if TDD feasible for bug fix) or in same commit for feature.
-3. Run tests, iterate until green.
-4. Summarize changes referencing this file for consistency.
+2. Draft/modify the spec to express the desired behavior (should fail initially) – include happy path + at least one boundary/edge.
+3. Run the spec to confirm it fails for the right reason (red).
+4. Implement the minimal production code to make it pass (green).
+5. Refactor (clean up duplication / improve design) while keeping tests green.
+6. Summarize changes referencing this file for consistency.
 
 If ambiguity: ask for clarification succinctly before large changes.
 
