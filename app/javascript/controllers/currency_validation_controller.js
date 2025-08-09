@@ -71,6 +71,14 @@ export default class extends Controller {
     }
   }
 
+  announceError(message) {
+    // Announce error to screen readers for accessibility
+    if (this.errorTarget) {
+      this.errorTarget.setAttribute('role', 'alert')
+      this.errorTarget.setAttribute('aria-live', 'polite')
+    }
+  }
+
   get isValid() {
     return this.validate()
   }
