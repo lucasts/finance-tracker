@@ -100,11 +100,13 @@ Perf / Dashboard Optimization (Item 5):
 - Added request specs guarding: performance query ceiling, chart data caching (notification-driven), recurring projection memoization
 
 Follow-ups (optional):
-- Add cache invalidation strategy (touch on transaction create/update affecting current or historical month)
-- Tighten performance spec threshold further (e.g. <= 30) once stable
+- [x] Add cache invalidation strategy (touch on transaction create/update affecting current or historical month)
+- [x] Tighten performance spec threshold further (e.g. <= 30) once stable
 - Add index on transactions(payment_date) if payment-centric queries grow
 - Introduce selective fragment caching for credit statement cards
 - Implement background warm-up job for chart cache (daily)
+- Instrument cache hits/misses (ActiveSupport::Notifications) e expor métricas
+- Monitor tempo de geração de build_chart_data (coletar p95)
 
 ### 🆕 Importação – Próximos Passos (Idempotência & Deduplicação)
 - [ ] Heurística de deduplicação entre arquivos diferentes (fingerprint cruzado por external_id/amount/data + janela de tolerância)
