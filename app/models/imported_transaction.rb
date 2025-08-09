@@ -12,6 +12,13 @@ class ImportedTransaction < ApplicationRecord
 
   after_save :update_status_from_reconciliation
 
+  scope :possible_duplicates, -> { where(possible_duplicate: true) }
+
+  def self.normalize_description(desc)
+    return '' if desc.nil?
+    I18n.transliterate(desc.to_s.downcase.gsub(/\s+/, ' ').strip)
+  end
+
   def update_status_from_reconciliation
     if reconciliation_entry&.action == 'create_new' && reconciliation_entry&.linked_transaction_id
       update_column(:status, 'conciliated')

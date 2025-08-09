@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_05_222400) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_09_002000) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -66,6 +66,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_05_222400) do
     t.string "entry_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id", "entry_type"], name: "index_entries_on_account_and_type"
     t.index ["account_id"], name: "index_entries_on_account_id"
     t.index ["transaction_id", "account_id"], name: "index_entries_on_transaction_id_and_account_id"
     t.index ["transaction_id"], name: "index_entries_on_transaction_id"
@@ -82,6 +83,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_05_222400) do
     t.datetime "imported_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "file_digest"
+    t.index ["account_id", "file_digest"], name: "index_import_sessions_on_account_id_and_file_digest", unique: true
     t.index ["user_id"], name: "index_import_sessions_on_user_id"
   end
 
@@ -104,7 +107,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_05_222400) do
     t.json "parsed_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "possible_duplicate", default: false, null: false
     t.index ["import_session_id"], name: "index_imported_transactions_on_import_session_id"
+    t.index ["possible_duplicate"], name: "index_imported_transactions_on_possible_duplicate"
   end
 
   create_table "installment_plans", force: :cascade do |t|
@@ -203,6 +208,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_05_222400) do
     t.index ["recurring_commitment_id"], name: "index_transactions_on_recurring_commitment_id"
     t.index ["transaction_group_id"], name: "index_transactions_on_transaction_group_id"
     t.index ["transaction_type"], name: "index_transactions_on_transaction_type"
+    t.index ["user_id", "status", "event_date"], name: "index_transactions_on_user_status_event_date"
     t.index ["user_id"], name: "index_transactions_on_user_id"
   end
 

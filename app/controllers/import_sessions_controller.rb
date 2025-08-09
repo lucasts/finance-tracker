@@ -30,23 +30,13 @@ class ImportSessionsController < ApplicationController
       @import_session.file_digest = digest
       if @import_session.save
         # Parsing and creation of ImportedTransaction
-        transactions =
-          if @import_session.source_type == 'ofx'
-            OfxImportService.call(file_content: @import_session.raw_file)
-          else
-            CsvImportService.call(file_content: @import_session.raw_file)
-          end
-        # Avoid duplication across sessions: skip transactions whose external_id+amount+date already imported for this account
-        existing_fingerprints = ImportedTransaction.joins(import_session: :account)
-          .where(import_sessions: { account_id: @import_session.account_id })
-          .pluck(:external_id, :amount, :event_date)
-          .map { |ext_id, amount, date| [ext_id, amount.to_s, date.to_s].join('-') }
-          .to_set
-        transactions.each do |tx|
-          fingerprint = [tx[:external_id], tx[:amount].to_s, tx[:event_date].to_s].join('-')
-          next if existing_fingerprints.include?(fingerprint)
-          @import_session.imported_transactions.create!(tx)
+        Rails.logger.info("[ImportSessions#create] source_type param=#{params[:import_session][:source_type].inspect} assigned=#{@import_session.source_type.inspect} filename=#{file.original_filename} content_snip=#{content[0..30]}...")
+        transactions = if @import_session.source_type == 'ofx'
+          OfxImportService.call(file_content: @import_session.raw_file)
+        else
+          CsvImportService.call(file_content: @import_session.raw_file)
         end
+        ImportDedupService.call(import_session: @import_session, parsed_transactions: transactions)
         redirect_to import_session_path(@import_session), notice: 'Arquivo importado com sucesso. Prossiga para conciliação.'
       else
         render :new, status: :unprocessable_entity

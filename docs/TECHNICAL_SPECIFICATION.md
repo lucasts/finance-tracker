@@ -127,7 +127,26 @@ app/
 - **OFX Parser** — Custom Ruby implementation (`lib/ofx_simple_parser.rb`)
 - **CSV Processing** — Flexible header detection and data mapping
 - **Reconciliation Engine** — Fuzzy matching algorithms for transaction identification
-- **Duplicate Detection** — Hash-based deduplication with tolerance parameters
+- **Duplicate Detection** — Advanced heuristic engine (description normalization + temporal & monetary tolerances + similarity flagging)
+
+#### Duplicate Detection Heuristics
+The import pipeline applies layered rules (implemented in `ImportDedupService`) to suppress true duplicates while surfacing likely repeats for manual review:
+
+| Order | Rule | Condition (after normalization) | Result |
+|-------|------|----------------------------------|--------|
+| 1 | Exact Duplicate | Same normalized description AND same date AND amount diff ≤ 0.01 | Skip (not created) |
+| 2 | Tolerance Duplicate | Same normalized description AND date diff ≤ 1 day AND amount diff ≤ 0.01 | Skip |
+| 3 | Similar (Flag) | (a) Same (or 1‑edit) normalized description AND date diff ≤ 3 days AND amount diff ≤ 2.00 OR (b) any prior txn (even >1 edit away) within those date & amount windows | Create + `possible_duplicate = true` |
+| 4 | Approximate Description | 1 edit (insert/substitute) difference is treated as same description for rules above | Included in same description bucket |
+
+Key implementation details:
+- Normalization collapses whitespace, lowercases, strips accents (`I18n.transliterate`).
+- One‑edit distance check avoids full Levenshtein cost for short strings.
+- Fallback similarity (3a/3b) broadens coverage when banks radically change wording.
+- Amount tolerance constant: `FinancialConstants::AMOUNT_ABSOLUTE_TOLERANCE` (currently 0.01).
+- Date similarity horizon: `FinancialConstants::DATE_TOLERANCE_DAYS` (currently 3).
+
+Why this matters: prevents silent duplication in re‑imports while preserving user control over ambiguous near‑matches (flag instead of suppress). Future enhancements: configurable tolerances, metrics, bulk resolution UI, adaptive heuristics.
 
 ### **Automated Processing**
 - **Background Jobs** — Sidekiq integration for recurring tasks
