@@ -66,4 +66,35 @@ RSpec.describe MonthlyBalanceProjectionService do
     # Expect projected installments (remaining installments all future at as_of)
     expect(competence[:projected_installment_expense]).to be > 0
   end
+
+  context 'boundary de fim de mês' do
+    it 'não conta projeções futuras quando as_of é o último dia do mês (sem dias restantes)' do
+      end_of_month = Date.new(2025, 8, 31)
+      user2 = create(:user)
+      category_exp = create(:category, :expense, user: user2)
+      asset_acc = create(:account, :asset, user: user2)
+      dest_acc = create(:account, :expense_destination, user: user2)
+      # Compromisso semanal que teria próxima ocorrência após o fim do mês
+      create(:recurring_commitment, user: user2, category: category_exp,
+             from_account: asset_acc, to_account: dest_acc,
+             start_date: Date.new(2025,8,7), default_amount: 80,
+             recurrence_frequency: 'weekly', status: :active)
+      # Plano de parcelas começando exatamente no último dia do mês
+      create(:installment_plan, user: user2, category: category_exp,
+             from_account: asset_acc, to_account: dest_acc,
+             installment_count: 3, total_amount: 300, starts_on: end_of_month,
+             recurrence_frequency: 'monthly')
+
+      result = MonthlyBalanceProjectionService.call(user: user2, month_date: end_of_month, as_of: end_of_month)
+      comp = result[:competence]
+      cash = result[:cash]
+      # Sem dias futuros restantes → futuras parcelas/recorrentes 0
+      expect(comp[:projected_recurring_expense]).to eq(0)
+      expect(comp[:projected_installment_expense]).to eq(0)
+      expect(cash[:projected_recurring_expense]).to eq(0)
+      expect(cash[:projected_installment_expense]).to eq(0)
+      expect(comp[:future_expense]).to eq(0)
+      expect(cash[:future_expense]).to eq(0)
+    end
+  end
 end

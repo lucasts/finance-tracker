@@ -85,14 +85,16 @@ class MonthlyBalanceProjectionService
   end
 
   def projected_recurring_expenses
-  RecurringProjectionService.call(as_of: @as_of)
-      .select { |p| p[:date] >= @as_of && p[:date] <= @month_end }
+    return 0 if @as_of == @month_end # sem dias futuros restantes
+    RecurringProjectionService.call(as_of: @as_of)
+      .select { |p| p[:date] > @as_of && p[:date] <= @month_end }
       .sum { |p| p[:amount].to_f.abs }
   end
 
   def projected_installment_expenses
+    return 0 if @as_of == @month_end
     InstallmentProjectionService.call(as_of: @as_of, months_ahead: 0)
-      .select { |p| p[:date] >= @as_of && p[:date] <= @month_end }
+      .select { |p| p[:date] > @as_of && p[:date] <= @month_end }
       .sum { |p| p[:amount].to_f.abs }
   end
 end
