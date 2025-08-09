@@ -7,6 +7,14 @@ require 'json'
 require 'optparse'
 require 'pathname'
 
+# Load Rails environment if available
+begin
+  require_relative '../config/environment'
+rescue LoadError
+  # Rails not available, continue without it
+  puts "ℹ️  Running without Rails environment"
+end
+
 class BundleAnalysisCLI
   def initialize
     @options = {
@@ -77,13 +85,23 @@ class BundleAnalysisCLI
   end
 
   def gather_project_info
-    {
-      rails_version: Rails::VERSION::STRING,
+    info = {
       ruby_version: RUBY_VERSION,
       node_version: `node --version 2>/dev/null`.strip,
-      npm_version: `npm --version 2>/dev/null`.strip,
-      bundler_version: Bundler::VERSION
+      npm_version: `npm --version 2>/dev/null`.strip
     }
+
+    # Add Rails info if available
+    if defined?(Rails)
+      info[:rails_version] = Rails::VERSION::STRING
+    end
+
+    # Add Bundler info if available
+    if defined?(Bundler)
+      info[:bundler_version] = Bundler::VERSION
+    end
+
+    info
   end
 
   def analyze_bundles
@@ -128,10 +146,13 @@ class BundleAnalysisCLI
     return nil unless should_analyze_file?(file_path)
     
     size = File.size(file_path)
-    relative_path = Pathname.new(file_path).relative_path_from(Pathname.new(Dir.pwd))
+    
+    # Use a safer method to get relative path
+    relative_path = file_path.start_with?(Dir.pwd) ? 
+      file_path[Dir.pwd.length + 1..-1] : file_path
     
     {
-      path: relative_path.to_s,
+      path: relative_path,
       size: size,
       size_kb: (size / 1024.0).round(2),
       type: determine_file_type(file_path),
