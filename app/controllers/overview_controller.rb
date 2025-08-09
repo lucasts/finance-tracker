@@ -254,8 +254,7 @@ end
 
 def generate_chart_data(user_transactions:)
   @__chart_data ||= begin
-    cache_key = ["chart-data-v1", current_user.id, Date.today.strftime('%Y-%m')]
-    Rails.cache.fetch(cache_key, expires_in: 6.hours) do
+    ChartDataCache.fetch(current_user.id) do
       build_chart_data(user_transactions: user_transactions)
     end
   end
@@ -365,5 +364,7 @@ end
 
 def recurring_projections(as_of: Date.today)
   @recurring_projection_cache ||= {}
-  @recurring_projection_cache[as_of.to_date] ||= RecurringProjectionService.call(as_of: as_of)
+  user_key = current_user.id
+  @recurring_projection_cache[user_key] ||= {}
+  @recurring_projection_cache[user_key][as_of.to_date] ||= RecurringProjectionService.call(as_of: as_of)
 end

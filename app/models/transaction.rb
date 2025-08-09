@@ -38,6 +38,7 @@ class Transaction < ApplicationRecord
   before_save :execute_before_save_operations
   after_create :execute_after_create_operations
   after_save :execute_after_save_operations
+  after_commit :invalidate_chart_cache
   
   # Scopes that work with Date using ranges (more efficient)
   scope :in_competence_month, ->(date) { 
@@ -278,5 +279,9 @@ class Transaction < ApplicationRecord
     if debit_entry.account_id == credit_entry.account_id
       errors.add(:base, 'Conta de origem e destino não podem ser iguais em uma transferência')
     end
+  end
+
+  def invalidate_chart_cache
+    ChartDataCache.invalidate_if_relevant(self)
   end
 end
