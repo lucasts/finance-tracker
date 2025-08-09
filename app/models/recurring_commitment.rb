@@ -18,7 +18,9 @@ class RecurringCommitment < ApplicationRecord
   validates :name, :category_id, :recurrence_frequency, :start_date, :status, presence: true
   validates :from_account, presence: true
   validates :to_account, presence: true
-  validates :recurrence_frequency, inclusion: { in: %w[monthly weekly annual] }, allow_blank: true
+  # Supported frequencies expanded to match product spec
+  SUPPORTED_FREQUENCIES = %w[daily weekly fortnightly monthly bimonthly quarterly semiannual annual biennial].freeze
+  validates :recurrence_frequency, inclusion: { in: SUPPORTED_FREQUENCIES }, allow_blank: true
   validates :default_amount, numericality: { greater_than: 0 }, allow_nil: true
 
   validate :accounts_must_be_different
@@ -121,21 +123,29 @@ class RecurringCommitment < ApplicationRecord
 
   # Unified date calculation method for consistency
   def calculate_next_date_from(from_date)
-    # Use frequency attribute if available, fallback to recurrence_frequency
-    freq = respond_to?(:frequency) ? frequency : recurrence_frequency
-    
+    freq = (respond_to?(:frequency) ? frequency : recurrence_frequency).to_s
     case freq
+    when 'daily'
+      from_date + 1.day
     when 'weekly'
-      # For weekly frequency, go to the next week (Monday to Monday)
-      from_date.next_week
+  from_date.next_week(:monday)
+    when 'fortnightly'
+      from_date + 14.days
     when 'monthly'
       from_date + 1.month
+    when 'bimonthly'
+      from_date + 2.months
     when 'quarterly'
       from_date + 3.months
-    when 'yearly', 'annual'
+    when 'semiannual'
+      from_date + 6.months
+    when 'annual', 'yearly'
       from_date + 1.year
+    when 'biennial'
+      from_date + 2.years
     else
-      from_date + 1.month # default to monthly
+      # Fallback: monthly to avoid silent infinite loops
+      from_date + 1.month
     end
   end
 
