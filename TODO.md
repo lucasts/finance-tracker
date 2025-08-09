@@ -120,6 +120,16 @@ Follow-ups (optional):
 
 
 ### Code Quality Improvements
+#### Projection Horizon Semantics (documentado 2025-08-09)
+Unificação aplicada:
+- Recorrentes & Parcelas: months_ahead > 0 agora corta exatamente em as_of.advance(months: n) (data exata), não até o fim do mês alvo.
+- months_ahead == 0 mantém comportamento de foco no mês corrente (até end_of_month).
+- MonthlyBalanceProjectionService: quando as_of == end_of_month nenhuma projeção futura (recorrente ou parcela) é adicionada; valores no próprio dia não contam como "futuros".
+Pendentes:
+- [ ] Confirmar se UX deseja opção alternativa (modo month_end) – se sim expor flag horizon_mode.
+- [ ] Atualizar qualquer documentação externa / help in-app mencionando horizonte.
+- [ ] Rever telas que exibem contagem de projeções para refletir mudança (especialmente se usuários esperavam mês cheio).
+
 - [ ] Consolidate legacy money parsing implementations
 - [ ] Reduce service pattern variations
 - [ ] Modernize deprecated concern usage
