@@ -57,7 +57,7 @@ class OverviewController < ApplicationController
     @savings_rate = calculate_savings_rate(@income_total, @expense_total)
 
     # === RECURRING COMMITMENTS PROJECTION ===
-    @projected_transactions = RecurringProjectionService.call(as_of: month_date)
+  @projected_transactions = recurring_projections(as_of: month_date)
 
   # === ACCOUNTS (batch balance computation to avoid per-account queries) ===
   load_accounts_with_balances
@@ -253,18 +253,25 @@ def largest_expense_this_month(month_date)
 end
 
 def generate_chart_data(user_transactions:)
+  @__chart_data ||= begin
+    cache_key = ["chart-data-v1", current_user.id, Date.today.strftime('%Y-%m')]
+    Rails.cache.fetch(cache_key, expires_in: 6.hours) do
+      build_chart_data(user_transactions: user_transactions)
+    end
+  end
+end
+
+def build_chart_data(user_transactions:)
+  ActiveSupport::Notifications.instrument('overview.build_chart_data') do
   end_date = Date.today
   start_date = end_date - 11.months
   range = start_date.beginning_of_month..end_date.end_of_month
-  # Single query load; filter confirmed only
   txs = user_transactions.where(status: 'confirmed', event_date: range).select(:id, :event_date, :amount, :transaction_type)
-
   months = []
   income_data = []
   expense_data = []
   balance_data = []
   accumulated_balance = 0
-
   (0..11).each do |i|
     m_date = start_date + i.months
     label = I18n.l(m_date, format: '%b/%y')
@@ -274,14 +281,13 @@ def generate_chart_data(user_transactions:)
     expense = month_txs.select { |t| t.transaction_type == 'expense' }.sum { |t| FinancialConstants.safe_to_float(t.amount) }
     monthly_balance = income - expense
     accumulated_balance += monthly_balance
-
     months << label
     income_data << FinancialConstants.safe_to_float(income)
     expense_data << FinancialConstants.safe_to_float(expense)
     balance_data << FinancialConstants.safe_to_float(accumulated_balance)
   end
-
   { categories: months, income_data: income_data, expense_data: expense_data, balance_data: balance_data }
+  end
 end
 
 
@@ -325,7 +331,7 @@ def projected_balance(current_balance, month)
   future_expenses = FinancialConstants.safe_to_float(future_grouped['expense'] || 0)
 
   # Include projected transactions (recurring commitments projection)
-  projected_transactions = RecurringProjectionService.call(as_of: month_date)
+  projected_transactions = recurring_projections(as_of: month_date)
   # Include future installments (competence perspective)
   installment_projections = InstallmentProjectionService.call(as_of: month_date)
   # Separate competence (event_date) vs cash (payment_date) if diverge in future
@@ -355,4 +361,9 @@ end
 
 def generate_category_projections(month_date)
   CategoryProjectionCalculator.call(user: current_user, month_date: month_date)
+end
+
+def recurring_projections(as_of: Date.today)
+  @recurring_projection_cache ||= {}
+  @recurring_projection_cache[as_of.to_date] ||= RecurringProjectionService.call(as_of: as_of)
 end
