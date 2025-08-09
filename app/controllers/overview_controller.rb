@@ -277,6 +277,10 @@ def projected_balance(current_balance, month)
 
   # Include projected transactions (recurring commitments projection)
   projected_transactions = RecurringProjectionService.call(as_of: month_date)
+  # Include future installments (competence perspective)
+  installment_projections = InstallmentProjectionService.call(as_of: month_date)
+  # Separate competence (event_date) vs cash (payment_date) if diverge in future
+  projected_transactions += installment_projections
   projected_income = projected_transactions
     .select { |t| FinancialConstants.safe_to_decimal(t[:amount]) > 0 }
     .sum { |t| FinancialConstants.safe_to_decimal(t[:amount]) }
