@@ -88,6 +88,25 @@ The **Finance Tracker** is **100% functional** for family financial management w
 
 ## 🔧 Technical Debt & Maintenance
 
+### ✅ Recently Completed (2025-08-09)
+Perf / Dashboard Optimization (Item 5):
+- Reduced Overview dashboard queries from ~220 to  < 40 (spec enforced)
+- Batched month aggregates & category ranking (in‑memory from preloaded dataset)
+- Preloaded credit statements (accounts + account_type + transactions) and consolidated stats computation
+- Batched account balances via grouped entries query
+- Added caching layer for 12‑month chart data (Rails.cache + in-request memoization)
+- Memoized RecurringProjectionService results per request to avoid duplicate projection generation
+- Added DB indexes: transactions(user_id, status, event_date) and entries(account_id, entry_type) to speed filtered range scans
+- Added request specs guarding: performance query ceiling, chart data caching (notification-driven), recurring projection memoization
+
+Follow-ups (optional):
+- Add cache invalidation strategy (touch on transaction create/update affecting current or historical month)
+- Tighten performance spec threshold further (e.g. <= 30) once stable
+- Add index on transactions(payment_date) if payment-centric queries grow
+- Introduce selective fragment caching for credit statement cards
+- Implement background warm-up job for chart cache (daily)
+
+
 ### Code Quality Improvements
 - [ ] Consolidate legacy money parsing implementations
 - [ ] Reduce service pattern variations
