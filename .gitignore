@@ -18,3 +18,9 @@ config/master.key
 
 /storage/sqlite/*
 !/storage/sqlite/.keep
+
+# JavaScript testing and coverage
+coverage/
+*.coverage
+.nyc_output/
+junit.xml

@@ -14,7 +14,7 @@ export class MoneyFormatter {
   // Format amount for display (consistent with Rails helper)
   static format(amount, options = {}) {
     if (amount === null || amount === undefined || amount === '') {
-      return 'R$ 0,00'
+      return 'R$\u00A00,00'
     }
 
     // Use intelligent caching for formatting operations
@@ -30,8 +30,8 @@ export class MoneyFormatter {
   static _formatInternal(amount, options = {}) {
     const value = typeof amount === 'string' ? this.parse(amount) : Number(amount)
     
-    if (isNaN(value)) {
-      return 'R$ 0,00'
+    if (isNaN(value) || !isFinite(value)) {
+      return 'R$\u00A00,00'
     }
 
     const config = { ...this.DEFAULTS, ...options }
@@ -45,7 +45,7 @@ export class MoneyFormatter {
       }).format(value)
     } catch (error) {
       // Fallback for older browsers
-      return `R$ ${value.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`
+      return `R$\u00A0${value.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`
     }
   }
 
