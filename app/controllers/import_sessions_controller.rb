@@ -21,6 +21,13 @@ class ImportSessionsController < ApplicationController
       @import_session.source_type = params[:import_session][:source_type]
       @import_session.account_id = params[:import_session][:account_id]
       @import_session.imported_at = nil
+      # Pre-compute digest for idempotency check
+      digest = Digest::SHA256.hexdigest(content)
+      existing = ImportSession.find_by(account_id: @import_session.account_id, file_digest: digest)
+      if existing
+        redirect_to import_session_path(existing), notice: 'Arquivo já havia sido importado anteriormente. Nenhuma nova transação criada.' and return
+      end
+      @import_session.file_digest = digest
       if @import_session.save
         # Parsing and creation of ImportedTransaction
         transactions =
@@ -29,7 +36,15 @@ class ImportSessionsController < ApplicationController
           else
             CsvImportService.call(file_content: @import_session.raw_file)
           end
+        # Avoid duplication across sessions: skip transactions whose external_id+amount+date already imported for this account
+        existing_fingerprints = ImportedTransaction.joins(import_session: :account)
+          .where(import_sessions: { account_id: @import_session.account_id })
+          .pluck(:external_id, :amount, :event_date)
+          .map { |ext_id, amount, date| [ext_id, amount.to_s, date.to_s].join('-') }
+          .to_set
         transactions.each do |tx|
+          fingerprint = [tx[:external_id], tx[:amount].to_s, tx[:event_date].to_s].join('-')
+          next if existing_fingerprints.include?(fingerprint)
           @import_session.imported_transactions.create!(tx)
         end
         redirect_to import_session_path(@import_session), notice: 'Arquivo importado com sucesso. Prossiga para conciliação.'
