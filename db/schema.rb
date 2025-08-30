@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_09_002000) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_30_100000) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -107,7 +107,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_09_002000) do
     t.json "parsed_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "fingerprint", limit: 64
+    t.integer "fingerprint_version", default: 1, null: false
     t.boolean "possible_duplicate", default: false, null: false
+    t.index ["fingerprint"], name: "index_imported_transactions_on_fingerprint"
     t.index ["import_session_id"], name: "index_imported_transactions_on_import_session_id"
     t.index ["possible_duplicate"], name: "index_imported_transactions_on_possible_duplicate"
   end
