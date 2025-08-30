@@ -100,6 +100,12 @@
               <%= @imported_transactions.left_joins(:reconciliation_entry).where(reconciliation_entries: { id: nil }).count %>
             </span>
           </div>
+          <div class="flex justify-between">
+            <span class="text-base-content/70">Possíveis duplicadas:</span>
+            <span class="font-bold text-error">
+              <%= @imported_transactions.where(possible_duplicate: true).count %>
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -164,7 +170,7 @@
             </thead>
             <tbody>
               <% @imported_transactions.each do |tx| %>
-                <tr class="hover">
+                <tr class="hover <%= 'bg-warning/10' if tx.possible_duplicate %>">
                   <td>
                     <div class="flex items-center gap-2">
                       <div class="badge badge-neutral badge-sm"><%= tx.line_number %></div>
@@ -173,6 +179,17 @@
                   <td>
                     <div class="max-w-xs truncate" title="<%= tx.description %>">
                       <span class="font-medium"><%= tx.description %></span>
+                      <% if tx.possible_duplicate %>
+                        <div class="mt-1">
+                          <span class="badge badge-error badge-xs gap-1" title="Transação potencialmente duplicada com base em heurísticas de similaridade (valor/data)">
+                            <!-- Ícone de alerta -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-2.5L13.73 5c-.77-.83-1.96-.83-2.73 0L3.34 16.5c-.77.83.19 2.5 1.73 2.5z" />
+                            </svg>
+                            Suspeita de duplicata
+                          </span>
+                        </div>
+                      <% end %>
                     </div>
                   </td>
                   <td>
