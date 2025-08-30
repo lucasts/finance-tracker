@@ -148,6 +148,32 @@ Key implementation details:
 
 Why this matters: prevents silent duplication in re‑imports while preserving user control over ambiguous near‑matches (flag instead of suppress). Future enhancements: configurable tolerances, metrics, bulk resolution UI, adaptive heuristics.
 
+#### Transfer Detection System
+The import pipeline automatically identifies potential transfers between user accounts using heuristic matching (implemented in `TransferDetectionService`):
+
+| Criteria | Tolerance | Purpose |
+|----------|-----------|---------|
+| Same User | Exact | Only detects transfers within user's accounts |
+| Different Accounts | Exact | Prevents same-account false positives |
+| Amount Match | ±R$ 0.01 | Compensates for rounding/small fees |
+| Date Proximity | ±2 days | Handles processing delays between institutions |
+| Sign Preference | Opposite preferred | One debit (-) paired with one credit (+) |
+
+**Database Schema**:
+```sql
+-- Added to imported_transactions
+transfer_candidate BOOLEAN NOT NULL DEFAULT FALSE
+potential_transfer_with_id BIGINT NULL
+```
+
+**Processing Flow**:
+1. Import creates transactions via `ImportDedupService`
+2. `TransferDetectionService` automatically runs post-import
+3. Identified pairs marked with `transfer_candidate = true`
+4. UI displays visual indicators (badges, background highlighting)
+
+**Limitations**: One-to-one pairing only, same user restriction, small tolerance may miss larger fees. Future: configurable tolerances, semantic description matching, bulk confirmation interface.
+
 ### **Automated Processing**
 - **Background Jobs** — Sidekiq integration for recurring tasks
 - **Recurring Generation** — Automatic future transaction creation
