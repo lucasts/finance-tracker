@@ -106,6 +106,12 @@
               <%= @imported_transactions.where(possible_duplicate: true).count %>
             </span>
           </div>
+          <div class="flex justify-between">
+            <span class="text-base-content/70">Transferências candidatas:</span>
+            <span class="font-bold text-info">
+              <%= @imported_transactions.where(transfer_candidate: true).count %>
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -170,7 +176,7 @@
             </thead>
             <tbody>
               <% @imported_transactions.each do |tx| %>
-                <tr class="hover <%= 'bg-warning/10' if tx.possible_duplicate %>">
+                <tr class="hover <%= 'bg-warning/10' if tx.possible_duplicate %> <%= 'bg-info/10' if tx.transfer_candidate %>">
                   <td>
                     <div class="flex items-center gap-2">
                       <div class="badge badge-neutral badge-sm"><%= tx.line_number %></div>
@@ -187,6 +193,17 @@
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-2.5L13.73 5c-.77-.83-1.96-.83-2.73 0L3.34 16.5c-.77.83.19 2.5 1.73 2.5z" />
                             </svg>
                             Suspeita de duplicata
+                          </span>
+                        </div>
+                      <% end %>
+                      <% if tx.transfer_candidate %>
+                        <div class="mt-1">
+                          <span class="badge badge-info badge-xs gap-1" title="Possível transferência entre contas. Valor e data similares encontrados em outra conta.">
+                            <!-- Ícone de transferência -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                            Transferência candidata
                           </span>
                         </div>
                       <% end %>

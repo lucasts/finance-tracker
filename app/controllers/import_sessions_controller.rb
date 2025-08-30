@@ -37,6 +37,8 @@ class ImportSessionsController < ApplicationController
           CsvImportService.call(file_content: @import_session.raw_file)
         end
         ImportDedupService.call(import_session: @import_session, parsed_transactions: transactions)
+        # Run transfer detection after dedup processing
+        TransferDetectionService.call(user: current_user)
         redirect_to import_session_path(@import_session), notice: 'Arquivo importado com sucesso. Prossiga para conciliação.'
       else
         render :new, status: :unprocessable_entity

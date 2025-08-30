@@ -6,6 +6,7 @@ class ImportedTransaction < ApplicationRecord
   belongs_to :installment_plan, optional: true
   belongs_to :recurring_commitment, optional: true
   belongs_to :matched_transaction, class_name: 'Transaction', optional: true
+  belongs_to :potential_transfer_with, class_name: 'ImportedTransaction', optional: true
   has_one :reconciliation_entry, dependent: :destroy
 
   validates :raw_data, presence: true
@@ -14,6 +15,7 @@ class ImportedTransaction < ApplicationRecord
   after_save :update_status_from_reconciliation
 
   scope :possible_duplicates, -> { where(possible_duplicate: true) }
+  scope :transfer_candidates, -> { where(transfer_candidate: true) }
 
   FINGERPRINT_VERSION = 1
 

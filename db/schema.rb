@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_30_100000) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_30_110000) do
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -110,9 +110,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_100000) do
     t.string "fingerprint", limit: 64
     t.integer "fingerprint_version", default: 1, null: false
     t.boolean "possible_duplicate", default: false, null: false
+    t.boolean "transfer_candidate", default: false, null: false
+    t.bigint "potential_transfer_with_id"
     t.index ["fingerprint"], name: "index_imported_transactions_on_fingerprint"
     t.index ["import_session_id"], name: "index_imported_transactions_on_import_session_id"
     t.index ["possible_duplicate"], name: "index_imported_transactions_on_possible_duplicate"
+    t.index ["potential_transfer_with_id"], name: "index_imported_transactions_on_potential_transfer_with_id"
+    t.index ["transfer_candidate"], name: "index_imported_transactions_on_transfer_candidate"
   end
 
   create_table "installment_plans", force: :cascade do |t|
