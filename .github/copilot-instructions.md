@@ -18,6 +18,7 @@ These directives define how the AI assistant should behave for this repository.
 - Respect competence (event_date) vs cash (payment_date) separation in calculations.
 - Add projection logic only with horizon tests covering boundary cases.
 - Reference issue or rationale in commit body when non-trivial.
+- Always update documentation in `docs/` and `.md` file in root `/` and comments to reflect changes.
 
 ## Never Do
 - Introduce schema changes without a migration in same commit.
