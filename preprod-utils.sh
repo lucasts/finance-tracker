@@ -1,100 +1,104 @@
 #!/bin/bash
-# Utilities for pre-production environment
+# Preprod Environment Management Utilities for Finance Tracker
 
-set -e
-
-# Check if docker-compose is available
-if ! command -v docker-compose &> /dev/null; then
-    if command -v docker &> /dev/null && docker compose version &> /dev/null; then
-        DOCKER_COMPOSE="docker compose"
-    else
-        echo "❌ Docker Compose not found."
-        exit 1
-    fi
-else
-    DOCKER_COMPOSE="docker-compose"
-fi
+PREPROD_IP="192.168.88.15"
+PREPROD_USER="root"
+REMOTE_PATH="/mnt/user/appdata/finance-tracker"
+SSH_KEY="~/.ssh/id_ed25519_unraid_deploy"
 
 show_help() {
-    echo "🔧 Pre-production Utilities - Orzeny Finance Tracker"
+    echo "🚀 Preprod Finance Tracker Management"
     echo ""
     echo "Available commands:"
-    echo "  start     - Start pre-production environment"
+    echo "  deploy    - Full deployment to preprod environment"
+    echo "  start     - Start all containers"
     echo "  stop      - Stop all containers"
-    echo "  restart   - Restart environment"
+    echo "  restart   - Restart all containers"
     echo "  logs      - Show application logs"
-    echo "  console   - Open Rails console in preprod environment"
-    echo "  shell     - Open shell in application container"
-    echo "  db        - Connect to PostgreSQL"
-    echo "  redis     - Connect to Redis"
-    echo "  jobs      - Force execution of recurring jobs"
-    echo "  reset     - Reset database and reload seeds"
-    echo "  test      - Run tests in preprod environment"
-    echo "  status    - Show container status"
+    echo "  console   - Open Rails console"
+    echo "  shell     - Open shell in app container"
+    echo "  status    - Show containers status"
+    echo "  sync      - Sync code only (no rebuild)"
+    echo "  rebuild   - Force rebuild containers"
+    echo "  reset     - Reset database with fresh data"
+    echo "  cleanup   - Remove stopped containers and unused images"
     echo ""
 }
 
+run_remote() {
+    ssh -i $SSH_KEY $PREPROD_USER@$PREPROD_IP "cd $REMOTE_PATH && $1"
+}
+
 case "${1:-help}" in
+    "deploy")
+        echo "🚀 Running full deployment..."
+        ./deploy-preprod.sh
+        ;;
     "start")
-        echo "🚀 Starting pre-production environment..."
-        ./run-pre-prod.sh
+        echo "▶️  Starting containers on preprod environment..."
+        run_remote "docker-compose -f docker-compose.preprod.yml up -d"
         ;;
     "stop")
-        echo "🛑 Stopping pre-production environment..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml down
+        echo "⏹️  Stopping containers on preprod environment..."
+        run_remote "docker-compose -f docker-compose.preprod.yml down"
         ;;
     "restart")
-        echo "🔄 Restarting environment..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml restart
+        echo "🔄 Restarting containers on preprod environment..."
+        run_remote "docker-compose -f docker-compose.preprod.yml restart"
         ;;
     "logs")
-        echo "📋 Application logs:"
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml logs -f app
+        echo "📋 Showing application logs..."
+        if [[ "$2" == "app" ]]; then
+            run_remote "docker-compose -f docker-compose.preprod.yml logs ${3:-} ${4:-} app"
+        else
+            run_remote "docker-compose -f docker-compose.preprod.yml logs -f app"
+        fi
         ;;
     "console")
-        echo "💬 Opening Rails console (preprod)..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails console
+        echo "💬 Opening Rails console..."
+        ssh -t -i $SSH_KEY $PREPROD_USER@$PREPROD_IP "cd $REMOTE_PATH && docker-compose -f docker-compose.preprod.yml exec app rails console"
         ;;
     "shell")
-        echo "🐚 Opening shell in container..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app bash
-        ;;
-    "db")
-        echo "🗄️  Connecting to PostgreSQL..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec db psql -U postgres orzeny_preprod
-        ;;
-    "redis")
-        echo "📦 Connecting to Redis..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec redis redis-cli
-        ;;
-    "jobs")
-        echo "⚙️  Executing recurring jobs..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails runner "
-            puts '🔄 Executing GenerateRecurringTransactionsJob...'
-            GenerateRecurringTransactionsJob.perform_now
-            puts '✅ Recurring transactions job executed!'
-            
-            puts '🔄 Executing GenerateInstallmentTransactionsJob...'
-            GenerateInstallmentTransactionsJob.perform_now
-            puts '✅ Installments job executed!'
-        "
-        ;;
-    "reset")
-        echo "🗑️  Resetting database..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails db:drop db:create db:migrate
-        echo "🌱 Reloading realistic seeds..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app rails runner "load 'db/seeds/demo_realistic.rb'"
-        ;;
-    "test")
-        echo "🧪 Running tests in preprod environment..."
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app bundle exec rspec
+        echo "🐚 Opening shell in app container..."
+        ssh -t -i $SSH_KEY $PREPROD_USER@$PREPROD_IP "cd $REMOTE_PATH && docker-compose -f docker-compose.preprod.yml exec app bash"
         ;;
     "status")
-        echo "📊 Container status:"
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml ps
+        echo "📊 Container status on preprod environment:"
+        run_remote "docker-compose -f docker-compose.preprod.yml ps"
         echo ""
-        echo "📋 Resource usage:"
-        $DOCKER_COMPOSE -f docker-compose.preprod.yml exec app ps aux
+        echo "🌐 URLs:"
+        echo "   App: http://$PREPROD_IP:8000"
+        echo "   Sidekiq: http://$PREPROD_IP:8000/sidekiq"
+        echo "   MailCatcher: http://$PREPROD_IP:1081"
+        ;;
+    "sync")
+        echo "📦 Syncing code to preprod environment (no rebuild)..."
+        rsync -avz --delete \
+            --exclude='.git/' \
+            --exclude='node_modules/' \
+            --exclude='tmp/' \
+            --exclude='log/' \
+            --exclude='coverage/' \
+            --exclude='storage/' \
+            --exclude='.env.local' \
+            --exclude='*.log' \
+            ./ $PREPROD_USER@$PREPROD_IP:$REMOTE_PATH/
+        echo "✅ Code synced. Run 'restart' if needed."
+        ;;
+    "rebuild")
+        echo "🔨 Force rebuilding containers..."
+        run_remote "docker-compose -f docker-compose.preprod.yml down"
+        run_remote "docker-compose -f docker-compose.preprod.yml build --no-cache"
+        run_remote "docker-compose -f docker-compose.preprod.yml up -d"
+        ;;
+    "reset")
+        echo "🗑️  Resetting database with fresh data..."
+        run_remote "docker-compose -f docker-compose.preprod.yml exec app rails db:drop db:create db:migrate db:seed"
+        ;;
+    "cleanup")
+        echo "🧹 Cleaning up Docker resources..."
+        run_remote "docker system prune -f"
+        run_remote "docker volume prune -f"
         ;;
     "help"|*)
         show_help

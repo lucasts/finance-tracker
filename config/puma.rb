@@ -24,7 +24,7 @@
 # Any libraries that use a connection pool or another resource pool should
 # be configured to provide at least as many connections as the number of
 # threads. This includes Active Record's `pool` parameter in `database.yml`.
-threads_count = ENV.fetch("RAILS_MAX_THREADS", 3)
+threads_count = ENV.fetch("RAILS_MAX_THREADS", 3).to_i
 threads threads_count, threads_count
 
 # Specifies the number of `workers` to boot in clustered mode.
@@ -32,7 +32,7 @@ threads threads_count, threads_count
 # the concurrency of the application would be max `threads` * `workers`.
 # Workers do not work on JRuby or Windows (both of which do not support
 # processes).
-workers_count = ENV.fetch("WEB_CONCURRENCY", 1)
+workers_count = ENV.fetch("WEB_CONCURRENCY", 1).to_i
 workers workers_count if workers_count > 1
 
 # Use the `preload_app!` method when specifying a `workers` number.
@@ -42,7 +42,7 @@ workers workers_count if workers_count > 1
 preload_app!
 
 # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
-port ENV.fetch("PORT", 3000)
+port ENV.fetch("PORT", 3000).to_i
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart

@@ -92,7 +92,9 @@ Rails.application.configure do
     "localhost",     # Allow requests from localhost
     /.*\.localhost/, # Allow requests from subdomains
     "127.0.0.1",
-    "0.0.0.0"
+    "0.0.0.0",
+    "192.168.88.15", # Allow requests from Unraid server
+    "192.168.88.15:8000" # Allow requests with port
   ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }

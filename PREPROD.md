@@ -14,11 +14,11 @@ This pre-production environment was designed to simulate a production environmen
 - **MailCatcher**: Email server for testing (port 1080)
 
 ### Exposed Ports
-- `3001`: Rails application
-- `5433`: PostgreSQL
-- `6380`: Redis
-- `1080`: MailCatcher Web UI
-- `1025`: MailCatcher SMTP
+- `8000`: Rails application
+- `5434`: PostgreSQL
+- `6381`: Redis
+- `1081`: MailCatcher Web UI
+- `1026`: MailCatcher SMTP
 
 ## 🚀 How to Use
 
@@ -42,6 +42,17 @@ This pre-production environment was designed to simulate a production environmen
 ./preprod-utils.sh reset     # Complete database reset
 ```
 
+### Remote Deployment
+```bash
+# Deploy to remote preprod environment (192.168.88.15)
+./deploy-preprod.sh
+
+# Manage remote environment
+./preprod-utils.sh deploy    # Full deployment
+./preprod-utils.sh sync      # Sync code only
+./preprod-utils.sh status    # Check status
+```
+
 ### Health Check
 ```bash
 ./health-check.sh
@@ -63,15 +74,15 @@ The environment uses `.env.preprod` which simulates Heroku-like configurations:
 
 ### Email Testing
 - MailCatcher captures all emails
-- Web interface at `http://localhost:1080`
-- Simulated SMTP on port 1025
+- Web interface at `http://localhost:1081`
+- Simulated SMTP on port 1026
 
 ## 📊 Monitoring
 
 ### Important URLs
-- **App**: http://localhost:3001
-- **Sidekiq**: http://localhost:3001/sidekiq
-- **MailCatcher**: http://localhost:1080
+- **App**: http://localhost:8000
+- **Sidekiq**: http://localhost:8000/sidekiq
+- **MailCatcher**: http://localhost:1081
 
 ### Test Data
 The environment automatically loads realistic data via `db/seeds/demo_realistic.rb`:
