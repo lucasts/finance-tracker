@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# Ensure this file is executable: `chmod +x bin/containers`
+set -euo pipefail
+
+COMPOSE_FILE="docker-compose.local.yml"
+PROJECT_NAME="finance_tracker_local"
+
+# Load .env.local if present (simple parser: KEY=VALUE lines, ignores comments)
+ENV_FILE=".env.local"
+if [ -f "$ENV_FILE" ]; then
+  # shellcheck disable=SC2046
+  export $(grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$ENV_FILE" | sed 's/#.*//') || true
+else
+  echo "[containers] Info: $ENV_FILE not found (create it or copy from .env.example)" >&2
+fi
+
+usage() {
+  cat <<EOF
+Container toolbox for local full-container dev.
+
+Usage: bin/containers <command> [args]
+Commands:
+  up [--build]        Start all services (in foreground)
+  start               Start in detached mode
+  stop                Stop containers (keep volumes)
+  down                Stop and remove containers (keep volumes)
+  destroy             Down + remove volumes (DB reset)
+  rebuild             Rebuild app & sidekiq images
+  logs [svc]          Tail logs (default: app)
+  rspec [args]        Run RSpec suite or specific files
+  test:js [args]      Run Jest tests
+  console             Rails console
+  db:migrate          Run migrations
+  db:prepare          Prepare database
+  db:reset            Drop + create + migrate
+  sidekiq             Open interactive Sidekiq logs
+  bash                Open bash in app container
+  exec <svc> <cmd..>  Exec arbitrary command in a service (default svc: app)
+
+Environment:
+  Uses ${COMPOSE_FILE}
+EOF
+}
+
+cmd=${1:-help}
+shift || true
+
+compose() {
+  docker compose -f "$COMPOSE_FILE" "$@"
+}
+
+case "$cmd" in
+  up)
+    compose up "$@"
+    ;;
+  start)
+    compose up -d "$@"
+    ;;
+  stop)
+    compose stop
+    ;;
+  down)
+    compose down
+    ;;
+  destroy)
+    compose down -v
+    ;;
+  rebuild)
+    compose build app sidekiq
+    ;;
+  logs)
+    svc=${1:-app}; shift || true
+    compose logs -f "$svc"
+    ;;
+  rspec)
+    compose exec app bundle exec rspec "$@"
+    ;;
+  test:js)
+    compose exec app yarn test "$@"
+    ;;
+  console)
+    compose exec app bundle exec rails console
+    ;;
+  db:migrate)
+    compose exec app bin/rails db:migrate
+    ;;
+  db:prepare)
+    compose exec app bin/rails db:prepare
+    ;;
+  db:reset)
+    compose exec app bin/rails db:drop db:create db:migrate
+    ;;
+  sidekiq)
+    compose logs -f sidekiq
+    ;;
+  bash)
+    compose exec app bash
+    ;;
+  exec)
+    svc=${1:-app}; shift || true
+    compose exec "$svc" "$@"
+    ;;
+  help|--help|-h)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $cmd" >&2
+    usage
+    exit 1
+    ;;
+esac

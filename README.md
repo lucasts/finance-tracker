@@ -50,6 +50,57 @@
 
 ## 🚀 Quick Start
 
+### Full Container Local (Recommended for Clean Host)
+```bash
+# Build and start full local environment (Rails + Postgres + Redis + Sidekiq + MailCatcher)
+docker compose -f docker-compose.local.yml up --build
+
+# (First run) It will run db:prepare automatically via startup command
+
+# Open app
+open http://localhost:3000  # (macOS) or just visit in browser
+
+# Run RSpec tests inside container
+docker compose -f docker-compose.local.yml exec app bundle exec rspec
+
+# Run a single spec
+docker compose -f docker-compose.local.yml exec app bundle exec rspec spec/models/transaction_spec.rb
+
+# Run frontend (Jest) tests
+docker compose -f docker-compose.local.yml exec app yarn test
+
+# Tail logs (useful services)
+docker compose -f docker-compose.local.yml logs -f app
+docker compose -f docker-compose.local.yml logs -f sidekiq
+
+# Rebuild after Gemfile changes
+docker compose -f docker-compose.local.yml build app sidekiq
+
+# Stop and remove containers (data in volumes persists)
+docker compose -f docker-compose.local.yml down
+
+# Stop and also remove persistent volumes (DB reset)
+docker compose -f docker-compose.local.yml down -v
+```
+
+Nota: o ambiente local utiliza a imagem construída a partir de `Dockerfile.local` (focada em velocidade de desenvolvimento, inclui gems e dependências de teste) enquanto preprod/produção usam pipelines distintas com otimizações próprias.
+
+Ports used locally:
+- App: http://localhost:3000
+- PostgreSQL: 5432 (container) — mapped to host 5432
+- Redis: 6379
+- MailCatcher UI: http://localhost:1080 (SMTP in 1025)
+
+Environment defaults (development):
+- `DATABASE_URL=postgres://postgres:postgres@db:5432/orzeny_development`
+- `REDIS_URL=redis://redis:6379/1`
+- Hot reload via bind-mount volume `.:/app`
+
+To reset database quickly:
+```bash
+docker compose -f docker-compose.local.yml exec app bin/rails db:drop db:create db:migrate
+```
+
 ### Development Setup
 ```bash
 # Complete initial setup
@@ -62,6 +113,14 @@
 bundle exec rspec    # Backend (457+ tests)
 yarn test           # Frontend (90 tests)
 ```
+
+### Environment Variables (.env.example)
+Um arquivo unificado `.env.example` lista todas as variáveis possíveis (desenvolvimento, preprod e produção). Para começar rapidamente:
+```bash
+cp .env.example .env.local
+# (Edite conforme necessário: DATABASE_URL, SECRET_KEY_BASE se quiser customizar)
+```
+O script `bin/containers` carrega automaticamente `.env.local` se existir.
 
 ### Demo Data
 The default setup loads only essential data. For demonstrations with realistic data:
