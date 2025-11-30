@@ -10,7 +10,6 @@
     "test:performance": "node test/javascript/performance/web_vitals.test.js"
   },
   "dependencies": {
-    "daisyui": "^5.0.40"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",

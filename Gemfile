@@ -22,7 +22,6 @@ gem "sidekiq" # Background jobs
 gem "sprockets-rails" # Asset pipeline
 gem "sqlite3", ">= 1.4" # Default DB for dev/test
 gem "stimulus-rails" # Stimulus JS
-gem "tailwindcss-rails" # Tailwind CSS
 gem "turbo-rails" # Hotwire Turbo
 
 gem "csv" # CSV parsing (required in Rails 8)
