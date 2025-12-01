@@ -1,64 +1,64 @@
 <% content_for :title, "Redefinir Senha" %>
 
-<div class="min-h-screen flex items-center justify-center bg-base-200">
-  <div class="card w-full max-w-md bg-base-100 shadow-xl">
-    <div class="card-body">
-      <!-- Header -->
-      <div class="text-center mb-8">
-        <%= image_tag "full_logo_orzeny-min.png", alt: "Orzeny - Clareza para suas finanças", class: "h-20 w-auto mx-auto mb-4" %>
-        <p class="text-base-content/70 mt-2">Redefinir sua senha</p>
-        <p class="text-sm text-base-content/60 mt-1">
-          Digite sua nova senha abaixo.
-        </p>
-      </div>
+<div>
+ <div>
+ <div>
+ <!-- Header -->
+ <div>
+ <%= image_tag "full_logo_orzeny-min.png", alt: "Orzeny - Clareza para suas finanças", class: "h-20 w-auto mx-auto mb-4" %>
+ <p>Redefinir sua senha</p>
+ <p>
+ Digite sua nova senha abaixo.
+ </p>
+ </div>
 
-      <!-- Error Messages -->
-      <%= render "devise/shared/error_messages", resource: resource %>
+ <!-- Error Messages -->
+ <%= render "devise/shared/error_messages", resource: resource %>
 
-      <!-- Password Reset Form -->
-      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }, local: true, class: "space-y-4") do |f| %>
-        <%= f.hidden_field :reset_password_token %>
-        
-        <!-- New Password Field -->
-        <div class="form-control">
-          <%= f.label :password, class: "label" do %>
-            <span class="label-text font-medium">Nova Senha</span>
-            <% if @minimum_password_length %>
-              <span class="label-text-alt">(mínimo <%= @minimum_password_length %> caracteres)</span>
-            <% end %>
-          <% end %>
-          <%= f.password_field :password, 
-                              autofocus: true, 
-                              autocomplete: "new-password",
-                              class: "input input-bordered w-full",
-                              placeholder: "••••••••" %>
-        </div>
+ <!-- Password Reset Form -->
+ <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }, local: true, class: "space-y-4") do |f| %>
+ <%= f.hidden_field :reset_password_token %>
+ 
+ <!-- New Password Field -->
+ <div>
+ <%= f.label :password, class: "label" do %>
+ <span>Nova Senha</span>
+ <% if @minimum_password_length %>
+ <span>(mínimo <%= @minimum_password_length %> caracteres)</span>
+ <% end %>
+ <% end %>
+ <%= f.password_field :password, 
+ autofocus: true, 
+ autocomplete: "new-password",
+ class: "input input-bordered w-full",
+ placeholder: "••••••••" %>
+ </div>
 
-        <!-- Password Confirmation Field -->
-        <div class="form-control">
-          <%= f.label :password_confirmation, class: "label" do %>
-            <span class="label-text font-medium">Confirme a Nova Senha</span>
-          <% end %>
-          <%= f.password_field :password_confirmation, 
-                              autocomplete: "new-password",
-                              class: "input input-bordered w-full",
-                              placeholder: "••••••••" %>
-        </div>
+ <!-- Password Confirmation Field -->
+ <div>
+ <%= f.label :password_confirmation, class: "label" do %>
+ <span>Confirme a Nova Senha</span>
+ <% end %>
+ <%= f.password_field :password_confirmation, 
+ autocomplete: "new-password",
+ class: "input input-bordered w-full",
+ placeholder: "••••••••" %>
+ </div>
 
-        <!-- Submit Button -->
-        <div class="form-control mt-6">
-          <%= f.submit "Alterar minha senha", 
-                      class: "btn btn-primary btn-block text-white" %>
-        </div>
-      <% end %>
+ <!-- Submit Button -->
+ <div>
+ <%= f.submit "Alterar minha senha", 
+  %>
+ </div>
+ <% end %>
 
-      <!-- Divider -->
-      <div class="divider">ou</div>
+ <!-- Divider -->
+ <div>ou</div>
 
-      <!-- Links -->
-      <div class="text-center">
-        <%= render "devise/shared/links" %>
-      </div>
-    </div>
-  </div>
+ <!-- Links -->
+ <div>
+ <%= render "devise/shared/links" %>
+ </div>
+ </div>
+ </div>
 </div>

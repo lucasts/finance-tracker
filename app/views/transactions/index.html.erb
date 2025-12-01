@@ -1,125 +1,119 @@
 <div data-controller="modal">
-<h1 class="text-3xl font-bold mb-6"><%= t('ui.navigation.transactions') %></h1>
-
-<div class="flex justify-between items-center mb-4">
-  <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one'), new_transaction_path, class: "btn btn-primary" %>
-</div>
+<header>
+  <h1><%= t('ui.navigation.transactions') %></h1>
+  <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one'), new_transaction_path %>
+</header>
 
 <% if @transactions.any? %>
   <% income_total = @transactions.select { |t| t.transaction_type == 'income' }.sum(&:amount) %>
   <% expense_total = @transactions.select { |t| t.transaction_type == 'expense' }.sum(&:amount) %>
   <% transfer_total = @transactions.select { |t| t.transaction_type == 'transfer' }.sum(&:amount) %>
   <% balance = income_total - expense_total %>
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <div class="alert alert-success">
-      <div class="flex-1">
-        <label class="label-text"><%= t('ui.transaction.types.income').pluralize %></label>
-        <p class="text-xl font-bold"><%= format_money_unified(income_total) %></p>
-      </div>
-    </div>
-    <div class="alert alert-error">
-      <div class="flex-1">
-        <label class="label-text"><%= t('ui.transaction.types.expense').pluralize %></label>
-        <p class="text-xl font-bold"><%= format_money_unified(expense_total) %></p>
-      </div>
-    </div>
-    <div class="alert alert-warning">
-      <div class="flex-1">
-        <label class="label-text"><%= t('ui.transaction.types.transfer').pluralize %></label>
-        <p class="text-xl font-bold"><%= format_money_unified(transfer_total) %></p>
-      </div>
-    </div>
-    <div class="alert alert-info">
-      <div class="flex-1">
-        <label class="label-text"><%= t('ui.filters.balance') %></label>
-        <p class="text-xl font-bold"><%= format_money_unified(balance) %></p>
-      </div>
-    </div>
-  </div>
+  
+  <section class="summary">
+    <article class="metric income">
+      <label><%= t('ui.transaction.types.income').pluralize %></label>
+      <data value="<%= income_total %>"><%= format_money_unified(income_total) %></data>
+    </article>
+    
+    <article class="metric expense">
+      <label><%= t('ui.transaction.types.expense').pluralize %></label>
+      <data value="<%= expense_total %>"><%= format_money_unified(expense_total) %></data>
+    </article>
+    
+    <article class="metric transfer">
+      <label><%= t('ui.transaction.types.transfer').pluralize %></label>
+      <data value="<%= transfer_total %>"><%= format_money_unified(transfer_total) %></data>
+    </article>
+    
+    <article class="metric balance <%= balance >= 0 ? 'positive' : 'negative' %>">
+      <label><%= t('ui.filters.balance') %></label>
+      <data value="<%= balance %>"><%= format_money_unified(balance) %></data>
+    </article>
+  </section>
 <% end %>
 
-<div class="mb-6 bg-base-100 rounded-box shadow" data-controller="collapsible">
-  <!-- Collapsible Header -->
-  <div class="p-4 border-b border-base-300 cursor-pointer" data-action="click->collapsible#toggle">
-    <div class="flex justify-between items-center">
-      <h3 class="text-lg font-semibold">
-        <%= t('ui.filters.title') %>
-        <% if params[:account_id].present? || params[:transaction_type].present? || params[:month].present? %>
-          <span class="badge badge-primary badge-sm ml-2"><%= t('ui.filters.active') %></span>
-        <% end %>
-      </h3>
-      <svg data-collapsible-target="icon" class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-      </svg>
-    </div>
-  </div>
+<section class="filters" data-controller="collapsible">
+  <header data-action="click->collapsible#toggle">
+    <h3>
+      <%= t('ui.filters.title') %>
+      <% if params[:account_id].present? || params[:transaction_type].present? || params[:month].present? %>
+        <mark class="active"><%= t('ui.filters.active') %></mark>
+      <% end %>
+    </h3>
+    <svg data-collapsible-target="icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </header>
   
-  <!-- Collapsible Content -->
-  <div data-collapsible-target="content" class="p-4">
+  <div data-collapsible-target="content" style="display: none;">
     <%= form_with url: transactions_path, method: :get, local: true do |f| %>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text"><%= t('activerecord.models.account.one') %></span>
-          </label>
-          <%= select_tag :account_id, options_from_collection_for_select(Account.all, :id, :name, params[:account_id]), prompt: t('ui.filters.all'), class: "select select-bordered w-full" %>
+      <fieldset>
+        <div>
+          <label><%= t('activerecord.models.account.one') %></label>
+          <%= select_tag :account_id, 
+                         options_from_collection_for_select(Account.all, :id, :name, params[:account_id]), 
+                         prompt: t('ui.filters.all') %>
         </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text"><%= t('activerecord.attributes.transaction.transaction_type') %></span>
-          </label>
-          <%= select_tag :transaction_type, options_for_select([[t('ui.filters.all'), nil], [t('ui.transaction.types.income'), "income"], [t('ui.transaction.types.expense'), "expense"], [t('ui.transaction.types.transfer'), "transfer"]], params[:transaction_type]), class: "select select-bordered w-full" %>
+        
+        <div>
+          <label><%= t('activerecord.attributes.transaction.transaction_type') %></label>
+          <%= select_tag :transaction_type, 
+                         options_for_select([
+                           [t('ui.filters.all'), nil], 
+                           [t('ui.transaction.types.income'), "income"], 
+                           [t('ui.transaction.types.expense'), "expense"], 
+                           [t('ui.transaction.types.transfer'), "transfer"]
+                         ], params[:transaction_type]) %>
         </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text"><%= t('ui.filters.month') %></span>
-          </label>
-          <%= month_field_tag :month, params[:month], class: "input input-bordered w-full" %>
+        
+        <div>
+          <label><%= t('ui.filters.month') %></label>
+          <%= month_field_tag :month, params[:month] %>
         </div>
-        <div class="form-control justify-end">
-          <div class="flex space-x-2">
-            <%= submit_tag t('ui.actions.filter'), class: "btn btn-primary" %>
-            <%= link_to t('ui.actions.clear'), transactions_path, class: "btn btn-ghost" %>
-          </div>
-        </div>
-      </div>
+      </fieldset>
+      
+      <footer>
+        <%= submit_tag t('ui.actions.filter') %>
+        <%= link_to t('ui.actions.clear'), transactions_path, class: "secondary" %>
+      </footer>
     <% end %>
   </div>
-</div>
+</section>
 
 <!-- All Transactions in unified list -->
 <% if @transactions.any? %>
-  <%= render 'transactions_table', transactions: @transactions %>
+ <%= render 'transactions_table', transactions: @transactions %>
 <% end %>
 
 <% if @transactions.empty? %>
-  <div class="bg-base-100 rounded-box shadow p-8 text-center">
-    <div class="text-6xl mb-4">💰</div>
-    <h3 class="text-xl font-semibold mb-2"><%= t('ui.transaction.empty.title') %></h3>
-    <p class="text-base-content/60 mb-4">
+  <article class="empty-state">
+    <div class="icon">💰</div>
+    <h3><%= t('ui.transaction.empty.title') %></h3>
+    <p>
       <% if params[:account_id].present? || params[:transaction_type].present? || params[:month].present? %>
         <%= t('ui.transaction.empty.filtered') %>
       <% else %>
         <%= t('ui.transaction.empty.first_time') %>
       <% end %>
     </p>
-    <div class="flex gap-2 justify-center">
-      <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one'), new_transaction_path, class: "btn btn-primary" %>
+    <footer>
+      <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one'), new_transaction_path %>
       <% if params[:account_id].present? || params[:transaction_type].present? || params[:month].present? %>
-        <%= link_to t('ui.filters.clear_filters'), transactions_path, class: "btn btn-ghost" %>
+        <%= link_to t('ui.filters.clear_filters'), transactions_path, class: "secondary" %>
       <% end %>
-    </div>
-  </div>
+    </footer>
+  </article>
 <% end %>
 
 <!-- Transaction Details Modal -->
-<dialog id="transaction_modal" class="modal" data-modal-target="dialog">
-  <div class="modal-box max-w-4xl w-11/12" data-modal-target="content">
-    <!-- Content will be loaded here -->
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
+<dialog id="transaction_modal" data-modal-target="dialog">
+ <div data-modal-target="content">
+ <!-- Content will be loaded here -->
+ </div>
+ <form method="dialog" >
+ <button>close</button>
+ </form>
 </dialog>
 
 </div> <!-- Close modal controller div -->

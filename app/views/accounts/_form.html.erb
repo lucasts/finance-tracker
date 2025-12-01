@@ -1,7 +1,7 @@
 <%= form_with(model: account, local: true) do |form| %>
-  <div class="space-y-4">
-    <%= form_group(form, :name) %>
-    <%= form_select_group(form, :account_type_id, AccountType.all, :id, :name, label: "Tipo de Conta") %>
-    <%= primary_button("Salvar") %>
-  </div>
+ <div>
+ <%= form_group(form, :name) %>
+ <%= form_select_group(form, :account_type_id, AccountType.all, :id, :name, label: "Tipo de Conta") %>
+ <%= primary_button("Salvar") %>
+ </div>
 <% end %>

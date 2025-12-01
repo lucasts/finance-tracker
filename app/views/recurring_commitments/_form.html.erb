@@ -1,246 +1,246 @@
 <%= form_with model: recurring_commitment, local: true, class: "space-y-6", html: { role: "form", "aria-label" => "Formulário de compromisso recorrente" }, data: { controller: "recurring-form" } do |form| %>
-  <% if recurring_commitment.errors.any? %>
-    <div class="alert alert-error" role="alert" aria-live="assertive">
-      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <div>
-        <h3 class="font-bold">Erro ao salvar!</h3>
-        <ul class="list-disc list-inside">
-          <% recurring_commitment.errors.full_messages.each do |message| %>
-            <li><%= message %></li>
-          <% end %>
-        </ul>
-      </div>
-    </div>
-  <% end %>
+ <% if recurring_commitment.errors.any? %>
+ <div role="alert" aria-live="assertive">
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ <div>
+ <h3>Erro ao salvar!</h3>
+ <ul>
+ <% recurring_commitment.errors.full_messages.each do |message| %>
+ <li><%= message %></li>
+ <% end %>
+ </ul>
+ </div>
+ </div>
+ <% end %>
 
-  <!-- Edit Strategy (only for existing records) -->
-  <% if recurring_commitment.persisted? %>
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text font-medium">
-          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          Como aplicar as mudanças?
-        </span>
-      </label>
-      
-      <fieldset role="radiogroup" aria-labelledby="edit-strategy-legend">
-        <legend id="edit-strategy-legend" class="sr-only">Estratégia de edição do compromisso recorrente</legend>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <label class="card bg-base-200 cursor-pointer hover:bg-base-300 transition-colors">
-          <div class="card-body p-4">
-            <%= form.radio_button :edit_strategy, 'future_only', checked: true, class: "radio radio-primary", data: { target: "recurring-form.strategy" } %>
-            <div class="ml-3">
-              <div class="font-bold text-primary">🎯 Só deste mês em diante</div>
-              <div class="text-sm opacity-70">Aplica mudanças apenas às transações futuras</div>
-            </div>
-          </div>
-        </label>
-        
-        <label class="card bg-base-200 cursor-pointer hover:bg-base-300 transition-colors">
-          <div class="card-body p-4">
-            <%= form.radio_button :edit_strategy, 'all_transactions', class: "radio radio-warning", data: { target: "recurring-form.strategy" } %>
-            <div class="ml-3">
-              <div class="font-bold text-warning">🔄 Todos os meses</div>
-              <div class="text-sm opacity-70">Atualiza o histórico completo</div>
-            </div>
-          </div>
-        </label>
-        
-        <label class="card bg-base-200 cursor-pointer hover:bg-base-300 transition-colors">
-          <div class="card-body p-4">
-            <%= form.radio_button :edit_strategy, 'split_commitment', class: "radio radio-secondary", data: { target: "recurring-form.strategy" } %>
-            <div class="ml-3">
-              <div class="font-bold text-secondary">✂️ Dividir compromisso</div>
-              <div class="text-sm opacity-70">Cria um novo compromisso para as mudanças</div>
-            </div>
-          </div>
-        </label>
-      </div>
-    </div>
+ <!-- Edit Strategy (only for existing records) -->
+ <% if recurring_commitment.persisted? %>
+ <div>
+ <label>
+ <span>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+ </svg>
+ Como aplicar as mudanças?
+ </span>
+ </label>
+ 
+ <fieldset role="radiogroup" aria-labelledby="edit-strategy-legend">
+ <legend id="edit-strategy-legend">Estratégia de edição do compromisso recorrente</legend>
+ <div>
+ <label>
+ <div>
+ <%= form.radio_button :edit_strategy, 'future_only', checked: true, class: "radio radio-primary", data: { target: "recurring-form.strategy" } %>
+ <div>
+ <div>🎯 Só deste mês em diante</div>
+ <div>Aplica mudanças apenas às transações futuras</div>
+ </div>
+ </div>
+ </label>
+ 
+ <label>
+ <div>
+ <%= form.radio_button :edit_strategy, 'all_transactions', class: "radio radio-warning", data: { target: "recurring-form.strategy" } %>
+ <div>
+ <div>🔄 Todos os meses</div>
+ <div>Atualiza o histórico completo</div>
+ </div>
+ </div>
+ </label>
+ 
+ <label>
+ <div>
+ <%= form.radio_button :edit_strategy, 'split_commitment', class: "radio radio-secondary", data: { target: "recurring-form.strategy" } %>
+ <div>
+ <div>✂️ Dividir compromisso</div>
+ <div>Cria um novo compromisso para as mudanças</div>
+ </div>
+ </div>
+ </label>
+ </div>
+ </div>
 
-    <!-- Effective Date (for future_only strategy) -->
-    <div class="form-control" data-recurring-form-target="effectiveDate" style="display: none;">
-      <%= form.label :effective_date, class: "label" do %>
-        <span class="label-text">Data efetiva das mudanças</span>
-      <% end %>
-      <%= form.date_field :effective_date, 
-                          value: Date.current,
-                          class: "input input-bordered w-full",
-                          data: { target: "recurring-form.effectiveDate" } %>
-      <label class="label">
-        <span class="label-text-alt">As mudanças serão aplicadas a partir desta data</span>
-      </label>
-    </div>
-  <% end %>
+ <!-- Effective Date (for future_only strategy) -->
+ <div data-recurring-form-target="effectiveDate" style="display: none;">
+ <%= form.label :effective_date, class: "label" do %>
+ <span>Data efetiva das mudanças</span>
+ <% end %>
+ <%= form.date_field :effective_date, 
+ value: Date.current,
+ class: "input input-bordered w-full",
+ data: { target: "recurring-form.effectiveDate" } %>
+ <label>
+ <span>As mudanças serão aplicadas a partir desta data</span>
+ </label>
+ </div>
+ <% end %>
 
-  <!-- Basic Information -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Name -->
-    <div class="form-control">
-      <%= form.label :name, class: "label" do %>
-        <span class="label-text">Nome do Compromisso</span>
-      <% end %>
-      <%= form.text_field :name, 
-                          class: "input input-bordered w-full",
-                          placeholder: "Ex: Aluguel, Netflix, Plano de Saúde" %>
-    </div>
+ <!-- Basic Information -->
+ <div>
+ <!-- Name -->
+ <div>
+ <%= form.label :name, class: "label" do %>
+ <span>Nome do Compromisso</span>
+ <% end %>
+ <%= form.text_field :name, 
+ class: "input input-bordered w-full",
+ placeholder: "Ex: Aluguel, Netflix, Plano de Saúde" %>
+ </div>
 
-    <!-- Category -->
-    <div class="form-control">
-      <%= form.label :category_id, class: "label" do %>
-        <span class="label-text">Categoria</span>
-      <% end %>
-      <%= form.select :category_id, 
-                      options_from_collection_for_select(@categories, :id, :name, recurring_commitment.category_id),
-                      { prompt: "Selecione uma categoria" },
-                      { class: "select select-bordered w-full" } %>
-    </div>
-  </div>
+ <!-- Category -->
+ <div>
+ <%= form.label :category_id, class: "label" do %>
+ <span>Categoria</span>
+ <% end %>
+ <%= form.select :category_id, 
+ options_from_collection_for_select(@categories, :id, :name, recurring_commitment.category_id),
+ { prompt: "Selecione uma categoria" },
+ { class: "select select-bordered w-full" } %>
+ </div>
+ </div>
 
-  <!-- Amount and Type -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Amount -->
-    <div class="form-control" data-controller="currency">
-      <%= form.label :default_amount, class: "label" do %>
-        <span class="label-text">Valor Padrão</span>
-      <% end %>
-      <%= form.text_field :default_amount, 
-                          class: "input input-bordered w-full",
-                          placeholder: "0,00",
-                          data: { 
-                            controller: "currency-input currency-validation",
-                            currency_input_target: "input",
-                            currency_validation_target: "input helper",
-                            currency_validation_required_value: true
-                          } %>
-      <label class="label">
-        <span class="label-text-alt" data-currency-helper>
-          Deixe em branco para valores variáveis
-        </span>
-      </label>
-    </div>
+ <!-- Amount and Type -->
+ <div>
+ <!-- Amount -->
+ <div data-controller="currency">
+ <%= form.label :default_amount, class: "label" do %>
+ <span>Valor Padrão</span>
+ <% end %>
+ <%= form.text_field :default_amount, 
+ class: "input input-bordered w-full",
+ placeholder: "0,00",
+ data: { 
+ controller: "currency-input currency-validation",
+ currency_input_target: "input",
+ currency_validation_target: "input helper",
+ currency_validation_required_value: true
+ } %>
+ <label>
+ <span data-currency-helper>
+ Deixe em branco para valores variáveis
+ </span>
+ </label>
+ </div>
 
-    <!-- Campo transaction_type removido pois não existe no modelo RecurringCommitment -->
-    <!-- Se precisar adicionar tipo de transação, crie uma migration: add_transaction_type_to_recurring_commitments -->
-    <!-- 
-    <div class="form-control">
-      <%= form.label :transaction_type, class: "label" do %>
-        <span class="label-text">Tipo de Transação</span>
-      <% end %>
-      <%= form.select :transaction_type,
-                      options_for_select([
-                        ['Despesa', 'expense'],
-                        ['Receita', 'income']
-                      ], nil),
-                      { prompt: "Selecione o tipo" },
-                      { class: "select select-bordered w-full" } %>
-    </div>
-    -->
-  </div>
+ <!-- Campo transaction_type removido pois não existe no modelo RecurringCommitment -->
+ <!-- Se precisar adicionar tipo de transação, crie uma migration: add_transaction_type_to_recurring_commitments -->
+ <!-- 
+ <div>
+ <%= form.label :transaction_type, class: "label" do %>
+ <span>Tipo de Transação</span>
+ <% end %>
+ <%= form.select :transaction_type,
+ options_for_select([
+ ['Despesa', 'expense'],
+ ['Receita', 'income']
+ ], nil),
+ { prompt: "Selecione o tipo" },
+ { class: "select select-bordered w-full" } %>
+ </div>
+ -->
+ </div>
 
-  <!-- Frequency and Dates -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Frequency -->
-    <div class="form-control">
-      <%= form.label :recurrence_frequency, class: "label" do %>
-        <span class="label-text">Frequência</span>
-      <% end %>
-      <%= form.select :recurrence_frequency,
-                      options_for_select([
-                        ['Mensal', 'monthly'],
-                        ['Semanal', 'weekly'],
-                        ['Anual', 'yearly']
-                      ], recurring_commitment.recurrence_frequency),
-                      { prompt: "Selecione a frequência" },
-                      { class: "select select-bordered w-full" } %>
-    </div>
+ <!-- Frequency and Dates -->
+ <div>
+ <!-- Frequency -->
+ <div>
+ <%= form.label :recurrence_frequency, class: "label" do %>
+ <span>Frequência</span>
+ <% end %>
+ <%= form.select :recurrence_frequency,
+ options_for_select([
+ ['Mensal', 'monthly'],
+ ['Semanal', 'weekly'],
+ ['Anual', 'yearly']
+ ], recurring_commitment.recurrence_frequency),
+ { prompt: "Selecione a frequência" },
+ { class: "select select-bordered w-full" } %>
+ </div>
 
-    <!-- Start Date -->
-    <div class="form-control">
-      <%= form.label :start_date, class: "label" do %>
-        <span class="label-text">Data de Início</span>
-      <% end %>
-      <%= form.date_field :start_date, 
-                          class: "input input-bordered w-full" %>
-    </div>
+ <!-- Start Date -->
+ <div>
+ <%= form.label :start_date, class: "label" do %>
+ <span>Data de Início</span>
+ <% end %>
+ <%= form.date_field :start_date, 
+ class: "input input-bordered w-full" %>
+ </div>
 
-    <!-- End Date -->
-    <div class="form-control">
-      <%= form.label :end_date, class: "label" do %>
-        <span class="label-text">Data de Fim <span class="text-sm">(opcional)</span></span>
-      <% end %>
-      <%= form.date_field :end_date, 
-                          class: "input input-bordered w-full" %>
-      <label class="label">
-        <span class="label-text-alt">Deixe em branco para compromissos indefinidos</span>
-      </label>
-    </div>
-  </div>
+ <!-- End Date -->
+ <div>
+ <%= form.label :end_date, class: "label" do %>
+ <span>Data de Fim <span>(opcional)</span></span>
+ <% end %>
+ <%= form.date_field :end_date, 
+ class: "input input-bordered w-full" %>
+ <label>
+ <span>Deixe em branco para compromissos indefinidos</span>
+ </label>
+ </div>
+ </div>
 
-  <!-- Notes -->
-  <div class="form-control">
-    <%= form.label :notes, class: "label" do %>
-      <span class="label-text">Observações <span class="text-sm">(opcional)</span></span>
-    <% end %>
-    <%= form.text_area :notes, 
-                       rows: 3,
-                       class: "textarea textarea-bordered w-full",
-                       placeholder: "Informações adicionais sobre este compromisso..." %>
-  </div>
+ <!-- Notes -->
+ <div>
+ <%= form.label :notes, class: "label" do %>
+ <span>Observações <span>(opcional)</span></span>
+ <% end %>
+ <%= form.text_area :notes, 
+ rows: 3,
+ class: "textarea textarea-bordered w-full",
+ placeholder: "Informações adicionais sobre este compromisso..." %>
+ </div>
 
-  <!-- Status -->
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Status</span>
-    </label>
-    <%= form.select :status,
-                    options_for_select([
-                      ['Ativo', 'active'],
-                      ['Pausado', 'paused'],
-                      ['Fechado', 'closed']
-                    ], recurring_commitment.status),
-                    {},
-                    { class: "select select-bordered w-full" } %>
-    <label class="label">
-      <span class="label-text-alt">Apenas compromissos ativos geram transações automaticamente</span>
-    </label>
-  </div>
+ <!-- Status -->
+ <div>
+ <label>
+ <span>Status</span>
+ </label>
+ <%= form.select :status,
+ options_for_select([
+ ['Ativo', 'active'],
+ ['Pausado', 'paused'],
+ ['Fechado', 'closed']
+ ], recurring_commitment.status),
+ {},
+ { class: "select select-bordered w-full" } %>
+ <label>
+ <span>Apenas compromissos ativos geram transações automaticamente</span>
+ </label>
+ </div>
 
-  <!-- Contas de Origem e Destino -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="form-control">
-      <%= form.label :from_account_id, class: "label" do %>
-        <span class="label-text">Conta de Origem</span>
-      <% end %>
-      <%= form.collection_select :from_account_id, @accounts, :id, :name, { prompt: "Selecione a conta de origem" }, { class: "select select-bordered w-full" } %>
-    </div>
-    <div class="form-control">
-      <%= form.label :to_account_id, class: "label" do %>
-        <span class="label-text">Conta de Destino</span>
-      <% end %>
-      <%= form.collection_select :to_account_id, @accounts, :id, :name, { prompt: "Selecione a conta de destino" }, { class: "select select-bordered w-full" } %>
-    </div>
-  </div>
+ <!-- Contas de Origem e Destino -->
+ <div>
+ <div>
+ <%= form.label :from_account_id, class: "label" do %>
+ <span>Conta de Origem</span>
+ <% end %>
+ <%= form.collection_select :from_account_id, @accounts, :id, :name, { prompt: "Selecione a conta de origem" }, { class: "select select-bordered w-full" } %>
+ </div>
+ <div>
+ <%= form.label :to_account_id, class: "label" do %>
+ <span>Conta de Destino</span>
+ <% end %>
+ <%= form.collection_select :to_account_id, @accounts, :id, :name, { prompt: "Selecione a conta de destino" }, { class: "select select-bordered w-full" } %>
+ </div>
+ </div>
 
-  <!-- Action Buttons -->
-  <div class="flex justify-between items-center pt-6 border-t">
-    <%= link_to recurring_commitment.persisted? ? recurring_commitment_path(recurring_commitment) : recurring_commitments_path, 
-                class: "btn btn-outline" do %>
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-      </svg>
-      Cancelar
-    <% end %>
-    
-    <div class="flex gap-2">
-      <%= form.submit recurring_commitment.persisted? ? 'Atualizar Compromisso' : 'Criar Compromisso', 
-                     class: "btn btn-primary" %>
-    </div>
-  </div>
+ <!-- Action Buttons -->
+ <div>
+ <%= link_to recurring_commitment.persisted? ? recurring_commitment_path(recurring_commitment) : recurring_commitments_path, 
+  do %>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+ </svg>
+ Cancelar
+ <% end %>
+ 
+ <div>
+ <%= form.submit recurring_commitment.persisted? ? 'Atualizar Compromisso' : 'Criar Compromisso', 
+  %>
+ </div>
+ </div>
 <% end %>
 
 <!-- Stimulus Controller for Form Interactions -->
@@ -248,25 +248,25 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["strategy", "effectiveDate"]
-  
-  connect() {
-    this.updateEffectiveDateVisibility()
-  }
-  
-  strategyChanged() {
-    this.updateEffectiveDateVisibility()
-  }
-  
-  updateEffectiveDateVisibility() {
-    const selectedStrategy = this.strategyTargets.find(radio => radio.checked)?.value
-    const effectiveDateContainer = this.effectiveDateTarget.parentElement
-    
-    if (selectedStrategy === 'future_only') {
-      effectiveDateContainer.style.display = 'block'
-    } else {
-      effectiveDateContainer.style.display = 'none'
-    }
-  }
+ static targets = ["strategy", "effectiveDate"]
+ 
+ connect() {
+ this.updateEffectiveDateVisibility()
+ }
+ 
+ strategyChanged() {
+ this.updateEffectiveDateVisibility()
+ }
+ 
+ updateEffectiveDateVisibility() {
+ const selectedStrategy = this.strategyTargets.find(radio => radio.checked)?.value
+ const effectiveDateContainer = this.effectiveDateTarget.parentElement
+ 
+ if (selectedStrategy === 'future_only') {
+ effectiveDateContainer.style.display = 'block'
+ } else {
+ effectiveDateContainer.style.display = 'none'
+ }
+ }
 }
 </script>

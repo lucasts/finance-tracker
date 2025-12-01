@@ -1,529 +1,524 @@
 <% content_for :title, @recurring_commitment.name %>
 
-<div class="container mx-auto px-4 py-6">
-  <!-- Breadcrumb -->
-  <div class="text-sm breadcrumbs mb-4">
-    <ul>
-      <li><%= link_to t('ui.navigation.recurring_commitments'), recurring_commitments_path %></li>
-      <li><%= @recurring_commitment.name %></li>
-    </ul>
-  </div>
+<div>
+ <!-- Breadcrumb -->
+ <div>
+ <ul>
+ <li><%= link_to t('ui.navigation.recurring_commitments'), recurring_commitments_path %></li>
+ <li><%= @recurring_commitment.name %></li>
+ </ul>
+ </div>
 
-  <!-- Header -->
-  <div class="flex justify-between items-start mb-6">
-    <div>
-      <h1 class="text-3xl font-bold text-base-content mb-2"><%= @recurring_commitment.name %></h1>
-      <div class="flex gap-2 mb-3">
-        <div class="badge <%= @recurring_commitment.active? ? 'badge-success' : 'badge-warning' %> badge-lg">
-          <%= @recurring_commitment.active? ? '✓ Ativo' : '⏸ Pausado' %>
-        </div>
-        <div class="badge badge-outline badge-lg">
-          <%= t("ui.transaction.recurring.recurrence.recurrence_frequency.#{@recurring_commitment.recurrence_frequency}") %>
-        </div>
-        <div class="badge badge-primary badge-lg">
-          <%= @recurring_commitment.category.name %>
-        </div>
-      </div>
-    </div>
-    
-    <div class="flex gap-2">
-      <%= link_to edit_recurring_commitment_path(@recurring_commitment), class: "btn btn-primary" do %>
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-        </svg>
-        Editar
-      <% end %>
-      
-      <button class="btn btn-secondary" onclick="advanced_edit_modal.showModal()">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-        Edição Avançada
-      </button>
-      
-      <%= link_to recurring_commitments_path, class: "btn btn-outline" do %>
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-        </svg>
-        Voltar
-      <% end %>
-    </div>
-  </div>
+ <!-- Header -->
+ <div>
+ <div>
+ <h1><%= @recurring_commitment.name %></h1>
+ <div>
+ <div>
+ <%= @recurring_commitment.active? ? '✓ Ativo' : '⏸ Pausado' %>
+ </div>
+ <div>
+ <%= t("ui.transaction.recurring.recurrence.recurrence_frequency.#{@recurring_commitment.recurrence_frequency}") %>
+ </div>
+ <div>
+ <%= @recurring_commitment.category.name %>
+ </div>
+ </div>
+ </div>
+ 
+ <div>
+ <%= link_to edit_recurring_commitment_path(@recurring_commitment) do %>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+ </svg>
+ Editar
+ <% end %>
+ 
+ <button onclick="advanced_edit_modal.showModal()">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+ </svg>
+ Edição Avançada
+ </button>
+ 
+ <%= link_to recurring_commitments_path do %>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+ </svg>
+ Voltar
+ <% end %>
+ </div>
+ </div>
 
-  <!-- Summary Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-    <div class="stat bg-primary text-primary-content rounded-lg">
-      <div class="stat-title text-primary-content/70">Valor Padrão</div>
-      <div class="stat-value text-2xl">
-        R$ <%= number_with_precision(@recurring_commitment.default_amount || 0, precision: 2, delimiter: '.', separator: ',') %>
-      </div>
-      <div class="stat-desc text-primary-content/70">Por <%= @recurring_commitment.recurrence_frequency == 'monthly' ? 'mês' : @recurring_commitment.recurrence_frequency %></div>
-    </div>
-    
-    <div class="stat bg-secondary text-secondary-content rounded-lg">
-      <div class="stat-title text-secondary-content/70">Total Gasto</div>
-      <div class="stat-value text-2xl">
-        R$ <%= number_with_precision(@total_generated, precision: 2, delimiter: '.', separator: ',') %>
-      </div>
-      <div class="stat-desc text-secondary-content/70">Em <%= @recurring_commitment.transactions.count %> transações</div>
-    </div>
-    
-    <div class="stat bg-accent text-accent-content rounded-lg">
-      <div class="stat-title text-accent-content/70">Próximo Vencimento</div>
-      <div class="stat-value text-xl">
-        <%= @next_transaction_date&.strftime('%d/%m/%Y') || 'N/A' %>
-      </div>
-      <div class="stat-desc text-accent-content/70">Data estimada</div>
-    </div>
-    
-    <div class="stat bg-info text-info-content rounded-lg">
-      <div class="stat-title text-info-content/70">Período</div>
-      <div class="stat-value text-lg">
-        <%= @recurring_commitment.start_date.strftime('%m/%Y') %>
-      </div>
-      <div class="stat-desc text-info-content/70">
-        até <%= @recurring_commitment.end_date&.strftime('%m/%Y') || 'indeterminado' %>
-      </div>
-    </div>
-  </div>
+ <!-- Summary Cards -->
+ <div>
+ <div>
+ <div>Valor Padrão</div>
+ <div>
+ R$ <%= number_with_precision(@recurring_commitment.default_amount || 0, precision: 2, delimiter: '.', separator: ',') %>
+ </div>
+ <div>Por <%= @recurring_commitment.recurrence_frequency == 'monthly' ? 'mês' : @recurring_commitment.recurrence_frequency %></div>
+ </div>
+ 
+ <div>
+ <div>Total Gasto</div>
+ <div>
+ R$ <%= number_with_precision(@total_generated, precision: 2, delimiter: '.', separator: ',') %>
+ </div>
+ <div>Em <%= @recurring_commitment.transactions.count %> transações</div>
+ </div>
+ 
+ <div>
+ <div>Próximo Vencimento</div>
+ <div>
+ <%= @next_transaction_date&.strftime('%d/%m/%Y') || 'N/A' %>
+ </div>
+ <div>Data estimada</div>
+ </div>
+ 
+ <div>
+ <div>Período</div>
+ <div>
+ <%= @recurring_commitment.start_date.strftime('%m/%Y') %>
+ </div>
+ <div>
+ até <%= @recurring_commitment.end_date&.strftime('%m/%Y') || 'indeterminado' %>
+ </div>
+ </div>
+ </div>
 
-  <!-- Notes Section -->
-  <% if @recurring_commitment.notes.present? %>
-    <div class="card bg-base-100 shadow-lg mb-6">
-      <div class="card-body">
-        <h3 class="card-title text-lg mb-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          Observações
-        </h3>
-        <p class="text-base-content/80"><%= simple_format(@recurring_commitment.notes) %></p>
-      </div>
-    </div>
-  <% end %>
+ <!-- Notes Section -->
+ <% if @recurring_commitment.notes.present? %>
+ <div>
+ <div>
+ <h3>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+ </svg>
+ Observações
+ </h3>
+ <p><%= simple_format(@recurring_commitment.notes) %></p>
+ </div>
+ </div>
+ <% end %>
 
-  <!-- Timeline Section -->
-  <div class="card bg-base-100 shadow-lg mb-6">
-    <div class="card-body">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="card-title text-lg">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-          </svg>
-          Timeline de Transações
-        </h3>
-        
-        <button class="btn btn-sm btn-outline" onclick="timeline_modal.showModal()">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-          </svg>
-          Ver Timeline Completa
-        </button>
-      </div>
-      
-      <!-- Recent Transactions -->
-      <% if @recent_transactions.any? %>
-        <div class="overflow-x-auto">
-          <table class="table table-zebra">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Descrição</th>
-                <th>Valor</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% @recent_transactions.each do |transaction| %>
-                <tr>
-                  <td>
-                    <div class="font-medium"><%= transaction.event_date.strftime('%d/%m/%Y') %></div>
-                    <div class="text-sm opacity-50"><%= transaction.event_date.strftime('%A') %></div>
-                  </td>
-                  <td>
-                    <div class="font-medium"><%= transaction.description %></div>
-                  </td>
-                  <td>
-                    <div class="font-bold text-lg <%= 
-                      case transaction.transaction_type
-                      when 'income' then 'text-success'
-                      when 'expense' then 'text-error'
-                      when 'transfer' then 'text-warning'
-                      else 'text-base-content'
-                      end
-                    %>">
-                      <%= 
-                        case transaction.transaction_type
-                        when 'income' then '+'
-                        when 'expense' then '-'
-                        when 'transfer' then '🔄'
-                        else ''
-                        end
-                      %>R$ <%= number_with_precision(transaction.amount, precision: 2, delimiter: '.', separator: ',') %>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="badge <%= case transaction.status
-                                          when 'confirmed' then 'badge-success'
-                                          when 'pending' then 'badge-warning'
-                                          when 'cancelled' then 'badge-error'
-                                          else 'badge-ghost'
-                                          end %>">
-                      <%= t("ui.transaction.status.#{transaction.status}") %>
-                    </div>
-                  </td>
-                  <td>
-                    <%= link_to edit_transaction_path(transaction), class: "btn btn-xs btn-outline" do %>
-                      Editar
-                    <% end %>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="text-center mt-4">
-          <%= link_to transactions_path(recurring_commitment_id: @recurring_commitment.id), class: "btn btn-outline" do %>
-            Ver Todas as Transações
-          <% end %>
-        </div>
-      <% else %>
-        <div class="text-center py-8 text-base-content/60">
-          <svg class="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          <p>Nenhuma transação gerada ainda para este compromisso.</p>
-        </div>
-      <% end %>
-    </div>
-  </div>
+ <!-- Timeline Section -->
+ <div>
+ <div>
+ <div>
+ <h3>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+ </svg>
+ Timeline de Transações
+ </h3>
+ 
+ <button onclick="timeline_modal.showModal()">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+ </svg>
+ Ver Timeline Completa
+ </button>
+ </div>
+ 
+ <!-- Recent Transactions -->
+ <% if @recent_transactions.any? %>
+ <div>
+ <table>
+ <thead>
+ <tr>
+ <th>Data</th>
+ <th>Descrição</th>
+ <th>Valor</th>
+ <th>Status</th>
+ <th>Ações</th>
+ </tr>
+ </thead>
+ <tbody>
+ <% @recent_transactions.each do |transaction| %>
+ <tr>
+ <td>
+ <div><%= transaction.event_date.strftime('%d/%m/%Y') %></div>
+ <div><%= transaction.event_date.strftime('%A') %></div>
+ </td>
+ <td>
+ <div><%= transaction.description %></div>
+ </td>
+ <td>
+ <div class="font-bold text-lg <%= 
+ case transaction.transaction_type
+ when 'income' then 'text-success'
+ when 'expense' then 'text-error'
+ when 'transfer' then 'text-warning'
+ else 'text-base-content'
+ end
+ %>">
+ <%= 
+ case transaction.transaction_type
+ when 'income' then '+'
+ when 'expense' then '-'
+ when 'transfer' then '🔄'
+ else ''
+ end
+ %>R$ <%= number_with_precision(transaction.amount, precision: 2, delimiter: '.', separator: ',') %>
+ </div>
+ </td>
+ <td>
+ <div>
+ <%= t("ui.transaction.status.#{transaction.status}") %>
+ </div>
+ </td>
+ <td>
+ <%= link_to edit_transaction_path(transaction) do %>
+ Editar
+ <% end %>
+ </td>
+ </tr>
+ <% end %>
+ </tbody>
+ </table>
+ </div>
+ 
+ <div>
+ <%= link_to transactions_path(recurring_commitment_id: @recurring_commitment.id) do %>
+ Ver Todas as Transações
+ <% end %>
+ </div>
+ <% else %>
+ <div>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+ </svg>
+ <p>Nenhuma transação gerada ainda para este compromisso.</p>
+ </div>
+ <% end %>
+ </div>
+ </div>
 
-  <!-- Lançamentos previstos futuros (projeção) -->
-  <div class="card bg-base-100 shadow mt-6">
-    <div class="card-body">
-      <h3 class="card-title mb-4">🔮 Lançamentos Previstos (Projeção)</h3>
-      <% projected = RecurringProjectionService.call(as_of: Date.current).select { |t| t[:recurring_commitment_id] == @recurring_commitment.id } %>
-      <% if projected.any? %>
-        <ul class="space-y-2">
-          <% projected.each do |proj| %>
-            <li class="flex justify-between items-center p-2 bg-base-200 rounded border border-dashed border-base-content/30 text-base-content/60">
-              <span class="flex items-center gap-2">
-                <%= proj[:description] %>
-                <span class="badge badge-outline badge-sm"><%= l(proj[:date], format: :short) %></span>
-                <span class="badge badge-secondary badge-xs" title="Este lançamento ainda não foi realizado, previsão automática">previsto</span>
-              </span>
-              <span class="font-bold">R$ <%= number_with_precision(proj[:amount], precision: 2) %></span>
-            </li>
-          <% end %>
-        </ul>
-        <div class="text-xs text-base-content/50 mt-2">
-          <span class="inline-flex items-center gap-1"><i class="fa fa-eye"></i> Lançamentos previstos são projeções automáticas deste compromisso e não estão lançados no extrato real.</span>
-        </div>
-      <% else %>
-        <div class="text-center text-base-content/60 py-4">
-          <div class="text-4xl mb-2">🔮</div>
-          <p>Nenhum lançamento previsto para este compromisso</p>
-        </div>
-      <% end %>
-    </div>
-  </div>
+ <!-- Lançamentos previstos futuros (projeção) -->
+ <div>
+ <div>
+ <h3>🔮 Lançamentos Previstos (Projeção)</h3>
+ <% projected = RecurringProjectionService.call(as_of: Date.current).select { |t| t[:recurring_commitment_id] == @recurring_commitment.id } %>
+ <% if projected.any? %>
+ <ul>
+ <% projected.each do |proj| %>
+ <li>
+ <span>
+ <%= proj[:description] %>
+ <span><%= l(proj[:date], format: :short) %></span>
+ <span title="Este lançamento ainda não foi realizado, previsão automática">previsto</span>
+ </span>
+ <span>R$ <%= number_with_precision(proj[:amount], precision: 2) %></span>
+ </li>
+ <% end %>
+ </ul>
+ <div>
+ <span><i class="fa fa-eye"></i> Lançamentos previstos são projeções automáticas deste compromisso e não estão lançados no extrato real.</span>
+ </div>
+ <% else %>
+ <div>
+ <div>🔮</div>
+ <p>Nenhum lançamento previsto para este compromisso</p>
+ </div>
+ <% end %>
+ </div>
+ </div>
 </div>
 
 <!-- Timeline Modal -->
-<dialog id="timeline_modal" class="modal">
-  <div class="modal-box w-11/12 max-w-5xl">
-    <form method="dialog">
-      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-    </form>
-    
-    <h3 class="font-bold text-lg mb-4">Timeline Completa - <%= @recurring_commitment.name %></h3>
-    
-    <div id="timeline-container" class="min-h-96">
-      <div class="loading loading-spinner loading-lg mx-auto"></div>
-      <p class="text-center mt-4">Carregando timeline...</p>
-    </div>
-  </div>
+<dialog id="timeline_modal" >
+ <div>
+ <form method="dialog">
+ <button>✕</button>
+ </form>
+ 
+ <h3>Timeline Completa - <%= @recurring_commitment.name %></h3>
+ 
+ <div id="timeline-container" >
+ <div></div>
+ <p>Carregando timeline...</p>
+ </div>
+ </div>
 </dialog>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const modal = document.getElementById('timeline_modal');
-  const container = document.getElementById('timeline-container');
-  
-  modal.addEventListener('show', function() {
-    if (container.innerHTML.includes('loading')) {
-      fetch('<%= timeline_recurring_commitment_path(@recurring_commitment) %>')
-        .then(response => response.json())
-        .then(data => {
-          renderTimeline(data);
-        })
-        .catch(error => {
-          container.innerHTML = '<div class="alert alert-error">Erro ao carregar timeline</div>';
-        });
-    }
-  });
-  
-  function renderTimeline(data) {
-    const html = `
-      <div class="grid gap-4">
-        ${data.transactions.map(transaction => `
-          <div class="card bg-base-200 p-4">
-            <div class="flex justify-between items-center">
-              <div>
-                <div class="font-bold">${transaction.description}</div>
-                <div class="text-sm opacity-70">${new Date(transaction.event_date).toLocaleDateString('pt-BR')}</div>
-              </div>
-              <div class="text-right">
-                <div class="font-bold text-lg ${transaction.type === 'expense' ? 'text-error' : 'text-success'}">
-                  ${transaction.type === 'expense' ? '-' : '+'}${CurrencyHelper.format(transaction.amount)}
-                </div>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-    container.innerHTML = html;
-  }
+ const modal = document.getElementById('timeline_modal');
+ const container = document.getElementById('timeline-container');
+ 
+ modal.addEventListener('show', function() {
+ if (container.innerHTML.includes('loading')) {
+ fetch('<%= timeline_recurring_commitment_path(@recurring_commitment) %>')
+ .then(response => response.json())
+ .then(data => {
+ renderTimeline(data);
+ })
+ .catch(error => {
+ container.innerHTML = '<div>Erro ao carregar timeline</div>';
+ });
+ }
+ });
+ 
+ function renderTimeline(data) {
+ const html = `
+ <div>
+ ${data.transactions.map(transaction => `
+ <div>
+ <div>
+ <div>
+ <div>${transaction.description}</div>
+ <div>${new Date(transaction.event_date).toLocaleDateString('pt-BR')}</div>
+ </div>
+ <div>
+ <div class="${transaction.type === 'expense' ? :">
+ ${transaction.type === 'expense' ? '-' : '+'}${CurrencyHelper.format(transaction.amount)}
+ </div>
+ </div>
+ </div>
+ </div>
+ `).join('')}
+ </div>
+ `;
+ container.innerHTML = html;
+ }
 });
 </script>
 
 <!-- Advanced Edit Modal -->
-<dialog id="advanced_edit_modal" class="modal">
-  <div class="modal-box w-11/12 max-w-4xl">
-    <form method="dialog">
-      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-    </form>
-    
-    <h3 class="font-bold text-lg mb-6">⚙️ Edição Avançada - <%= @recurring_commitment.name %></h3>
-    
-    <%= form_with url: recurring_commitment_path(@recurring_commitment), method: :patch, 
-                  local: true, data: { controller: "advanced-edit-form" } do |form| %>
-      
-      <!-- Strategy Selection -->
-      <div class="card bg-base-200 mb-6">
-        <div class="card-body">
-          <h4 class="card-title text-base mb-4">📋 Estratégia de Edição</h4>
-          
-          <div class="form-control">
-            <%= form.radio_button :edit_strategy, 'future_only', class: "radio radio-primary", 
-                                  checked: true, data: { action: "change->advanced-edit-form#updateStrategy" } %>
-            <label class="label cursor-pointer justify-start gap-3">
-              <span class="label-text font-semibold">Apenas transações futuras</span>
-            </label>
-            <div class="text-sm text-base-content/70 ml-6 mb-3">
-              Aplica as mudanças apenas às transações que ainda não foram geradas ou processadas
-            </div>
-          </div>
-          
-          <div class="form-control">
-            <%= form.radio_button :edit_strategy, 'all_transactions', class: "radio radio-primary",
-                                  data: { action: "change->advanced-edit-form#updateStrategy" } %>
-            <label class="label cursor-pointer justify-start gap-3">
-              <span class="label-text font-semibold">Todas as transações</span>
-            </label>
-            <div class="text-sm text-base-content/70 ml-6 mb-3">
-              Aplica as mudanças a todas as transações, incluindo as já processadas
-            </div>
-          </div>
-          
-          <div class="form-control">
-            <%= form.radio_button :edit_strategy, 'split_commitment', class: "radio radio-primary",
-                                  data: { action: "change->advanced-edit-form#updateStrategy" } %>
-            <label class="label cursor-pointer justify-start gap-3">
-              <span class="label-text font-semibold">Dividir compromisso</span>
-            </label>
-            <div class="text-sm text-base-content/70 ml-6 mb-3">
-              Cria um novo compromisso a partir da data efetiva com as novas configurações
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Effective Date -->
-      <div class="card bg-base-200 mb-6" data-advanced-edit-form-target="effectiveDateCard">
-        <div class="card-body">
-          <h4 class="card-title text-base mb-4">📅 Data Efetiva</h4>
-          
-          <%= form.label :effective_date, "Data a partir da qual as mudanças serão aplicadas", 
-                         class: "label label-text font-semibold" %>
-          <%= form.date_field :effective_date, class: "input input-bordered w-full", 
-                              value: Date.current, required: true %>
-          
-          <div class="text-sm text-base-content/70 mt-2" data-advanced-edit-form-target="dateHelp">
-            As mudanças serão aplicadas a partir desta data
-          </div>
-        </div>
-      </div>
-      
-      <!-- New Attributes -->
-      <div class="card bg-base-200 mb-6">
-        <div class="card-body">
-          <h4 class="card-title text-base mb-4">✏️ Novos Valores</h4>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <%= form.label :name, "Nome", class: "label label-text font-semibold" %>
-              <%= form.text_field :name, class: "input input-bordered", 
-                                  value: @recurring_commitment.name %>
-            </div>
-            
-            <div class="form-control">
-              <%= form.label :amount, "Valor", class: "label label-text font-semibold" %>
-              <div class="input-group">
-                <span class="bg-base-300 px-3 flex items-center">R$</span>
-                <%= form.number_field :amount, class: "input input-bordered w-full", 
-                                      step: 0.01, value: @recurring_commitment.default_amount %>
-              </div>
-            </div>
-            
-            <div class="form-control">
-              <%= form.label :from_account_id, "Conta de Origem", class: "label label-text font-semibold" %>
-              <%= form.collection_select :from_account_id, Account.all, :id, :name, { prompt: "Selecione a conta de origem" }, { class: "select select-bordered w-full" } %>
-            </div>
-            <div class="form-control">
-              <%= form.label :to_account_id, "Conta de Destino", class: "label label-text font-semibold" %>
-              <%= form.collection_select :to_account_id, Account.all, :id, :name, { prompt: "Selecione a conta de destino" }, { class: "select select-bordered w-full" } %>
-            </div>
-            
-            <div class="form-control">
-              <%= form.label :category_id, "Categoria", class: "label label-text font-semibold" %>
-              <%= form.select :category_id, 
-                              options_from_collection_for_select(Category.all, :id, :name, @recurring_commitment.category_id),
-                              { prompt: "Selecione uma categoria" },
-                              { class: "select select-bordered w-full" } %>
-            </div>
-            
-            <div class="form-control">
-              <%= form.label :recurrence_frequency, "Frequência", class: "label label-text font-semibold" %>
-              <%= form.select :recurrence_frequency,
-                              options_for_select([
-                                ['Diária', 'daily'],
-                                ['Semanal', 'weekly'], 
-                                ['Mensal', 'monthly'],
-                                ['Trimestral', 'quarterly'],
-                                ['Anual', 'yearly']
-                              ], @recurring_commitment.recurrence_frequency),
-                              {},
-                              { class: "select select-bordered w-full" } %>
-            </div>
-            
-            <!-- Campo transaction_type removido pois não existe no modelo RecurringCommitment -->
-            <!-- Se precisar adicionar tipo de transação, crie uma migration: add_transaction_type_to_recurring_commitments -->
-          </div>
-          
-          <div class="form-control mt-4">
-            <%= form.label :notes, "Observações", class: "label label-text font-semibold" %>
-            <%= form.text_area :notes, class: "textarea textarea-bordered", 
-                               rows: 3, value: @recurring_commitment.notes %>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Impact Preview -->
-      <div class="alert alert-info mb-6" data-advanced-edit-form-target="impactPreview">
-        <div>
-          <h4 class="font-bold">💡 Impacto das Mudanças:</h4>
-          <div class="text-sm mt-2" data-advanced-edit-form-target="impactText">
-            Selecione uma estratégia para ver o impacto das mudanças
-          </div>
-        </div>
-      </div>
-      
-      <!-- Hidden field for advanced edit flag -->
-      <%= form.hidden_field :advanced_edit, value: true %>
-      
-      <!-- Actions -->
-      <div class="modal-action">
-        <button type="button" class="btn btn-ghost" onclick="advanced_edit_modal.close()">
-          Cancelar
-        </button>
-        <%= form.submit "Aplicar Mudanças", class: "btn btn-primary" %>
-      </div>
-    <% end %>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
+<dialog id="advanced_edit_modal" >
+ <div>
+ <form method="dialog">
+ <button>✕</button>
+ </form>
+ 
+ <h3>⚙️ Edição Avançada - <%= @recurring_commitment.name %></h3>
+ 
+ <%= form_with url: recurring_commitment_path(@recurring_commitment), method: :patch, 
+ local: true, data: { controller: "advanced-edit-form" } do |form| %>
+ 
+ <!-- Strategy Selection -->
+ <div>
+ <div>
+ <h4>📋 Estratégia de Edição</h4>
+ 
+ <div>
+ <%= form.radio_button :edit_strategy, 'future_only', class: "radio radio-primary", 
+ checked: true, data: { action: "change->advanced-edit-form#updateStrategy" } %>
+ <label>
+ <span>Apenas transações futuras</span>
+ </label>
+ <div>
+ Aplica as mudanças apenas às transações que ainda não foram geradas ou processadas
+ </div>
+ </div>
+ 
+ <div>
+ <%= form.radio_button :edit_strategy, 'all_transactions', class: "radio radio-primary",
+ data: { action: "change->advanced-edit-form#updateStrategy" } %>
+ <label>
+ <span>Todas as transações</span>
+ </label>
+ <div>
+ Aplica as mudanças a todas as transações, incluindo as já processadas
+ </div>
+ </div>
+ 
+ <div>
+ <%= form.radio_button :edit_strategy, 'split_commitment', class: "radio radio-primary",
+ data: { action: "change->advanced-edit-form#updateStrategy" } %>
+ <label>
+ <span>Dividir compromisso</span>
+ </label>
+ <div>
+ Cria um novo compromisso a partir da data efetiva com as novas configurações
+ </div>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- Effective Date -->
+ <div data-advanced-edit-form-target="effectiveDateCard">
+ <div>
+ <h4>📅 Data Efetiva</h4>
+ 
+ <%= form.label :effective_date, "Data a partir da qual as mudanças serão aplicadas", 
+ class: "label label-text font-semibold" %>
+ <%= form.date_field :effective_date, class: "input input-bordered w-full", 
+ value: Date.current, required: true %>
+ 
+ <div data-advanced-edit-form-target="dateHelp">
+ As mudanças serão aplicadas a partir desta data
+ </div>
+ </div>
+ </div>
+ 
+ <!-- New Attributes -->
+ <div>
+ <div>
+ <h4>✏️ Novos Valores</h4>
+ 
+ <div>
+ <div>
+ <%= form.label :name, "Nome", class: "label label-text font-semibold" %>
+ <%= form.text_field :name, class: "input input-bordered", 
+ value: @recurring_commitment.name %>
+ </div>
+ 
+ <div>
+ <%= form.label :amount, "Valor", class: "label label-text font-semibold" %>
+ <div>
+ <span>R$</span>
+ <%= form.number_field :amount, class: "input input-bordered w-full", 
+ step: 0.01, value: @recurring_commitment.default_amount %>
+ </div>
+ </div>
+ 
+ <div>
+ <%= form.label :from_account_id, "Conta de Origem", class: "label label-text font-semibold" %>
+ <%= form.collection_select :from_account_id, Account.all, :id, :name, { prompt: "Selecione a conta de origem" }, { class: "select select-bordered w-full" } %>
+ </div>
+ <div>
+ <%= form.label :to_account_id, "Conta de Destino", class: "label label-text font-semibold" %>
+ <%= form.collection_select :to_account_id, Account.all, :id, :name, { prompt: "Selecione a conta de destino" }, { class: "select select-bordered w-full" } %>
+ </div>
+ 
+ <div>
+ <%= form.label :category_id, "Categoria", class: "label label-text font-semibold" %>
+ <%= form.select :category_id, 
+ options_from_collection_for_select(Category.all, :id, :name, @recurring_commitment.category_id),
+ { prompt: "Selecione uma categoria" },
+ { class: "select select-bordered w-full" } %>
+ </div>
+ 
+ <div>
+ <%= form.label :recurrence_frequency, "Frequência", class: "label label-text font-semibold" %>
+ <%= form.select :recurrence_frequency,
+ options_for_select([
+ ['Diária', 'daily'],
+ ['Semanal', 'weekly'], 
+ ['Mensal', 'monthly'],
+ ['Trimestral', 'quarterly'],
+ ['Anual', 'yearly']
+ ], @recurring_commitment.recurrence_frequency),
+ {},
+ { class: "select select-bordered w-full" } %>
+ </div>
+ 
+ <!-- Campo transaction_type removido pois não existe no modelo RecurringCommitment -->
+ <!-- Se precisar adicionar tipo de transação, crie uma migration: add_transaction_type_to_recurring_commitments -->
+ </div>
+ 
+ <div>
+ <%= form.label :notes, "Observações", class: "label label-text font-semibold" %>
+ <%= form.text_area :notes, class: "textarea textarea-bordered", 
+ rows: 3, value: @recurring_commitment.notes %>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- Impact Preview -->
+ <div data-advanced-edit-form-target="impactPreview">
+ <div>
+ <h4>💡 Impacto das Mudanças:</h4>
+ <div data-advanced-edit-form-target="impactText">
+ Selecione uma estratégia para ver o impacto das mudanças
+ </div>
+ </div>
+ </div>
+ 
+ <!-- Hidden field for advanced edit flag -->
+ <%= form.hidden_field :advanced_edit, value: true %>
+ 
+ <!-- Actions -->
+ <div>
+ <button type="button" onclick="advanced_edit_modal.close()">
+ Cancelar
+ </button>
+ <%= form.submit "Aplicar Mudanças" %>
+ </div>
+ <% end %>
+ </div>
+ <form method="dialog" >
+ <button>close</button>
+ </form>
 </dialog>
 
 <!-- Stimulus Controller for Advanced Edit Form -->
 <script data-turbo-track="reload">
 (() => {
-  const application = window.Stimulus;
-  
-  application.register("advanced-edit-form", class extends application.Controller {
-    static targets = ["effectiveDateCard", "dateHelp", "impactPreview", "impactText"];
-    
-    connect() {
-      this.updateStrategy();
-    }
-    
-    updateStrategy() {
-      const selectedStrategy = this.element.querySelector('input[name="recurring_commitment[edit_strategy]"]:checked')?.value;
-      
-      if (!selectedStrategy) return;
-      
-      // Update date card visibility and help text
-      if (selectedStrategy === 'all_transactions') {
-        this.effectiveDateCardTarget.style.display = 'none';
-      } else {
-        this.effectiveDateCardTarget.style.display = 'block';
-        
-        if (selectedStrategy === 'future_only') {
-          this.dateHelpTarget.textContent = 'As mudanças serão aplicadas apenas às transações futuras a partir desta data';
-        } else if (selectedStrategy === 'split_commitment') {
-          this.dateHelpTarget.textContent = 'Um novo compromisso será criado a partir desta data com as novas configurações';
-        }
-      }
-      
-      // Update impact preview
-      this.updateImpactPreview(selectedStrategy);
-    }
-    
-    updateImpactPreview(strategy) {
-      let impactText = '';
-      
-      switch (strategy) {
-        case 'future_only':
-          impactText = `
-            <ul class="list-disc list-inside">
-              <li>O compromisso atual será atualizado com os novos valores</li>
-              <li>Transações futuras (a partir da data efetiva) serão atualizadas</li>
-              <li>Transações já processadas permanecerão inalteradas</li>
-              <li>Recomendado para ajustes pontuais sem afetar o histórico</li>
-            </ul>
-          `;
-          break;
-          
-        case 'all_transactions':
-          impactText = `
-            <ul class="list-disc list-inside text-warning">
-              <li>⚠️ TODAS as transações deste compromisso serão atualizadas</li>
-              <li>Isso inclui transações já processadas e registradas</li>
-              <li>Pode afetar relatórios e balanços históricos</li>
-              <li>Use apenas quando necessário corrigir dados incorretos</li>
-            </ul>
-          `;
-          break;
-          
-        case 'split_commitment':
-          impactText = `
-            <ul class="list-disc list-inside">
-              <li>O compromisso atual será encerrado na data efetiva</li>
-              <li>Um novo compromisso será criado com as novas configurações</li>
-              <li>Transações futuras serão movidas para o novo compromisso</li>
-              <li>Ideal para mudanças significativas mantendo o histórico</li>
-            </ul>
-          `;
-          break;
-      }
-      
-      this.impactTextTarget.innerHTML = impactText;
-    }
-  });
+ const application = window.Stimulus;
+ 
+ application.register("advanced-edit-form", class extends application.Controller {
+ static targets = ["effectiveDateCard", "dateHelp", "impactPreview", "impactText"];
+ 
+ connect() {
+ this.updateStrategy();
+ }
+ 
+ updateStrategy() {
+ const selectedStrategy = this.element.querySelector('input[name="recurring_commitment[edit_strategy]"]:checked')?.value;
+ 
+ if (!selectedStrategy) return;
+ 
+ // Update date card visibility and help text
+ if (selectedStrategy === 'all_transactions') {
+ this.effectiveDateCardTarget.style.display = 'none';
+ } else {
+ this.effectiveDateCardTarget.style.display = 'block';
+ 
+ if (selectedStrategy === 'future_only') {
+ this.dateHelpTarget.textContent = 'As mudanças serão aplicadas apenas às transações futuras a partir desta data';
+ } else if (selectedStrategy === 'split_commitment') {
+ this.dateHelpTarget.textContent = 'Um novo compromisso será criado a partir desta data com as novas configurações';
+ }
+ }
+ 
+ // Update impact preview
+ this.updateImpactPreview(selectedStrategy);
+ }
+ 
+ updateImpactPreview(strategy) {
+ let impactText = '';
+ 
+ switch (strategy) {
+ case 'future_only':
+ impactText = `
+ <ul>
+ <li>O compromisso atual será atualizado com os novos valores</li>
+ <li>Transações futuras (a partir da data efetiva) serão atualizadas</li>
+ <li>Transações já processadas permanecerão inalteradas</li>
+ <li>Recomendado para ajustes pontuais sem afetar o histórico</li>
+ </ul>
+ `;
+ break;
+ 
+ case 'all_transactions':
+ impactText = `
+ <ul>
+ <li>⚠️ TODAS as transações deste compromisso serão atualizadas</li>
+ <li>Isso inclui transações já processadas e registradas</li>
+ <li>Pode afetar relatórios e balanços históricos</li>
+ <li>Use apenas quando necessário corrigir dados incorretos</li>
+ </ul>
+ `;
+ break;
+ 
+ case 'split_commitment':
+ impactText = `
+ <ul>
+ <li>O compromisso atual será encerrado na data efetiva</li>
+ <li>Um novo compromisso será criado com as novas configurações</li>
+ <li>Transações futuras serão movidas para o novo compromisso</li>
+ <li>Ideal para mudanças significativas mantendo o histórico</li>
+ </ul>
+ `;
+ break;
+ }
+ 
+ this.impactTextTarget.innerHTML = impactText;
+ }
+ });
 })();
 </script>

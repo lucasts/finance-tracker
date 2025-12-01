@@ -1,52 +1,52 @@
-<h1 class="text-3xl font-bold mb-6"><%= t('ui.navigation.credit_statements') %></h1>
+<h1><%= t('ui.navigation.credit_statements') %></h1>
 
 <% if @credit_statements.any? %>
-  <div class="bg-base-100 rounded-box shadow overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="table table-zebra w-full">
-        <thead class="bg-base-200">
-          <tr>
-            <th><%= t('activerecord.models.account.one') %></th>
-            <th><%= t('ui.credit_statement.table.month') %></th>
-            <th class="text-right"><%= t('ui.credit_statement.table.total_amount') %></th>
-            <th class="text-right"><%= t('ui.credit_statement.table.paid_amount') %></th>
-            <th><%= t('activerecord.attributes.credit_statement.status') %></th>
-            <th><%= t('ui.credit_statement.table.closing') %></th>
-            <th><%= t('ui.credit_statement.table.due_date') %></th>
-            <th><%= t('ui.credit_statement.table.payment_date') %></th>
-            <th class="text-right"><%= t('ui.actions.title') %></th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @credit_statements.each do |cs| %>
-            <tr>
-              <td class="font-medium"><%= cs.account.name %></td>
-              <td><%= cs.month %></td>
-              <td class="text-right font-semibold"><%= format_money_unified(cs.amount_due) %></td>
-              <td class="text-right"><%= format_money_unified(cs.amount_paid) %></td>
-              <td>
-                <span class="badge badge-<%= cs.status == 'paid' ? 'success' : cs.status == 'overdue' ? 'error' : 'warning' %>">
-                  <%= t("activerecord.attributes.credit_statement.statuses.#{cs.status}") %>
-                </span>
-              </td>
-              <td class="text-sm"><%= l(cs.closed_on) if cs.closed_on %></td>
-              <td class="text-sm"><%= l(cs.due_on) if cs.due_on %></td>
-              <td class="text-sm"><%= l(cs.paid_on) if cs.paid_on %></td>
-              <td class="text-right">
-                <%= link_to t('ui.actions.show'), credit_statement_path(cs), class: "link link-primary" %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  </div>
+ <div>
+ <div>
+ <table>
+ <thead>
+ <tr>
+ <th><%= t('activerecord.models.account.one') %></th>
+ <th><%= t('ui.credit_statement.table.month') %></th>
+ <th><%= t('ui.credit_statement.table.total_amount') %></th>
+ <th><%= t('ui.credit_statement.table.paid_amount') %></th>
+ <th><%= t('activerecord.attributes.credit_statement.status') %></th>
+ <th><%= t('ui.credit_statement.table.closing') %></th>
+ <th><%= t('ui.credit_statement.table.due_date') %></th>
+ <th><%= t('ui.credit_statement.table.payment_date') %></th>
+ <th><%= t('ui.actions.title') %></th>
+ </tr>
+ </thead>
+ <tbody>
+ <% @credit_statements.each do |cs| %>
+ <tr>
+ <td><%= cs.account.name %></td>
+ <td><%= cs.month %></td>
+ <td><%= format_money_unified(cs.amount_due) %></td>
+ <td><%= format_money_unified(cs.amount_paid) %></td>
+ <td>
+ <span>
+ <%= t("activerecord.attributes.credit_statement.statuses.#{cs.status}") %>
+ </span>
+ </td>
+ <td><%= l(cs.closed_on) if cs.closed_on %></td>
+ <td><%= l(cs.due_on) if cs.due_on %></td>
+ <td><%= l(cs.paid_on) if cs.paid_on %></td>
+ <td>
+ <%= link_to t('ui.actions.show'), credit_statement_path(cs), class: "link link-primary" %>
+ </td>
+ </tr>
+ <% end %>
+ </tbody>
+ </table>
+ </div>
+ </div>
 <% else %>
-  <div class="bg-base-100 rounded-box shadow p-8 text-center">
-    <div class="text-6xl mb-4">💳</div>
-    <h3 class="text-xl font-semibold mb-2"><%= t('ui.credit_statement.empty.title') %></h3>
-    <p class="text-base-content/60 mb-4">
-      <%= t('ui.credit_statement.empty.description') %>
-    </p>
-  </div>
+ <div>
+ <div>💳</div>
+ <h3><%= t('ui.credit_statement.empty.title') %></h3>
+ <p>
+ <%= t('ui.credit_statement.empty.description') %>
+ </p>
+ </div>
 <% end %>

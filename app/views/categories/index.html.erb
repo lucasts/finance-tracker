@@ -1,39 +1,39 @@
-<h1 class="text-3xl font-bold mb-6"><%= t('activerecord.models.category.other') %></h1>
+<h1><%= t('activerecord.models.category.other') %></h1>
 
-<div class="flex justify-between items-center mb-4">  <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.category.one'), new_category_path, class: "btn btn-primary" %>
+<div> <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.category.one'), new_category_path %>
 </div>
 
-<div class="bg-base-100 rounded-box shadow overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="table table-zebra w-full">
-      <thead class="bg-base-200">
-        <tr>
-          <th><%= t('activerecord.attributes.category.name') %></th>
-          <th>Descrição</th>
-          <th><%= t('activerecord.attributes.category.category_type') %></th>
-          <th class="text-right"><%= t('ui.actions.title') %></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @categories.each do |cat| %>
-          <tr>
-            <td><strong><%= cat.name %></strong></td>
-            <td class="text-sm text-base-content/80">
-              <%= cat.description.present? ? truncate(cat.description, length: 80) : "—" %>
-            </td>
-            <td>
-              <% if cat.income? %>
-                <span class="badge badge-success">📈 <%= t('ui.transaction.types.income') %></span>
-              <% else %>
-                <span class="badge badge-error">📉 <%= t('ui.transaction.types.expense') %></span>
-              <% end %>
-            </td>
-            <td class="text-right">
-              <%= link_to t('ui.actions.edit'), edit_category_path(cat), class: "btn btn-sm btn-outline btn-primary" %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
+<div>
+ <div>
+ <table>
+ <thead>
+ <tr>
+ <th><%= t('activerecord.attributes.category.name') %></th>
+ <th>Descrição</th>
+ <th><%= t('activerecord.attributes.category.category_type') %></th>
+ <th><%= t('ui.actions.title') %></th>
+ </tr>
+ </thead>
+ <tbody>
+ <% @categories.each do |cat| %>
+ <tr>
+ <td><strong><%= cat.name %></strong></td>
+ <td>
+ <%= cat.description.present? ? truncate(cat.description, length: 80) : "—" %>
+ </td>
+ <td>
+ <% if cat.income? %>
+ <span>📈 <%= t('ui.transaction.types.income') %></span>
+ <% else %>
+ <span>📉 <%= t('ui.transaction.types.expense') %></span>
+ <% end %>
+ </td>
+ <td>
+ <%= link_to t('ui.actions.edit'), edit_category_path(cat) %>
+ </td>
+ </tr>
+ <% end %>
+ </tbody>
+ </table>
+ </div>
 </div>

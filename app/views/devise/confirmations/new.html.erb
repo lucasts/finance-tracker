@@ -1,50 +1,50 @@
 <% content_for :title, "Reenviar Confirmação" %>
 
-<div class="min-h-screen flex items-center justify-center bg-base-200">
-  <div class="card w-full max-w-md bg-base-100 shadow-xl">
-    <div class="card-body">
-      <!-- Header -->
-      <div class="text-center mb-8">
-        <%= image_tag "full_logo_orzeny-min.png", alt: "Orzeny - Clareza para suas finanças", class: "h-20 w-auto mx-auto mb-4" %>
-        <p class="text-base-content/70 mt-2">Reenviar confirmação</p>
-        <p class="text-sm text-base-content/60 mt-1">
-          Digite seu email para receber novamente as instruções de confirmação.
-        </p>
-      </div>
+<div>
+ <div>
+ <div>
+ <!-- Header -->
+ <div>
+ <%= image_tag "full_logo_orzeny-min.png", alt: "Orzeny - Clareza para suas finanças", class: "h-20 w-auto mx-auto mb-4" %>
+ <p>Reenviar confirmação</p>
+ <p>
+ Digite seu email para receber novamente as instruções de confirmação.
+ </p>
+ </div>
 
-      <!-- Error Messages -->
-      <%= render "devise/shared/error_messages", resource: resource %>
+ <!-- Error Messages -->
+ <%= render "devise/shared/error_messages", resource: resource %>
 
-      <!-- Confirmation Form -->
-      <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }, local: true, class: "space-y-4") do |f| %>
-        
-        <!-- Email Field -->
-        <div class="form-control">
-          <%= f.label :email, class: "label" do %>
-            <span class="label-text font-medium">Email</span>
-          <% end %>
-          <%= f.email_field :email, 
-                            autofocus: true, 
-                            autocomplete: "email",
-                            value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email),
-                            class: "input input-bordered w-full",
-                            placeholder: "seu@email.com" %>
-        </div>
+ <!-- Confirmation Form -->
+ <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }, local: true, class: "space-y-4") do |f| %>
+ 
+ <!-- Email Field -->
+ <div>
+ <%= f.label :email, class: "label" do %>
+ <span>Email</span>
+ <% end %>
+ <%= f.email_field :email, 
+ autofocus: true, 
+ autocomplete: "email",
+ value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email),
+ class: "input input-bordered w-full",
+ placeholder: "seu@email.com" %>
+ </div>
 
-        <!-- Submit Button -->
-        <div class="form-control mt-6">
-          <%= f.submit "Reenviar instruções", 
-                      class: "btn btn-primary btn-block text-white" %>
-        </div>
-      <% end %>
+ <!-- Submit Button -->
+ <div>
+ <%= f.submit "Reenviar instruções", 
+  %>
+ </div>
+ <% end %>
 
-      <!-- Divider -->
-      <div class="divider">ou</div>
+ <!-- Divider -->
+ <div>ou</div>
 
-      <!-- Links -->
-      <div class="text-center">
-        <%= render "devise/shared/links" %>
-      </div>
-    </div>
-  </div>
+ <!-- Links -->
+ <div>
+ <%= render "devise/shared/links" %>
+ </div>
+ </div>
+ </div>
 </div>

@@ -1,40 +1,40 @@
 <% content_for :title, t('ui.actions.edit') + ' ' + @recurring_commitment.name %>
 
-<div class="container mx-auto px-4 py-6">
-  <!-- Breadcrumb -->
-  <div class="text-sm breadcrumbs mb-4">
-    <ul>
-      <li><%= link_to t('ui.navigation.recurring_commitments'), recurring_commitments_path %></li>
-      <li><%= link_to @recurring_commitment.name, recurring_commitment_path(@recurring_commitment) %></li>
-      <li><%= t('ui.actions.edit') %></li>
-    </ul>
-  </div>
+<div>
+ <!-- Breadcrumb -->
+ <div>
+ <ul>
+ <li><%= link_to t('ui.navigation.recurring_commitments'), recurring_commitments_path %></li>
+ <li><%= link_to @recurring_commitment.name, recurring_commitment_path(@recurring_commitment) %></li>
+ <li><%= t('ui.actions.edit') %></li>
+ </ul>
+ </div>
 
-  <!-- Header -->
-  <div class="mb-6">
-    <h1 class="text-3xl font-bold text-base-content mb-2">
-      <%= t('ui.actions.edit') %> <%= @recurring_commitment.name %>
-    </h1>
-    <p class="text-base-content/70">
-      Edite o compromisso recorrente e escolha como aplicar as mudanças às transações existentes.
-    </p>
-  </div>
+ <!-- Header -->
+ <div>
+ <h1>
+ <%= t('ui.actions.edit') %> <%= @recurring_commitment.name %>
+ </h1>
+ <p>
+ Edite o compromisso recorrente e escolha como aplicar as mudanças às transações existentes.
+ </p>
+ </div>
 
-  <!-- Edit Strategy Alert -->
-  <div class="alert alert-info mb-6">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-    </svg>
-    <div>
-      <h3 class="font-bold">Estratégia de Edição</h3>
-      <div class="text-sm">Escolha como suas alterações serão aplicadas às transações deste compromisso.</div>
-    </div>
-  </div>
+ <!-- Edit Strategy Alert -->
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+ </svg>
+ <div>
+ <h3>Estratégia de Edição</h3>
+ <div>Escolha como suas alterações serão aplicadas às transações deste compromisso.</div>
+ </div>
+ </div>
 
-  <!-- Form Card -->
-  <div class="card bg-base-100 shadow-lg">
-    <div class="card-body">
-      <%= render 'form', recurring_commitment: @recurring_commitment %>
-    </div>
-  </div>
+ <!-- Form Card -->
+ <div>
+ <div>
+ <%= render 'form', recurring_commitment: @recurring_commitment %>
+ </div>
+ </div>
 </div>

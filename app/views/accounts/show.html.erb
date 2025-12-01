@@ -1,109 +1,109 @@
 <% content_for :title, "#{@account.name} - Conta" %>
 <% content_for :description, "Detalhes da conta #{@account.name} no #{t('app.name')}" %>
 
-<div class="breadcrumbs text-sm mb-6">
-  <ul>
-    <li><%= link_to "Início", root_path %></li>
-    <li><%= link_to "Contas", accounts_path %></li>
-    <li><%= @account.name %></li>
-  </ul>
+<div>
+ <ul>
+ <li><%= link_to "Início", root_path %></li>
+ <li><%= link_to "Contas", accounts_path %></li>
+ <li><%= @account.name %></li>
+ </ul>
 </div>
 
-<div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-  <div>
-    <h1 class="text-3xl font-bold flex items-center gap-3">
-      🏦 <%= @account.name %>
-      <div class="badge badge-primary">
-        <%= @account.account_type.name %>
-      </div>
-    </h1>
-    <p class="text-base-content/70 mt-2">Detalhes e movimentações da conta</p>
-  </div>
-  
-  <div class="flex flex-wrap gap-2">
-    <%= link_to 'Editar', edit_account_path(@account), class: "btn btn-primary" %>
-    <%= link_to 'Voltar', accounts_path, class: "btn btn-ghost" %>
-  </div>
+<div>
+ <div>
+ <h1>
+ 🏦 <%= @account.name %>
+ <div>
+ <%= @account.account_type.name %>
+ </div>
+ </h1>
+ <p>Detalhes e movimentações da conta</p>
+ </div>
+ 
+ <div>
+ <%= link_to 'Editar', edit_account_path(@account) %>
+ <%= link_to 'Voltar', accounts_path %>
+ </div>
 </div>
 
 <!-- Account Details Card -->
-<div class="card bg-base-100 shadow mb-6">
-  <div class="card-body">
-    <h2 class="card-title mb-4">📋 Informações da Conta</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="stat bg-base-200 rounded p-4">
-        <div class="stat-title">Nome da Conta</div>
-        <div class="stat-value text-lg"><%= @account.name %></div>
-      </div>
-      
-      <div class="stat bg-base-200 rounded p-4">
-        <div class="stat-title">Tipo de Conta</div>
-        <div class="stat-value text-lg"><%= @account.account_type.name %></div>
-      </div>
-    </div>
-  </div>
+<div>
+ <div>
+ <h2>📋 Informações da Conta</h2>
+ 
+ <div>
+ <div>
+ <div>Nome da Conta</div>
+ <div><%= @account.name %></div>
+ </div>
+ 
+ <div>
+ <div>Tipo de Conta</div>
+ <div><%= @account.account_type.name %></div>
+ </div>
+ </div>
+ </div>
 </div>
 
 <!-- Recent Transactions -->
-<div class="card bg-base-100 shadow">
-  <div class="card-body">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="card-title">💰 Transações Recentes</h2>
-      <%= link_to "Ver todas", transactions_path(account_id: @account.id), class: "btn btn-sm btn-outline" %>
-    </div>
-    
-    <% if @account.transactions.any? %>
-      <div class="overflow-x-auto">
-        <table class="table table-zebra w-full">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Descrição</th>
-              <th>Categoria</th>
-              <th class="text-right">Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @account.transactions.limit(10).order(created_at: :desc).each do |transaction| %>
-              <tr>
-                <td><%= l(transaction.transaction_date, format: :short) %></td>
-                <td><%= transaction.description %></td>
-                <td>
-                  <div class="badge badge-outline badge-sm">
-                    <%= transaction.category.name %>
-                  </div>
-                </td>
-                <td class="text-right font-mono">
-                  <span class="<%= 
-                    case transaction.transaction_type
-                    when 'income' then 'text-success'
-                    when 'expense' then 'text-error'
-                    when 'transfer' then 'text-warning'
-                    else 'text-base-content'
-                    end
-                  %>">
-                    <%= 
-                      case transaction.transaction_type
-                      when 'income' then '+'
-                      when 'expense' then '-'
-                      when 'transfer' then '🔄'
-                      else ''
-                      end
-                    %>R$ <%= number_with_precision(transaction.amount.abs, precision: 2, delimiter: ".") %>
-                  </span>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    <% else %>
-      <div class="text-center py-8">
-        <div class="text-4xl mb-2">💳</div>
-        <p class="text-base-content/60">Nenhuma transação encontrada</p>
-        <p class="text-sm text-base-content/50 mt-1">As transações aparecerão aqui quando forem criadas</p>
-      </div>
-    <% end %>
-  </div>
+<div>
+ <div>
+ <div>
+ <h2>💰 Transações Recentes</h2>
+ <%= link_to "Ver todas", transactions_path(account_id: @account.id) %>
+ </div>
+ 
+ <% if @account.transactions.any? %>
+ <div>
+ <table>
+ <thead>
+ <tr>
+ <th>Data</th>
+ <th>Descrição</th>
+ <th>Categoria</th>
+ <th>Valor</th>
+ </tr>
+ </thead>
+ <tbody>
+ <% @account.transactions.limit(10).order(created_at: :desc).each do |transaction| %>
+ <tr>
+ <td><%= l(transaction.transaction_date, format: :short) %></td>
+ <td><%= transaction.description %></td>
+ <td>
+ <div>
+ <%= transaction.category.name %>
+ </div>
+ </td>
+ <td>
+ <span class="<%= 
+ case transaction.transaction_type
+ when 'income' then 'text-success'
+ when 'expense' then 'text-error'
+ when 'transfer' then 'text-warning'
+ else 'text-base-content'
+ end
+ %>">
+ <%= 
+ case transaction.transaction_type
+ when 'income' then '+'
+ when 'expense' then '-'
+ when 'transfer' then '🔄'
+ else ''
+ end
+ %>R$ <%= number_with_precision(transaction.amount.abs, precision: 2, delimiter: ".") %>
+ </span>
+ </td>
+ </tr>
+ <% end %>
+ </tbody>
+ </table>
+ </div>
+ <% else %>
+ <div>
+ <div>💳</div>
+ <p>Nenhuma transação encontrada</p>
+ <p>As transações aparecerão aqui quando forem criadas</p>
+ </div>
+ <% end %>
+ </div>
 </div>

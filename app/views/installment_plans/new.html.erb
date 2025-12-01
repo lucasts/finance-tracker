@@ -1,18 +1,18 @@
-<div class="breadcrumbs text-sm mb-6">
-  <ul>
-    <li><%= link_to "Início", root_path %></li>
-    <li><%= link_to "Parcelamentos", installment_plans_path %></li>
-    <li>Novo Parcelamento</li>
-  </ul>
+<div>
+ <ul>
+ <li><%= link_to "Início", root_path %></li>
+ <li><%= link_to "Parcelamentos", installment_plans_path %></li>
+ <li>Novo Parcelamento</li>
+ </ul>
 </div>
 
-<div class="flex justify-between items-center mb-6">
-  <h1 class="text-3xl font-bold">📊 Novo Plano de Parcelamento</h1>
-  <%= link_to 'Voltar', installment_plans_path, class: "btn btn-ghost" %>
+<div>
+ <h1>📊 Novo Plano de Parcelamento</h1>
+ <%= link_to 'Voltar', installment_plans_path %>
 </div>
 
-<div class="card bg-base-100 shadow">
-  <div class="card-body">
-    <%= render 'form', installment_plan: @installment_plan %>
-  </div>
+<div>
+ <div>
+ <%= render 'form', installment_plan: @installment_plan %>
+ </div>
 </div>

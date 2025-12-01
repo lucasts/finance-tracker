@@ -1,442 +1,442 @@
 <%= form_with(model: transaction, local: true, data: { controller: "transaction-form" }, html: { role: "form", "aria-label" => "Formulário de transação financeira" }) do |form| %>
-  <div class="space-y-6">
-    
-    <!-- Transaction Type Selection (moved to top for better UX) -->
-    <div class="card bg-base-100 shadow-sm border border-base-300">
-      <div class="card-body py-4">
-        <h3 class="card-title text-lg mb-3">💰 <%= t('activerecord.attributes.transaction.transaction_type') %></h3>
-        <fieldset role="radiogroup" aria-labelledby="transaction-type-legend">
-          <legend id="transaction-type-legend" class="sr-only">Selecione o tipo de transação</legend>
-          <div class="flex gap-4">
-            <%= form.radio_button :transaction_type, "income", 
-                  class: "radio radio-success", 
-                  "aria-describedby" => "income-help",
-                  data: { 
-                    transaction_form_target: "transactionType",
-                    action: "change->transaction-form#handleTypeChange" 
-                  } %>
-            <%= form.label :transaction_type_income, "📈 #{t('ui.transaction.types.income')}", class: "cursor-pointer flex items-center gap-2" %>
-            <span id="income-help" class="sr-only">Receitas e entradas de dinheiro</span>
-            
-            <%= form.radio_button :transaction_type, "expense", 
-                  class: "radio radio-error ml-6", 
-                  "aria-describedby" => "expense-help",
-                  data: { 
-                    transaction_form_target: "transactionType",
-                    action: "change->transaction-form#handleTypeChange" 
-                  } %>
-            <%= form.label :transaction_type_expense, "📉 #{t('ui.transaction.types.expense')}", class: "cursor-pointer flex items-center gap-2" %>
-            <span id="expense-help" class="sr-only">Gastos e saídas de dinheiro</span>
-            
-            <%= form.radio_button :transaction_type, "transfer", 
-                  class: "radio radio-warning ml-6", 
-                  "aria-describedby" => "transfer-help",
-                  data: { 
-                    transaction_form_target: "transactionType",
-                    action: "change->transaction-form#handleTypeChange" 
-                  } %>
-            <%= form.label :transaction_type_transfer, "🔄 #{t('ui.transaction.types.transfer')}", class: "cursor-pointer flex items-center gap-2" %>
-            <span id="transfer-help" class="sr-only">Transferências entre contas</span>
-          </div>
-        </fieldset>
-      </div>
-    </div>
+ <div>
+ 
+ <!-- Transaction Type Selection (moved to top for better UX) -->
+ <div>
+ <div>
+ <h3>💰 <%= t('activerecord.attributes.transaction.transaction_type') %></h3>
+ <fieldset role="radiogroup" aria-labelledby="transaction-type-legend">
+ <legend id="transaction-type-legend">Selecione o tipo de transação</legend>
+ <div>
+ <%= form.radio_button :transaction_type, "income", 
+ class: "radio radio-success", 
+ "aria-describedby" => "income-help",
+ data: { 
+ transaction_form_target: "transactionType",
+ action: "change->transaction-form#handleTypeChange" 
+ } %>
+ <%= form.label :transaction_type_income, "📈 #{t('ui.transaction.types.income')}", class: "cursor-pointer flex items-center gap-2" %>
+ <span id="income-help">Receitas e entradas de dinheiro</span>
+ 
+ <%= form.radio_button :transaction_type, "expense", 
+ class: "radio radio-error ml-6", 
+ "aria-describedby" => "expense-help",
+ data: { 
+ transaction_form_target: "transactionType",
+ action: "change->transaction-form#handleTypeChange" 
+ } %>
+ <%= form.label :transaction_type_expense, "📉 #{t('ui.transaction.types.expense')}", class: "cursor-pointer flex items-center gap-2" %>
+ <span id="expense-help">Gastos e saídas de dinheiro</span>
+ 
+ <%= form.radio_button :transaction_type, "transfer", 
+ class: "radio radio-warning ml-6", 
+ "aria-describedby" => "transfer-help",
+ data: { 
+ transaction_form_target: "transactionType",
+ action: "change->transaction-form#handleTypeChange" 
+ } %>
+ <%= form.label :transaction_type_transfer, "🔄 #{t('ui.transaction.types.transfer')}", class: "cursor-pointer flex items-center gap-2" %>
+ <span id="transfer-help">Transferências entre contas</span>
+ </div>
+ </fieldset>
+ </div>
+ </div>
 
-    <!-- Basic Information -->
-    <div class="card bg-base-100 shadow-sm border border-base-300">
-      <div class="card-body">
-        <h3 class="card-title text-lg mb-4">📝 <%= t('ui.transaction.form.basic_info') %></h3>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="lg:col-span-2">            <%= form_group(form, :description, 
-                  placeholder: t('ui.transaction.form.description_placeholder'),
-                  "aria-label" => "Descrição da transação",
-                  "aria-describedby" => "description-help",
-                  data: { 
-                    transaction_form_target: "description",
-                    action: "input->transaction-form#handleDescriptionChange"
-                  }) %>
-            <div id="description-help" class="text-xs text-base-content/60 mt-1">
-              Descreva brevemente a transação (ex: Supermercado, Salário, etc.)
-            </div>
-          </div>
-          
-          <div class="form-control" data-controller="currency">
-            <label class="label" for="transaction_amount">
-              <span class="label-text">💵 <%= t('activerecord.attributes.transaction.amount') %></span>
-            </label>
-            <%= form.text_field :amount, 
-                  id: "transaction_amount",
-                  class: "input input-bordered w-full text-lg font-bold", 
-                  placeholder: "0,00",
-                  "aria-label" => "Valor da transação em reais",
-                  "aria-describedby" => "amount-help",
-                  "aria-required" => "true",
-                  data: {
-                    controller: "currency-input currency-validation",
-                    currency_input_target: "input",
-                    currency_validation_target: "input",
-                    currency_validation_required_value: true,
-                    transaction_form_target: "amount",
-                    action: "input->transaction-form#handleAmountChange"
-                  } %>
-            <label class="label">
-              <span class="label-text-alt text-base-content/60" 
-                    id="amount-help"
-                    data-transaction-form-target="amountHelper" 
-                    data-currency-validation-target="helper">
-                <%= t('ui.transaction.form.amount_helper') %> Digite apenas números, ex: 150.50
-              </span>
-              <span class="label-text-alt text-error hidden" 
-                    data-currency-validation-target="error"
-                    role="alert"
-                    aria-live="polite"></span>
-            </label>
-          </div>
+ <!-- Basic Information -->
+ <div>
+ <div>
+ <h3>📝 <%= t('ui.transaction.form.basic_info') %></h3>
+ <div>
+ <div> <%= form_group(form, :description, 
+ placeholder: t('ui.transaction.form.description_placeholder'),
+ "aria-label" => "Descrição da transação",
+ "aria-describedby" => "description-help",
+ data: { 
+ transaction_form_target: "description",
+ action: "input->transaction-form#handleDescriptionChange"
+ }) %>
+ <div id="description-help" >
+ Descreva brevemente a transação (ex: Supermercado, Salário, etc.)
+ </div>
+ </div>
+ 
+ <div data-controller="currency">
+ <label for="transaction_amount">
+ <span>💵 <%= t('activerecord.attributes.transaction.amount') %></span>
+ </label>
+ <%= form.text_field :amount, 
+ id: "transaction_amount",
+ class: "input input-bordered w-full text-lg font-bold", 
+ placeholder: "0,00",
+ "aria-label" => "Valor da transação em reais",
+ "aria-describedby" => "amount-help",
+ "aria-required" => "true",
+ data: {
+ controller: "currency-input currency-validation",
+ currency_input_target: "input",
+ currency_validation_target: "input",
+ currency_validation_required_value: true,
+ transaction_form_target: "amount",
+ action: "input->transaction-form#handleAmountChange"
+ } %>
+ <label>
+ <span 
+ id="amount-help"
+ data-transaction-form-target="amountHelper" 
+ data-currency-validation-target="helper">
+ <%= t('ui.transaction.form.amount_helper') %> Digite apenas números, ex: 150.50
+ </span>
+ <span 
+ data-currency-validation-target="error"
+ role="alert"
+ aria-live="polite"></span>
+ </label>
+ </div>
 
-          <div class="form-control">
-            <label class="label" for="transaction_event_date">
-              <span class="label-text">📅 <%= t('ui.transaction.form.event_date_label') %></span>
-              <span class="label-text-alt text-base-content/60" id="event-date-help">
-                <%= t('ui.transaction.form.event_date_helper') %>
-              </span>
-            </label>
-            <%= form.date_field :event_date, 
-                  id: "transaction_event_date",
-                  class: "input input-bordered w-full", 
-                  value: transaction.event_date || Date.current,
-                  "aria-label" => "Data em que a transação ocorreu",
-                  "aria-describedby" => "event-date-help",
-                  "aria-required" => "true",
-                  data: { 
-                    transaction_form_target: "eventDate",
-                    action: "change->transaction-form#handleDateChange"
-                  } %>
-          </div>
-        </div>
-      </div>
-    </div>
+ <div>
+ <label for="transaction_event_date">
+ <span>📅 <%= t('ui.transaction.form.event_date_label') %></span>
+ <span id="event-date-help">
+ <%= t('ui.transaction.form.event_date_helper') %>
+ </span>
+ </label>
+ <%= form.date_field :event_date, 
+ id: "transaction_event_date",
+ class: "input input-bordered w-full", 
+ value: transaction.event_date || Date.current,
+ "aria-label" => "Data em que a transação ocorreu",
+ "aria-describedby" => "event-date-help",
+ "aria-required" => "true",
+ data: { 
+ transaction_form_target: "eventDate",
+ action: "change->transaction-form#handleDateChange"
+ } %>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <!-- Accounts Selection -->
-    <div class="card bg-base-100 shadow-sm border border-base-300">
-      <div class="card-body">
-        <h3 class="card-title text-lg mb-4">
-          <span data-transaction-form-target="accountsTitle">🏦 <%= t('ui.transaction.form.accounts') %></span>
-        </h3>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text" data-transaction-form-target="fromAccountLabel">
-                <%= t('ui.transaction.form.from_account_label') %>
-              </span>
-            </label>
-            <%= form.collection_select :from_account_id, 
-                  @accounts || Account.includes(:account_type).order(:name), 
-                  :id, 
-                  ->(account) { "#{account.name} (#{account.account_type.name})" },
-                  { prompt: "Selecione a conta" }, 
-                  { 
-                    class: "select select-bordered w-full",
-                    data: { 
-                      transaction_form_target: "fromAccount",
-                      action: "change->transaction-form#handleAccountChange"
-                    }
-                  } %>
-            <label class="label">
-              <span class="label-text-alt" data-transaction-form-target="fromAccountHelper">
-                <%= t('ui.transaction.form.from_account_helper') %>
-              </span>
-            </label>
-          </div>
+ <!-- Accounts Selection -->
+ <div>
+ <div>
+ <h3>
+ <span data-transaction-form-target="accountsTitle">🏦 <%= t('ui.transaction.form.accounts') %></span>
+ </h3>
+ <div>
+ <div>
+ <label>
+ <span data-transaction-form-target="fromAccountLabel">
+ <%= t('ui.transaction.form.from_account_label') %>
+ </span>
+ </label>
+ <%= form.collection_select :from_account_id, 
+ @accounts || Account.includes(:account_type).order(:name), 
+ :id, 
+ ->(account) { "#{account.name} (#{account.account_type.name})" },
+ { prompt: "Selecione a conta" }, 
+ { 
+ class: "select select-bordered w-full",
+ data: { 
+ transaction_form_target: "fromAccount",
+ action: "change->transaction-form#handleAccountChange"
+ }
+ } %>
+ <label>
+ <span data-transaction-form-target="fromAccountHelper">
+ <%= t('ui.transaction.form.from_account_helper') %>
+ </span>
+ </label>
+ </div>
 
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text" data-transaction-form-target="toAccountLabel">
-                <%= t('ui.transaction.form.to_account_label') %>
-              </span>
-            </label>
-            <%= form.collection_select :to_account_id, 
-                  @accounts || Account.includes(:account_type).order(:name), 
-                  :id, 
-                  ->(account) { "#{account.name} (#{account.account_type.name})" },
-                  { prompt: "Selecione a conta" }, 
-                  { 
-                    class: "select select-bordered w-full",
-                    data: { 
-                      transaction_form_target: "toAccount",
-                      action: "change->transaction-form#handleToAccountChange"
-                    }
-                  } %>
-            <label class="label">
-              <span class="label-text-alt" data-transaction-form-target="toAccountHelper">
-                <%= t('ui.transaction.form.to_account_helper') %>
-              </span>
-            </label>
-          </div>
-        </div>
+ <div>
+ <label>
+ <span data-transaction-form-target="toAccountLabel">
+ <%= t('ui.transaction.form.to_account_label') %>
+ </span>
+ </label>
+ <%= form.collection_select :to_account_id, 
+ @accounts || Account.includes(:account_type).order(:name), 
+ :id, 
+ ->(account) { "#{account.name} (#{account.account_type.name})" },
+ { prompt: "Selecione a conta" }, 
+ { 
+ class: "select select-bordered w-full",
+ data: { 
+ transaction_form_target: "toAccount",
+ action: "change->transaction-form#handleToAccountChange"
+ }
+ } %>
+ <label>
+ <span data-transaction-form-target="toAccountHelper">
+ <%= t('ui.transaction.form.to_account_helper') %>
+ </span>
+ </label>
+ </div>
+ </div>
 
-        <!-- Payment Date (conditional) -->
-        <div data-transaction-form-target="paymentDateSection" class="form-control mt-4">
-          <label class="label">
-            <span class="label-text">💳 <%= t('ui.transaction.form.payment_date_label') %></span>
-            <span class="label-text-alt text-base-content/60"><%= t('ui.transaction.form.payment_date_helper_caixa') %></span>
-          </label>
-          <%= form.date_field :payment_date, 
-                class: "input input-bordered w-full", 
-                data: { transaction_form_target: "paymentDate" } %>
-          <label class="label">
-            <span class="label-text-alt" data-transaction-form-target="paymentDateHelper">
-              <%= t('ui.transaction.form.payment_date_helper') %>
-            </span>
-          </label>
-        </div>
+ <!-- Payment Date (conditional) -->
+ <div data-transaction-form-target="paymentDateSection">
+ <label>
+ <span>💳 <%= t('ui.transaction.form.payment_date_label') %></span>
+ <span><%= t('ui.transaction.form.payment_date_helper_caixa') %></span>
+ </label>
+ <%= form.date_field :payment_date, 
+ class: "input input-bordered w-full", 
+ data: { transaction_form_target: "paymentDate" } %>
+ <label>
+ <span data-transaction-form-target="paymentDateHelper">
+ <%= t('ui.transaction.form.payment_date_helper') %>
+ </span>
+ </label>
+ </div>
 
-        <!-- Credit Card Info (conditional) -->
-        <div data-transaction-form-target="creditCardInfo" class="hidden">
-          <div class="alert alert-info mt-4">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <div>
-              <h4 class="font-bold"><%= t('ui.transaction.credit_card.title') %></h4>
-              <div class="text-sm" data-transaction-form-target="creditCardDetails">
-                <%= t('ui.transaction.credit_card.auto_association') %>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+ <!-- Credit Card Info (conditional) -->
+ <div data-transaction-form-target="creditCardInfo" >
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+ <div>
+ <h4><%= t('ui.transaction.credit_card.title') %></h4>
+ <div data-transaction-form-target="creditCardDetails">
+ <%= t('ui.transaction.credit_card.auto_association') %>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <!-- Category and Classification -->
-    <div class="card bg-base-100 shadow-sm border border-base-300" data-transaction-form-target="categorySection">
-      <div class="card-body">
-        <h3 class="card-title text-lg mb-4">🏷️ <%= t('ui.transaction.form.categorization') %></h3>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="lg:col-span-2">
-            <%= form_select_group(form, :category_id, 
-                  @categories || Category.order(:name), 
-                  :id, 
-                  :name, 
-                  label: t('activerecord.attributes.transaction.category'),
-                  data: { 
-                    transaction_form_target: "category",
-                    action: "change->transaction-form#handleCategoryChange"
-                  }) %>
-          </div>
-        </div>
+ <!-- Category and Classification -->
+ <div data-transaction-form-target="categorySection">
+ <div>
+ <h3>🏷️ <%= t('ui.transaction.form.categorization') %></h3>
+ <div>
+ <div>
+ <%= form_select_group(form, :category_id, 
+ @categories || Category.order(:name), 
+ :id, 
+ :name, 
+ label: t('activerecord.attributes.transaction.category'),
+ data: { 
+ transaction_form_target: "category",
+ action: "change->transaction-form#handleCategoryChange"
+ }) %>
+ </div>
+ </div>
 
-        <!-- Category suggestions -->
-        <div data-transaction-form-target="categorySuggestions" class="hidden mt-3">
-          <div class="text-sm text-base-content/60 mb-2">💡 <%= t('ui.transaction.suggestions.title') %></div>
-          <div class="flex flex-wrap gap-2" data-transaction-form-target="suggestionButtons">
-            <!-- Suggestions will be populated by JavaScript -->
-          </div>
-        </div>
-      </div>
-    </div>
+ <!-- Category suggestions -->
+ <div data-transaction-form-target="categorySuggestions" >
+ <div>💡 <%= t('ui.transaction.suggestions.title') %></div>
+ <div data-transaction-form-target="suggestionButtons">
+ <!-- Suggestions will be populated by JavaScript -->
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <!-- Recurrence Type Selection -->
-    <div class="card bg-base-100 shadow-sm border border-base-300" data-controller="recurrence">
-      <div class="card-body">
-        <h3 class="card-title text-lg mb-4">🔄 Configurações de Repetição</h3>
-        
-        <!-- Checkbox para ativar repetição -->
-        <div class="form-control">
-          <label class="label cursor-pointer justify-start gap-3">
-            <input type="checkbox" 
-                   class="checkbox checkbox-primary" 
-                   data-recurrence-target="repeatCheckbox"
-                   data-action="change->recurrence#handleRepeatToggle">
-            <span class="label-text font-medium">📅 Repetir este lançamento?</span>
-          </label>
-          <div class="text-sm text-base-content/60 ml-8 mt-1">
-            Marque esta opção para gastos recorrentes ou parcelamentos
-          </div>
-        </div>
+ <!-- Recurrence Type Selection -->
+ <div data-controller="recurrence">
+ <div>
+ <h3>🔄 Configurações de Repetição</h3>
+ 
+ <!-- Checkbox para ativar repetição -->
+ <div>
+ <label>
+ <input type="checkbox" 
+ 
+ data-recurrence-target="repeatCheckbox"
+ data-action="change->recurrence#handleRepeatToggle">
+ <span>📅 Repetir este lançamento?</span>
+ </label>
+ <div>
+ Marque esta opção para gastos recorrentes ou parcelamentos
+ </div>
+ </div>
 
-        <!-- Opções de repetição (aparecem quando checkbox marcado) -->
-        <div data-recurrence-target="repeatOptions" class="hidden mt-4">
-          <div class="space-y-3">
-            <!-- Compromisso Recorrente -->
-            <div class="form-control">
-              <label class="label cursor-pointer justify-start gap-3 p-3 border border-base-300 rounded-lg hover:bg-base-50 transition-colors">
-                <input type="radio" 
-                       name="repeat_type" 
-                       value="recurring" 
-                       class="radio radio-primary flex-shrink-0" 
-                       data-recurrence-target="repeatType"
-                       data-action="change->recurrence#handleTypeChange">
-                <div class="flex-1">
-                  <div class="font-semibold">🔄 Compromisso Recorrente</div>
-                  <div class="text-sm text-base-content/60">Gastos que se repetem regularmente como aluguel, assinaturas</div>
-                </div>
-              </label>
-            </div>
+ <!-- Opções de repetição (aparecem quando checkbox marcado) -->
+ <div data-recurrence-target="repeatOptions" >
+ <div>
+ <!-- Compromisso Recorrente -->
+ <div>
+ <label>
+ <input type="radio" 
+ name="repeat_type" 
+ value="recurring" 
+ 
+ data-recurrence-target="repeatType"
+ data-action="change->recurrence#handleTypeChange">
+ <div>
+ <div>🔄 Compromisso Recorrente</div>
+ <div>Gastos que se repetem regularmente como aluguel, assinaturas</div>
+ </div>
+ </label>
+ </div>
 
-            <!-- Parcelamento -->
-            <div class="form-control">
-              <label class="label cursor-pointer justify-start gap-3 p-3 border border-base-300 rounded-lg hover:bg-base-50 transition-colors">
-                <input type="radio" 
-                       name="repeat_type" 
-                       value="installment" 
-                       class="radio radio-primary flex-shrink-0" 
-                       data-recurrence-target="repeatType"
-                       data-action="change->recurrence#handleTypeChange">
-                <div class="flex-1">
-                  <div class="font-semibold">📊 Parcelamento</div>
-                  <div class="text-sm text-base-content/60">Compras divididas em parcelas fixas</div>
-                </div>
-              </label>
-            </div>
-          </div>
-        </div>
+ <!-- Parcelamento -->
+ <div>
+ <label>
+ <input type="radio" 
+ name="repeat_type" 
+ value="installment" 
+ 
+ data-recurrence-target="repeatType"
+ data-action="change->recurrence#handleTypeChange">
+ <div>
+ <div>📊 Parcelamento</div>
+ <div>Compras divididas em parcelas fixas</div>
+ </div>
+ </label>
+ </div>
+ </div>
+ </div>
 
-        <!-- Campo hidden para manter compatibilidade -->
-        <%= form.hidden_field :recurrence_type, value: "single", data: { recurrence_target: "hiddenType" } %>
+ <!-- Campo hidden para manter compatibilidade -->
+ <%= form.hidden_field :recurrence_type, value: "single", data: { recurrence_target: "hiddenType" } %>
 
-        <!-- Recurring Commitment Section -->
-        <div data-recurrence-target="recurringSection" class="space-y-4 mt-4 hidden">
-          <div class="alert alert-info">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <div>
-              <h4 class="font-bold">🔄 Compromisso Recorrente</h4>
-              <div class="text-sm">
-                Esta transação criará um compromisso recorrente que gerará automaticamente lançamentos futuros com valor fixo.
-              </div>
-            </div>
-          </div>
+ <!-- Recurring Commitment Section -->
+ <div data-recurrence-target="recurringSection" >
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+ </svg>
+ <div>
+ <h4>🔄 Compromisso Recorrente</h4>
+ <div>
+ Esta transação criará um compromisso recorrente que gerará automaticamente lançamentos futuros com valor fixo.
+ </div>
+ </div>
+ </div>
 
-          <div class="form-control max-w-xs">
-            <label class="label">
-              <span class="label-text">📊 Frequência de repetição</span>
-            </label>
-            <%= form.select :recurrence_frequency, 
-                  options_for_select([
-                    ["Mensal", "monthly"],
-                    ["Semanal", "weekly"],
-                    ["Anual", "yearly"]
-                  ]), 
-                  { prompt: "Selecione a frequência" }, 
-                  { 
-                    class: "select select-bordered w-full",
-                    data: { recurrence_target: "frequency" }
-                  } %>
-          </div>
+ <div>
+ <label>
+ <span>📊 Frequência de repetição</span>
+ </label>
+ <%= form.select :recurrence_frequency, 
+ options_for_select([
+ ["Mensal", "monthly"],
+ ["Semanal", "weekly"],
+ ["Anual", "yearly"]
+ ]), 
+ { prompt: "Selecione a frequência" }, 
+ { 
+ class: "select select-bordered w-full",
+ data: { recurrence_target: "frequency" }
+ } %>
+ </div>
 
-          <!-- Hidden fields for recurring commitment -->
-          <%= hidden_field_tag :create_recurring_commitment, "", data: { recurrence_target: "createRecurring" } %>
-        </div>
+ <!-- Hidden fields for recurring commitment -->
+ <%= hidden_field_tag :create_recurring_commitment, "", data: { recurrence_target: "createRecurring" } %>
+ </div>
 
-        <!-- Installment Plan Section -->
-        <div data-recurrence-target="installmentSection" class="space-y-4 mt-4 hidden">
-          <% if transaction.installment_plan_id.present? %>
-            <!-- Existing installment plan info -->
-            <div class="alert alert-info">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <div>
-                <h4 class="font-bold"><%= t('ui.transaction.installments.existing_plan') %></h4>
-                <div class="text-sm">
-                  <%= t('ui.transaction.installments.existing_description', 
-                        current: transaction.installment_number || 1, 
-                        total: transaction.installment_plan&.installment_count || 1) %>
-                  <% if transaction.installment_plan&.total_amount.present? %>
-                    <br><%= t('ui.transaction.installments.total_value', amount: format_money_unified(transaction.installment_plan.total_amount)) %>
-                  <% end %>
-                </div>
-              </div>
-            </div>
-          <% else %>
-            <!-- New installment plan creation -->
-            <div class="alert alert-info">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <div>
-                <h4 class="font-bold">📊 Criação de Parcelamento</h4>
-                <div class="text-sm">
-                  O valor total será dividido automaticamente em parcelas mensais iguais a partir da data do evento.
-                </div>
-              </div>
-            </div>
+ <!-- Installment Plan Section -->
+ <div data-recurrence-target="installmentSection" >
+ <% if transaction.installment_plan_id.present? %>
+ <!-- Existing installment plan info -->
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+ </svg>
+ <div>
+ <h4><%= t('ui.transaction.installments.existing_plan') %></h4>
+ <div>
+ <%= t('ui.transaction.installments.existing_description', 
+ current: transaction.installment_number || 1, 
+ total: transaction.installment_plan&.installment_count || 1) %>
+ <% if transaction.installment_plan&.total_amount.present? %>
+ <br><%= t('ui.transaction.installments.total_value', amount: format_money_unified(transaction.installment_plan.total_amount)) %>
+ <% end %>
+ </div>
+ </div>
+ </div>
+ <% else %>
+ <!-- New installment plan creation -->
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+ </svg>
+ <div>
+ <h4>📊 Criação de Parcelamento</h4>
+ <div>
+ O valor total será dividido automaticamente em parcelas mensais iguais a partir da data do evento.
+ </div>
+ </div>
+ </div>
 
-            <div class="form-control max-w-xs">
-              <label class="label">
-                <span class="label-text">📅 Número de parcelas</span>
-              </label>
-              <%= number_field_tag :installment_count, "", 
-                    placeholder: "Ex: 10", 
-                    min: 2,
-                    max: 60,
-                    class: "input input-bordered w-full",
-                    data: { 
-                      recurrence_target: "installmentsCount",
-                      action: "input->recurrence#calculateInstallment keyup->recurrence#calculateInstallment"
-                    } %>
-              <label class="label">
-                <span class="label-text-alt">Entre 2 e 60 parcelas</span>
-              </label>
-            </div>
+ <div>
+ <label>
+ <span>📅 Número de parcelas</span>
+ </label>
+ <%= number_field_tag :installment_count, "", 
+ placeholder: "Ex: 10", 
+ min: 2,
+ max: 60,
+ class: "input input-bordered w-full",
+ data: { 
+ recurrence_target: "installmentsCount",
+ action: "input->recurrence#calculateInstallment keyup->recurrence#calculateInstallment"
+ } %>
+ <label>
+ <span>Entre 2 e 60 parcelas</span>
+ </label>
+ </div>
 
-            <!-- Preview das parcelas -->
-            <div data-recurrence-target="installmentPreview" class="hidden">
-              <div class="divider text-sm">📋 Resumo do Parcelamento</div>
-              <div class="bg-base-200 rounded-lg p-3 transition-all duration-300">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-                  <div>
-                    <div class="text-xl font-bold text-primary" data-recurrence-target="installmentValue">R$ 0,00</div>
-                    <div class="text-xs text-base-content/60">Valor por parcela</div>
-                  </div>
-                  <div>
-                    <div class="text-xl font-bold text-secondary" data-recurrence-target="firstDate">-</div>
-                    <div class="text-xs text-base-content/60">Primeira parcela</div>
-                  </div>
-                  <div>
-                    <div class="text-xl font-bold text-accent" data-recurrence-target="lastDate">-</div>
-                    <div class="text-xs text-base-content/60">Última parcela</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+ <!-- Preview das parcelas -->
+ <div data-recurrence-target="installmentPreview" >
+ <div>📋 Resumo do Parcelamento</div>
+ <div>
+ <div>
+ <div>
+ <div data-recurrence-target="installmentValue">R$ 0,00</div>
+ <div>Valor por parcela</div>
+ </div>
+ <div>
+ <div data-recurrence-target="firstDate">-</div>
+ <div>Primeira parcela</div>
+ </div>
+ <div>
+ <div data-recurrence-target="lastDate">-</div>
+ <div>Última parcela</div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-            <!-- Hidden fields for installment plan -->
-            <%= hidden_field_tag :create_installment_plan, "", data: { recurrence_target: "createInstallment" } %>
-          <% end %>
-        </div>
-      </div>
-    </div>
+ <!-- Hidden fields for installment plan -->
+ <%= hidden_field_tag :create_installment_plan, "", data: { recurrence_target: "createInstallment" } %>
+ <% end %>
+ </div>
+ </div>
+ </div>
 
-    <!-- Hidden field to preserve status -->
-    <%= form.hidden_field :status, value: transaction.status || "confirmed" %>
+ <!-- Hidden field to preserve status -->
+ <%= form.hidden_field :status, value: transaction.status || "confirmed" %>
 
-    <!-- Action Buttons -->
-    <div class="flex justify-end gap-3 pt-4">
-      <%= link_to "Cancelar", transactions_path, 
-            class: "btn btn-ghost" %>
-      <%= form.submit transaction.persisted? ? "Atualizar Transação" : "Criar Transação", 
-            class: "btn btn-primary",
-            data: { transaction_form_target: "submitButton" } %>
-    </div>
-  </div>
+ <!-- Action Buttons -->
+ <div>
+ <%= link_to "Cancelar", transactions_path, 
+  %>
+ <%= form.submit transaction.persisted? ? "Atualizar Transação" : "Criar Transação", 
+ 
+ data: { transaction_form_target: "submitButton" } %>
+ </div>
+ </div>
 
-  <!-- Hidden data for JavaScript -->
-  <script type="application/json" data-transaction-form-target="accountData">
-    <%= raw (@accounts || Account.includes(:account_type)).map { |account| {
-      id: account.id,
-      name: account.name,
-      type_code: account.account_type.code,
-      type_name: account.account_type.name,
-      closing_day: account.closing_day,
-      due_day: account.due_day
-    }}.to_json %>
-  </script>
+ <!-- Hidden data for JavaScript -->
+ <script type="application/json" data-transaction-form-target="accountData">
+ <%= raw (@accounts || Account.includes(:account_type)).map { |account| {
+ id: account.id,
+ name: account.name,
+ type_code: account.account_type.code,
+ type_name: account.account_type.name,
+ closing_day: account.closing_day,
+ due_day: account.due_day
+ }}.to_json %>
+ </script>
 
-  <script type="application/json" data-transaction-form-target="categoryData">
-    <%= raw (@categories || Category.order(:name)).map { |category| {
-      id: category.id,
-      name: category.name,
-      category_type: category.category_type
-    }}.to_json %>
-  </script>
+ <script type="application/json" data-transaction-form-target="categoryData">
+ <%= raw (@categories || Category.order(:name)).map { |category| {
+ id: category.id,
+ name: category.name,
+ category_type: category.category_type
+ }}.to_json %>
+ </script>
 <% end %>

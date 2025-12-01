@@ -1,32 +1,32 @@
-<h1 class="text-3xl font-bold mb-6"><%= t('activerecord.models.account_type.other') %></h1>
-<p class="text-sm text-base-content/60 mb-4"><%= t('ui.account_type.index.description') %></p>
+<h1><%= t('activerecord.models.account_type.other') %></h1>
+<p><%= t('ui.account_type.index.description') %></p>
 
-<div class="flex justify-between items-center mb-4">  <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.account_type.one'), new_account_type_path, class: "btn btn-primary" %>
+<div> <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.account_type.one'), new_account_type_path %>
 </div>
 
-<div class="bg-base-100 rounded-box shadow overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="table table-zebra w-full">
-      <thead class="bg-base-200">
-        <tr>
-          <th><%= t('activerecord.attributes.account_type.code') %></th>
-          <th><%= t('activerecord.attributes.account_type.name') %></th>
-          <th><%= t('activerecord.attributes.account_type.role') %></th>
-          <th class="text-right"><%= t('ui.actions.title') %></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @account_types.each do |type| %>
-          <tr>
-            <td><%= type.code %></td>
-            <td><%= type.name %></td>
-            <td><%= type.role %></td>
-            <td class="text-right">
-              <%= link_to 'Editar', edit_account_type_path(type), class: "link link-primary" %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
+<div>
+ <div>
+ <table>
+ <thead>
+ <tr>
+ <th><%= t('activerecord.attributes.account_type.code') %></th>
+ <th><%= t('activerecord.attributes.account_type.name') %></th>
+ <th><%= t('activerecord.attributes.account_type.role') %></th>
+ <th><%= t('ui.actions.title') %></th>
+ </tr>
+ </thead>
+ <tbody>
+ <% @account_types.each do |type| %>
+ <tr>
+ <td><%= type.code %></td>
+ <td><%= type.name %></td>
+ <td><%= type.role %></td>
+ <td>
+ <%= link_to 'Editar', edit_account_type_path(type), class: "link link-primary" %>
+ </td>
+ </tr>
+ <% end %>
+ </tbody>
+ </table>
+ </div>
 </div>

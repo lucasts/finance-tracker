@@ -1,32 +1,31 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="orzeny">
-  <head>
-    <title><%= content_for(:title) || "#{t('app.name')} - #{t('app.tagline')}" %></title>
-    <meta name="description" content="<%= content_for(:description) || "#{t('app.name')} - #{t('app.tagline')} Sistema completo de gestão financeira familiar com controle de cartões, parcelamentos e fluxo de caixa." %>">
-    <meta name="keywords" content="gestão financeira, controle de gastos, orçamento familiar, cartão de crédito, parcelamentos, fluxo de caixa">
-    <meta name="author" content="Orzeny">
-    <meta property="og:title" content="<%= content_for(:title) || "#{t('app.name')} - #{t('app.tagline')}" %>">
-    <meta property="og:description" content="<%= content_for(:description) || "Sistema completo de gestão financeira familiar" %>">
-    <meta property="og:image" content="<%= asset_url('full_logo_orzeny.png') %>">
-    <meta property="og:type" content="website">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="icon" type="image/png" href="/logo-min.png">
-    <link rel="apple-touch-icon" href="/logo-min.png">
-    <link rel="shortcut icon" href="/logo-min.png">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
+ <head>
+ <title><%= content_for(:title) || "#{t('app.name')} - #{t('app.tagline')}" %></title>
+ <meta name="description" content="<%= content_for(:description) || "#{t('app.name')} - #{t('app.tagline')} Sistema completo de gestão financeira familiar com controle de cartões, parcelamentos e fluxo de caixa." %>">
+ <meta name="keywords" content="gestão financeira, controle de gastos, orçamento familiar, cartão de crédito, parcelamentos, fluxo de caixa">
+ <meta name="author" content="Orzeny">
+ <meta property="og:title" content="<%= content_for(:title) || "#{t('app.name')} - #{t('app.tagline')}" %>">
+ <meta property="og:description" content="<%= content_for(:description) || "Sistema completo de gestão financeira familiar" %>">
+ <meta property="og:image" content="<%= asset_url('full_logo_orzeny.png') %>">
+ <meta property="og:type" content="website">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <link rel="icon" type="image/png" href="/logo-min.png">
+ <link rel="apple-touch-icon" href="/logo-min.png">
+ <link rel="shortcut icon" href="/logo-min.png">
+ <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+ <%= csrf_meta_tags %>
+ <%= csp_meta_tag %>
+ <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+ <%= javascript_importmap_tags %>
+ </head>
 
-  <body class="bg-base-200 text-base-content min-h-screen flex flex-col">
-    <%= render 'shared/navbar' %>
-    <div class="container mx-auto px-4 py-6 flex-1">
-      <%= render 'shared/flash' %>
-      <%= yield %>
-    </div>
-    <%= render 'shared/footer' %>
-  </body>
+ <body>
+ <%= render 'shared/navbar' %>
+ <div>
+ <%= render 'shared/flash' %>
+ <%= yield %>
+ </div>
+ <%= render 'shared/footer' %>
+ </body>
 </html>

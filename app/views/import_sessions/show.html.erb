@@ -1,346 +1,346 @@
-<div class="container mx-auto px-4 py-8">
-  <!-- Header -->
-  <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-8">
-    <div>
-      <div class="breadcrumbs text-sm mb-2">
-        <ul>
-          <li><%= link_to "Importações", import_sessions_path, class: "link link-hover" %></li>
-          <li class="text-base-content/70">Detalhes da Importação</li>
-        </ul>
-      </div>
-      <h1 class="text-3xl font-bold text-base-content flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <%= @import_session.original_filename %>
-      </h1>
-    </div>
-    
-    <!-- Status badge -->
-    <div class="flex gap-2">
-      <% if @import_session.imported_at %>
-        <div class="badge badge-success badge-lg gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          Concluída
-        </div>
-      <% else %>
-        <div class="badge badge-warning badge-lg gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Pendente
-        </div>
-      <% end %>
-    </div>
-  </div>
+<div>
+ <!-- Header -->
+ <div>
+ <div>
+ <div>
+ <ul>
+ <li><%= link_to "Importações", import_sessions_path, class: "link link-hover" %></li>
+ <li>Detalhes da Importação</li>
+ </ul>
+ </div>
+ <h1>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+ </svg>
+ <%= @import_session.original_filename %>
+ </h1>
+ </div>
+ 
+ <!-- Status badge -->
+ <div>
+ <% if @import_session.imported_at %>
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+ </svg>
+ Concluída
+ </div>
+ <% else %>
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ Pendente
+ </div>
+ <% end %>
+ </div>
+ </div>
 
-  <!-- Cards de informação -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-    <!-- Informações básicas -->
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h2 class="card-title text-base-content/80">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Informações
-        </h2>
-        <div class="space-y-3">
-          <div class="flex justify-between">
-            <span class="text-base-content/70">Tipo:</span>
-            <div class="badge badge-outline"><%= @import_session.source_type.upcase %></div>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-base-content/70">Conta:</span>
-            <span class="font-medium"><%= @import_session.account&.name %></span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-base-content/70">Importado em:</span>
-            <span class="font-medium"><%= l(@import_session.created_at, format: :short) %></span>
-          </div>
-          <% if @import_session.imported_at %>
-            <div class="flex justify-between">
-              <span class="text-base-content/70">Finalizado em:</span>
-              <span class="font-medium text-success"><%= l(@import_session.imported_at, format: :short) %></span>
-            </div>
-          <% end %>
-          <div class="flex justify-between">
-            <span class="text-base-content/70">Tamanho:</span>
-            <span class="font-medium"><%= file_size_human(@import_session.file_size) %></span>
-          </div>
-        </div>
-      </div>
-    </div>
+ <!-- Cards de informação -->
+ <div>
+ <!-- Informações básicas -->
+ <div>
+ <div>
+ <h2>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ Informações
+ </h2>
+ <div>
+ <div>
+ <span>Tipo:</span>
+ <div><%= @import_session.source_type.upcase %></div>
+ </div>
+ <div>
+ <span>Conta:</span>
+ <span><%= @import_session.account&.name %></span>
+ </div>
+ <div>
+ <span>Importado em:</span>
+ <span><%= l(@import_session.created_at, format: :short) %></span>
+ </div>
+ <% if @import_session.imported_at %>
+ <div>
+ <span>Finalizado em:</span>
+ <span><%= l(@import_session.imported_at, format: :short) %></span>
+ </div>
+ <% end %>
+ <div>
+ <span>Tamanho:</span>
+ <span><%= file_size_human(@import_session.file_size) %></span>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <!-- Estatísticas -->
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h2 class="card-title text-base-content/80">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          Estatísticas
-        </h2>
-        <div class="space-y-3">
-          <div class="flex justify-between">
-            <span class="text-base-content/70">Total de linhas:</span>
-            <span class="font-bold text-primary"><%= @imported_transactions.count %></span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-base-content/70">Conciliadas:</span>
-            <span class="font-bold text-success">
-              <%= @imported_transactions.joins(:reconciliation_entry).where.not(reconciliation_entries: { action: nil }).count %>
-            </span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-base-content/70">Pendentes:</span>
-            <span class="font-bold text-warning">
-              <%= @imported_transactions.left_joins(:reconciliation_entry).where(reconciliation_entries: { id: nil }).count %>
-            </span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-base-content/70">Possíveis duplicadas:</span>
-            <span class="font-bold text-error">
-              <%= @imported_transactions.where(possible_duplicate: true).count %>
-            </span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-base-content/70">Transferências candidatas:</span>
-            <span class="font-bold text-info">
-              <%= @imported_transactions.where(transfer_candidate: true).count %>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
+ <!-- Estatísticas -->
+ <div>
+ <div>
+ <h2>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+ </svg>
+ Estatísticas
+ </h2>
+ <div>
+ <div>
+ <span>Total de linhas:</span>
+ <span><%= @imported_transactions.count %></span>
+ </div>
+ <div>
+ <span>Conciliadas:</span>
+ <span>
+ <%= @imported_transactions.joins(:reconciliation_entry).where.not(reconciliation_entries: { action: nil }).count %>
+ </span>
+ </div>
+ <div>
+ <span>Pendentes:</span>
+ <span>
+ <%= @imported_transactions.left_joins(:reconciliation_entry).where(reconciliation_entries: { id: nil }).count %>
+ </span>
+ </div>
+ <div>
+ <span>Possíveis duplicadas:</span>
+ <span>
+ <%= @imported_transactions.where(possible_duplicate: true).count %>
+ </span>
+ </div>
+ <div>
+ <span>Transferências candidatas:</span>
+ <span>
+ <%= @imported_transactions.where(transfer_candidate: true).count %>
+ </span>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <!-- Progresso -->
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h2 class="card-title text-base-content/80">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          Progresso
-        </h2>
-        <% 
-          total = @imported_transactions.count
-          conciliadas = @imported_transactions.joins(:reconciliation_entry).where.not(reconciliation_entries: { action: nil }).count
-          progresso = total > 0 ? (conciliadas.to_f / total * 100).round : 0
-        %>
-        <div class="space-y-2">
-          <div class="flex justify-between text-sm">
-            <span>Conciliação</span>
-            <span><%= progresso %>%</span>
-          </div>
-          <progress class="progress progress-primary w-full" value="<%= progresso %>" max="100"></progress>
-          <div class="text-xs text-base-content/60">
-            <%= conciliadas %> de <%= total %> transações processadas
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+ <!-- Progresso -->
+ <div>
+ <div>
+ <h2>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+ </svg>
+ Progresso
+ </h2>
+ <% 
+ total = @imported_transactions.count
+ conciliadas = @imported_transactions.joins(:reconciliation_entry).where.not(reconciliation_entries: { action: nil }).count
+ progresso = total > 0 ? (conciliadas.to_f / total * 100).round : 0
+ %>
+ <div>
+ <div>
+ <span>Conciliação</span>
+ <span><%= progresso %>%</span>
+ </div>
+ <progress value="<%= progresso %>" max="100"></progress>
+ <div>
+ <%= conciliadas %> de <%= total %> transações processadas
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-  <!-- Tabela de transações -->
-  <div class="card bg-base-100 shadow-xl">
-    <div class="card-header">
-      <div class="card-title flex justify-between items-center p-6 pb-0">
-        <h2 class="text-xl font-bold flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-          Transações Importadas
-        </h2>
-        <div class="text-sm text-base-content/70">
-          <%= @imported_transactions.count %> registros
-        </div>
-      </div>
-    </div>
-    
-    <div class="card-body p-0">
-      <% if @imported_transactions.any? %>
-        <div class="overflow-x-auto">
-          <table class="table table-zebra">
-            <thead>
-              <tr class="bg-base-200">
-                <th class="font-semibold">#</th>
-                <th class="font-semibold">Descrição</th>
-                <th class="font-semibold">Valor</th>
-                <th class="font-semibold">Data</th>
-                <th class="font-semibold">Status</th>
-                <th class="font-semibold">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% @imported_transactions.each do |tx| %>
-                <tr class="hover <%= 'bg-warning/10' if tx.possible_duplicate %> <%= 'bg-info/10' if tx.transfer_candidate %>">
-                  <td>
-                    <div class="flex items-center gap-2">
-                      <div class="badge badge-neutral badge-sm"><%= tx.line_number %></div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="max-w-xs truncate" title="<%= tx.description %>">
-                      <span class="font-medium"><%= tx.description %></span>
-                      <% if tx.possible_duplicate %>
-                        <div class="mt-1">
-                          <span class="badge badge-error badge-xs gap-1" title="Transação potencialmente duplicada com base em heurísticas de similaridade (valor/data)">
-                            <!-- Ícone de alerta -->
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-2.5L13.73 5c-.77-.83-1.96-.83-2.73 0L3.34 16.5c-.77.83.19 2.5 1.73 2.5z" />
-                            </svg>
-                            Suspeita de duplicata
-                          </span>
-                        </div>
-                      <% end %>
-                      <% if tx.transfer_candidate %>
-                        <div class="mt-1">
-                          <span class="badge badge-info badge-xs gap-1" title="Possível transferência entre contas. Valor e data similares encontrados em outra conta.">
-                            <!-- Ícone de transferência -->
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                            </svg>
-                            Transferência candidata
-                          </span>
-                        </div>
-                      <% end %>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="font-mono font-semibold <%= tx.amount && tx.amount >= 0 ? 'text-success' : 'text-error' %>">
-                      <%= tx.amount.nil? ? '-' : format_money_unified(tx.amount) %>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="text-sm">
-                      <%= l(tx.event_date, format: :short) if tx.event_date %>
-                    </div>
-                  </td>
-                  <td>
-                    <% if tx.reconciliation_entry&.action == 'create_new' && tx.reconciliation_entry&.linked_transaction %>
-                      <div class="badge badge-success gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Nova criada
-                      </div>
-                    <% elsif tx.reconciliation_entry&.action == 'associate' %>
-                      <div class="badge badge-info gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                        Associada
-                      </div>
-                    <% elsif tx.reconciliation_entry&.action == 'ignore' %>
-                      <div class="badge badge-warning gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
-                        </svg>
-                        Ignorada
-                      </div>
-                    <% else %>
-                      <div class="badge badge-neutral gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Pendente
-                      </div>
-                    <% end %>
-                  </td>
-                  <td>
-                    <div class="flex gap-1">
-                      <% if tx.reconciliation_entry&.linked_transaction %>
-                        <%= link_to transaction_path(tx.reconciliation_entry.linked_transaction), 
-                            class: "btn btn-sm btn-outline gap-1", 
-                            title: "Ver transação criada/associada" do %>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                          Ver
-                        <% end %>
-                      <% else %>
-                        <%= link_to edit_import_session_imported_transaction_path(@import_session, tx), 
-                            class: "btn btn-sm btn-primary gap-1", 
-                            title: "Conciliar transação" do %>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                          Conciliar
-                        <% end %>
-                      <% end %>
-                    </div>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-      <% else %>
-        <div class="hero py-16">
-          <div class="hero-content text-center">
-            <div class="max-w-md">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-base-content/30 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <h3 class="text-lg font-bold mb-2">Nenhuma transação importada</h3>
-              <p class="text-base-content/70">
-                Não foram encontradas transações neste arquivo de importação.
-              </p>
-            </div>
-          </div>
-        </div>
-      <% end %>
-    </div>
-  </div>
+ <!-- Tabela de transações -->
+ <div>
+ <div>
+ <div>
+ <h2>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+ </svg>
+ Transações Importadas
+ </h2>
+ <div>
+ <%= @imported_transactions.count %> registros
+ </div>
+ </div>
+ </div>
+ 
+ <div>
+ <% if @imported_transactions.any? %>
+ <div>
+ <table>
+ <thead>
+ <tr>
+ <th>#</th>
+ <th>Descrição</th>
+ <th>Valor</th>
+ <th>Data</th>
+ <th>Status</th>
+ <th>Ações</th>
+ </tr>
+ </thead>
+ <tbody>
+ <% @imported_transactions.each do |tx| %>
+ <tr class="hover <%= if tx.possible_duplicate %> <%= if tx.transfer_candidate %>">
+ <td>
+ <div>
+ <div><%= tx.line_number %></div>
+ </div>
+ </td>
+ <td>
+ <div title="<%= tx.description %>">
+ <span><%= tx.description %></span>
+ <% if tx.possible_duplicate %>
+ <div>
+ <span title="Transação potencialmente duplicada com base em heurísticas de similaridade (valor/data)">
+ <!-- Ícone de alerta -->
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-2.5L13.73 5c-.77-.83-1.96-.83-2.73 0L3.34 16.5c-.77.83.19 2.5 1.73 2.5z" />
+ </svg>
+ Suspeita de duplicata
+ </span>
+ </div>
+ <% end %>
+ <% if tx.transfer_candidate %>
+ <div>
+ <span title="Possível transferência entre contas. Valor e data similares encontrados em outra conta.">
+ <!-- Ícone de transferência -->
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+ </svg>
+ Transferência candidata
+ </span>
+ </div>
+ <% end %>
+ </div>
+ </td>
+ <td>
+ <div>
+ <%= tx.amount.nil? ? '-' : format_money_unified(tx.amount) %>
+ </div>
+ </td>
+ <td>
+ <div>
+ <%= l(tx.event_date, format: :short) if tx.event_date %>
+ </div>
+ </td>
+ <td>
+ <% if tx.reconciliation_entry&.action == 'create_new' && tx.reconciliation_entry&.linked_transaction %>
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+ </svg>
+ Nova criada
+ </div>
+ <% elsif tx.reconciliation_entry&.action == 'associate' %>
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+ </svg>
+ Associada
+ </div>
+ <% elsif tx.reconciliation_entry&.action == 'ignore' %>
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+ </svg>
+ Ignorada
+ </div>
+ <% else %>
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ Pendente
+ </div>
+ <% end %>
+ </td>
+ <td>
+ <div>
+ <% if tx.reconciliation_entry&.linked_transaction %>
+ <%= link_to transaction_path(tx.reconciliation_entry.linked_transaction), 
+  
+ title: "Ver transação criada/associada" do %>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+ </svg>
+ Ver
+ <% end %>
+ <% else %>
+ <%= link_to edit_import_session_imported_transaction_path(@import_session, tx), 
+  
+ title: "Conciliar transação" do %>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+ </svg>
+ Conciliar
+ <% end %>
+ <% end %>
+ </div>
+ </td>
+ </tr>
+ <% end %>
+ </tbody>
+ </table>
+ </div>
+ <% else %>
+ <div>
+ <div>
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+ </svg>
+ <h3>Nenhuma transação importada</h3>
+ <p>
+ Não foram encontradas transações neste arquivo de importação.
+ </p>
+ </div>
+ </div>
+ </div>
+ <% end %>
+ </div>
+ </div>
 
-  <!-- Footer com ações -->
-  <div class="flex justify-between items-center mt-8">
-    <%= link_to import_sessions_path, class: "btn btn-ghost gap-2" do %>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-      </svg>
-      Voltar às Importações
-    <% end %>
-    
-    <% 
-      # Calcula transações pendentes corretamente
-      total_transactions = @imported_transactions.count
-      reconciled_transactions = @imported_transactions.joins(:reconciliation_entry).where.not(reconciliation_entries: { action: nil }).count
-      pending_transactions = total_transactions - reconciled_transactions
-      has_pending = pending_transactions > 0
-    %>
-    
-    <% if has_pending %>
-      <div class="alert alert-warning max-w-md">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"/>
-        </svg>
-        <span class="text-sm">
-          <strong>Atenção:</strong> <%= pending_transactions %> transação(ões) pendente(s) de conciliação.
-        </span>
-      </div>
-    <% elsif !@import_session.imported_at %>
-      <div class="alert alert-info max-w-md">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <span class="text-sm">
-          <strong>Pronto!</strong> Todas as transações foram conciliadas. Pode finalizar a importação.
-        </span>
-      </div>
-    <% end %>
-    
-    <% if !has_pending && !@import_session.imported_at %>
-      <%= link_to confirm_import_session_path(@import_session), class: "btn btn-primary gap-2" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Finalizar Importação
-      <% end %>
-    <% end %>
-  </div>
+ <!-- Footer com ações -->
+ <div>
+ <%= link_to import_sessions_path do %>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+ </svg>
+ Voltar às Importações
+ <% end %>
+ 
+ <% 
+ # Calcula transações pendentes corretamente
+ total_transactions = @imported_transactions.count
+ reconciled_transactions = @imported_transactions.joins(:reconciliation_entry).where.not(reconciliation_entries: { action: nil }).count
+ pending_transactions = total_transactions - reconciled_transactions
+ has_pending = pending_transactions > 0
+ %>
+ 
+ <% if has_pending %>
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"/>
+ </svg>
+ <span>
+ <strong>Atenção:</strong> <%= pending_transactions %> transação(ões) pendente(s) de conciliação.
+ </span>
+ </div>
+ <% elsif !@import_session.imported_at %>
+ <div>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+ </svg>
+ <span>
+ <strong>Pronto!</strong> Todas as transações foram conciliadas. Pode finalizar a importação.
+ </span>
+ </div>
+ <% end %>
+ 
+ <% if !has_pending && !@import_session.imported_at %>
+ <%= link_to confirm_import_session_path(@import_session) do %>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ Finalizar Importação
+ <% end %>
+ <% end %>
+ </div>
 </div>
