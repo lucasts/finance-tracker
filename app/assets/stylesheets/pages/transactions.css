@@ -141,7 +141,7 @@ section.filters > header {
   margin-bottom: 0;
   
   &:hover h3 {
-    color: var(--color-primary);
+    color: var(--color-toasted-almond);
   }
 }
 

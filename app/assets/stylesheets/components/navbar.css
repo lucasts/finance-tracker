@@ -72,8 +72,8 @@ body > nav ul > li > a {
   position: relative;
   
   &:hover {
-    background: rgba(65, 65, 65, 0.04);
-    color: var(--color-primary);
+    background: rgba(232, 135, 69, 0.08);
+    color: var(--color-toasted-almond);
   }
   
   &[aria-current="page"] {
@@ -142,8 +142,8 @@ body > nav li[data-controller="dropdown"] summary {
   }
   
   &:hover {
-    background: rgba(65, 65, 65, 0.04);
-    color: var(--color-primary);
+    background: rgba(232, 135, 69, 0.08);
+    color: var(--color-toasted-almond);
   }
 }
 
@@ -359,8 +359,8 @@ body > nav > div:last-child > div:not(:has(label)) a:first-child {
   transition: all var(--transition-fast);
   
   &:hover {
-    background: rgba(65, 65, 65, 0.04);
-    color: var(--color-primary);
+    background: rgba(232, 135, 69, 0.08);
+    color: var(--color-toasted-almond);
   }
 }
 
