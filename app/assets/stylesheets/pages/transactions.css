@@ -1,0 +1,416 @@
+/*
+ * Transactions Page Styles
+ * Semantic, contextual styling following Braun principles
+ */
+
+/* ============================================
+   PAGE HEADER
+   ============================================ */
+
+body > div[data-controller="modal"] > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-8);
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+body > div[data-controller="modal"] > header h1 {
+  margin: 0;
+}
+
+/* ============================================
+   SUMMARY METRICS
+   ============================================ */
+
+section.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-8);
+}
+
+section.summary article.metric {
+  background-color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-5);
+  box-shadow: var(--shadow-base);
+}
+
+section.summary article.metric label {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-2);
+}
+
+section.summary article.metric data {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+}
+
+section.summary article.metric.income data {
+  color: var(--color-success);
+}
+
+section.summary article.metric.expense data {
+  color: var(--color-error);
+}
+
+section.summary article.metric.balance.positive data {
+  color: var(--color-success);
+}
+
+section.summary article.metric.balance.negative data {
+  color: var(--color-error);
+}
+
+/* ============================================
+   FILTERS SECTION
+   ============================================ */
+
+section.filters {
+  background-color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-8);
+  box-shadow: var(--shadow-base);
+}
+
+section.filters > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 0;
+  border: none;
+  background: none;
+  margin-bottom: 0;
+  
+  &:hover h3 {
+    color: var(--color-primary);
+  }
+}
+
+section.filters > header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  transition: color var(--transition-base);
+}
+
+section.filters > header svg {
+  color: var(--color-text-muted);
+  transition: transform var(--transition-base);
+}
+
+section.filters > header mark.active {
+  margin-left: var(--spacing-3);
+  background-color: var(--color-accent);
+  color: var(--color-white);
+  padding: 3px var(--spacing-3);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+section.filters > div[data-collapsible-target="content"] {
+  padding-top: var(--spacing-6);
+  border-top: var(--border-width-thin) solid var(--color-border);
+  margin-top: var(--spacing-5);
+}
+
+section.filters form fieldset {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+  border: none;
+  padding: 0;
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+section.filters form footer {
+  display: flex;
+  gap: var(--spacing-3);
+  border: none;
+  padding: 0;
+  background: none;
+}
+
+section.filters a.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3) var(--spacing-5);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  background-color: transparent;
+  color: var(--color-text);
+  border: var(--border-width-thick) solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-base);
+  
+  &:hover {
+    background-color: var(--color-gray-100);
+    border-color: var(--color-gray-300);
+    color: var(--color-text);
+  }
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+article.empty-state {
+  background-color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-10);
+  text-align: center;
+  box-shadow: var(--shadow-base);
+}
+
+article.empty-state .icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-4);
+}
+
+article.empty-state h3 {
+  margin-bottom: var(--spacing-3);
+}
+
+article.empty-state p {
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-6);
+}
+
+article.empty-state footer {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: center;
+  border: none;
+  padding: 0;
+  background: none;
+}
+
+article.empty-state footer a.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3) var(--spacing-5);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  background-color: transparent;
+  color: var(--color-text);
+  border: var(--border-width-thick) solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-base);
+  
+  &:hover {
+    background-color: var(--color-gray-100);
+    border-color: var(--color-gray-300);
+  }
+}
+
+/* ============================================
+   TRANSACTIONS TABLE
+   ============================================ */
+
+section.transactions {
+  background-color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius-base);
+  overflow: hidden;
+  box-shadow: var(--shadow-base);
+}
+
+section.transactions table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+}
+
+section.transactions thead {
+  background-color: var(--color-gray-50);
+  border-bottom: var(--border-width-medium) solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-sticky);
+}
+
+section.transactions th {
+  padding: var(--spacing-4);
+  text-align: left;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: none;
+}
+
+section.transactions tbody tr {
+  border-bottom: var(--border-width-thin) solid var(--color-border);
+  transition: background-color var(--transition-fast);
+  
+  &:hover {
+    background-color: var(--color-gray-50);
+  }
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+section.transactions td {
+  padding: var(--spacing-4);
+  font-size: var(--font-size-sm);
+  vertical-align: middle;
+  border-bottom: none;
+}
+
+/* Type badges */
+section.transactions td.type mark {
+  display: inline-block;
+  padding: 3px var(--spacing-3);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+section.transactions td.type mark.income {
+  background-color: rgba(106, 126, 100, 0.12);
+  color: var(--color-success);
+}
+
+section.transactions td.type mark.expense {
+  background-color: rgba(217, 83, 79, 0.12);
+  color: var(--color-error);
+}
+
+section.transactions td.type mark.transfer {
+  background-color: rgba(232, 167, 94, 0.12);
+  color: var(--color-warning);
+}
+
+/* Dates */
+section.transactions td.date {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Description */
+section.transactions td.description {
+  max-width: 300px;
+}
+
+section.transactions td.description .content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+section.transactions td.description strong {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+section.transactions td.description small.meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+section.transactions td.description .icon {
+  color: var(--color-text-muted);
+  margin-left: var(--spacing-2);
+  cursor: help;
+}
+
+/* Accounts & Category */
+section.transactions td.account,
+section.transactions td.category {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+/* Amount */
+section.transactions td.amount {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-semibold);
+}
+
+section.transactions td.amount.income {
+  color: var(--color-success);
+}
+
+section.transactions td.amount.expense {
+  color: var(--color-error);
+}
+
+/* Balance */
+section.transactions td.balance {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-semibold);
+}
+
+section.transactions td.balance.positive {
+  color: var(--color-success);
+}
+
+section.transactions td.balance.negative {
+  color: var(--color-error);
+}
+
+/* Actions */
+section.transactions td.actions {
+  text-align: center;
+}
+
+section.transactions td.actions button,
+section.transactions td.actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0 var(--spacing-1);
+  background-color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+  
+  &:hover {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    box-shadow: var(--shadow-base);
+  }
+  
+  &:active {
+    box-shadow: var(--shadow-inset);
+  }
+}
