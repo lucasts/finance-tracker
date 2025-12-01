@@ -160,6 +160,7 @@ pt-BR:
         origin: "Origem"
         destination: "Destino"
         accumulated_balance: "Saldo Acumulado"
+        toggle_balance: "Saldo"
       
       recurring:
         title: "Compromisso Recorrente"
