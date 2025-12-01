@@ -5,18 +5,27 @@ export default class extends Controller {
 
   connect() {
     // Initialize collapsed state
-    this.collapsed = true
+    this.collapsed = this.contentTarget.classList.contains("hidden")
+    this.updateIcon()
   }
 
   toggle() {
     this.collapsed = !this.collapsed
     
     if (this.collapsed) {
+      this.contentTarget.style.display = "none"
       this.contentTarget.classList.add("hidden")
-      this.iconTarget.style.transform = "rotate(0deg)"
     } else {
+      this.contentTarget.style.display = "block"
       this.contentTarget.classList.remove("hidden")
-      this.iconTarget.style.transform = "rotate(180deg)"
+    }
+    
+    this.updateIcon()
+  }
+  
+  updateIcon() {
+    if (this.hasIconTarget) {
+      this.iconTarget.style.transform = this.collapsed ? "rotate(0deg)" : "rotate(180deg)"
     }
   }
 }

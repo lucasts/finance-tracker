@@ -1,7 +1,11 @@
 <div data-controller="modal">
 <header>
   <h1><%= t('ui.navigation.transactions') %></h1>
-  <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one'), new_transaction_path %>
+  <%= link_to new_transaction_path, class: "new-transaction-button", title: t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one') do %>
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+    </svg>
+  <% end %>
 </header>
 
 <% if @transactions.any? %>
@@ -46,7 +50,7 @@
     </svg>
   </header>
   
-  <div data-collapsible-target="content" style="display: none;">
+  <div data-collapsible-target="content" class="hidden">
     <%= form_with url: transactions_path, method: :get, local: true do |f| %>
       <fieldset>
         <div>
