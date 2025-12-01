@@ -342,7 +342,7 @@
  current: transaction.installment_number || 1, 
  total: transaction.installment_plan&.installment_count || 1) %>
  <% if transaction.installment_plan&.total_amount.present? %>
- <br><%= t('ui.transaction.installments.total_value', amount: format_money_unified(transaction.installment_plan.total_amount)) %>
+ <br><%= t('ui.transaction.installments.total_value', amount: format_money(transaction.installment_plan.total_amount)) %>
  <% end %>
  </div>
  </div>

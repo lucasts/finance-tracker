@@ -43,7 +43,7 @@
  <label>Valor</label>
  <div>
  <div>
- <%= format_money_unified(@imported_transaction.amount) %>
+ <%= format_money(@imported_transaction.amount) %>
  </div>
  </div>
  </div>
@@ -126,7 +126,7 @@
  <div>
  <%= l(tx.event_date, format: :short) if tx.event_date %> •
  <span>
- <%= format_money_unified(tx.amount) %>
+ <%= format_money(tx.amount) %>
  </span>
  <% if tx.category %>
  • <span><%= tx.category.name %></span>

@@ -15,10 +15,6 @@ module ApplicationHelper
     number_to_currency(amount, defaults.merge(options))
   end
 
-  # DEPRECATED: Use format_money instead
-  # Kept for backwards compatibility, will be removed in future
-  alias_method :format_money_unified, :format_money
-
   def parse_money(value)
     MoneyParsingConcern.parse_money_string(value)
   end

@@ -22,8 +22,8 @@
  <tr>
  <td><%= cs.account.name %></td>
  <td><%= cs.month %></td>
- <td><%= format_money_unified(cs.amount_due) %></td>
- <td><%= format_money_unified(cs.amount_paid) %></td>
+ <td><%= format_money(cs.amount_due) %></td>
+ <td><%= format_money(cs.amount_paid) %></td>
  <td>
  <span>
  <%= t("activerecord.attributes.credit_statement.statuses.#{cs.status}") %>
