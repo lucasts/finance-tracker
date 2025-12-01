@@ -22,7 +22,10 @@
 @import "dirams/components.css";
 @import "dirams/utilities.css";
 
-/* Page-specific styles */
+/* Component-specific stylesheets */
+@import "components/navbar.css";
+
+/* Page-specific stylesheets */
 @import "pages/transactions.css";
 
 /* Application-specific overrides and customizations */
