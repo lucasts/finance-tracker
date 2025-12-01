@@ -25,7 +25,7 @@
 /* Component-specific stylesheets */
 @import "components/navbar.css";
 @import "components/month_navigation.css";
-@import "components/financial_overview.css";
+@import "components/financial_summary.css";
 
 /* Page-specific stylesheets */
 @import "pages/transactions.css";

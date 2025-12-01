@@ -1,0 +1,162 @@
+/*
+ * Financial Summary Component
+ * Unified horizontal layout: Opening Balance → Movement → Closing Balance
+ * Braun-inspired compact design with clear information flow
+ */
+
+.financial-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-5);
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-5) var(--spacing-6);
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08),
+              0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Flow Arrows - Visual connectors */
+.flow-arrow {
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-light);
+  flex-shrink: 0;
+}
+
+/* Summary Metrics - Common styles */
+.summary-metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.summary-metric label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.summary-metric data {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.summary-metric data.positive {
+  color: #7a9671;
+}
+
+.summary-metric data.negative {
+  color: #cc6666;
+}
+
+.summary-metric small {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--spacing-1);
+}
+
+.summary-metric small.positive {
+  color: #7a9671;
+}
+
+.summary-metric small.negative {
+  color: #cc6666;
+}
+
+/* Opening & Closing Balance - Emphasized */
+.summary-metric.opening,
+.summary-metric.closing {
+  min-width: 140px;
+}
+
+/* Movement Section - Compact inline layout */
+.summary-metric.movement {
+  flex: 1;
+  gap: var(--spacing-1);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: rgba(65, 65, 65, 0.02);
+  border: 1px solid rgba(65, 65, 65, 0.06);
+  border-radius: 4px;
+}
+
+.movement-line {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+}
+
+.movement-line .symbol {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.movement-line label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  text-transform: none;
+  letter-spacing: normal;
+  margin: 0;
+  flex: 1;
+}
+
+.movement-line data {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin-left: auto;
+}
+
+.movement-line.income .symbol,
+.movement-line.income data {
+  color: #7a9671;
+}
+
+.movement-line.expense .symbol,
+.movement-line.expense data {
+  color: #cc6666;
+}
+
+.movement-line.transfer .symbol,
+.movement-line.transfer data {
+  color: #5b7c99;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .financial-summary {
+    flex-direction: column;
+    gap: var(--spacing-4);
+    align-items: stretch;
+  }
+  
+  .flow-arrow {
+    transform: rotate(90deg);
+    align-self: center;
+  }
+  
+  .summary-metric.opening,
+  .summary-metric.closing {
+    min-width: auto;
+  }
+  
+  .summary-metric data {
+    font-size: var(--font-size-xl);
+  }
+  
+  .summary-metric.movement {
+    order: 2;
+  }
+}

@@ -37,65 +37,54 @@
   <% current_balance = @initial_balance + balance %>
   <% balance_change = @initial_balance != 0 ? ((balance / @initial_balance.abs) * 100).round(1) : 0 %>
   
-  <%# Hero Section - Financial Overview %>
-  <section class="financial-overview">
-    <div class="overview-header">
-      <div class="initial-balance">
-        <label>Saldo Inicial</label>
-        <data class="<%= @initial_balance >= 0 ? 'positive' : 'negative' %>">
-          <%= format_money(@initial_balance) %>
-        </data>
-        <small><%= l(@selected_month.beginning_of_month - 1.day, format: :short) %></small>
-      </div>
-    </div>
-    
-    <div class="overview-movement">
-      <div class="movement-item income">
-        <span class="movement-label">+ Receitas</span>
-        <span class="movement-value"><%= format_money(income_total) %></span>
-      </div>
-      <div class="movement-item expense">
-        <span class="movement-label">− Despesas</span>
-        <span class="movement-value"><%= format_money(expense_total) %></span>
-      </div>
-    </div>
-    
-    <div class="overview-footer">
-      <div class="current-balance">
-        <label>Saldo Atual</label>
-        <data class="<%= current_balance >= 0 ? 'positive' : 'negative' %>">
-          <%= format_money(current_balance) %>
-        </data>
-        <% if balance != 0 && @initial_balance != 0 %>
-          <small class="<%= balance >= 0 ? 'positive' : 'negative' %>">
-            <%= balance >= 0 ? '↗' : '↘' %>
-            <%= balance >= 0 ? '+' : '' %><%= balance_change %>%
-          </small>
-        <% end %>
-      </div>
-    </div>
-  </section>
-  
-  <%# Summary Metrics %>
-  <section class="summary">
-    <article class="metric income">
-      <label><%= t('ui.transaction.types.income').pluralize %></label>
-      <data value="<%= income_total %>"><%= format_money(income_total) %></data>
+  <%# Unified Financial Summary - Compact horizontal layout %>
+  <section class="financial-summary">
+    <%# Opening Balance %>
+    <article class="summary-metric opening">
+      <label>Saldo Inicial</label>
+      <data class="<%= @initial_balance >= 0 ? 'positive' : 'negative' %>">
+        <%= format_money(@initial_balance) %>
+      </data>
     </article>
     
-    <article class="metric expense">
-      <label><%= t('ui.transaction.types.expense').pluralize %></label>
-      <data value="<%= expense_total %>"><%= format_money(expense_total) %></data>
+    <%# Flow Separator %>
+    <div class="flow-arrow">→</div>
+    
+    <%# Monthly Movement %>
+    <article class="summary-metric movement">
+      <div class="movement-line income">
+        <span class="symbol">+</span>
+        <label>Receitas</label>
+        <data><%= format_money(income_total) %></data>
+      </div>
+      <div class="movement-line expense">
+        <span class="symbol">−</span>
+        <label>Despesas</label>
+        <data><%= format_money(expense_total) %></data>
+      </div>
+      <% if transfer_total > 0 %>
+        <div class="movement-line transfer">
+          <span class="symbol">↔</span>
+          <label>Transferências</label>
+          <data><%= format_money(transfer_total) %></data>
+        </div>
+      <% end %>
     </article>
     
-    <article class="metric transfer">
-      <label><%= t('ui.transaction.types.transfer').pluralize %></label>
-      <data value="<%= transfer_total %>"><%= format_money(transfer_total) %></data>
-    </article>
+    <%# Flow Separator %>
+    <div class="flow-arrow">→</div>
     
-    <article class="metric balance <%= balance >= 0 ? 'positive' : 'negative' %>">
-      <label><%= t('ui.filters.balance') %></label>
-      <data value="<%= balance %>"><%= format_money(balance) %></data>
+    <%# Closing Balance %>
+    <article class="summary-metric closing">
+      <label>Saldo Atual</label>
+      <data class="<%= current_balance >= 0 ? 'positive' : 'negative' %>">
+        <%= format_money(current_balance) %>
+      </data>
+      <% if balance != 0 && @initial_balance != 0 %>
+        <small class="<%= balance >= 0 ? 'positive' : 'negative' %>">
+          <%= balance >= 0 ? '↗' : '↘' %> <%= balance >= 0 ? '+' : '' %><%= balance_change %>%
+        </small>
+      <% end %>
     </article>
   </section>
 <% end %>
