@@ -1,34 +1,21 @@
 <nav>
  <div>
- <%= link_to overview_index_path do %>
- <%= image_tag "logo-min.png", alt: "Orzeny" %>
+<%= link_to overview_index_path do %>
+    <%= image_tag "logo-min.png", alt: "Orzeny" %>
  <span><%= t('app.name') %></span>
- <% end %>
+<% end %>
  </div>
  <div>
  <% if user_signed_in? %>
  <ul>
- <li><%= link_to t('ui.navigation.overview'), overview_index_path %></li>
  <li><%= link_to t('ui.navigation.transactions'), transactions_path %></li>
- <li data-controller="dropdown">
- <details data-dropdown-target="menu">
- <summary><%= t('ui.navigation.settings') %></summary>
- <ul>
- <li><%= link_to t('ui.navigation.accounts'), accounts_path %></li>
- <li><%= link_to t('ui.navigation.categories'), categories_path %></li>
- <li><%= link_to t('ui.navigation.account_types'), account_types_path %></li>
- <li><%= link_to t('ui.navigation.installment_plans'), installment_plans_path %></li>
- <li><%= link_to t('ui.navigation.recurring_commitments'), recurring_commitments_path %></li>
- </ul>
- </details>
- </li>
- <li><%= link_to t('ui.navigation.reports'), reports_path %></li>
+ <li><%= link_to "Relatórios", reports_path %></li>
  <li><%= link_to t('ui.navigation.credit_statements'), credit_statements_path %></li>
  <li><%= link_to "🤖 Automação", automation_index_path %></li>
+ <li><%= link_to 'Importação', import_sessions_path %></li>
  <li>
  <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one'), new_transaction_path %>
  </li>
- <li><%= link_to 'Importação', import_sessions_path %></li>
  </ul>
  <div>
  <label tabindex="0">
@@ -48,6 +35,14 @@
  Editar Perfil
  <% end %>
  </li>
+ <li>
+ <span><%= t('ui.navigation.settings') %></span>
+ </li>
+ <li><%= link_to t('ui.navigation.accounts'), accounts_path %></li>
+ <li><%= link_to t('ui.navigation.categories'), categories_path %></li>
+ <li><%= link_to t('ui.navigation.account_types'), account_types_path %></li>
+ <li><%= link_to t('ui.navigation.installment_plans'), installment_plans_path %></li>
+ <li><%= link_to t('ui.navigation.recurring_commitments'), recurring_commitments_path %></li>
  <li>
  <%= link_to destroy_user_session_path, data: { 'turbo-method': :delete } do %>
  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
