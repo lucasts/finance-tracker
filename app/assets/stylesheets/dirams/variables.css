@@ -12,7 +12,7 @@
   /* Base Palette (Industrial vintage colors) */
   --color-gunmetal: #414141;      /* Gunmetal - texto principal */
   --color-soft-linen: #EDE9E3;    /* Soft Linen - bege suave para cards */
-  --color-light-gray: #EDEDED;    /* Light Gray - background cinza claro */
+  --color-light-gray: #F7F7F7;    /* Light Gray - background cinza claro */
   --color-alabaster: #E1E0DE;     /* Alabaster Grey - elementos secundários */
   --color-toasted-almond: #E88745; /* Toasted Almond - laranja característico */
   --color-dusty-olive: #6A7E64;   /* Dusty Olive - verde militar */
@@ -27,7 +27,7 @@
   --color-gray-400: #b8b8b8;
   --color-gray-300: #d4d4d4;
   --color-gray-200: var(--color-alabaster);
-  --color-gray-100: var(--color-light-gray);
+  --color-gray-100: #F7F7F7;
   --color-white: #fafaf8;         /* Off-white quente */
   
   /* Functional Colors (DiRams palette) */

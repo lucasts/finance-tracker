@@ -412,10 +412,8 @@
 
  <!-- Action Buttons -->
  <div>
- <%= link_to "Cancelar", transactions_path, 
-  %>
+ <%= link_to "Cancelar", transactions_path %>
  <%= form.submit transaction.persisted? ? "Atualizar Transação" : "Criar Transação", 
- 
  data: { transaction_form_target: "submitButton" } %>
  </div>
  </div>
