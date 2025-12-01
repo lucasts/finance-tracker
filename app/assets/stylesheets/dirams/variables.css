@@ -1,0 +1,151 @@
+/*
+ * DiRams Design System - Variables
+ * Inspired by Dieter Rams' principles: Less, but better
+ * Using CSS Custom Properties (CSS Variables)
+ */
+
+:root {
+  /* ============================================
+     COLORS - DiRams Authentic Palette
+     ============================================ */
+  
+  /* Base Palette (Industrial vintage colors) */
+  --color-gunmetal: #414141;      /* Gunmetal - texto principal */
+  --color-soft-linen: #EDE9E3;    /* Soft Linen - bege suave para cards */
+  --color-light-gray: #EDEDED;    /* Light Gray - background cinza claro */
+  --color-alabaster: #E1E0DE;     /* Alabaster Grey - elementos secundários */
+  --color-toasted-almond: #E88745; /* Toasted Almond - laranja característico */
+  --color-dusty-olive: #6A7E64;   /* Dusty Olive - verde militar */
+  
+  /* Extended Grays */
+  --color-black: #2a2a2a;
+  --color-gray-900: #353535;
+  --color-gray-800: var(--color-gunmetal);
+  --color-gray-700: #5a5a5a;
+  --color-gray-600: #787878;
+  --color-gray-500: #9a9a9a;
+  --color-gray-400: #b8b8b8;
+  --color-gray-300: #d4d4d4;
+  --color-gray-200: var(--color-alabaster);
+  --color-gray-100: var(--color-light-gray);
+  --color-white: #fafaf8;         /* Off-white quente */
+  
+  /* Functional Colors (DiRams palette) */
+  --color-accent: var(--color-toasted-almond);   /* Laranja terroso */
+  --color-accent-dark: #d67435;                   /* Laranja mais escuro */
+  --color-success: var(--color-dusty-olive);     /* Verde oliva */
+  --color-success-light: #89a584;                 /* Verde oliva claro */
+  --color-error: #d9534f;                         /* Vermelho terroso */
+  --color-warning: #e8a75e;                       /* Âmbar suave */
+  
+  /* Semantic Colors */
+  --color-primary: var(--color-accent);
+  --color-secondary: var(--color-dusty-olive);
+  --color-background: var(--color-light-gray);
+  --color-surface: var(--color-soft-linen);
+  --color-border: var(--color-alabaster);
+  --color-text: var(--color-gunmetal);
+  --color-text-muted: var(--color-gray-600);
+  --color-text-inverse: var(--color-white);
+  
+  /* ============================================
+     TYPOGRAPHY
+     ============================================ */
+  
+  /* Font Families */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', Monaco, 'Courier New', monospace;
+  
+  /* Font Sizes (8pt grid base) */
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.875rem;     /* 14px */
+  --font-size-base: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.25rem;      /* 20px */
+  --font-size-2xl: 1.5rem;      /* 24px */
+  --font-size-3xl: 2rem;        /* 32px */
+  --font-size-4xl: 2.5rem;      /* 40px */
+  
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.05em;
+  
+  /* ============================================
+     SPACING (8pt Grid System)
+     ============================================ */
+  
+  --spacing-0: 0;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
+  
+  /* ============================================
+     LAYOUT
+     ============================================ */
+  
+  --container-max-width: 1200px;
+  --container-padding: var(--spacing-4);
+  
+  /* ============================================
+     BORDERS & RADIUS
+     ============================================ */
+  
+  --border-width-thin: 1px;
+  --border-width-thick: 2px;
+  
+  --border-radius-none: 0;
+  --border-radius-sm: 3px;
+  --border-radius-base: 6px;
+  --border-radius-lg: 12px;
+  --border-radius-full: 9999px;   /* For circular buttons */
+  
+  /* ============================================
+     SHADOWS (DiRams warm, subtle)
+     ============================================ */
+  
+  --shadow-none: none;
+  --shadow-inset: inset 0 1px 3px rgba(65, 65, 65, 0.08);
+  --shadow-sm: 0 1px 2px rgba(65, 65, 65, 0.06);
+  --shadow-base: 0 1px 3px rgba(65, 65, 65, 0.10), 0 2px 6px rgba(65, 65, 65, 0.06);
+  --shadow-md: 0 2px 8px rgba(65, 65, 65, 0.10), 0 4px 12px rgba(65, 65, 65, 0.06);
+  --shadow-lg: 0 4px 16px rgba(65, 65, 65, 0.10), 0 8px 24px rgba(65, 65, 65, 0.06);
+  
+  /* ============================================
+     TRANSITIONS
+     ============================================ */
+  
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+  
+  /* ============================================
+     Z-INDEX
+     ============================================ */
+  
+  --z-index-base: 1;
+  --z-index-dropdown: 100;
+  --z-index-sticky: 200;
+  --z-index-modal: 1000;
+  --z-index-tooltip: 2000;
+}

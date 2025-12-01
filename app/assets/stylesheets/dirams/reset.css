@@ -1,0 +1,212 @@
+/*
+ * DiRams Design System - Reset & Base Styles
+ * Minimal, semantic, purpose-driven
+ */
+
+/* ============================================
+   RESET (Minimal)
+   ============================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+   TYPOGRAPHY BASE
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+h1 { font-size: var(--font-size-3xl); }
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-xl); }
+h4 { font-size: var(--font-size-lg); }
+h5 { font-size: var(--font-size-base); }
+h6 { font-size: var(--font-size-sm); }
+
+p {
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+small {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+strong, b {
+  font-weight: var(--font-weight-semibold);
+}
+
+em, i {
+  font-style: italic;
+}
+
+/* ============================================
+   LINKS
+   ============================================ */
+
+a {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color var(--transition-base);
+  
+  &:hover {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent);
+  }
+  
+  &:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================
+   LISTS
+   ============================================ */
+
+ul, ol {
+  margin: 0 0 var(--spacing-4) 0;
+  padding-left: var(--spacing-5);
+}
+
+li {
+  margin-bottom: var(--spacing-2);
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+nav li {
+  margin: 0;
+}
+
+/* ============================================
+   CODE & PRE
+   ============================================ */
+
+code, kbd, samp {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background-color: var(--color-gray-200);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-gray-100);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-4);
+  overflow-x: auto;
+  margin: 0 0 var(--spacing-4) 0;
+  
+  & code {
+    background: none;
+    padding: 0;
+  }
+}
+
+/* ============================================
+   HORIZONTAL RULE
+   ============================================ */
+
+hr {
+  border: none;
+  border-top: var(--border-width-thin) solid var(--color-border);
+  margin: var(--spacing-6) 0;
+}
+
+/* ============================================
+   IMAGES & MEDIA
+   ============================================ */
+
+img, svg, video, canvas, audio, iframe, embed, object {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ============================================
+   TABLES BASE
+   ============================================ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0 0 var(--spacing-6) 0;
+}
+
+th, td {
+  text-align: left;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-bottom: var(--border-width-thin) solid var(--color-border);
+}
+
+th {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-muted);
+  background-color: var(--color-surface);
+}
+
+td {
+  font-size: var(--font-size-sm);
+}
+
+/* ============================================
+   FORMS BASE
+   ============================================ */
+
+input, button, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+fieldset {
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-4);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+legend {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  padding: 0 var(--spacing-2);
+}
