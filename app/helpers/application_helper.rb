@@ -1,8 +1,9 @@
 module ApplicationHelper
   
-  # Unified money formatting helper - replaces all number_to_currency calls
-  def format_money_unified(amount, options = {})
-    return content_tag(:span, 'R$ 0,00', class: 'text-muted') if amount.blank? || amount.zero?
+  # Money formatting helper with Brazilian standards
+  # Returns plain formatted string (no HTML wrapper)
+  def format_money(amount, options = {})
+    return 'R$ 0,00' if amount.blank? || amount.zero?
     
     defaults = {
       unit: 'R$ ',
@@ -11,17 +12,12 @@ module ApplicationHelper
       precision: 2
     }
     
-    formatted = number_to_currency(amount, defaults.merge(options))
-    
-    # Add semantic CSS classes based on amount
-    css_class = case
-                when amount > 0 then 'money-positive'
-                when amount < 0 then 'money-negative'  
-                else 'money-neutral'
-                end
-                
-    content_tag(:span, formatted, class: "money-display #{css_class}")
+    number_to_currency(amount, defaults.merge(options))
   end
+
+  # DEPRECATED: Use format_money instead
+  # Kept for backwards compatibility, will be removed in future
+  alias_method :format_money_unified, :format_money
 
   def parse_money(value)
     MoneyParsingConcern.parse_money_string(value)

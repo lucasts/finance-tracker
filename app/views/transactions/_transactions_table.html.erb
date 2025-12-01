@@ -38,7 +38,7 @@
           end
         %>
         <span class="day-total <%= day_total >= 0 ? 'positive' : 'negative' %>">
-          <%= format_money_unified(day_total) %>
+          <%= format_money(day_total) %>
         </span>
       </div>
 
@@ -65,100 +65,88 @@
           %>
 
           <article class="transaction-card <%= tx.transaction_type %>" data-transaction-id="<%= tx.id %>">
-            <%# Primary Line: Type Badge + Description + Amount %>
+            <%# Primary Line: Description + Amount + Balance %>
             <div class="card-primary">
-              <div class="type-badge">
-                <% case tx.transaction_type %>
-                <% when 'income' %>
-                  <mark class="income" title="<%= t('ui.transaction.types.income') %>">R</mark>
-                <% when 'expense' %>
-                  <mark class="expense" title="<%= t('ui.transaction.types.expense') %>">D</mark>
-                <% when 'transfer' %>
-                  <mark class="transfer" title="<%= t('ui.transaction.types.transfer') %>">T</mark>
-                <% end %>
-              </div>
-
               <div class="description">
                 <strong><%= tx.description %></strong>
               </div>
 
               <div class="amount <%= tx.transaction_type %>">
-                <%= 
+                <% 
+                  formatted_amount = format_money(tx.amount)
                   case tx.transaction_type
                   when 'transfer'
-                    "🔄 #{format_money_unified(tx.amount)}"
-                  when 'income'
-                    "+ #{format_money_unified(tx.amount)}"
-                  when 'expense'
-                    "− #{format_money_unified(tx.amount)}"
-                  end
                 %>
+                  🔄 <%= formatted_amount %>
+                <% when 'income' %>
+                  + <%= formatted_amount %>
+                <% when 'expense' %>
+                  − <%= formatted_amount %>
+                <% end %>
               </div>
 
               <%# Running Balance (toggleable) %>
               <div class="balance <%= running_balance >= 0 ? 'positive' : 'negative' %>" 
                    data-balance-toggle-target="balance">
-                <%= format_money_unified(running_balance) %>
+                <%= format_money(running_balance) %>
               </div>
             </div>
 
-            <%# Secondary Line: Metadata %>
+            <%# Secondary Line: Metadata + Extras + Actions %>
             <div class="card-secondary">
-              <% if tx.category.present? %>
-                <span class="meta-item category">
-                  <%= tx.category.name %>
-                </span>
-              <% end %>
+              <div class="meta-items">
+                <% if tx.category.present? %>
+                  <span class="meta-item category">
+                    <%= tx.category.name %>
+                  </span>
+                <% end %>
 
-              <% if tx.transaction_type == 'transfer' %>
-                <span class="meta-item accounts">
-                  <%= origin_account %> → <%= destination_account %>
-                </span>
-              <% else %>
-                <span class="meta-item account">
-                  <%= tx.transaction_type == 'income' ? destination_account : origin_account %>
-                </span>
-              <% end %>
+                <% if tx.transaction_type == 'transfer' %>
+                  <span class="meta-item accounts">
+                    <%= origin_account %> → <%= destination_account %>
+                  </span>
+                <% else %>
+                  <span class="meta-item account">
+                    <%= tx.transaction_type == 'income' ? destination_account : origin_account %>
+                  </span>
+                <% end %>
 
-              <% if tx.payment_date != tx.event_date %>
-                <span class="meta-item dates-diff" title="Competência vs Caixa">
-                  <%= l(tx.event_date, format: :short) %> • <%= l(tx.payment_date, format: :short) %>
-                </span>
-              <% end %>
-            </div>
-
-            <%# Conditional Line: Extras (installments, recurring) %>
-            <% if tx.installment_plan.present? || tx.recurring_commitment.present? %>
-              <div class="card-extras">
+                <% if tx.payment_date != tx.event_date %>
+                  <span class="meta-item dates-diff" title="Competência vs Caixa">
+                    <%= l(tx.event_date, format: :short) %> • <%= l(tx.payment_date, format: :short) %>
+                  </span>
+                <% end %>
+                
+                <%# Installment/Recurring badges inline %>
                 <% if tx.installment_plan.present? %>
-                  <span class="extra-item installment">
+                  <span class="meta-item extra-item installment">
                     <span class="icon">⟳</span>
                     <%= "#{tx.installment_number}/#{tx.installment_plan.installment_count}" %>
                     <span class="extra-label"><%= tx.installment_plan.name %></span>
                   </span>
                 <% elsif tx.recurring_commitment.present? %>
-                  <span class="extra-item recurring">
+                  <span class="meta-item extra-item recurring">
                     <span class="icon">↻</span>
                     <span class="extra-label"><%= tx.recurring_commitment.name %></span>
                   </span>
                 <% end %>
               </div>
-            <% end %>
 
-            <%# Hover Actions %>
-            <div class="card-actions">
-              <button 
-                data-action="click->modal#show" 
-                data-url="<%= transaction_path(tx) %>"
-                title="<%= t('ui.actions.show') %>"
-                class="action-btn view">
-                👁️
-              </button>
-              <%= link_to edit_transaction_path(tx), 
-                    title: t('ui.actions.edit'),
-                    class: 'action-btn edit' do %>
-                ✏️
-              <% end %>
+              <%# Actions %>
+              <div class="card-actions">
+                <button 
+                  data-action="click->modal#show" 
+                  data-url="<%= transaction_path(tx) %>"
+                  title="<%= t('ui.actions.show') %>"
+                  class="action-btn view">
+                  👁️
+                </button>
+                <%= link_to edit_transaction_path(tx), 
+                      title: t('ui.actions.edit'),
+                      class: 'action-btn edit' do %>
+                  ✏️
+                <% end %>
+              </div>
             </div>
           </article>
         <% end %>

@@ -345,40 +345,52 @@ section.transactions-list {
 .date-group {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-8);
+  padding-bottom: var(--spacing-6);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.date-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .date-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-3) var(--spacing-5);
-  background: linear-gradient(180deg, #fafaf8 0%, #f5f5f3 100%);
-  border: var(--border-width-thin) solid var(--color-border);
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(65, 65, 65, 0.04),
-              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  align-items: baseline;
+  padding: 0 0 var(--spacing-3) 0;
+  margin-bottom: var(--spacing-2);
+  border-bottom: var(--border-width-thin) solid var(--color-border);
 }
 
 .date-header .date-label {
   margin: 0;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text);
+  text-transform: none;
+  letter-spacing: -0.01em;
 }
 
 .date-header .day-total {
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: 4px;
 }
 
 .date-header .day-total.positive {
   color: var(--color-success);
+  background: rgba(122, 150, 113, 0.08);
 }
 
 .date-header .day-total.negative {
   color: var(--color-error);
+  background: rgba(204, 102, 102, 0.08);
 }
 
 /* Transactions Group */
@@ -394,7 +406,7 @@ section.transactions-list {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
-  padding: var(--spacing-4) var(--spacing-5);
+  padding: var(--spacing-4) var(--spacing-5) var(--spacing-4) var(--spacing-4);
   background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
   border: var(--border-width-thin) solid var(--color-border);
   border-radius: 6px;
@@ -403,10 +415,12 @@ section.transactions-list {
               inset 0 1px 0 rgba(255, 255, 255, 0.8);
   transition: all var(--transition-fast);
   
+  /* Colored left border for type indication */
+  border-left-width: 4px;
+  
   &:hover {
-    border-color: var(--color-toasted-almond);
-    box-shadow: 0 4px 8px rgba(202, 66, 2, 0.12), 
-                0 2px 4px rgba(202, 66, 2, 0.08),
+    box-shadow: 0 4px 8px rgba(65, 65, 65, 0.15), 
+                0 2px 4px rgba(65, 65, 65, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.9);
     transform: translateY(-1px);
   }
@@ -416,59 +430,27 @@ section.transactions-list {
   }
 }
 
-/* Subtle background tint by type */
+/* Type indication via left border color */
 .transaction-card.income {
-  background: linear-gradient(180deg, rgba(122, 150, 113, 0.02) 0%, #f9f9f8 100%);
+  border-left-color: var(--color-success);
+  background: linear-gradient(180deg, rgba(122, 150, 113, 0.015) 0%, #f9f9f8 100%);
 }
 
 .transaction-card.expense {
-  background: linear-gradient(180deg, rgba(204, 102, 102, 0.02) 0%, #f9f9f8 100%);
+  border-left-color: var(--color-error);
+  background: linear-gradient(180deg, rgba(204, 102, 102, 0.015) 0%, #f9f9f8 100%);
 }
 
 .transaction-card.transfer {
-  background: linear-gradient(180deg, rgba(232, 168, 93, 0.02) 0%, #f9f9f8 100%);
+  border-left-color: #5b7c99;
+  background: linear-gradient(180deg, rgba(91, 124, 153, 0.015) 0%, #f9f9f8 100%);
 }
 
-/* PRIMARY LINE: Badge + Description + Amount + Balance */
+/* PRIMARY LINE: Description + Amount + Balance */
 .card-primary {
   display: flex;
   align-items: center;
   gap: var(--spacing-4);
-}
-
-.type-badge {
-  flex-shrink: 0;
-}
-
-.type-badge mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border-radius: 50%;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-white);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15),
-              0 1px 2px rgba(0, 0, 0, 0.1),
-              inset 0 1px 1px rgba(255, 255, 255, 0.2),
-              inset 0 -1px 1px rgba(0, 0, 0, 0.15);
-}
-
-.type-badge mark.income {
-  background: linear-gradient(135deg, var(--color-success) 0%, #5a6d54 100%);
-}
-
-.type-badge mark.expense {
-  background: linear-gradient(135deg, var(--color-error) 0%, #b84946 100%);
-}
-
-.type-badge mark.transfer {
-  background: linear-gradient(135deg, var(--color-warning) 0%, #d89950 100%);
 }
 
 .card-primary .description {
@@ -478,7 +460,7 @@ section.transactions-list {
 
 .card-primary .description strong {
   display: block;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text);
   line-height: 1.4;
@@ -490,11 +472,12 @@ section.transactions-list {
 .card-primary .amount {
   flex-shrink: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   line-height: 1;
   text-align: right;
-  min-width: 120px;
+  min-width: 140px;
+  margin-left: auto;
 }
 
 .card-primary .amount.income {
@@ -506,16 +489,16 @@ section.transactions-list {
 }
 
 .card-primary .amount.transfer {
-  color: var(--color-warning);
+  color: #5b7c99;
 }
 
 .card-primary .balance {
   flex-shrink: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   text-align: right;
-  min-width: 100px;
+  min-width: 120px;
   padding-left: var(--spacing-4);
   border-left: var(--border-width-thin) solid var(--color-border);
   transition: opacity var(--transition-base);
@@ -538,12 +521,20 @@ section.transactions-list {
   display: block;
 }
 
-/* SECONDARY LINE: Metadata */
+/* SECONDARY LINE: Metadata + Actions */
 .card-secondary {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--spacing-3);
-  padding-left: calc(32px + var(--spacing-4)); /* Align with description */
+  flex-wrap: wrap;
+}
+
+.meta-items {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex: 1;
   flex-wrap: wrap;
 }
 
@@ -581,64 +572,55 @@ section.transactions-list {
   font-weight: var(--font-weight-medium);
 }
 
-/* CONDITIONAL LINE: Extras (installments, recurring) */
-.card-extras {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding-left: calc(32px + var(--spacing-4));
-}
-
-.extra-item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-2);
+/* Installment/Recurring badges inline with metadata */
+.meta-item.extra-item {
   padding: var(--spacing-1) var(--spacing-3);
-  background: linear-gradient(135deg, rgba(202, 66, 2, 0.08) 0%, rgba(202, 66, 2, 0.04) 100%);
-  border: var(--border-width-thin) solid rgba(202, 66, 2, 0.2);
   border-radius: 12px;
-  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
 }
 
-.extra-item .icon {
-  font-size: var(--font-size-sm);
+.meta-item.extra-item::before {
+  content: none;
 }
 
-.extra-item.installment {
+.meta-item.installment {
   background: linear-gradient(135deg, rgba(232, 168, 93, 0.12) 0%, rgba(232, 168, 93, 0.06) 100%);
-  border-color: rgba(232, 168, 93, 0.3);
+  border: var(--border-width-thin) solid rgba(232, 168, 93, 0.3);
   color: var(--color-warning);
 }
 
-.extra-item.recurring {
+.meta-item.recurring {
   background: linear-gradient(135deg, rgba(122, 150, 113, 0.12) 0%, rgba(122, 150, 113, 0.06) 100%);
-  border-color: rgba(122, 150, 113, 0.3);
+  border: var(--border-width-thin) solid rgba(122, 150, 113, 0.3);
   color: var(--color-success);
 }
 
-.extra-label {
+.meta-item .icon {
+  font-size: var(--font-size-sm);
+}
+
+.meta-item .extra-label {
   opacity: 0.8;
 }
 
-/* HOVER ACTIONS */
+/* Action buttons in secondary line */
 .card-actions {
-  position: absolute;
-  top: var(--spacing-4);
-  right: var(--spacing-4);
   display: flex;
   gap: var(--spacing-2);
   opacity: 0;
   transition: opacity var(--transition-fast);
 }
 
+.transaction-card:hover .card-actions {
+  opacity: 1;
+}
+
 .action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   background: linear-gradient(180deg, var(--color-white) 0%, #f5f5f3 100%);
   border: var(--border-width-thin) solid var(--color-border);
@@ -646,7 +628,8 @@ section.transactions-list {
   color: var(--color-text);
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(65, 65, 65, 0.06),
+  font-size: var(--font-size-xs);
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.1),
               inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition: all var(--transition-fast);
   
@@ -656,11 +639,11 @@ section.transactions-list {
     border-color: var(--color-primary);
     box-shadow: 0 2px 4px rgba(202, 66, 2, 0.25),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
+    transform: scale(1.05);
   }
   
   &:active {
-    transform: translateY(0);
+    transform: scale(0.95);
     box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.2);
   }
 }

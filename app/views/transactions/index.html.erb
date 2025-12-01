@@ -17,22 +17,22 @@
   <section class="summary">
     <article class="metric income">
       <label><%= t('ui.transaction.types.income').pluralize %></label>
-      <data value="<%= income_total %>"><%= format_money_unified(income_total) %></data>
+      <data value="<%= income_total %>"><%= format_money(income_total) %></data>
     </article>
     
     <article class="metric expense">
       <label><%= t('ui.transaction.types.expense').pluralize %></label>
-      <data value="<%= expense_total %>"><%= format_money_unified(expense_total) %></data>
+      <data value="<%= expense_total %>"><%= format_money(expense_total) %></data>
     </article>
     
     <article class="metric transfer">
       <label><%= t('ui.transaction.types.transfer').pluralize %></label>
-      <data value="<%= transfer_total %>"><%= format_money_unified(transfer_total) %></data>
+      <data value="<%= transfer_total %>"><%= format_money(transfer_total) %></data>
     </article>
     
     <article class="metric balance <%= balance >= 0 ? 'positive' : 'negative' %>">
       <label><%= t('ui.filters.balance') %></label>
-      <data value="<%= balance %>"><%= format_money_unified(balance) %></data>
+      <data value="<%= balance %>"><%= format_money(balance) %></data>
     </article>
   </section>
 <% end %>
