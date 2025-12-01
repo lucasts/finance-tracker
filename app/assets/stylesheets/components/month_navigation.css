@@ -1,0 +1,66 @@
+/*
+ * Month Navigation Component
+ * Braun-inspired navigation for switching between months
+ */
+
+.month-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-4) var(--spacing-5);
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08), 
+              0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.current-month {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  text-transform: capitalize;
+}
+
+.month-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  text-transform: capitalize;
+  background: linear-gradient(180deg, var(--color-white) 0%, #f5f5f3 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: all var(--transition-base);
+  
+  &:hover {
+    color: var(--color-text);
+    background: linear-gradient(180deg, #f9f9f8 0%, #f0f0ee 100%);
+    border-color: var(--color-text-muted);
+    box-shadow: 0 2px 3px rgba(65, 65, 65, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 3px rgba(65, 65, 65, 0.1);
+  }
+}
+
+.month-nav-btn svg {
+  width: 20px;
+  height: 20px;
+}

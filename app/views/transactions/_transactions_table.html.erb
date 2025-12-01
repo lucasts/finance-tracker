@@ -1,5 +1,5 @@
 <%# Partial para exibir lista de transações com arquitetura de informação hierárquica %>
-<% running_balance = 0 %>
+<% running_balance = initial_balance %>
 <% transactions_by_date = transactions.group_by(&:event_date).sort.reverse %>
 
 <section class="transactions-list" data-controller="balance-toggle">

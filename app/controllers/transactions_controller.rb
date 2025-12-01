@@ -10,8 +10,22 @@ class TransactionsController < ApplicationController
       selected_month = Date.today
     end
 
+    @selected_month = selected_month
+    @previous_month = selected_month - 1.month
+    @next_month = selected_month + 1.month
+
     # Filter by current user
     @transactions = current_user_scope(Transaction).in_competence_month(selected_month).order(event_date: :desc)
+    
+    # Calculate initial balance (all transactions up to last day of previous month)
+    last_day_previous_month = selected_month.beginning_of_month - 1.day
+    previous_transactions = current_user_scope(Transaction)
+      .where('event_date <= ?', last_day_previous_month)
+      .where.not(transaction_type: 'transfer')
+    
+    @initial_balance = previous_transactions.sum do |tx|
+      tx.transaction_type == 'income' ? tx.amount : -tx.amount
+    end
     
     # Filter by installment plan if specified
     if params[:plan].present?
