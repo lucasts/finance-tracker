@@ -7,18 +7,57 @@
    PAGE HEADER
    ============================================ */
 
-body > div[data-controller="modal"] > header {
+div[data-controller="modal"] > header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: var(--spacing-3);
   margin-bottom: var(--spacing-8);
   padding: 0;
   border: none;
   background: none;
 }
 
-body > div[data-controller="modal"] > header h1 {
+div[data-controller="modal"] > header h1 {
   margin: 0;
+}
+
+/* New Transaction Button */
+a.new-transaction-button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3) !important;
+  background: linear-gradient(180deg, var(--color-text) 0%, #353535 100%) !important;
+  color: var(--color-white) !important;
+  text-decoration: none;
+  border-radius: 4px !important;
+  font-size: var(--font-size-sm) !important;
+  font-weight: var(--font-weight-medium);
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.2), 
+              0 1px 3px rgba(65, 65, 65, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  transition: all var(--transition-fast);
+  width: auto !important;
+  height: auto !important;
+}
+
+a.new-transaction-button:hover {
+  background: linear-gradient(180deg, var(--color-primary) 0%, #b83a00 100%) !important;
+  box-shadow: 0 2px 4px rgba(202, 66, 2, 0.25), 
+              0 1px 3px rgba(202, 66, 2, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+a.new-transaction-button:active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+a.new-transaction-button svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 3;
 }
 
 /* ============================================
@@ -33,11 +72,13 @@ section.summary {
 }
 
 section.summary article.metric {
-  background-color: var(--color-white);
-  border: none;
-  border-radius: var(--border-radius-base);
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
   padding: var(--spacing-5);
-  box-shadow: var(--shadow-base);
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08), 
+              0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 section.summary article.metric label {
@@ -79,12 +120,14 @@ section.summary article.metric.balance.negative data {
    ============================================ */
 
 section.filters {
-  background-color: var(--color-white);
-  border: none;
-  border-radius: var(--border-radius-base);
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
   padding: var(--spacing-5);
   margin-bottom: var(--spacing-8);
-  box-shadow: var(--shadow-base);
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08), 
+              0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 section.filters > header {
@@ -110,19 +153,25 @@ section.filters > header h3 {
 
 section.filters > header svg {
   color: var(--color-text-muted);
-  transition: transform var(--transition-base);
+  transition: transform 0.3s ease;
+}
+
+section.filters .hidden {
+  display: none !important;
 }
 
 section.filters > header mark.active {
   margin-left: var(--spacing-3);
-  background-color: var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #b83a00 100%);
   color: var(--color-white);
-  padding: 3px var(--spacing-3);
-  border-radius: var(--border-radius-full);
+  padding: 4px var(--spacing-3);
+  border-radius: 12px;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  box-shadow: 0 2px 4px rgba(202, 66, 2, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 section.filters > div[data-collapsible-target="content"] {
@@ -155,18 +204,27 @@ section.filters a.secondary {
   padding: var(--spacing-3) var(--spacing-5);
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   text-decoration: none;
-  background-color: transparent;
+  background: linear-gradient(180deg, var(--color-white) 0%, #f5f5f3 100%);
   color: var(--color-text);
-  border: var(--border-width-thick) solid var(--color-border);
-  border-radius: var(--border-radius-sm);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition: all var(--transition-base);
   
   &:hover {
-    background-color: var(--color-gray-100);
-    border-color: var(--color-gray-300);
-    color: var(--color-text);
+    background: linear-gradient(180deg, #f9f9f8 0%, #f0f0ee 100%);
+    border-color: var(--color-text-muted);
+    box-shadow: 0 2px 3px rgba(65, 65, 65, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 3px rgba(65, 65, 65, 0.1);
   }
 }
 
@@ -175,12 +233,14 @@ section.filters a.secondary {
    ============================================ */
 
 article.empty-state {
-  background-color: var(--color-white);
-  border: none;
-  border-radius: var(--border-radius-base);
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
   padding: var(--spacing-10);
   text-align: center;
-  box-shadow: var(--shadow-base);
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08), 
+              0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 article.empty-state .icon {
@@ -213,17 +273,27 @@ article.empty-state footer a.secondary {
   padding: var(--spacing-3) var(--spacing-5);
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   text-decoration: none;
-  background-color: transparent;
+  background: linear-gradient(180deg, var(--color-white) 0%, #f5f5f3 100%);
   color: var(--color-text);
-  border: var(--border-width-thick) solid var(--color-border);
-  border-radius: var(--border-radius-sm);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition: all var(--transition-base);
   
   &:hover {
-    background-color: var(--color-gray-100);
-    border-color: var(--color-gray-300);
+    background: linear-gradient(180deg, #f9f9f8 0%, #f0f0ee 100%);
+    border-color: var(--color-text-muted);
+    box-shadow: 0 2px 3px rgba(65, 65, 65, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 3px rgba(65, 65, 65, 0.1);
   }
 }
 
@@ -232,11 +302,13 @@ article.empty-state footer a.secondary {
    ============================================ */
 
 section.transactions {
-  background-color: var(--color-white);
-  border: none;
-  border-radius: var(--border-radius-base);
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: var(--shadow-base);
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08), 
+              0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 section.transactions table {
@@ -246,11 +318,12 @@ section.transactions table {
 }
 
 section.transactions thead {
-  background-color: var(--color-gray-50);
+  background: linear-gradient(180deg, #fafaf8 0%, #f5f5f3 100%);
   border-bottom: var(--border-width-medium) solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: var(--z-index-sticky);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 section.transactions th {
@@ -264,12 +337,13 @@ section.transactions th {
   border-bottom: none;
 }
 
-section.transactions tbody tr {
+section.transactions table tbody tr {
   border-bottom: var(--border-width-thin) solid var(--color-border);
-  transition: background-color var(--transition-fast);
+  transition: all var(--transition-fast);
   
   &:hover {
-    background-color: var(--color-gray-50);
+    background: linear-gradient(90deg, rgba(202, 66, 2, 0.03) 0%, rgba(202, 66, 2, 0.01) 100%);
+    box-shadow: inset 0 0 0 1px rgba(202, 66, 2, 0.1);
   }
   
   &:last-child {
@@ -286,28 +360,34 @@ section.transactions td {
 
 /* Type badges */
 section.transactions td.type mark {
-  display: inline-block;
-  padding: 3px var(--spacing-3);
-  border-radius: var(--border-radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  color: var(--color-white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15),
+              0 1px 2px rgba(0, 0, 0, 0.1),
+              inset 0 1px 1px rgba(255, 255, 255, 0.2),
+              inset 0 -1px 1px rgba(0, 0, 0, 0.15);
 }
 
 section.transactions td.type mark.income {
-  background-color: rgba(106, 126, 100, 0.12);
-  color: var(--color-success);
+  background: linear-gradient(135deg, var(--color-success) 0%, #5a6d54 100%);
 }
 
 section.transactions td.type mark.expense {
-  background-color: rgba(217, 83, 79, 0.12);
-  color: var(--color-error);
+  background: linear-gradient(135deg, var(--color-error) 0%, #b84946 100%);
 }
 
 section.transactions td.type mark.transfer {
-  background-color: rgba(232, 167, 94, 0.12);
-  color: var(--color-warning);
+  background: linear-gradient(135deg, var(--color-warning) 0%, #d89950 100%);
 }
 
 /* Dates */
@@ -395,22 +475,27 @@ section.transactions td.actions a {
   height: 32px;
   padding: 0;
   margin: 0 var(--spacing-1);
-  background-color: var(--color-white);
-  border: none;
-  border-radius: var(--border-radius-sm);
-  color: var(--color-text-muted);
+  background: linear-gradient(180deg, var(--color-white) 0%, #f5f5f3 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text);
   text-decoration: none;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition: all var(--transition-fast);
   
   &:hover {
-    background-color: var(--color-accent);
+    background: linear-gradient(180deg, var(--color-accent) 0%, #b83a00 100%);
     color: var(--color-white);
-    box-shadow: var(--shadow-base);
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 4px rgba(202, 66, 2, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
   }
   
   &:active {
-    box-shadow: var(--shadow-inset);
+    transform: translateY(0);
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.2);
   }
 }
