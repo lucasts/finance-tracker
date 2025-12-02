@@ -1,44 +1,50 @@
 <div data-controller="modal">
-<header>
-  <h1><%= t('ui.navigation.transactions') %></h1>
-  <%= link_to new_transaction_path, class: "new-transaction-button", title: t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one') do %>
-    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
-    </svg>
-  <% end %>
-</header>
-
-<%# Month Navigation %>
+<%# Combined Header + Month Navigation + Financial Summary %>
 <nav class="month-navigation">
-  <%= link_to transactions_path(month: @previous_month.strftime("%Y-%m")), class: "month-nav-btn prev" do %>
-    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-    </svg>
-    <%= l(@previous_month, format: :month_year) %>
-  <% end %>
+  <div class="navigation-controls">
+    <%= link_to transactions_path(month: @previous_month.strftime("%Y-%m")), class: "month-nav-btn prev" do %>
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      <%= l(@previous_month, format: :month_year) %>
+    <% end %>
+    
+    <div class="current-month">
+      <h1><%= t('ui.navigation.transactions') %></h1>
+      <span class="month-label"><%= l(@selected_month, format: :month_year) %></span>
+    </div>
+    
+    <%= link_to transactions_path(month: @next_month.strftime("%Y-%m")), class: "month-nav-btn next" do %>
+      <%= l(@next_month, format: :month_year) %>
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    <% end %>
+    
+    <%= link_to new_transaction_path, class: "new-transaction-button", title: t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one') do %>
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+      </svg>
+    <% end %>
+  </div>
   
-  <h2 class="current-month">
-    <%= l(@selected_month, format: :month_year) %>
-  </h2>
-  
-  <%= link_to transactions_path(month: @next_month.strftime("%Y-%m")), class: "month-nav-btn next" do %>
-    <%= l(@next_month, format: :month_year) %>
-    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-    </svg>
-  <% end %>
-</nav>
-
-<% if @transactions.any? %>
-  <% income_total = @transactions.select { |t| t.transaction_type == 'income' }.sum(&:amount) %>
-  <% expense_total = @transactions.select { |t| t.transaction_type == 'expense' }.sum(&:amount) %>
-  <% transfer_total = @transactions.select { |t| t.transaction_type == 'transfer' }.sum(&:amount) %>
-  <% balance = income_total - expense_total %>
-  <% current_balance = @initial_balance + balance %>
-  <% balance_change = @initial_balance != 0 ? ((balance / @initial_balance.abs) * 100).round(1) : 0 %>
-  
-  <%# Unified Financial Summary - Compact horizontal layout %>
-  <section class="financial-summary">
+  <% if @transactions.any? %>
+    <% income_total = @transactions.select { |t| t.transaction_type == 'income' }.sum(&:amount) %>
+    <% expense_total = @transactions.select { |t| t.transaction_type == 'expense' }.sum(&:amount) %>
+    <% transfer_total = @transactions.select { |t| t.transaction_type == 'transfer' }.sum(&:amount) %>
+    <% balance = income_total - expense_total %>
+    
+    <%# Calculate actual current balance (initial + all movements in the month) %>
+    <% current_balance = @initial_balance %>
+    <% @transactions.sort_by(&:event_date).each do |tx| %>
+      <% current_balance += tx.amount if tx.transaction_type == 'income' %>
+      <% current_balance -= tx.amount if tx.transaction_type == 'expense' %>
+    <% end %>
+    
+    <% balance_change = @initial_balance != 0 ? ((balance / @initial_balance.abs) * 100).round(1) : 0 %>
+    
+    <%# Unified Financial Summary - Inside navigation context %>
+    <section class="financial-summary">
     <%# Opening Balance %>
     <article class="summary-metric opening">
       <label>Saldo Inicial</label>
@@ -87,59 +93,62 @@
       <% end %>
     </article>
   </section>
-<% end %>
-
-<section class="filters" data-controller="collapsible">
-  <header data-action="click->collapsible#toggle">
-    <h3>
-      <%= t('ui.filters.title') %>
-      <% if params[:account_id].present? || params[:transaction_type].present? || params[:month].present? %>
-        <mark class="active"><%= t('ui.filters.active') %></mark>
-      <% end %>
-    </h3>
-    <svg data-collapsible-target="icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-    </svg>
-  </header>
-  
-  <div data-collapsible-target="content" class="hidden">
-    <%= form_with url: transactions_path, method: :get, local: true do |f| %>
-      <fieldset>
-        <div>
-          <label><%= t('activerecord.models.account.one') %></label>
-          <%= select_tag :account_id, 
-                         options_from_collection_for_select(Account.all, :id, :name, params[:account_id]), 
-                         prompt: t('ui.filters.all') %>
-        </div>
-        
-        <div>
-          <label><%= t('activerecord.attributes.transaction.transaction_type') %></label>
-          <%= select_tag :transaction_type, 
-                         options_for_select([
-                           [t('ui.filters.all'), nil], 
-                           [t('ui.transaction.types.income'), "income"], 
-                           [t('ui.transaction.types.expense'), "expense"], 
-                           [t('ui.transaction.types.transfer'), "transfer"]
-                         ], params[:transaction_type]) %>
-        </div>
-        
-        <div>
-          <label><%= t('ui.filters.month') %></label>
-          <%= month_field_tag :month, params[:month] %>
-        </div>
-      </fieldset>
-      
-      <footer>
-        <%= submit_tag t('ui.actions.filter') %>
-        <%= link_to t('ui.actions.clear'), transactions_path, class: "secondary" %>
-      </footer>
-    <% end %>
-  </div>
-</section>
+  <% end %>
+</nav>
 
 <!-- All Transactions in unified list -->
 <% if @transactions.any? %>
- <%= render 'transactions_table', transactions: @transactions, initial_balance: @initial_balance %>
+  <div class="transactions-container">
+    <section class="filters" data-controller="collapsible">
+      <header data-action="click->collapsible#toggle">
+        <h3>
+          <%= t('ui.filters.title') %>
+          <% if params[:account_id].present? || params[:transaction_type].present? || params[:month].present? %>
+            <mark class="active"><%= t('ui.filters.active') %></mark>
+          <% end %>
+        </h3>
+        <svg data-collapsible-target="icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </header>
+      
+      <div data-collapsible-target="content" class="hidden">
+        <%= form_with url: transactions_path, method: :get, local: true do |f| %>
+          <fieldset>
+            <div>
+              <label><%= t('activerecord.models.account.one') %></label>
+              <%= select_tag :account_id, 
+                             options_from_collection_for_select(Account.all, :id, :name, params[:account_id]), 
+                             prompt: t('ui.filters.all') %>
+            </div>
+            
+            <div>
+              <label><%= t('activerecord.attributes.transaction.transaction_type') %></label>
+              <%= select_tag :transaction_type, 
+                             options_for_select([
+                               [t('ui.filters.all'), nil], 
+                               [t('ui.transaction.types.income'), "income"], 
+                               [t('ui.transaction.types.expense'), "expense"], 
+                               [t('ui.transaction.types.transfer'), "transfer"]
+                             ], params[:transaction_type]) %>
+            </div>
+            
+            <div>
+              <label><%= t('ui.filters.month') %></label>
+              <%= month_field_tag :month, params[:month] %>
+            </div>
+          </fieldset>
+          
+          <footer>
+            <%= submit_tag t('ui.actions.filter') %>
+            <%= link_to t('ui.actions.clear'), transactions_path, class: "secondary" %>
+          </footer>
+        <% end %>
+      </div>
+    </section>
+
+    <%= render 'transactions_table', transactions: @transactions, initial_balance: @initial_balance %>
+  </div>
 <% end %>
 
 <% if @transactions.empty? %>
