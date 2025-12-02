@@ -1,39 +1,44 @@
-<h1><%= t('activerecord.models.category.other') %></h1>
+<header>
+  <h1><%= t('activerecord.models.category.other') %></h1>
+  <%= link_to new_category_path, class: "new-category-button", title: t('ui.actions.new') + ' ' + t('activerecord.models.category.one') do %>
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+    </svg>
+  <% end %>
+</header>
 
-<div> <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.category.one'), new_category_path %>
-</div>
-
-<div>
- <div>
- <table>
- <thead>
- <tr>
- <th><%= t('activerecord.attributes.category.name') %></th>
- <th>Descrição</th>
- <th><%= t('activerecord.attributes.category.category_type') %></th>
- <th><%= t('ui.actions.title') %></th>
- </tr>
- </thead>
- <tbody>
- <% @categories.each do |cat| %>
- <tr>
- <td><strong><%= cat.name %></strong></td>
- <td>
- <%= cat.description.present? ? truncate(cat.description, length: 80) : "—" %>
- </td>
- <td>
- <% if cat.income? %>
- <span>📈 <%= t('ui.transaction.types.income') %></span>
- <% else %>
- <span>📉 <%= t('ui.transaction.types.expense') %></span>
- <% end %>
- </td>
- <td>
- <%= link_to t('ui.actions.edit'), edit_category_path(cat) %>
- </td>
- </tr>
- <% end %>
- </tbody>
- </table>
- </div>
-</div>
+<% if @categories.any? %>
+  <div class="categories-container">
+    <ul class="categories-list">
+      <% @categories.each do |category| %>
+        <li class="category-item">
+          <div class="category-info">
+            <div class="category-main">
+              <strong class="category-name"><%= category.name %></strong>
+              <span class="category-type <%= category.category_type %>">
+                <%= t("ui.transaction.types.#{category.category_type}") %>
+              </span>
+            </div>
+            <% if category.description.present? %>
+              <p class="category-description"><%= truncate(category.description, length: 100) %></p>
+            <% end %>
+          </div>
+          <%= link_to edit_category_path(category), class: "category-action", title: t('ui.actions.edit') do %>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+            </svg>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% else %>
+  <article class="empty-state">
+    <div class="icon">💰</div>
+    <h3>Nenhuma categoria cadastrada</h3>
+    <p>Crie categorias para organizar suas receitas e despesas.</p>
+    <footer>
+      <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.category.one'), new_category_path %>
+    </footer>
+  </article>
+<% end %>

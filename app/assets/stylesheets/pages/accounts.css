@@ -1,0 +1,208 @@
+/*
+ * Accounts Page Styles
+ * Minimal, functional styling following DiRams principles
+ */
+
+/* ============================================
+   PAGE HEADER
+   ============================================ */
+
+header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-8);
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+header h1 {
+  margin: 0;
+}
+
+/* New Account Button */
+a.new-account-button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3) !important;
+  background: linear-gradient(180deg, var(--color-text) 0%, #353535 100%) !important;
+  color: var(--color-white) !important;
+  text-decoration: none;
+  border-radius: 4px !important;
+  font-size: var(--font-size-sm) !important;
+  font-weight: var(--font-weight-medium);
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.2), 
+              0 1px 3px rgba(65, 65, 65, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  transition: all var(--transition-fast);
+  width: auto !important;
+  height: auto !important;
+}
+
+a.new-account-button:hover {
+  background: linear-gradient(180deg, var(--color-primary) 0%, #b83a00 100%) !important;
+  box-shadow: 0 2px 4px rgba(202, 66, 2, 0.25), 
+              0 1px 3px rgba(202, 66, 2, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+a.new-account-button:active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+a.new-account-button svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 3;
+}
+
+/* ============================================
+   ACCOUNTS CONTAINER
+   ============================================ */
+
+.accounts-container {
+  padding: var(--spacing-4);
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08), 
+              0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* ============================================
+   ACCOUNTS LIST
+   ============================================ */
+
+.accounts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4) var(--spacing-2);
+  border-bottom: 1px solid rgba(65, 65, 65, 0.06);
+  transition: background-color var(--transition-fast);
+}
+
+.account-item:last-child {
+  border-bottom: none;
+}
+
+.account-item:hover {
+  background-color: rgba(65, 65, 65, 0.02);
+}
+
+.account-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.account-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+/* Account Type Badge */
+.account-type {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 3px;
+  line-height: 1;
+  background-color: rgba(65, 65, 65, 0.08);
+  color: var(--color-text-muted);
+}
+
+/* Account Action Button (edit icon) */
+.account-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: var(--border-width-thin) solid transparent;
+  border-radius: 4px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.account-action:hover {
+  background-color: rgba(65, 65, 65, 0.05);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.account-action:active {
+  background-color: rgba(65, 65, 65, 0.08);
+}
+
+.account-action svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+article.empty-state {
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
+  padding: var(--spacing-10);
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08), 
+              0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+article.empty-state .icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-4);
+}
+
+article.empty-state h3 {
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+article.empty-state p {
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-6);
+  font-size: var(--font-size-base);
+}
+
+article.empty-state footer {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: center;
+  border: none;
+  padding: 0;
+  background: none;
+}

@@ -30,6 +30,8 @@
 
 /* Page-specific stylesheets */
 @import "pages/transactions.css";
+@import "pages/categories.css";
+@import "pages/accounts.css";
 
 /* Application-specific overrides and customizations */
 /* ============================================ */
