@@ -441,8 +441,8 @@ section.transactions-list {
 }
 
 .transaction-card.transfer {
-  border-left-color: #5b7c99;
-  background: linear-gradient(180deg, rgba(91, 124, 153, 0.015) 0%, #f9f9f8 100%);
+  border-left-color: var(--color-warning);
+  background: linear-gradient(180deg, rgba(232, 167, 94, 0.015) 0%, #f9f9f8 100%);
 }
 
 /* PRIMARY LINE: Description + Amount + Balance */
@@ -488,7 +488,7 @@ section.transactions-list {
 }
 
 .card-primary .amount.transfer {
-  color: #5b7c99;
+  color: var(--color-warning);
 }
 
 .card-primary .balance {
