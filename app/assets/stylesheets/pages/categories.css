@@ -4,221 +4,199 @@
  */
 
 /* ============================================
+   INDEX PAGE LAYOUT
+   ============================================ */
+
+.index-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-6) var(--spacing-4);
+}
+
+/* ============================================
    PAGE HEADER
    ============================================ */
 
-header {
+.page-header {
   display: flex;
   justify-content: flex-start;
   align-items: center;
   gap: var(--spacing-3);
   margin-bottom: var(--spacing-8);
-  padding: 0;
-  border: none;
-  background: none;
 }
 
-header h1 {
+.page-header h1 {
   margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
 }
 
-/* New Category Button */
-a.new-category-button {
+/* New Button */
+.btn-new {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-3) !important;
-  background: linear-gradient(180deg, var(--color-text) 0%, #353535 100%) !important;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: linear-gradient(180deg, var(--color-text) 0%, #353535 100%);
   color: var(--color-white) !important;
   text-decoration: none;
-  border-radius: 4px !important;
-  font-size: var(--font-size-sm) !important;
-  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius-sm);
   box-shadow: 0 2px 4px rgba(65, 65, 65, 0.2), 
               0 1px 3px rgba(65, 65, 65, 0.12),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: all var(--transition-fast);
-  width: auto !important;
-  height: auto !important;
+  flex-shrink: 0;
 }
 
-a.new-category-button:hover {
-  background: linear-gradient(180deg, var(--color-primary) 0%, #b83a00 100%) !important;
-  box-shadow: 0 2px 4px rgba(202, 66, 2, 0.25), 
-              0 1px 3px rgba(202, 66, 2, 0.15),
-              inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+.btn-new:hover {
+  background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-accent-dark) 100%);
+  box-shadow: 0 2px 4px rgba(232, 135, 69, 0.25), 
+              0 1px 3px rgba(232, 135, 69, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-a.new-category-button:active {
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+.btn-new:active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-a.new-category-button svg {
-  width: 16px;
-  height: 16px;
+.btn-new svg {
+  width: 20px;
+  height: 20px;
   stroke-width: 3;
 }
 
 /* ============================================
-   CATEGORIES CONTAINER
+   TABLE SPECIFIC STYLES
    ============================================ */
-
-.categories-container {
-  padding: var(--spacing-4);
-  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
-  border: var(--border-width-thin) solid var(--color-border);
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08), 
-              0 1px 2px rgba(65, 65, 65, 0.06),
-              inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-/* ============================================
-   CATEGORIES LIST
-   ============================================ */
-
-.categories-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.category-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-4);
-  padding: var(--spacing-4) var(--spacing-2);
-  border-bottom: 1px solid rgba(65, 65, 65, 0.06);
-  transition: background-color var(--transition-fast);
-}
-
-.category-item:last-child {
-  border-bottom: none;
-}
-
-.category-item:hover {
-  background-color: rgba(65, 65, 65, 0.02);
-}
-
-.category-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.category-main {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  margin-bottom: var(--spacing-1);
-}
 
 .category-name {
-  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text);
 }
 
 .category-description {
-  margin: 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-  line-height: var(--line-height-normal);
 }
 
-/* Category Type Badge */
-.category-type {
+/* Category Type Badge - Semantic colors matching account roles */
+.category-type-badge {
   display: inline-block;
-  padding: var(--spacing-1) var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-3);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-radius: 3px;
-  line-height: 1;
+  border-radius: var(--border-radius-full);
+  line-height: 1.4;
 }
 
-.category-type.income {
-  background-color: rgba(122, 150, 113, 0.1);
-  color: var(--color-success);
+/* Income (Receita) - Green (Dusty Olive) */
+.category-type-badge.income {
+  background-color: rgba(106, 126, 100, 0.12);
+  color: #6A7E64;
 }
 
-.category-type.expense {
-  background-color: rgba(204, 102, 102, 0.1);
-  color: var(--color-error);
+/* Expense (Despesa) - Red (Error Red) */
+.category-type-badge.expense {
+  background-color: rgba(217, 83, 79, 0.12);
+  color: #d9534f;
 }
 
-/* Category Action Button (edit icon) */
-.category-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: transparent;
-  border: var(--border-width-thin) solid transparent;
-  border-radius: 4px;
-  color: var(--color-text-muted);
-  text-decoration: none;
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
-}
-
-.category-action:hover {
-  background-color: rgba(65, 65, 65, 0.05);
-  border-color: var(--color-border);
-  color: var(--color-text);
-}
-
-.category-action:active {
-  background-color: rgba(65, 65, 65, 0.08);
-}
-
-.category-action svg {
-  width: 16px;
-  height: 16px;
+/* Transfer (Transferência) - Amber (Warning Amber) */
+.category-type-badge.transfer {
+  background-color: rgba(232, 167, 94, 0.12);
+  color: #c68a42;
 }
 
 /* ============================================
    EMPTY STATE
    ============================================ */
 
-article.empty-state {
+.empty-state {
   background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
   border: var(--border-width-thin) solid var(--color-border);
-  border-radius: 6px;
-  padding: var(--spacing-10);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-12) var(--spacing-6);
   text-align: center;
   box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08), 
               0 1px 2px rgba(65, 65, 65, 0.06),
               inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-article.empty-state .icon {
-  font-size: 3rem;
-  margin-bottom: var(--spacing-4);
+.empty-state .icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-5);
+  opacity: 0.8;
 }
 
-article.empty-state h3 {
-  margin-bottom: var(--spacing-3);
-  font-size: var(--font-size-lg);
+.empty-state h3 {
+  margin: 0 0 var(--spacing-3) 0;
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text);
 }
 
-article.empty-state p {
+.empty-state p {
+  margin: 0 0 var(--spacing-6) 0;
   color: var(--color-text-muted);
-  margin-bottom: var(--spacing-6);
   font-size: var(--font-size-base);
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
 }
 
-article.empty-state footer {
-  display: flex;
-  gap: var(--spacing-3);
+.empty-state footer {
+  margin-top: var(--spacing-6);
+}
+
+.empty-state .btn-primary {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
+  padding: var(--spacing-3) var(--spacing-6);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-white);
+  background-color: var(--color-primary);
   border: none;
-  padding: 0;
-  background: none;
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-base);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.empty-state .btn-primary:hover {
+  background-color: var(--color-accent-dark);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .index-page {
+    padding: var(--spacing-4) var(--spacing-3);
+  }
+
+  .data-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 700px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header h1 {
+    font-size: var(--font-size-xl);
+  }
 }

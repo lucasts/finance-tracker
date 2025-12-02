@@ -1,6 +1,6 @@
 /*
- * Accounts Page Styles
- * Minimal, functional styling following DiRams principles
+ * Account Types Page Styles
+ * Clean, industrial styling following DiRams principles
  */
 
 /* ============================================
@@ -69,16 +69,96 @@
 }
 
 /* ============================================
-   TABLE SPECIFIC STYLES
+   DATA TABLE CONTAINER
    ============================================ */
 
-.account-name {
+.data-table-container {
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--border-radius-base);
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08), 
+              0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+}
+
+/* ============================================
+   DATA TABLE
+   ============================================ */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead {
+  background: linear-gradient(180deg, var(--color-gray-100) 0%, var(--color-alabaster) 100%);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.data-table th {
+  text-align: left;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  padding: var(--spacing-4) var(--spacing-5);
+}
+
+.data-table th.actions-column {
+  text-align: right;
+  width: 80px;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid rgba(65, 65, 65, 0.06);
+  transition: background-color var(--transition-fast);
+}
+
+.data-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+  background-color: rgba(232, 135, 69, 0.03);
+}
+
+.data-table td {
+  padding: var(--spacing-4) var(--spacing-5);
+  font-size: var(--font-size-sm);
   color: var(--color-text);
 }
 
-/* Account Type Badge - Neutral style for all account types */
-.account-type-badge {
+.data-table td.actions-column {
+  text-align: right;
+}
+
+/* ============================================
+   TABLE CELL CONTENT
+   ============================================ */
+
+/* Type Code */
+.type-code {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Consolas', monospace;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  background-color: rgba(65, 65, 65, 0.08);
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+
+/* Type Name */
+.type-name {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+/* Role Badge - Semantic colors based on accounting function */
+.role-badge {
   display: inline-block;
   padding: var(--spacing-1) var(--spacing-3);
   font-size: var(--font-size-xs);
@@ -87,8 +167,58 @@
   letter-spacing: 0.05em;
   border-radius: var(--border-radius-full);
   line-height: 1.4;
+}
+
+/* Asset (Ativo) - Amber/Neutral (representa patrimônio) */
+.role-badge.role-asset {
   background-color: rgba(232, 167, 94, 0.12);
   color: #c68a42;
+}
+
+/* Income (Receita) - Green (positivo, entrada de dinheiro) */
+.role-badge.role-income {
+  background-color: rgba(106, 126, 100, 0.12);
+  color: #6A7E64;
+}
+
+/* Expense (Despesa) - Red (negativo, saída de dinheiro) */
+.role-badge.role-expense {
+  background-color: rgba(217, 83, 79, 0.12);
+  color: #d9534f;
+}
+
+/* ============================================
+   ACTION BUTTON
+   ============================================ */
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: var(--border-width-thin) solid transparent;
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.btn-action:hover {
+  background-color: rgba(65, 65, 65, 0.05);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn-action:active {
+  background-color: rgba(65, 65, 65, 0.08);
+}
+
+.btn-action svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* ============================================
