@@ -103,7 +103,7 @@
       <header data-action="click->collapsible#toggle">
         <h3>
           <%= t('ui.filters.title') %>
-          <% if params[:account_id].present? || params[:transaction_type].present? || params[:month].present? %>
+          <% if params[:account_id].present? || params[:category_id].present? || params[:transaction_type].present? || params[:month].present? %>
             <mark class="active"><%= t('ui.filters.active') %></mark>
           <% end %>
         </h3>
@@ -118,7 +118,14 @@
             <div>
               <label><%= t('activerecord.models.account.one') %></label>
               <%= select_tag :account_id, 
-                             options_from_collection_for_select(Account.all, :id, :name, params[:account_id]), 
+                             options_from_collection_for_select(@accounts, :id, :name, params[:account_id]), 
+                             prompt: t('ui.filters.all') %>
+            </div>
+
+            <div>
+              <label><%= t('activerecord.models.category.one') %></label>
+              <%= select_tag :category_id, 
+                             options_from_collection_for_select(@categories, :id, :name, params[:category_id]), 
                              prompt: t('ui.filters.all') %>
             </div>
             
@@ -156,7 +163,7 @@
     <div class="icon">💰</div>
     <h3><%= t('ui.transaction.empty.title') %></h3>
     <p>
-      <% if params[:account_id].present? || params[:transaction_type].present? || params[:month].present? %>
+      <% if params[:account_id].present? || params[:category_id].present? || params[:transaction_type].present? || params[:month].present? %>
         <%= t('ui.transaction.empty.filtered') %>
       <% else %>
         <%= t('ui.transaction.empty.first_time') %>
@@ -164,7 +171,7 @@
     </p>
     <footer>
       <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.transaction.one'), new_transaction_path %>
-      <% if params[:account_id].present? || params[:transaction_type].present? || params[:month].present? %>
+      <% if params[:account_id].present? || params[:category_id].present? || params[:transaction_type].present? || params[:month].present? %>
         <%= link_to t('ui.filters.clear_filters'), transactions_path, class: "secondary" %>
       <% end %>
     </footer>
