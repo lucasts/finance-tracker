@@ -1,19 +1,16 @@
 <%# Partial para exibir lista de transações com arquitetura de informação hierárquica %>
+<%# Pre-calculate running balances for all transactions (chronologically by event_date) %>
+<% balance_by_transaction = {} %>
 <% running_balance = initial_balance %>
+<% transactions.sort_by { |tx| [tx.event_date, tx.id] }.each do |tx| %>
+  <% running_balance += tx.amount if tx.transaction_type == 'income' %>
+  <% running_balance -= tx.amount if tx.transaction_type == 'expense' %>
+  <% balance_by_transaction[tx.id] = running_balance %>
+<% end %>
+
 <% transactions_by_date = transactions.group_by(&:event_date).sort.reverse %>
 
-<section class="transactions-list" data-controller="balance-toggle">
-  <%# Controls %>
-  <div class="list-controls">
-    <button 
-      type="button"
-      class="balance-toggle-btn"
-      data-action="click->balance-toggle#toggle"
-      data-balance-toggle-target="button">
-      <%= t('ui.transaction.table.toggle_balance') %>
-    </button>
-  </div>
-
+<section class="transactions-list">
   <%# Transaction List %>
   <% transactions_by_date.each do |date, day_transactions| %>
     <div class="date-group">
@@ -28,40 +25,19 @@
             <%= l(date, format: :long) %>
           <% end %>
         </h3>
-        <% 
-          day_total = day_transactions.sum do |tx|
-            case tx.transaction_type
-            when 'income' then tx.amount
-            when 'expense' then -tx.amount
-            else 0
-            end
-          end
-        %>
-        <span class="day-total <%= day_total >= 0 ? 'positive' : 'negative' %>">
-          <%= format_money(day_total) %>
-        </span>
       </div>
 
-      <%# Transactions for this day %>
+      <%# Transactions for this day (sorted by id descending - last created first, shows final balance) %>
       <div class="transactions-group">
-        <% day_transactions.each do |tx| %>
+        <% day_transactions.sort_by { |tx| -tx.id }.each do |tx| %>
           <% 
-            case tx.transaction_type
-            when 'income'
-              delta = tx.amount
-            when 'expense' 
-              delta = -tx.amount
-            when 'transfer'
-              delta = 0
-            else
-              delta = 0
-            end
-            running_balance += delta
-            
             credit_entry = tx.entries.find { |e| e.entry_type == 'credit' }
             debit_entry = tx.entries.find { |e| e.entry_type == 'debit' }
             origin_account = credit_entry&.account&.name || 'N/A'
             destination_account = debit_entry&.account&.name || 'N/A'
+            
+            # Get pre-calculated balance for this transaction
+            tx_balance = balance_by_transaction[tx.id]
           %>
 
           <article class="transaction-card <%= tx.transaction_type %>" data-transaction-id="<%= tx.id %>">
@@ -86,9 +62,9 @@
               </div>
 
               <%# Running Balance (toggleable) %>
-              <div class="balance <%= running_balance >= 0 ? 'positive' : 'negative' %>" 
+              <div class="balance <%= tx_balance >= 0 ? 'positive' : 'negative' %>" 
                    data-balance-toggle-target="balance">
-                <%= format_money(running_balance) %>
+                <%= format_money(tx_balance) %>
               </div>
             </div>
 
