@@ -1,11 +1,16 @@
-<footer>
- <div>
- <div>
- <%= image_tag "logo-min.png", alt: "Orzeny" %>
- <div>
- <p><%= t('app.name') %> © <%= Time.now.year %></p>
- <p><%= t('app.taglines.footer') %></p>
- </div>
- </div>
- </div>
+<footer class="site-footer" aria-label="Informações institucionais">
+  <section class="footer-inner">
+    <figure class="footer-branding">
+      <%= image_tag "logo-min.png", alt: "Orzeny", class: "footer-logo" %>
+      <figcaption>
+        <strong><%= t('app.name') %></strong>
+        <small><%= t('app.taglines.footer') %></small>
+      </figcaption>
+    </figure>
+
+    <section class="footer-meta" aria-label="Créditos do produto">
+      <p>© <%= Time.current.year %> Orzeny Tecnologia Financeira</p>
+      <p>Desenvolvido no Brasil</p>
+    </section>
+  </section>
 </footer>
