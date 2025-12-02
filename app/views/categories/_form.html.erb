@@ -1,30 +1,47 @@
-<%= form_with(model: category, local: true) do |form| %>
- <div>
- <%= form_group(form, :name) %>
- 
- <div>
- <label>
- <span>📝 Descrição (opcional)</span>
- </label>
- <%= form.text_area :description, class: "textarea textarea-bordered", placeholder: "Descreva o tipo de gasto ou receita desta categoria...", rows: 3 %>
- <label>
- <span>Máximo 500 caracteres</span>
- </label>
- </div>
- 
- <div>
- <label>
- <span>💰 <%= t('activerecord.attributes.category.category_type') %></span>
- </label>
- <div>
- <%= form.radio_button :category_type, "income", class: "radio radio-success" %>
- <%= form.label :category_type_income, "📈 #{t('ui.transaction.types.income')}", class: "cursor-pointer flex items-center gap-2" %>
- 
- <%= form.radio_button :category_type, "expense", class: "radio radio-error ml-6" %>
- <%= form.label :category_type_expense, "📉 #{t('ui.transaction.types.expense')}", class: "cursor-pointer flex items-center gap-2" %>
- </div>
- </div>
- 
- <%= primary_button("Salvar") %>
- </div>
+<%= form_with(model: category, local: true, class: "form") do |form| %>
+  <% if category.errors.any? %>
+    <article class="form-errors">
+      <h2><%= pluralize(category.errors.count, "erro") %> <%= category.errors.count == 1 ? "impediu" : "impediram" %> que esta categoria fosse salva:</h2>
+      <ul>
+        <% category.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </article>
+  <% end %>
+
+  <fieldset class="form-fieldset">
+    <div class="form-field">
+      <%= form.label :name, "Nome da Categoria" %>
+      <%= form.text_field :name, placeholder: "Ex: Alimentação, Salário, Transporte", autofocus: true %>
+    </div>
+
+    <div class="form-field">
+      <%= form.label :description, "Descrição (opcional)" %>
+      <%= form.text_area :description, 
+          placeholder: "Descreva o tipo de gasto ou receita desta categoria...", 
+          rows: 3 %>
+      <small style="color: var(--color-text-muted); font-size: var(--font-size-xs);">Máximo 500 caracteres</small>
+    </div>
+
+    <div class="form-field">
+      <%= form.label :category_type, t('activerecord.attributes.category.category_type') %>
+      <div class="radio-group">
+        <label class="radio-option">
+          <%= form.radio_button :category_type, "income" %>
+          <span><%= t('ui.transaction.types.income') %></span>
+        </label>
+        
+        <label class="radio-option">
+          <%= form.radio_button :category_type, "expense" %>
+          <span><%= t('ui.transaction.types.expense') %></span>
+        </label>
+      </div>
+    </div>
+  </fieldset>
+
+  <footer class="form-actions">
+    <%= form.submit "Salvar Categoria", class: "btn-primary" %>
+    <%= link_to "Cancelar", categories_path, class: "btn-secondary" %>
+  </footer>
 <% end %>
