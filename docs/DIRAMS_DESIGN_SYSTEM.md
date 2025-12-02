@@ -115,10 +115,15 @@ app/assets/stylesheets/
 
 ### Badges
 
-**Circulares com paleta Braun:**
-- Income: `#6A7E64` (dusty olive) com background `rgba(106, 126, 100, 0.12)`
-- Expense: `#d9534f` (red) com background `rgba(217, 83, 79, 0.12)`
-- Transfer: `#e8a75e` (amber) com background `rgba(232, 167, 94, 0.12)`
+**Circulares com paleta Braun (cores semânticas padronizadas):**
+- **Income/Receita**: `#6A7E64` (dusty olive) com background `rgba(106, 126, 100, 0.12)`
+  - Usado em: Categories, Account Types (role: income), Transaction amounts
+- **Expense/Despesa**: `#d9534f` (error red) com background `rgba(217, 83, 79, 0.12)`
+  - Usado em: Categories, Account Types (role: expense), Transaction amounts
+- **Transfer/Transferência**: `#c68a42` (warning amber escurecido) com background `rgba(232, 167, 94, 0.12)`
+  - Usado em: Categories (transfer), Transaction cards
+- **Asset/Ativo** (neutro): `#c68a42` (warning amber escurecido) com background `rgba(232, 167, 94, 0.12)`
+  - Usado em: Account Types (role: asset), Account type badges
 
 ### Cards
 
