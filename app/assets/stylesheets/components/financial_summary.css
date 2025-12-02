@@ -7,9 +7,9 @@
 .financial-summary {
   display: flex;
   align-items: center;
-  gap: var(--spacing-5);
-  margin-bottom: var(--spacing-6);
-  padding: var(--spacing-5) var(--spacing-6);
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-5);
   background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
   border: var(--border-width-thin) solid var(--color-border);
   border-radius: 6px;
@@ -43,7 +43,7 @@
 }
 
 .summary-metric data {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text);
   margin: 0;
