@@ -20,6 +20,7 @@
 @import "dirams/reset.css";
 @import "dirams/layout.css";
 @import "dirams/components.css";
+@import "dirams/forms.css";
 @import "dirams/utilities.css";
 
 /* Component-specific stylesheets */
@@ -32,6 +33,7 @@
 @import "pages/transactions.css";
 @import "pages/categories.css";
 @import "pages/accounts.css";
+@import "pages/account_types.css";
 
 /* Application-specific overrides and customizations */
 /* ============================================ */
