@@ -1,7 +1,31 @@
-<%= form_with(model: account, local: true) do |form| %>
- <div>
- <%= form_group(form, :name) %>
- <%= form_select_group(form, :account_type_id, AccountType.all, :id, :name, label: "Tipo de Conta") %>
- <%= primary_button("Salvar") %>
- </div>
+<%= form_with(model: account, local: true, class: "form") do |form| %>
+  <% if account.errors.any? %>
+    <article class="form-errors">
+      <h2><%= pluralize(account.errors.count, "erro") %> <%= account.errors.count == 1 ? "impediu" : "impediram" %> que esta conta fosse salva:</h2>
+      <ul>
+        <% account.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </article>
+  <% end %>
+
+  <fieldset class="form-fieldset">
+    <div class="form-field">
+      <%= form.label :name, "Nome da Conta" %>
+      <%= form.text_field :name, placeholder: "Ex: Nubank, Bradesco CC, Carteira", autofocus: true %>
+    </div>
+
+    <div class="form-field">
+      <%= form.label :account_type_id, "Tipo de Conta" %>
+      <%= form.collection_select :account_type_id, AccountType.all, :id, :name, 
+          { prompt: "Selecione o tipo de conta" }, 
+          { required: true } %>
+    </div>
+  </fieldset>
+
+  <footer class="form-actions">
+    <%= form.submit "Salvar Conta", class: "btn-primary" %>
+    <%= link_to "Cancelar", accounts_path, class: "btn-secondary" %>
+  </footer>
 <% end %>
