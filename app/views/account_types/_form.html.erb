@@ -1,8 +1,43 @@
-<%= form_with(model: account_type, local: true) do |form| %>
- <div>
- <%= form_group(form, :code) %>
- <%= form_group(form, :name) %>
- <%= form_group(form, :role, type: :select, choices: options_for_select([[t('ui.account_type.roles.asset'), "asset"], [t('ui.account_type.roles.income'), "income"], [t('ui.account_type.roles.expense'), "expense"]], selected: account_type.role)) %>
- <%= primary_button(t('ui.actions.save')) %>
- </div>
+<%= form_with(model: account_type, local: true, class: "form") do |form| %>
+  <% if account_type.errors.any? %>
+    <article class="form-errors">
+      <h2><%= pluralize(account_type.errors.count, "erro") %> <%= account_type.errors.count == 1 ? "impediu" : "impediram" %> que este tipo fosse salvo:</h2>
+      <ul>
+        <% account_type.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </article>
+  <% end %>
+
+  <fieldset class="form-fieldset">
+    <div class="form-field">
+      <%= form.label :code, "Código" %>
+      <%= form.text_field :code, placeholder: "Ex: CC, CP, INV", autofocus: true %>
+      <small style="color: var(--color-text-muted); font-size: var(--font-size-xs);">Código único para identificação interna</small>
+    </div>
+
+    <div class="form-field">
+      <%= form.label :name, "Nome" %>
+      <%= form.text_field :name, placeholder: "Ex: Conta Corrente, Poupança, Investimentos" %>
+    </div>
+
+    <div class="form-field">
+      <%= form.label :role, "Função Contábil" %>
+      <%= form.select :role, 
+          options_for_select([
+            [t('ui.account_type.roles.asset'), "asset"], 
+            [t('ui.account_type.roles.income'), "income"], 
+            [t('ui.account_type.roles.expense'), "expense"]
+          ], selected: account_type.role),
+          { prompt: "Selecione a função" },
+          { required: true } %>
+      <small style="color: var(--color-text-muted); font-size: var(--font-size-xs);">Define como este tipo de conta se comporta no sistema contábil</small>
+    </div>
+  </fieldset>
+
+  <footer class="form-actions">
+    <%= form.submit t('ui.actions.save'), class: "btn-primary" %>
+    <%= link_to "Cancelar", account_types_path, class: "btn-secondary" %>
+  </footer>
 <% end %>

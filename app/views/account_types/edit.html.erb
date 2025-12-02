@@ -1,5 +1,8 @@
-<h1><%= t('ui.actions.edit') %> <%= t('activerecord.models.account_type.one') %></h1>
+<section class="form-page">
+  <header class="form-header">
+    <h1><%= t('ui.actions.edit') %> <%= t('activerecord.models.account_type.one') %></h1>
+    <p>Atualize as informações do tipo de conta <%= @account_type.name %></p>
+  </header>
 
-<div>
- <%= render 'form', account_type: @account_type %>
-</div>
+  <%= render 'form', account_type: @account_type %>
+</section>
