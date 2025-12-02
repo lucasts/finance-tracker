@@ -10,7 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_30_110000) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_01_232116) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "account_types", force: :cascade do |t|
     t.string "code"
     t.string "role"
@@ -190,7 +193,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_110000) do
   create_table "transactions", force: :cascade do |t|
     t.string "description"
     t.decimal "amount"
-    t.date "event_date"
+    t.datetime "event_date"
     t.integer "category_id"
     t.integer "installment"
     t.integer "status", default: 0
@@ -198,7 +201,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_110000) do
     t.integer "transaction_group_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.date "payment_date"
+    t.datetime "payment_date"
     t.integer "credit_statement_id"
     t.integer "recurring_commitment_id"
     t.integer "installment_plan_id"
