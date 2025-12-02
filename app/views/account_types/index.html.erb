@@ -1,32 +1,56 @@
-<h1><%= t('activerecord.models.account_type.other') %></h1>
-<p><%= t('ui.account_type.index.description') %></p>
+<section class="index-page">
+  <header class="page-header">
+    <h1><%= t('activerecord.models.account_type.other') %></h1>
+    <%= link_to new_account_type_path, class: "btn-new", title: t('ui.actions.new') + ' ' + t('activerecord.models.account_type.one') do %>
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+      </svg>
+    <% end %>
+  </header>
 
-<div> <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.account_type.one'), new_account_type_path %>
-</div>
-
-<div>
- <div>
- <table>
- <thead>
- <tr>
- <th><%= t('activerecord.attributes.account_type.code') %></th>
- <th><%= t('activerecord.attributes.account_type.name') %></th>
- <th><%= t('activerecord.attributes.account_type.role') %></th>
- <th><%= t('ui.actions.title') %></th>
- </tr>
- </thead>
- <tbody>
- <% @account_types.each do |type| %>
- <tr>
- <td><%= type.code %></td>
- <td><%= type.name %></td>
- <td><%= type.role %></td>
- <td>
- <%= link_to 'Editar', edit_account_type_path(type), class: "link link-primary" %>
- </td>
- </tr>
- <% end %>
- </tbody>
- </table>
- </div>
-</div>
+  <% if @account_types.any? %>
+    <article class="data-table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th><%= t('activerecord.attributes.account_type.code') %></th>
+            <th><%= t('activerecord.attributes.account_type.name') %></th>
+            <th><%= t('activerecord.attributes.account_type.role') %></th>
+            <th class="actions-column"><%= t('ui.actions.title') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @account_types.each do |type| %>
+            <tr>
+              <td>
+                <code class="type-code"><%= type.code %></code>
+              </td>
+              <td class="type-name"><%= type.name %></td>
+              <td>
+                <span class="role-badge role-<%= type.role %>">
+                  <%= t("ui.account_type.roles.#{type.role}") %>
+                </span>
+              </td>
+              <td class="actions-column">
+                <%= link_to edit_account_type_path(type), class: "btn-action", title: t('ui.actions.edit') do %>
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                  </svg>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </article>
+  <% else %>
+    <article class="empty-state">
+      <div class="icon">🏦</div>
+      <h3>Nenhum tipo de conta cadastrado</h3>
+      <p>Os tipos de conta são usados para classificar e organizar suas contas bancárias no sistema.</p>
+      <footer>
+        <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.account_type.one'), new_account_type_path, class: "btn-primary" %>
+      </footer>
+    </article>
+  <% end %>
+</section>

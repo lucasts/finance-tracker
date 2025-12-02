@@ -1,41 +1,52 @@
-<header>
-  <h1><%= t('activerecord.models.account.other') %></h1>
-  <%= link_to new_account_path, class: "new-account-button", title: t('ui.actions.new') + ' ' + t('activerecord.models.account.one') do %>
-    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
-    </svg>
-  <% end %>
-</header>
+<section class="index-page">
+  <header class="page-header">
+    <h1><%= t('activerecord.models.account.other') %></h1>
+    <%= link_to new_account_path, class: "btn-new", title: t('ui.actions.new') + ' ' + t('activerecord.models.account.one') do %>
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+      </svg>
+    <% end %>
+  </header>
 
-<% if @accounts.any? %>
-  <div class="accounts-container">
-    <ul class="accounts-list">
-      <% @accounts.each do |account| %>
-        <li class="account-item">
-          <div class="account-info">
-            <div class="account-main">
-              <strong class="account-name"><%= account.name %></strong>
-              <span class="account-type">
-                <%= account.account_type.name %>
-              </span>
-            </div>
-          </div>
-          <%= link_to edit_account_path(account), class: "account-action", title: t('ui.actions.edit') do %>
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-            </svg>
+  <% if @accounts.any? %>
+    <article class="data-table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Tipo</th>
+            <th class="actions-column"><%= t('ui.actions.title') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @accounts.each do |account| %>
+            <tr>
+              <td class="account-name"><%= account.name %></td>
+              <td>
+                <span class="account-type-badge">
+                  <%= account.account_type.name %>
+                </span>
+              </td>
+              <td class="actions-column">
+                <%= link_to edit_account_path(account), class: "btn-action", title: t('ui.actions.edit') do %>
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                  </svg>
+                <% end %>
+              </td>
+            </tr>
           <% end %>
-        </li>
-      <% end %>
-    </ul>
-  </div>
-<% else %>
-  <article class="empty-state">
-    <div class="icon">💰</div>
-    <h3>Nenhuma conta cadastrada</h3>
-    <p>Crie contas para organizar suas finanças (bancárias, carteira, investimentos, etc).</p>
-    <footer>
-      <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.account.one'), new_account_path %>
-    </footer>
-  </article>
-<% end %>
+        </tbody>
+      </table>
+    </article>
+  <% else %>
+    <article class="empty-state">
+      <div class="icon">💰</div>
+      <h3>Nenhuma conta cadastrada</h3>
+      <p>Crie contas para organizar suas finanças (bancárias, carteira, investimentos, etc).</p>
+      <footer>
+        <%= link_to t('ui.actions.new') + ' ' + t('activerecord.models.account.one'), new_account_path, class: "btn-primary" %>
+      </footer>
+    </article>
+  <% end %>
+</section>
