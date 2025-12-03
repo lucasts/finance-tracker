@@ -2,6 +2,9 @@
 
 Sistema de design inspirado nos princípios de design industrial de Dieter Rams.
 
+![Calc](image.png)
+![alt text](image-1764427309748.png)
+
 ## Princípios
 
 1. **Elementos HTML semânticos primeiro** - Usar `<section>`, `<article>`, `<header>`, `<footer>`, `<mark>`, `<data>`, etc.
