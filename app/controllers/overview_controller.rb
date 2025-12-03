@@ -164,28 +164,25 @@ end
 private
 
 def load_credit_statements(month_date)
-  # Preload account and its type in a single pass
+  # Get only the last open statement per credit card account
+  # This shows either the current month's statement (if unpaid) or next month's statement (if current was paid)
+  user_credit_accounts = current_user.accounts
+    .joins(:account_type)
+    .where(account_types: { code: 'CREDIT_CARD' })
+    .pluck(:id)
+  
+  return @credit_statements = [] if user_credit_accounts.empty?
+  
+  # Get the most recent open statement for each account
   @credit_statements = CreditStatement
-                        .includes(:transactions, account: :account_type)
-                        .where(month: month_date.strftime('%Y-%m'))
-                        .order('accounts.name')
-
-  # Aggregate statistics without extra queries
-  stats = { total_due: 0, total_paid: 0, pending_count: 0, overdue_count: 0 }
-  @credit_statements.each do |st|
-    stats[:total_due] += FinancialConstants.safe_to_float(st.amount_due)
-    stats[:total_paid] += FinancialConstants.safe_to_float(st.amount_paid)
-    stats[:pending_count] += 1 if %w[open overdue].include?(st.status)
-    stats[:overdue_count] += 1 if st.status == 'overdue'
-  end
-  @credit_stats = stats
-
-  @upcoming_statements = CreditStatement
-                           .includes(:transactions, account: :account_type)
-                           .where(due_on: Date.today..30.days.from_now)
-                           .where.not(status: 'paid')
-                           .order(:due_on)
-                           .limit(5)
+    .includes(:transactions, account: :account_type)
+    .where(account_id: user_credit_accounts)
+    .where(status: 'open')
+    .order('accounts.name, credit_statements.due_on DESC')
+    .group_by(&:account_id)
+    .map { |_account_id, statements| statements.first }
+    .compact
+    .sort_by { |s| s.due_on }
 end
 
 def monthly_statistics(month_date, month_transactions:, user_transactions:)
@@ -216,16 +213,29 @@ def monthly_statistics(month_date, month_transactions:, user_transactions:)
 end
 
 def load_accounts_with_balances
-  @accounts = current_user.accounts.includes(:account_type).to_a
-  return (@account_balances = {}) if @accounts.empty?
-  ids = @accounts.map(&:id)
+  all_accounts = current_user.accounts.includes(:account_type).to_a
+  return (@account_balances = {}) if all_accounts.empty?
+  
+  # Get all account IDs for balance calculation
+  ids = all_accounts.map(&:id)
+  
+  # Get recent transactions per account (last 90 days)
+  recent_activity = Transaction
+    .joins(:entries)
+    .where(entries: { account_id: ids })
+    .where('transactions.event_date >= ?', 90.days.ago)
+    .group('entries.account_id')
+    .count
+  
   # Single grouped query for confirmed entries
   sums = Entry.joins(:transaction_record)
               .where(account_id: ids, transactions: { status: 'confirmed' })
               .group(:account_id, :entry_type)
               .sum(:amount)
+  
+  # Calculate balances for all accounts
   @account_balances = {}
-  @accounts.each do |acc|
+  all_accounts.each do |acc|
     debit_total = FinancialConstants.safe_to_float(sums[[acc.id, 'debit']] || 0)
     credit_total = FinancialConstants.safe_to_float(sums[[acc.id, 'credit']] || 0)
     balance = if acc.account_type&.asset_type?
@@ -235,6 +245,11 @@ def load_accounts_with_balances
               end
     @account_balances[acc.id] = balance
   end
+  
+  # Limit to 3 accounts with most recent activity
+  @accounts = all_accounts
+    .sort_by { |acc| -(recent_activity[acc.id] || 0) }
+    .take(3)
 end
 
   def calculate_savings_rate(income, expense)
