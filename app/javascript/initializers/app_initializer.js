@@ -5,8 +5,6 @@ import { application } from "controllers/application"
 import ASSET_CONFIG from "config/assets"
 import intelligentCache from "services/intelligent_cache"
 import performanceUtils from "utilities/performance_utils"
-import bundleAnalyzer from "utilities/bundle_analyzer"
-import resourcePreloader from "utilities/resource_preloader"
 
 class AppInitializer {
   constructor() {
@@ -88,12 +86,10 @@ class AppInitializer {
   }
 
   async initializeIntegrations() {
-    // Initialize Service Worker for offline functionality
+    // Future: Service Worker, Analytics, etc.
     if (this.config.performance.enableServiceWorker) {
       await this.initializeServiceWorker();
     }
-    
-    // Future: Analytics, Error tracking, etc.
   }
 
   async initializeAnimations() {
@@ -138,58 +134,8 @@ class AppInitializer {
   }
 
   async initializeServiceWorker() {
-    try {
-      const { default: serviceWorkerManager } = await import('services/service_worker_manager');
-      const registered = await serviceWorkerManager.register();
-      
-      if (registered) {
-        console.log('✅ Service Worker enabled for offline functionality');
-        
-        // Setup offline/online event handlers
-        document.addEventListener('app:offline', () => {
-          this.handleOfflineMode();
-        });
-        
-        document.addEventListener('app:online', () => {
-          this.handleOnlineMode();
-        });
-      }
-    } catch (error) {
-      console.warn('Service Worker initialization failed:', error);
-    }
-  }
-
-  handleOfflineMode() {
-    // Add visual indicator that app is offline
-    document.body.classList.add('app-offline');
-    
-    // Show offline notification
-    this.showOfflineNotification();
-  }
-
-  handleOnlineMode() {
-    // Remove offline indicator
-    document.body.classList.remove('app-offline');
-    
-    // Hide offline notification if present
-    const offlineNotification = document.querySelector('.offline-notification');
-    if (offlineNotification) {
-      offlineNotification.remove();
-    }
-  }
-
-  showOfflineNotification() {
-    // Remove existing notification if present
-    const existing = document.querySelector('.offline-notification');
-    if (existing) existing.remove();
-
-    const notification = document.createElement('div');
-    notification.className = 'offline-notification fixed top-0 left-0 right-0 bg-warning text-warning-content p-2 text-center text-sm z-50';
-    notification.innerHTML = `
-      <span>📡 Modo Offline - Funcionalidade limitada</span>
-    `;
-
-    document.body.appendChild(notification);
+    // Future enhancement
+    console.log('Service Worker initialization would go here');
   }
 
   setupErrorHandling() {
