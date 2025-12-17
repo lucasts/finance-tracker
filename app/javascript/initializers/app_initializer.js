@@ -187,14 +187,6 @@ class AppInitializer {
 
     // Smart preloading based on user behavior
     this.setupBehaviorTracking();
-
-    // Bundle analysis in development
-    if (this.isDevelopment()) {
-      this.setupBundleAnalysis();
-    }
-
-    // Initialize resource preloading
-    resourcePreloader.initializeForPage();
   }
 
   setupBehaviorTracking() {
@@ -249,31 +241,6 @@ class AppInitializer {
       animations: true,
       currency: 'BRL'
     };
-  }
-
-  setupBundleAnalysis() {
-    // Run bundle analysis after page load
-    window.addEventListener('load', async () => {
-      try {
-        const report = await bundleAnalyzer.startAnalysis();
-        
-        // Log summary to console in development
-        console.group('📊 Bundle Analysis');
-        console.table(report.summary);
-        
-        // Show recommendations if any
-        if (report.recommendations.length > 0) {
-          console.warn('Bundle optimization recommendations:', report.recommendations);
-        }
-        
-        console.groupEnd();
-        
-        // Store report for debugging
-        window.bundleReport = report;
-      } catch (error) {
-        console.warn('Bundle analysis failed:', error);
-      }
-    });
   }
 
   isDevelopment() {
