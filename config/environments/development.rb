@@ -52,14 +52,6 @@ Rails.application.configure do
   # Append comments with runtime information tags to SQL queries in logs.
   config.active_record.query_log_tags_enabled = true
 
-  # Asset pipeline configuration for development
-  # Disable digest generation in development to avoid stale precompiled assets
-  config.assets.digest = false
-  # Debug mode provides better error messages for assets
-  config.assets.debug = true
-  # Prevent using precompiled assets - always compile on-demand in development
-  config.assets.compile = true
-
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
 
