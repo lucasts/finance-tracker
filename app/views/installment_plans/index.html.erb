@@ -1,29 +1,29 @@
-<h1>📊 Planos de Parcelamento</h1>
-
-<div>
- <%= link_to 'Novo Plano', new_installment_plan_path %>
- 
- <div>
- <%= link_to "📈 Relatórios", reports_path %>
- <%= link_to "💰 Transações", transactions_path %>
- </div>
-</div>
+<section class="installment-plans-index">
+  <header class="page-header">
+    <h1>Planos de Parcelamento</h1>
+    <%= link_to new_installment_plan_path, class: "btn-new", title: "Novo Plano de Parcelamento" do %>
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+      </svg>
+    <% end %>
+  </header>
 
 <% if @installment_plans.any? %>
- <div>
+ <div class="plans-list">
  <% @plan_summaries.each do |summary| %>
  <% plan = summary[:plan] %>
- <div>
- <div>
+ <div class="plan-card">
+ <div class="plan-header">
  <div>
  <h3><%= plan.name %></h3>
- <div>
+ </div>
+ <div class="plan-status">
  <%= plan.active? ? 'Ativo' : 'Inativo' %>
  </div>
  </div>
  
  <!-- Progress Bar -->
- <div>
+ <div class="progress-section">
  <div>
  <span>Progresso</span>
  <span><%= summary[:progress_percentage] %>%</span>
@@ -35,7 +35,7 @@
  </div>
  
  <!-- Financial Summary -->
- <div>
+ <div class="financial-row">
  <div>
  <div>Valor Total</div>
  <div>R$ <%= number_with_precision(plan.total_amount, precision: 2, delimiter: ".") %></div>
@@ -46,7 +46,7 @@
  </div>
  </div>
  
- <div>
+ <div class="financial-row">
  <div>
  <div>Pago</div>
  <div>R$ <%= number_with_precision(summary[:total_paid], precision: 2, delimiter: ".") %></div>
@@ -59,9 +59,9 @@
  
  <!-- Next Payment -->
  <% if summary[:next_due_date] %>
+ <div class="next-payment-alert">
  <div>
- <div>
- <strong>Próxima parcela:</strong><br>
+ <strong>Próxima parcela:</strong>
  <%= l(summary[:next_due_date], format: :short) %>
  <span>
  <% days_diff = (summary[:next_due_date] - Date.current).to_i %>
@@ -78,15 +78,13 @@
  </div>
  </div>
  <% elsif summary[:paid_installments] >= plan.installment_count %>
- <div>
- <div>
- <strong>✅ Parcelamento concluído!</strong>
- </div>
+ <div class="completed-badge">
+ <strong>Parcelamento concluído</strong>
  </div>
  <% end %>
  
  <!-- Account & Category Info -->
- <div>
+ <div class="plan-metadata">
  <% first_transaction = plan.transactions.first %>
  <% if first_transaction %>
  <% if first_transaction %>
@@ -102,25 +100,24 @@
  </div>
  
  <!-- Actions -->
- <div>
+ <div class="plan-actions">
  <%= link_to 'Ver', installment_plan_path(plan) %>
  <%= link_to 'Editar', edit_installment_plan_path(plan) %>
  <%= link_to plan.active? ? 'Desativar' : 'Ativar', 
  toggle_active_installment_plan_path(plan), 
- method: :patch,
-  %>
- </div>
+ method: :patch %>
  </div>
  </div>
  <% end %>
  </div>
 <% else %>
- <div>
- <div>📊</div>
+ <div class="empty-state">
+ <div class="empty-icon">📊</div>
  <h3>Nenhum plano de parcelamento</h3>
  <p>
  Crie planos de parcelamento para organizar suas compras em várias parcelas.
  </p>
  <%= link_to 'Criar Primeiro Plano', new_installment_plan_path %>
- </div>
+  </div>
 <% end %>
+</section>

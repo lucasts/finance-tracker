@@ -35,6 +35,7 @@
 @import "pages/accounts.css";
 @import "pages/account_types.css";
 @import "pages/overview.css"; /* Updated 2025-12-02 */
+@import "pages/installment_plans.css"; /* Updated 2025-12-03 */
 
 /* Application-specific overrides and customizations */
 /* ============================================ */

@@ -1,0 +1,277 @@
+/*
+ * Installment Plans Page Styles - SCOPED
+ * Styling following Braun principles
+ * "Weniger, aber besser" - Less, but better
+ * Using .installment-plans-index wrapper for complete isolation
+ */
+
+/* Page header - uses existing .page-header styles from layout.css */
+.installment-plans-index .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-6);
+}
+
+.installment-plans-index .page-header h1 {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+/* Use existing .btn-new styles from components */
+
+/* Plans list */
+.installment-plans-index .plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+/* Individual plan card */
+.installment-plans-index .plan-card {
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
+  padding: var(--spacing-5);
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08);
+  transition: all var(--transition-fast);
+}
+
+.installment-plans-index .plan-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 8px rgba(232, 135, 69, 0.15);
+}
+
+/* Plan header */
+.installment-plans-index .plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-3);
+  border-bottom: var(--border-width-thin) solid var(--color-border-light);
+}
+
+.installment-plans-index .plan-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.installment-plans-index .plan-status {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 4px var(--spacing-3);
+  border-radius: var(--border-radius-full);
+  background: rgba(106, 126, 100, 0.15);
+  color: var(--color-success);
+}
+
+/* Progress section */
+.installment-plans-index .progress-section {
+  margin-bottom: var(--spacing-4);
+}
+
+.installment-plans-index .progress-section > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.installment-plans-index .progress-section progress {
+  width: 100%;
+  height: 6px;
+  border: none;
+  border-radius: 3px;
+  background: var(--color-border-light);
+  margin-bottom: var(--spacing-2);
+}
+
+.installment-plans-index .progress-section progress::-webkit-progress-bar {
+  background: var(--color-border-light);
+  border-radius: 3px;
+}
+
+.installment-plans-index .progress-section progress::-webkit-progress-value {
+  background: linear-gradient(90deg, var(--color-success) 0%, var(--color-primary) 100%);
+  border-radius: 3px;
+}
+
+.installment-plans-index .progress-section progress::-moz-progress-bar {
+  background: linear-gradient(90deg, var(--color-success) 0%, var(--color-primary) 100%);
+  border-radius: 3px;
+}
+
+.installment-plans-index .progress-section > div:last-child {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* Financial summary - two rows */
+.installment-plans-index .financial-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  background: rgba(65, 65, 65, 0.02);
+  border-radius: 4px;
+  margin-bottom: var(--spacing-3);
+}
+
+.installment-plans-index .financial-row > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.installment-plans-index .financial-row > div > div:first-child {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-semibold);
+}
+
+.installment-plans-index .financial-row > div > div:last-child {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Next payment alert */
+.installment-plans-index .next-payment-alert {
+  padding: var(--spacing-3);
+  background: linear-gradient(90deg, rgba(232, 135, 69, 0.05) 0%, transparent 100%);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 4px 4px 0;
+  margin-bottom: var(--spacing-4);
+}
+
+.installment-plans-index .next-payment-alert strong {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.installment-plans-index .next-payment-alert span {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding: 2px var(--spacing-2);
+  background: rgba(65, 65, 65, 0.05);
+  border-radius: 3px;
+  margin-left: var(--spacing-2);
+}
+
+/* Completed badge */
+.installment-plans-index .completed-badge {
+  padding: var(--spacing-3);
+  background: linear-gradient(90deg, rgba(106, 126, 100, 0.08) 0%, transparent 100%);
+  border-left: 3px solid var(--color-success);
+  border-radius: 0 4px 4px 0;
+  margin-bottom: var(--spacing-4);
+  text-align: center;
+}
+
+.installment-plans-index .completed-badge strong {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-success);
+}
+
+/* Metadata section */
+.installment-plans-index .plan-metadata {
+  padding: var(--spacing-3) 0;
+  border-top: var(--border-width-thin) solid var(--color-border-light);
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.installment-plans-index .plan-metadata > div {
+  margin-bottom: var(--spacing-2);
+}
+
+.installment-plans-index .plan-metadata > div:last-child {
+  margin-bottom: 0;
+}
+
+.installment-plans-index .plan-metadata strong {
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Actions */
+.installment-plans-index .plan-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  padding-top: var(--spacing-3);
+  border-top: var(--border-width-thin) solid var(--color-border-light);
+}
+
+.installment-plans-index .plan-actions a {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+  border: var(--border-width-thin) solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-text);
+}
+
+.installment-plans-index .plan-actions a:hover {
+  background: var(--color-soft-linen);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Empty state */
+.installment-plans-index .empty-state {
+  text-align: center;
+  padding: var(--spacing-12) var(--spacing-4);
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08);
+  margin-top: var(--spacing-6);
+}
+
+.installment-plans-index .empty-state .empty-icon {
+  font-size: 64px;
+  margin-bottom: var(--spacing-4);
+  opacity: 0.3;
+}
+
+.installment-plans-index .empty-state h3 {
+  margin: 0 0 var(--spacing-2) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.installment-plans-index .empty-state p {
+  margin: 0 0 var(--spacing-5) 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .installment-plans-index .financial-row {
+    grid-template-columns: 1fr;
+  }
+}
