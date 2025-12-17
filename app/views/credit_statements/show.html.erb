@@ -1,135 +1,153 @@
-<h1>💳 Fatura do Cartão</h1>
+<section class="credit-statement-show">
+  <header class="page-header">
+    <h1>Fatura <%= @credit_statement.month.gsub('-', '/') %></h1>
+  </header>
 
-<!-- Header Info Card -->
-<div>
- <div>
- <div>
- <div>
- <h2><%= @credit_statement.account.name %></h2>
- <p>Fatura de <%= @credit_statement.month %></p>
- </div>
- <div>
- <span>
- <%= t("activerecord.attributes.credit_statement.statuses.#{@credit_statement.status}") rescue @credit_statement.status.titleize %>
- </span>
- </div>
- </div>
- </div>
-</div>
+  <!-- Statement Header Card -->
+  <article class="statement-header-card">
+    <div class="header-content">
+      <div>
+        <h2><%= @credit_statement.account.name %></h2>
+        <p class="statement-month">Fatura de <%= Date.parse("#{@credit_statement.month}-01").strftime('%B/%Y') %></p>
+      </div>
+      <span class="status-badge <%= @credit_statement.status %>">
+        <%= t("activerecord.attributes.credit_statement.statuses.#{@credit_statement.status}") rescue @credit_statement.status.titleize %>
+      </span>
+    </div>
+  </article>
 
-<!-- Financial Summary Cards -->
-<div>
- <div>
- <div>
- <label>Valor Total da Fatura</label>
- <p>R$ <%= number_with_precision(@credit_statement.amount_due, precision: 2, separator: ",") %></p>
- </div>
- </div>
- 
- <div>
- <div>
- <label>Valor Pago</label>
- <p>R$ <%= number_with_precision(@credit_statement.amount_paid, precision: 2, separator: ",") %></p>
- </div>
- </div>
- 
- <div>
- <div>
- <label>Saldo Restante</label>
- <p>R$ <%= number_with_precision(@credit_statement.remaining_balance, precision: 2, separator: ",") %></p>
- </div>
- </div>
-</div>
+  <!-- Financial Summary Cards -->
+  <section class="financial-summary">
+    <article class="summary-card total">
+      <label>Valor Total da Fatura</label>
+      <data class="amount" value="<%= @credit_statement.amount_due %>">
+        R$ <%= number_with_precision(@credit_statement.amount_due, precision: 2, separator: ",", delimiter: ".") %>
+      </data>
+    </article>
+    
+    <article class="summary-card paid">
+      <label>Valor Pago</label>
+      <data class="amount" value="<%= @credit_statement.amount_paid %>">
+        R$ <%= number_with_precision(@credit_statement.amount_paid, precision: 2, separator: ",", delimiter: ".") %>
+      </data>
+    </article>
+    
+    <article class="summary-card remaining">
+      <label>Saldo Restante</label>
+      <data class="amount" value="<%= @credit_statement.remaining_balance %>">
+        R$ <%= number_with_precision(@credit_statement.remaining_balance, precision: 2, separator: ",", delimiter: ".") %>
+      </data>
+    </article>
+  </section>
 
-<!-- Detailed Information -->
-<div>
- <!-- Dates and Timeline -->
- <div>
- <div>
- <h3>📅 Cronograma</h3>
- <div>
- <div>
- <span>Data de Fechamento</span>
- <span>
- <%= l(@credit_statement.closed_on, format: :long) if @credit_statement.closed_on %>
- <% unless @credit_statement.closed_on %>
- <span>Não informado</span>
- <% end %>
- </span>
- </div>
- 
- <div>
- <span>Data de Vencimento</span>
- <span>
- <%= l(@credit_statement.due_on, format: :long) if @credit_statement.due_on %>
- <% unless @credit_statement.due_on %>
- <span>Não informado</span>
- <% end %>
- </span>
- </div>
- 
- <div>
- <span>Data de Pagamento</span>
- <span>
- <%= l(@credit_statement.paid_on, format: :long) if @credit_statement.paid_on %>
- <% unless @credit_statement.paid_on %>
- <span>Não pago</span>
- <% end %>
- </span>
- </div>
- </div>
- </div>
- </div>
- 
- <!-- Payment Status and Actions -->
- <div>
- <div>
- <h3>💰 Status do Pagamento</h3>
- 
- <!-- Progress Bar -->
- <div>
- <div>
- <span>Progresso do Pagamento</span>
- <span>
- <% if @credit_statement.amount_due > 0 %>
- <%= number_to_percentage((@credit_statement.amount_paid / @credit_statement.amount_due) * 100, precision: 1) %>
- <% else %>
- 0.0%
- <% end %>
- </span>
- </div>
- <progress 
- value="<%= @credit_statement.amount_paid %>" 
- max="<%= [@credit_statement.amount_due, 1].max %>"></progress>
- </div>
- 
- <!-- Status Info -->
- <div>
- <% if @credit_statement.status == 'paid' %>
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
- <span>Fatura paga integralmente!</span>
- </div>
- <% elsif @credit_statement.status == 'overdue' %>
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" /></svg>
- <span>Fatura em atraso!</span>
- </div>
- <% else %>
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" /></svg>
- <span>Aguardando pagamento</span>
- </div>
- <% end %>
- </div>
- </div>
- </div>
-</div>
+  <!-- Detailed Information -->
+  <section class="statement-details">
+    <!-- Dates and Timeline -->
+    <article class="detail-card">
+      <h3>Cronograma</h3>
+      <div class="timeline-item">
+        <span class="item-label">Data de Fechamento</span>
+        <span class="item-value">
+          <% if @credit_statement.closed_on %>
+            <time datetime="<%= @credit_statement.closed_on.iso8601 %>">
+              <%= l(@credit_statement.closed_on, format: :long) %>
+            </time>
+          <% else %>
+            <span class="not-set">Não informado</span>
+          <% end %>
+        </span>
+      </div>
+      
+      <div class="timeline-item">
+        <span class="item-label">Data de Vencimento</span>
+        <span class="item-value">
+          <% if @credit_statement.due_on %>
+            <time datetime="<%= @credit_statement.due_on.iso8601 %>">
+              <%= l(@credit_statement.due_on, format: :long) %>
+            </time>
+          <% else %>
+            <span class="not-set">Não informado</span>
+          <% end %>
+        </span>
+      </div>
+      
+      <div class="timeline-item">
+        <span class="item-label">Data de Pagamento</span>
+        <span class="item-value">
+          <% if @credit_statement.paid_on %>
+            <time datetime="<%= @credit_statement.paid_on.iso8601 %>">
+              <%= l(@credit_statement.paid_on, format: :long) %>
+            </time>
+          <% else %>
+            <span class="not-set">Não pago</span>
+          <% end %>
+        </span>
+      </div>
+    </article>
+    
+    <!-- Payment Status and Progress -->
+    <article class="detail-card">
+      <h3>Status do Pagamento</h3>
+      
+      <!-- Progress Bar -->
+      <div class="progress-bar-container">
+        <div class="progress-header">
+          <span class="progress-label">Progresso do Pagamento</span>
+          <span class="progress-percentage">
+            <% if @credit_statement.amount_due > 0 %>
+              <%= number_to_percentage((@credit_statement.amount_paid / @credit_statement.amount_due) * 100, precision: 1) %>
+            <% else %>
+              0.0%
+            <% end %>
+          </span>
+        </div>
+        <progress 
+          value="<%= @credit_statement.amount_paid %>" 
+          max="<%= [@credit_statement.amount_due, 1].max %>">
+        </progress>
+      </div>
+      
+      <!-- Status Alert -->
+      <% if @credit_statement.status == 'paid' %>
+        <div class="status-alert success">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Fatura paga integralmente!</span>
+        </div>
+      <% elsif @credit_statement.status == 'overdue' %>
+        <div class="status-alert danger">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <span>Fatura em atraso!</span>
+        </div>
+      <% else %>
+        <div class="status-alert warning">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Aguardando pagamento</span>
+        </div>
+      <% end %>
+    </article>
+  </section>
 
-<!-- Actions -->
-<div>
- <%= link_to '← Voltar às Faturas', credit_statements_path %>
- <% if respond_to?(:edit_credit_statement_path) %>
- <%= link_to 'Editar Fatura', edit_credit_statement_path(@credit_statement) %>
- <% end %>
-</div>
+  <!-- Page Actions -->
+  <footer class="page-actions">
+    <%= link_to credit_statements_path do %>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      <span>Voltar às Faturas</span>
+    <% end %>
+    <% if respond_to?(:edit_credit_statement_path) %>
+      <%= link_to edit_credit_statement_path(@credit_statement), class: "primary" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        <span>Editar Fatura</span>
+      <% end %>
+    <% end %>
+  </footer>
+</section>
