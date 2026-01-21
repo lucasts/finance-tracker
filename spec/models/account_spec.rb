@@ -37,7 +37,8 @@ RSpec.describe Account, type: :model do
     let(:expense_category) { create(:category, :expense, user: user) }
 
     before do
-      # Clear any existing transactions to start fresh
+      # Clear any existing transactions to start fresh (entries first due to FK)
+      Entry.delete_all
       Transaction.delete_all
     end
 
@@ -61,6 +62,7 @@ RSpec.describe Account, type: :model do
           ]
         )
         
+        account.reload
         expect(account.balance).to eq(1000.0)
       end
 

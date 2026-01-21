@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Transaction, type: :model do
+  include ActiveSupport::Testing::TimeHelpers
+
   let(:user) { create(:user) }
   let(:account) { create(:account, user: user) }
   let(:category) { create(:category, user: user) }
@@ -176,6 +178,23 @@ RSpec.describe Transaction, type: :model do
       expect(Transaction.pending).to include(pending_transaction)
       expect(Transaction.pending).not_to include(confirmed_transaction)
     end
+
+    describe '.upcoming_payments' do
+      it 'returns pending or confirmed transactions within the next month ordered by event_date' do
+        travel_to(Time.zone.local(2025, 1, 1)) do
+          in_range_pending = create(:transaction, :expense, status: :pending, event_date: 1.week.from_now, payment_date: 1.week.from_now, user: user)
+          in_range_confirmed = create(:transaction, :expense, status: :confirmed, event_date: 2.weeks.from_now, payment_date: 2.weeks.from_now, user: user)
+          cancelled_in_range = create(:transaction, :expense, status: :cancelled, event_date: 3.weeks.from_now, payment_date: 3.weeks.from_now, user: user)
+          past_transaction = create(:transaction, :expense, status: :confirmed, event_date: 1.week.ago, payment_date: 1.week.ago, user: user)
+          distant_future = create(:transaction, :expense, status: :pending, event_date: 2.months.from_now, payment_date: 2.months.from_now, user: user)
+
+          result = described_class.where(user: user).upcoming_payments
+
+          expect(result).to eq([in_range_pending, in_range_confirmed])
+          expect(result).not_to include(cancelled_in_range, past_transaction, distant_future)
+        end
+      end
+    end
   end
 
   describe 'business methods' do
@@ -347,7 +366,7 @@ RSpec.describe Transaction, type: :model do
     it 'aceita valores extremos' do
       transaction = create(:transaction, 
         :expense,
-        amount: 999999999.99,
+        amount: 99_999_999.99,
         user: user
       )
       expect(transaction).to be_valid

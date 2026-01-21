@@ -20,7 +20,6 @@ class Transaction < ApplicationRecord
   accepts_nested_attributes_for :entries
 
   validates :description, :amount, :event_date, :payment_date, :transaction_type, presence: true
-  validates :status, inclusion: { in: %w[pending confirmed cancelled] }
   validate :balance_of_entries
   
   # Mutual exclusivity validation - transaction can only belong to ONE type
@@ -53,7 +52,7 @@ class Transaction < ApplicationRecord
   }
   
   scope :upcoming_payments, ->(limit = 10) {
-  where(status: ['pending', 'confirmed'])
+  where(status: %i[pending confirmed])
     .where('event_date > ?', Date.current)
     .where('event_date <= ?', 1.months.from_now)
     .order(:event_date)
@@ -125,29 +124,29 @@ class Transaction < ApplicationRecord
   end
   
   def set_default_status
-    return if status.present?
-    
+    return if status.present? && !pending?
+
     self.status = determine_automatic_status
   end
   
   def determine_automatic_status
     current_date = Date.current
-    check_date = payment_date || event_date
+    check_date = (payment_date || event_date)&.to_date
     
     if check_date && check_date > current_date
-      'pending'    # Future transaction
+      :pending    # Future transaction
     else
       # For installment plan transactions, use different logic
       if installment_plan.present? && installment_number.present?
         # First installment can be confirmed if in the past/present
         # Other installments always pending until manually paid
         if installment_number == 1 && check_date <= current_date
-          'confirmed'
+          :confirmed
         else
-          'pending'
+          :pending
         end
       else
-        'confirmed'  # Current or past transaction (except installments)
+        :confirmed  # Current or past transaction (except installments)
       end
     end
   end

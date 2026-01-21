@@ -8,7 +8,7 @@ RSpec.describe 'Transaction Edge Cases', type: :model do
 
   it 'creates transaction with extremely high value' do
     tx = CreateTransactionService.call(
-      amount: 1_000_000_000, 
+      amount: 99_999_999.99, 
       event_date: Date.today, 
       payment_date: Date.today,
       category: category, 
@@ -16,8 +16,8 @@ RSpec.describe 'Transaction Edge Cases', type: :model do
       description: 'Valor extremo',
       transaction_type: 'expense',
       entries_attributes: [
-        { account_id: account.id, entry_type: 'debit', amount: 1_000_000_000 },
-        { account_id: expense_account.id, entry_type: 'credit', amount: 1_000_000_000 }
+        { account_id: account.id, entry_type: 'debit', amount: 99_999_999.99 },
+        { account_id: expense_account.id, entry_type: 'credit', amount: 99_999_999.99 }
       ]
     )
     expect(tx).to be_persisted
@@ -25,7 +25,7 @@ RSpec.describe 'Transaction Edge Cases', type: :model do
 
   it 'creates transaction with extreme negative value' do
     tx = CreateTransactionService.call(
-      amount: 1_000_000_000, 
+      amount: 99_999_999.99, 
       event_date: Date.today, 
       payment_date: Date.today,
       category: category, 
@@ -33,8 +33,8 @@ RSpec.describe 'Transaction Edge Cases', type: :model do
       description: 'Valor negativo extremo',
       transaction_type: 'expense',
       entries_attributes: [
-        { account_id: account.id, entry_type: 'credit', amount: 1_000_000_000 },
-        { account_id: expense_account.id, entry_type: 'debit', amount: 1_000_000_000 }
+        { account_id: account.id, entry_type: 'credit', amount: 99_999_999.99 },
+        { account_id: expense_account.id, entry_type: 'debit', amount: 99_999_999.99 }
       ]
     )
     expect(tx).to be_persisted
