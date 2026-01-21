@@ -73,7 +73,7 @@ case "$cmd" in
     compose logs -f "$svc"
     ;;
   rspec)
-    compose exec app bundle exec rspec "$@"
+    compose exec -e RAILS_ENV=test app bundle exec rspec "$@"
     ;;
   test:js)
     compose exec app yarn test "$@"
