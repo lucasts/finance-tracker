@@ -21,16 +21,16 @@ RSpec.describe CreditStatementService, type: :service do
     it 'creates a new credit statement when none exists' do
       expect {
         CreditStatementService.find_or_create_for_transaction(transaction)
-      }.to change(CreditStatement, :count).by(1)
+      }.to change { credit_account.credit_statements.count }.by(1)
     end
 
     it 'returns existing credit statement when one exists' do
       existing_statement = create(:credit_statement, account: credit_account, month: '2024-06')
       
-      result = CreditStatementService.find_or_create_for_transaction(transaction)
-      
-      expect(result).to eq(existing_statement)
-      expect(CreditStatement.count).to eq(1)
+      expect {
+        result = CreditStatementService.find_or_create_for_transaction(transaction)
+        expect(result).to eq(existing_statement)
+      }.not_to change { credit_account.credit_statements.count }
     end
 
     it 'calculates correct period based on closing day' do
