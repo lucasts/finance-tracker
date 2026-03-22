@@ -4,10 +4,13 @@ RSpec.describe 'BatchProcessing', type: :request do
   let(:user) { create(:user) }
   let!(:account) { create(:account, user: user) }
   let!(:import_session) { create(:import_session, user: user, account: account) }
-  let!(:tx1) { create(:imported_transaction, import_session: import_session, line_number: 1, raw_data: '{}', amount: 100.0) }
-  let!(:tx2) { create(:imported_transaction, import_session: import_session, line_number: 2, raw_data: '{}', amount: 200.0) }
 
-  before { sign_in user }
+  before do
+    create(:imported_transaction, import_session: import_session, line_number: 1, raw_data: '{}', amount: 100.0)
+    create(:imported_transaction, import_session: import_session, line_number: 2, raw_data: '{}', amount: 200.0)
+sign_in user
+  end
+
 
   describe 'POST #batch_process_pending' do
     it 'processa todas as pendentes como ignore' do

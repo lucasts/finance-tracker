@@ -98,7 +98,7 @@ Rails.application.configure do
   ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
-# config/environments/preprod.rb - Adicione estas linhas:
+  # config/environments/preprod.rb - Adicione estas linhas:
 
   # Assets
   config.assets.compile = true
@@ -112,12 +112,12 @@ Rails.application.configure do
   config.active_job.queue_adapter = :sidekiq
 
   # Mailer config for testing
-  config.action_mailer.default_url_options = { host: 'localhost', port: 3001 }
+  config.action_mailer.default_url_options = { host: "localhost", port: 3001 }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address: 'localhost',
+    address: "localhost",
     port: 1025, # MailCatcher
-    domain: 'localhost'
+    domain: "localhost"
   }
 
   # Error handling like production

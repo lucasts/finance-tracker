@@ -13,19 +13,19 @@ Last active development: **January 2026**. Resumed: **March 2026**.
 ## 🚨 Immediate — Fix & Stabilize (before any new work)
 
 ### 1. Get test suite green again
-- [ ] Fix all failing RSpec tests (regressions accumulated while project was idle)
+- [x] Fix all failing RSpec tests — 566 examples, 0 failures (was 0 passing)
 - [ ] Ensure Docker environment builds cleanly (`docker compose -f docker-compose.local.yml up --build`)
 - [ ] Verify `bin/verify` passes inside container
 
 ### 2. Enable code quality tooling
-- [ ] Enable RuboCop in `bin/verify` and fix violations (currently commented out)
-- [ ] Enable Brakeman security scanning in `bin/verify` (currently commented out)
-- [ ] Configure SimpleCov with a minimum coverage threshold (currently unconfigured)
+- [x] Enable RuboCop in `bin/verify` — 0 violations across 155 files
+- [x] Enable Brakeman security scanning in `bin/verify` — 0 warnings; 3 IDOR vulnerabilities fixed
+- [x] Configure SimpleCov with 90% minimum coverage threshold (guarded by COVERAGE/CI env vars)
 
 ### 3. Strengthen test integrity
-- [ ] Add explicit double-entry balance assertion spec (`sum(debits) == sum(credits)` for every transaction)
-- [ ] Standardize spec language to English (some specs use Portuguese `it` descriptions)
-- [ ] Expand request/integration specs (14 request specs for 10 controllers — gaps in automation, reconciliation)
+- [x] Add explicit double-entry balance assertion spec — 10 tests in double_entry_integrity_spec.rb
+- [x] Standardize spec language to English — all Portuguese descriptions translated
+- [x] Expand request/integration specs — added 8 spec files (71 tests) for previously uncovered controllers
 
 ### 4. Update dependencies
 - [ ] Run `bundle update --conservative` for security patches (2 months stale)

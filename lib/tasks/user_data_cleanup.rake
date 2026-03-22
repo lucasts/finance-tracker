@@ -1,6 +1,6 @@
 namespace :user do
   desc "Limpa dados financeiros de um usuário (apenas em desenvolvimento)"
-  task :cleanup_financial_data, [:email] => :environment do |task, args|
+  task :cleanup_financial_data, [ :email ] => :environment do |task, args|
     # Verificação de segurança - apenas em desenvolvimento
     unless Rails.env.development?
       puts "❌ Esta task só pode ser executada em ambiente de desenvolvimento!"
@@ -58,7 +58,7 @@ namespace :user do
 
       # 4. Limpar faturas de cartão de crédito
       credit_statements_count = 0
-      user.accounts.joins(:account_type).where(account_types: { code: 'CREDIT_CARD' }).each do |account|
+      user.accounts.joins(:account_type).where(account_types: { code: "CREDIT_CARD" }).each do |account|
         statements_count = account.credit_statements.count
         if statements_count > 0
           puts "🗑️  Removendo #{statements_count} faturas do cartão #{account.name}..."
@@ -69,7 +69,7 @@ namespace :user do
       deleted_counts[:credit_statements] = credit_statements_count if credit_statements_count > 0
 
       # 5. Limpar sessões de importação
-      import_sessions_count = user.accounts.joins(:import_sessions).count('import_sessions.id')
+      import_sessions_count = user.accounts.joins(:import_sessions).count("import_sessions.id")
       if import_sessions_count > 0
         puts "🗑️  Removendo #{import_sessions_count} sessões de importação..."
         ImportSession.where(account: user.accounts).destroy_all
@@ -102,7 +102,7 @@ namespace :user do
   end
 
   desc "Lista usuários disponíveis para limpeza"
-  task :list => :environment do
+  task list: :environment do
     unless Rails.env.development?
       puts "❌ Esta task só pode ser executada em ambiente de desenvolvimento!"
       exit 1
@@ -127,7 +127,7 @@ namespace :user do
   end
 
   desc "Mostra informações detalhadas de um usuário"
-  task :info, [:email] => :environment do |task, args|
+  task :info, [ :email ] => :environment do |task, args|
     unless Rails.env.development?
       puts "❌ Esta task só pode ser executada em ambiente de desenvolvimento!"
       exit 1
@@ -167,17 +167,17 @@ namespace :user do
     puts "   • Transações: #{user.transactions.count}"
     puts "   • Planos de parcelamento: #{user.installment_plans.count}"
     puts "   • Compromissos recorrentes: #{user.recurring_commitments.count}"
-    
+
     credit_statements_count = CreditStatement.joins(:account).where(account: { user: user }).count
     puts "   • Faturas de cartão: #{credit_statements_count}"
-    
+
     import_sessions_count = ImportSession.joins(:account).where(account: { user: user }).count
     puts "   • Sessões de importação: #{import_sessions_count}"
     puts
   end
 
   desc "Mostra ajuda sobre como usar as tasks de usuário"
-  task :help => :environment do
+  task help: :environment do
     puts "🔧 Tasks de Gerenciamento de Usuário"
     puts "=================================="
     puts

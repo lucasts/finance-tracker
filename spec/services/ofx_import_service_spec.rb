@@ -7,44 +7,50 @@ RSpec.describe OfxImportService, type: :service do
         File.read(Rails.root.join('spec/fixtures/files/sample.ofx'))
       end
 
-      it 'parses transactions correctly' do
-        service = OfxImportService.new(ofx_content)
+      it 'parses the expected number of transactions' do
+        service = described_class.new(ofx_content)
         result = service.parse
 
         expect(result).to be_an(Array)
         expect(result.length).to eq(2)
+      end
 
-        # First transaction (Supermarket - debit)
-        first_transaction = result[0]
-        expect(first_transaction[:line_number]).to eq(1)
-        expect(first_transaction[:external_id]).to eq('1')
-        expect(first_transaction[:description]).to eq('Supermercado')
-        expect(first_transaction[:amount]).to eq(200.00)
-        expect(first_transaction[:event_date]).to eq(Date.new(2024, 1, 2))
-        expect(first_transaction[:payment_date]).to eq(Date.new(2024, 1, 2))
-        expect(first_transaction[:transaction_type]).to eq('expense')
-        expect(first_transaction[:status]).to eq('pending')
-        expect(first_transaction[:raw_data]).to be_present
-        expect(first_transaction[:parsed_data]).to be_a(Hash)
+      it 'parses first transaction (expense) correctly' do
+        result = described_class.new(ofx_content).parse
+        first = result[0]
 
-        # Second transaction (Salary - credit)
-        second_transaction = result[1]
-        expect(second_transaction[:line_number]).to eq(2)
-        expect(second_transaction[:external_id]).to eq('2')
-        expect(second_transaction[:description]).to eq('Salario')
-        expect(second_transaction[:amount]).to eq(1000.00)
-        expect(second_transaction[:transaction_type]).to eq('income')
-        expect(second_transaction[:status]).to eq('pending')
+        expect(first[:line_number]).to eq(1)
+        expect(first[:external_id]).to eq('1')
+        expect(first[:description]).to eq('Supermercado')
+        expect(first[:amount]).to eq(200.00)
+        expect(first[:event_date]).to eq(Date.new(2024, 1, 2))
+        expect(first[:payment_date]).to eq(Date.new(2024, 1, 2))
+        expect(first[:transaction_type]).to eq('expense')
+        expect(first[:status]).to eq('pending')
+        expect(first[:raw_data]).to be_present
+        expect(first[:parsed_data]).to be_a(Hash)
+      end
+
+      it 'parses second transaction (income) correctly' do
+        result = described_class.new(ofx_content).parse
+        second = result[1]
+
+        expect(second[:line_number]).to eq(2)
+        expect(second[:external_id]).to eq('2')
+        expect(second[:description]).to eq('Salario')
+        expect(second[:amount]).to eq(1000.00)
+        expect(second[:transaction_type]).to eq('income')
+        expect(second[:status]).to eq('pending')
       end
 
       it 'preserves original data in raw_data' do
-        service = OfxImportService.new(ofx_content)
+        service = described_class.new(ofx_content)
         result = service.parse
 
         first_transaction = result[0]
         raw_data = JSON.parse(first_transaction[:raw_data])
-        
-        expect([raw_data['amount'], raw_data['amount'].to_f]).to include(-200.00)
+
+        expect([ raw_data['amount'], raw_data['amount'].to_f ]).to include(-200.00)
         expect(raw_data).to include(
           'fit_id' => '1',
           'posted_at' => '2024-01-02'
@@ -96,7 +102,7 @@ RSpec.describe OfxImportService, type: :service do
       end
 
       it 'parses transactions with memo and name' do
-        service = OfxImportService.new(custom_ofx)
+        service = described_class.new(custom_ofx)
         result = service.parse
 
         expect(result.length).to eq(2)
@@ -119,19 +125,19 @@ RSpec.describe OfxImportService, type: :service do
     context 'error cases' do
       it 'raises error for empty content' do
         expect {
-          OfxImportService.new('').parse
+          described_class.new('').parse
         }.to raise_error(StandardError, 'Empty OFX content')
       end
 
       it 'raises error for nil content' do
         expect {
-          OfxImportService.new(nil).parse
+          described_class.new(nil).parse
         }.to raise_error(StandardError, 'Empty OFX content')
       end
 
       it 'raises error for invalid format without OFX tags' do
         expect {
-          OfxImportService.new('not an ofx file').parse
+          described_class.new('not an ofx file').parse
         }.to raise_error(StandardError, /Invalid OFX format: missing required OFX tags/)
       end
 
@@ -153,7 +159,7 @@ RSpec.describe OfxImportService, type: :service do
         OFX
 
         expect {
-          OfxImportService.new(malformed_ofx).parse
+          described_class.new(malformed_ofx).parse
         }.to raise_error(StandardError, /Invalid OFX format:/)
       end
     end
@@ -192,19 +198,19 @@ RSpec.describe OfxImportService, type: :service do
       end
 
       it 'lida com valores extremos' do
-        service = OfxImportService.new(edge_case_ofx)
+        service = described_class.new(edge_case_ofx)
         result = service.parse
 
         expect(result.length).to eq(3)
-        
+
         # Valor muito pequeno
         expect(result[0][:amount]).to eq(0.01)
         expect(result[0][:transaction_type]).to eq('income')
-        
+
         # Valor negativo grande
         expect(result[1][:amount]).to eq(999999.99)
         expect(result[1][:transaction_type]).to eq('expense')
-        
+
         # Valor positivo grande
         expect(result[2][:amount]).to eq(1000000.00)
         expect(result[2][:transaction_type]).to eq('income')
@@ -229,7 +235,7 @@ RSpec.describe OfxImportService, type: :service do
           </OFX>
         OFX
 
-        service = OfxImportService.new(ofx_without_description)
+        service = described_class.new(ofx_without_description)
         result = service.parse
 
         expect(result.length).to eq(1)
@@ -260,7 +266,7 @@ RSpec.describe OfxImportService, type: :service do
           </OFX>
         OFX
 
-        service = OfxImportService.new(ofx_with_dates)
+        service = described_class.new(ofx_with_dates)
         result = service.parse
 
         expect(result.length).to eq(2)
@@ -301,17 +307,17 @@ RSpec.describe OfxImportService, type: :service do
       end
 
       it 'classifies transaction types correctly' do
-        service = OfxImportService.new(type_test_ofx)
+        service = described_class.new(type_test_ofx)
         result = service.parse
 
         expect(result.length).to eq(3)
-        
+
         # Zero value should be treated as income
         expect(result[0][:transaction_type]).to eq('income')
-        
+
         # Positive value is income
         expect(result[1][:transaction_type]).to eq('income')
-        
+
         # Negative value is expense
         expect(result[2][:transaction_type]).to eq('expense')
       end
@@ -319,7 +325,7 @@ RSpec.describe OfxImportService, type: :service do
 
     context 'multiple transactions' do
       it 'numbers lines correctly' do
-        service = OfxImportService.new(File.read(Rails.root.join('spec/fixtures/files/sample.ofx')))
+        service = described_class.new(File.read(Rails.root.join('spec/fixtures/files/sample.ofx')))
         result = service.parse
 
         expect(result[0][:line_number]).to eq(1)
@@ -327,7 +333,7 @@ RSpec.describe OfxImportService, type: :service do
       end
 
       it 'maintains transaction order' do
-        service = OfxImportService.new(File.read(Rails.root.join('spec/fixtures/files/sample.ofx')))
+        service = described_class.new(File.read(Rails.root.join('spec/fixtures/files/sample.ofx')))
         result = service.parse
 
         # Verifies if date order is correct according to file

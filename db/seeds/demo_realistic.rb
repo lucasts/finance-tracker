@@ -28,15 +28,15 @@ accounts = {
   # Contas correntes
   itau_pai:      Account.create!(name: "Itaú - João", account_type: AccountType.find_by(code: "CHECKING"), user: default_user),
   bradesco_mae:  Account.create!(name: "Bradesco - Maria", account_type: AccountType.find_by(code: "CHECKING"), user: default_user),
-  
+
   # Cartões de crédito
   nubank_pai:    Account.create!(name: "Nubank - João", account_type: AccountType.find_by(code: "CREDIT_CARD"), closing_day: 15, due_day: 5, user: default_user),
   inter_mae:     Account.create!(name: "Inter - Maria", account_type: AccountType.find_by(code: "CREDIT_CARD"), closing_day: 20, due_day: 10, user: default_user),
   santander:     Account.create!(name: "Santander - Família", account_type: AccountType.find_by(code: "CREDIT_CARD"), closing_day: 25, due_day: 15, user: default_user),
-  
+
   # Poupança
   poupanca:      Account.create!(name: "Poupança Emergência", account_type: AccountType.find_by(code: "SAVINGS"), user: default_user),
-  
+
   # Contas de despesas (estabelecimentos)
   mercado:       Account.create!(name: "Supermercados", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
   farmacia:      Account.create!(name: "Farmácias", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
@@ -48,7 +48,7 @@ accounts = {
   vestuario:     Account.create!(name: "Roupas e Calçados", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
   transporte:    Account.create!(name: "Transporte", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
   banco:         Account.create!(name: "Bancos e Financeiras", account_type: AccountType.find_by(code: "EXPENSE"), user: default_user),
-  
+
   # Contas de receita
   empresa_pai:   Account.create!(name: "Empresa João", account_type: AccountType.find_by(code: "REVENUE"), user: default_user),
   empresa_mae:   Account.create!(name: "Empresa Maria", account_type: AccountType.find_by(code: "REVENUE"), user: default_user),
@@ -64,7 +64,7 @@ def create_transaction(**params)
   from_account = params.delete(:from_account)
   to_account = params.delete(:to_account)
   category_name = params.delete(:category_name)
-  
+
   # Remove parâmetros obsoletos
   params.delete(:recurrence_type)
   params.delete(:status)
@@ -129,7 +129,7 @@ statements = {}
 # Gerar faturas para os últimos 12 meses
 (-11..0).each do |offset|
   mes_fatura = Date.today.beginning_of_month + offset.months
-  
+
   # Fatura Nubank - João
   statements[:nubank_pai] ||= {}
   statements[:nubank_pai][offset] = CreditStatement.create!(
@@ -142,7 +142,7 @@ statements = {}
     due_on: (mes_fatura + 1.month).change(day: 5),
     paid_on: offset < -1 ? (mes_fatura + 1.month).change(day: 6) : nil
   )
-  
+
   # Fatura Inter - Maria
   statements[:inter_mae] ||= {}
   statements[:inter_mae][offset] = CreditStatement.create!(
@@ -155,7 +155,7 @@ statements = {}
     due_on: (mes_fatura + 1.month).change(day: 10),
     paid_on: offset < -1 ? (mes_fatura + 1.month).change(day: 11) : nil
   )
-  
+
   # Fatura Santander - Família
   statements[:santander] ||= {}
   statements[:santander][offset] = CreditStatement.create!(
@@ -181,9 +181,9 @@ meses_gerados = []
   mes_atual = data_inicio + i.months
   meses_gerados << mes_atual.strftime('%Y-%m')
   puts "  Gerando mês #{mes_atual.strftime('%B/%Y')}..."
-  
+
   # === RECEITAS MENSAIS (PAI E MÃE) ===
-  
+
   # Salário do pai - R$ 4.000 (dia 5)
   create_transaction(
     description: "Salário - João Silva",
@@ -195,7 +195,7 @@ meses_gerados = []
     category_name: "Salário",
     user: default_user
   )
-  
+
   # Salário da mãe - R$ 8.500 (dia 10)
   create_transaction(
     description: "Salário - Maria Silva",
@@ -207,7 +207,7 @@ meses_gerados = []
     category_name: "Salário",
     user: default_user
   )
-  
+
   # Freelance ocasional (30% de chance por mês)
   if rand < 0.3
     valor_freelance = rand(800..2500)
@@ -217,14 +217,14 @@ meses_gerados = []
       transaction_type: "income",
       event_date: Date.new(mes_atual.year, mes_atual.month, rand(15..25)),
       from_account: accounts[:freelance],
-      to_account: [accounts[:itau_pai], accounts[:bradesco_mae]].sample,
+      to_account: [ accounts[:itau_pai], accounts[:bradesco_mae] ].sample,
       category_name: "Outras Receitas",
       user: default_user
     )
   end
-  
+
   # === DESPESAS FIXAS MENSAIS ===
-  
+
   # Escola dos 3 filhos - R$ 2.800 (dia 8)
   create_transaction(
     description: "Mensalidade escolar - 3 filhos",
@@ -236,7 +236,7 @@ meses_gerados = []
     category_name: "Educação",
     user: default_user
   )
-  
+
   # Plano de saúde família - R$ 1.450 (dia 12)
   create_transaction(
     description: "Plano de saúde familiar - Unimed",
@@ -248,7 +248,7 @@ meses_gerados = []
     category_name: "Saúde",
     user: default_user
   )
-  
+
   # Aluguel/Financiamento casa - R$ 2.200 (dia 10)
   create_transaction(
     description: "Financiamento habitacional - Caixa",
@@ -260,7 +260,7 @@ meses_gerados = []
     category_name: "Habitação",
     user: default_user
   )
-  
+
   # Internet e TV - R$ 180 (dia 15)
   create_transaction(
     description: "Internet + TV - Claro",
@@ -272,7 +272,7 @@ meses_gerados = []
     category_name: "Serviços e Assinaturas",
     user: default_user
   )
-  
+
   # Celular família - R$ 220 (dia 20)
   create_transaction(
     description: "Plano celular família - Vivo",
@@ -284,7 +284,7 @@ meses_gerados = []
     category_name: "Serviços e Assinaturas",
     user: default_user
   )
-  
+
   # === MERCADO (3-4 VEZES POR MÊS) ===
   compras_mercado = rand(3..4)
   compras_mercado.times do |j|
@@ -293,65 +293,65 @@ meses_gerados = []
     when 1 then rand(280..400)  # Compra média
     else rand(80..180)          # Compras menores
     end
-    
-    dia_compra = [7, 14, 21, 28][j] + rand(-2..2)
-    dia_compra = [dia_compra, 1].max
-    dia_compra = [dia_compra, 28].min
-    
-    mercados = ["Zaffari", "Big", "Carrefour", "Extra", "Walmart"]
-    
+
+    dia_compra = [ 7, 14, 21, 28 ][j] + rand(-2..2)
+    dia_compra = [ dia_compra, 1 ].max
+    dia_compra = [ dia_compra, 28 ].min
+
+    mercados = [ "Zaffari", "Big", "Carrefour", "Extra", "Walmart" ]
+
     create_transaction(
       description: "Supermercado #{mercados.sample} - Compras família",
       amount: valor_compra,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, dia_compra),
-      from_account: [accounts[:itau_pai], accounts[:bradesco_mae], accounts[:nubank_pai]].sample,
+      from_account: [ accounts[:itau_pai], accounts[:bradesco_mae], accounts[:nubank_pai] ].sample,
       to_account: accounts[:mercado],
       category_name: "Supermercado",
       user: default_user
     )
   end
-  
+
   # === COMBUSTÍVEL (2-3 VEZES POR MÊS) ===
   abastecimentos = rand(2..3)
   abastecimentos.times do |j|
     valor_combustivel = rand(180..320)
-    dia_abastecimento = [10, 20, 30][j % 3] + rand(-3..3)
-    dia_abastecimento = [dia_abastecimento, 1].max
-    dia_abastecimento = [dia_abastecimento, 28].min
-    
-    postos = ["Ipiranga", "Shell", "Petrobras", "Texaco"]
-    
+    dia_abastecimento = [ 10, 20, 30 ][j % 3] + rand(-3..3)
+    dia_abastecimento = [ dia_abastecimento, 1 ].max
+    dia_abastecimento = [ dia_abastecimento, 28 ].min
+
+    postos = [ "Ipiranga", "Shell", "Petrobras", "Texaco" ]
+
     create_transaction(
       description: "Combustível - Posto #{postos.sample}",
       amount: valor_combustivel,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, dia_abastecimento),
-      from_account: [accounts[:itau_pai], accounts[:nubank_pai]].sample,
+      from_account: [ accounts[:itau_pai], accounts[:nubank_pai] ].sample,
       to_account: accounts[:posto],
       category_name: "Transporte",
       user: default_user
     )
   end
-  
+
   # === FARMÁCIA (1-2 VEZES POR MÊS) ===
   compras_farmacia = rand(1..2)
   compras_farmacia.times do |j|
     valor_farmacia = rand(45..250)
-    farmacias = ["Panvel", "Droga Raia", "Drogasil", "Pague Menos"]
-    
+    farmacias = [ "Panvel", "Droga Raia", "Drogasil", "Pague Menos" ]
+
     create_transaction(
       description: "Farmácia #{farmacias.sample} - Medicamentos",
       amount: valor_farmacia,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, rand(5..25)),
-      from_account: [accounts[:bradesco_mae], accounts[:inter_mae]].sample,
+      from_account: [ accounts[:bradesco_mae], accounts[:inter_mae] ].sample,
       to_account: accounts[:farmacia],
       category_name: "Saúde",
       user: default_user
     )
   end
-  
+
   # === RESTAURANTES E DELIVERY (6-10 VEZES POR MÊS) ===
   refeicoes_fora = rand(6..10)
   refeicoes_fora.times do |j|
@@ -361,37 +361,37 @@ meses_gerados = []
       "Restaurante Japonês", "Pizzaria do bairro", "Lanche da tarde",
       "Açaí família", "Churrascaria", "iFood - Burguer King", "Sorveteria"
     ]
-    
+
     create_transaction(
       description: opcoes_delivery.sample,
       amount: valor_refeicao,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
-      from_account: [accounts[:nubank_pai], accounts[:inter_mae], accounts[:santander]].sample,
+      from_account: [ accounts[:nubank_pai], accounts[:inter_mae], accounts[:santander] ].sample,
       to_account: accounts[:lazer],
       category_name: "Restaurante e Delivery",
       user: default_user
     )
   end
-  
+
   # === TRANSPORTE URBANO ===
   transporte_mes = rand(4..8)
   transporte_mes.times do |j|
     valor_transporte = rand(15..85)
-    tipos_transporte = ["Uber", "99", "Táxi", "Ônibus", "Estacionamento"]
-    
+    tipos_transporte = [ "Uber", "99", "Táxi", "Ônibus", "Estacionamento" ]
+
     create_transaction(
       description: "Transporte - #{tipos_transporte.sample}",
       amount: valor_transporte,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
-      from_account: [accounts[:itau_pai], accounts[:bradesco_mae], accounts[:nubank_pai]].sample,
+      from_account: [ accounts[:itau_pai], accounts[:bradesco_mae], accounts[:nubank_pai] ].sample,
       to_account: accounts[:transporte],
       category_name: "Transporte",
       user: default_user
     )
   end
-  
+
   # === LAZER E ENTRETENIMENTO ===
   atividades_lazer = rand(3..6)
   atividades_lazer.times do |j|
@@ -401,44 +401,44 @@ meses_gerados = []
       "Show musical", "Clube recreativo", "Museu", "Zoológico",
       "Boliche", "Escape room", "Netflix", "Spotify", "Amazon Prime"
     ]
-    
+
     create_transaction(
       description: atividades.sample,
       amount: valor_lazer,
       transaction_type: "expense",
       event_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
-      from_account: [accounts[:inter_mae], accounts[:santander], accounts[:nubank_pai]].sample,
+      from_account: [ accounts[:inter_mae], accounts[:santander], accounts[:nubank_pai] ].sample,
       to_account: accounts[:lazer],
       category_name: "Serviços e Assinaturas",
       user: default_user
     )
   end
-  
+
   # === ROUPAS E CALÇADOS (OCASIONAL) ===
   if rand < 0.6  # 60% de chance por mês
     compras_roupa = rand(1..3)
     compras_roupa.times do |j|
       valor_roupa = rand(120..450)
-      lojas = ["C&A", "Renner", "Riachuelo", "Zara", "Nike", "Adidas", "Centauro"]
-      
+      lojas = [ "C&A", "Renner", "Riachuelo", "Zara", "Nike", "Adidas", "Centauro" ]
+
       create_transaction(
         description: "Roupas - #{lojas.sample}",
         amount: valor_roupa,
         transaction_type: "expense",
         event_date: Date.new(mes_atual.year, mes_atual.month, rand(1..28)),
-        from_account: [accounts[:santander], accounts[:inter_mae]].sample,
+        from_account: [ accounts[:santander], accounts[:inter_mae] ].sample,
         to_account: accounts[:vestuario],
         category_name: "Compras Diversas",
         user: default_user
       )
     end
   end
-  
+
   # === ENERGIA E ÁGUA ===
   # Energia elétrica (varia por estação)
-  fator_sazonal = [1.2, 1.1, 0.9, 0.8, 0.8, 0.9, 1.0, 1.1, 1.0, 0.9, 1.0, 1.3][mes_atual.month - 1]
+  fator_sazonal = [ 1.2, 1.1, 0.9, 0.8, 0.8, 0.9, 1.0, 1.1, 1.0, 0.9, 1.0, 1.3 ][mes_atual.month - 1]
   valor_energia = (rand(280..450) * fator_sazonal).round(2)
-  
+
   create_transaction(
     description: "Conta de luz - CEEE",
     amount: valor_energia,
@@ -449,7 +449,7 @@ meses_gerados = []
     category_name: "Habitação",
     user: default_user
   )
-  
+
   # Água e esgoto
   valor_agua = rand(120..180)
   create_transaction(
@@ -462,7 +462,7 @@ meses_gerados = []
     category_name: "Habitação",
     user: default_user
   )
-  
+
   # === ACADEMIA E ATIVIDADES FÍSICAS ===
   create_transaction(
     description: "Academia Smart Fit - João",
@@ -474,7 +474,7 @@ meses_gerados = []
     category_name: "Bem-estar",
     user: default_user
   )
-  
+
   create_transaction(
     description: "Pilates - Maria",
     amount: 180.00,
@@ -491,7 +491,7 @@ end
 puts "Criando parcelamentos..."
 
 # TV 65" - 10x de R$ 380 (6 meses atrás)
-tv_plan = InstallmentPlan.create!(user: default_user, 
+tv_plan = InstallmentPlan.create!(user: default_user,
   name: "Smart TV 65 polegadas",
   installment_count: 10,
   recurrence_frequency: "monthly",
@@ -513,7 +513,7 @@ tv_plan.create_installment_transactions!({
 })
 
 # Carro usado - 48x de R$ 890 (financiamento que começou 8 meses atrás)
-carro_plan = InstallmentPlan.create!(user: default_user, 
+carro_plan = InstallmentPlan.create!(user: default_user,
   name: "Carro usado (financiamento)",
   installment_count: 48,
   recurrence_frequency: "monthly",
@@ -535,7 +535,7 @@ carro_plan.create_installment_transactions!({
 })
 
 # Móveis planejados - 24x de R$ 520 (começou 3 meses atrás)
-moveis_plan = InstallmentPlan.create!(user: default_user, 
+moveis_plan = InstallmentPlan.create!(user: default_user,
   name: "Móveis planejados",
   installment_count: 24,
   recurrence_frequency: "monthly",
@@ -557,7 +557,7 @@ moveis_plan.create_installment_transactions!({
 })
 
 # Empréstimo pessoal para emergência - 12x de R$ 1000 (começou 2 meses atrás)
-emprestimo_plan = InstallmentPlan.create!(user: default_user, 
+emprestimo_plan = InstallmentPlan.create!(user: default_user,
   name: "Empréstimo pessoal",
   installment_count: 12,
   recurrence_frequency: "monthly",
@@ -582,7 +582,7 @@ emprestimo_plan.create_installment_transactions!({
 puts "Criando compromissos recorrentes..."
 
 # Salário João - todo dia 5 do mês
-salario_joao = RecurringCommitment.create!(user: default_user, 
+salario_joao = RecurringCommitment.create!(user: default_user,
   name: "Salário João - Empresa ABC",
   default_amount: 8500.00,
   recurrence_frequency: "monthly",
@@ -595,7 +595,7 @@ salario_joao = RecurringCommitment.create!(user: default_user,
 )
 
 # Salário Maria - todo dia 10 do mês
-salario_maria = RecurringCommitment.create!(user: default_user, 
+salario_maria = RecurringCommitment.create!(user: default_user,
   name: "Salário Maria - Consultoria XYZ",
   default_amount: 6800.00,
   recurrence_frequency: "monthly",
@@ -608,7 +608,7 @@ salario_maria = RecurringCommitment.create!(user: default_user,
 )
 
 # Aluguel - todo dia 10 do mês
-aluguel = RecurringCommitment.create!(user: default_user, 
+aluguel = RecurringCommitment.create!(user: default_user,
   name: "Aluguel do apartamento",
   default_amount: 2800.00,
   recurrence_frequency: "monthly",
@@ -621,7 +621,7 @@ aluguel = RecurringCommitment.create!(user: default_user,
 )
 
 # Escola dos filhos - todo dia 15
-escola_filhos = RecurringCommitment.create!(user: default_user, 
+escola_filhos = RecurringCommitment.create!(user: default_user,
   name: "Mensalidade escola particular",
   default_amount: 1200.00,
   recurrence_frequency: "monthly",
@@ -634,7 +634,7 @@ escola_filhos = RecurringCommitment.create!(user: default_user,
 )
 
 # Internet e TV - todo dia 20
-internet_tv = RecurringCommitment.create!(user: default_user, 
+internet_tv = RecurringCommitment.create!(user: default_user,
   name: "Internet e TV por assinatura",
   default_amount: 180.00,
   recurrence_frequency: "monthly",
@@ -647,7 +647,7 @@ internet_tv = RecurringCommitment.create!(user: default_user,
 )
 
 # Academia casal - todo dia 8
-academia = RecurringCommitment.create!(user: default_user, 
+academia = RecurringCommitment.create!(user: default_user,
   name: "Academia Smart Fit - Casal",
   default_amount: 140.00,
   recurrence_frequency: "monthly",
@@ -660,7 +660,7 @@ academia = RecurringCommitment.create!(user: default_user,
 )
 
 # Freelance João - toda sexta-feira
-freelance_joao = RecurringCommitment.create!(user: default_user, 
+freelance_joao = RecurringCommitment.create!(user: default_user,
   name: "Consultoria TI - Freelance",
   default_amount: 1500.00,
   recurrence_frequency: "monthly",
@@ -692,16 +692,16 @@ puts "Atualizando valores das faturas..."
 CreditStatement.all.each do |fatura|
   total_fatura = fatura.transactions.sum(:amount)
   valor_pago = fatura.status == 'paid' ? total_fatura : 0
-  
+
   fatura.update!(
     amount_due: total_fatura,
     amount_paid: valor_pago
   )
-  
+
   # Criar transação de pagamento da fatura se foi paga
   if fatura.status == 'paid' && total_fatura > 0
     conta_origem = fatura.account.name.include?('João') ? accounts[:itau_pai] : accounts[:bradesco_mae]
-    
+
     create_transaction(
       description: "Pagamento fatura #{fatura.account.name}",
       amount: total_fatura,
@@ -725,13 +725,13 @@ puts "Criando transferências..."
 8.times do |i|
   data_transferencia = (Date.today - rand(90..300).days)
   valor_transferencia = rand(200..2000)
-  
+
   # Diferentes tipos de transferências
   case i % 4
   when 0
     # Poupança para conta corrente
     from_account = accounts[:poupanca]
-    to_account = [accounts[:itau_pai], accounts[:bradesco_mae]].sample
+    to_account = [ accounts[:itau_pai], accounts[:bradesco_mae] ].sample
     descricao = "Transferência da poupança"
   when 1
     # Entre contas correntes
@@ -740,7 +740,7 @@ puts "Criando transferências..."
     descricao = "Transferência PIX entre contas"
   when 2
     # Para poupança (reserva de emergência)
-    from_account = [accounts[:itau_pai], accounts[:bradesco_mae]].sample
+    from_account = [ accounts[:itau_pai], accounts[:bradesco_mae] ].sample
     to_account = accounts[:poupanca]
     descricao = "Reserva de emergência"
   else
@@ -749,7 +749,7 @@ puts "Criando transferências..."
     to_account = accounts[:itau_pai]
     descricao = "Transferência para pagamento"
   end
-  
+
   create_transaction(
     description: descricao,
     amount: valor_transferencia,
@@ -768,8 +768,8 @@ puts "Adicionando gastos extras e emergências..."
 2.times do |i|
   data_consulta = Date.today - rand(30..360).days
   valor_consulta = rand(200..600)
-  medicos = ["Cardiologista", "Dermatologista", "Ortopedista", "Dentista", "Pediatra"]
-  
+  medicos = [ "Cardiologista", "Dermatologista", "Ortopedista", "Dentista", "Pediatra" ]
+
   create_transaction(
     description: "Consulta #{medicos.sample} - particular",
     amount: valor_consulta,
@@ -789,8 +789,8 @@ end
 3.times do |i|
   data_manutencao = Date.today - rand(60..360).days
   valor_manutencao = rand(300..1200)
-  servicos = ["Revisão completa", "Troca de pneus", "Mecânica geral", "Funilaria"]
-  
+  servicos = [ "Revisão completa", "Troca de pneus", "Mecânica geral", "Funilaria" ]
+
   create_transaction(
     description: "#{servicos.sample} - Honda Civic",
     amount: valor_manutencao,
@@ -920,7 +920,7 @@ meses_gerados.each do |mes_str|
   despesas = Transaction.expense.confirmed.in_competence_month(mes_date).sum(:amount)
   transferencias = Transaction.transfer.confirmed.in_competence_month(mes_date).sum(:amount)
   saldo = receitas - despesas
-  
+
   puts "#{mes_str}: Receitas R$ #{receitas.to_i} | Despesas R$ #{despesas.to_i} | Transferências R$ #{transferencias.to_i} | Saldo R$ #{saldo.to_i}"
 end
 

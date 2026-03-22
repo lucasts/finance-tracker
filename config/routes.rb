@@ -1,31 +1,31 @@
 Rails.application.routes.draw do
   # Health check endpoint
   get "/up" => "rails/health#show", as: :rails_health_check
-  
+
   devise_for :users
-  
+
   # Root route para usuários autenticados
-  root 'overview#index'
-  
-  resources :credit_statements, only: [:index, :show]  
-  resources :transactions      
-  resources :overview, only: [:index]  
-  resources :reports, only: [:index] do
+  root "overview#index"
+
+  resources :credit_statements, only: [ :index, :show ]
+  resources :transactions
+  resources :overview, only: [ :index ]
+  resources :reports, only: [ :index ] do
     collection do
       get :variable_expenses_analysis
     end
   end
   resources :accounts
   resources :categories
-  resources :account_types, only: [:index, :new, :create, :edit, :update, :destroy]
-  
+  resources :account_types, only: [ :index, :new, :create, :edit, :update, :destroy ]
+
   resources :recurring_commitments do
     member do
       get :timeline
       patch :toggle_active
     end
   end
-  
+
   resources :installment_plans do
     member do
       get :payment_schedule
@@ -35,7 +35,7 @@ Rails.application.routes.draw do
   end
 
   # Automation routes
-  resources :automation, only: [:index] do
+  resources :automation, only: [ :index ] do
     collection do
       post :run_daily
       post :run_recurring
@@ -45,13 +45,13 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :import_sessions, only: [:index, :new, :create, :show] do
+  resources :import_sessions, only: [ :index, :new, :create, :show ] do
     member do
       get :confirm
       post :finalize
       post :batch_process_pending
     end
-    resources :imported_transactions, only: [:edit, :update]
+    resources :imported_transactions, only: [ :edit, :update ]
   end
-  resources :reconciliation_entries, only: [:create]
+  resources :reconciliation_entries, only: [ :create ]
 end

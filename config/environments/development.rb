@@ -68,8 +68,8 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   # Set secret_key_base for development to avoid Rails.application.secrets deprecation warning
-  config.secret_key_base = ENV['SECRET_KEY_BASE'] || '93baa1f4cde67c7d93c9b517e83d2493ee47221564dfb949e8c57be18615fb6ff1c53392a068e19e6d90308df94d92476af0b3a702016a7f412639a80aedf666'
+  config.secret_key_base = ENV["SECRET_KEY_BASE"] || "93baa1f4cde67c7d93c9b517e83d2493ee47221564dfb949e8c57be18615fb6ff1c53392a068e19e6d90308df94d92476af0b3a702016a7f412639a80aedf666"
 
   # Allow web console from any IP (useful for Docker environments)
-  config.web_console.permissions = '0.0.0.0/0'
+  config.web_console.permissions = "0.0.0.0/0"
 end

@@ -1,16 +1,16 @@
 # Use this file to easily define all of your cron jobs.
-# 
+#
 # Configuração de jobs automáticos para o sistema financeiro
 #
 
 # Configura o ambiente baseado no RAILS_ENV
-set :environment, ENV['RAILS_ENV'] || 'development'
+set :environment, ENV["RAILS_ENV"] || "development"
 
 # Configurações específicas por ambiente
 case @environment
-when 'preprod'
+when "preprod"
   # Em pré-produção, executa jobs mais frequentemente para testes
-  
+
   # Gera transações recorrentes a cada 30 minutos (para testes)
   every 30.minutes do
     runner "GenerateRecurringTransactionsJob.perform_later"
@@ -22,36 +22,36 @@ when 'preprod'
   end
 
   # Job de limpeza diário às 3:00
-  every 1.day, at: '3:00 am' do
+  every 1.day, at: "3:00 am" do
     # Add cleanup job here when needed
   end
 
-when 'production'
+when "production"
   # Em produção, executa nos horários padrão
-  
+
   # Gera transações recorrentes todos os dias às 6:00
-  every 1.day, at: '6:00 am' do
+  every 1.day, at: "6:00 am" do
     runner "GenerateRecurringTransactionsJob.perform_later"
   end
 
   # Gera parcelas de parcelamentos todos os dias às 6:30
-  every 1.day, at: '6:30 am' do
+  every 1.day, at: "6:30 am" do
     runner "GenerateInstallmentTransactionsJob.perform_later"
   end
 
   # Job semanal para limpeza e manutenção (domingos às 2:00)
-  every 1.week, at: '2:00 am' do
+  every 1.week, at: "2:00 am" do
     runner "MaintenanceJob.perform_later" if defined?(MaintenanceJob)
   end
 
   # Job mensal para relatórios automáticos (primeiro dia do mês às 8:00)
-  every '0 8 1 * *' do
+  every "0 8 1 * *" do
     runner "MonthlyReportJob.perform_later" if defined?(MonthlyReportJob)
   end
 
 else
   # Desenvolvimento - jobs manuais ou mais raros
-  
+
   # Gera transações recorrentes a cada 2 horas
   every 2.hours do
     runner "GenerateRecurringTransactionsJob.perform_later"
@@ -63,7 +63,7 @@ else
   end
 
   # Job de manutenção mensal (último dia do mês às 23:55)
-  every '55 23 last_day_of_month' do
+  every "55 23 last_day_of_month" do
     runner "MaintenanceJob.perform_later" if defined?(MaintenanceJob)
   end
 

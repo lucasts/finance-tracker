@@ -4,24 +4,24 @@ namespace :db do
     task demo: :environment do
       puts "🎭 Carregando dados de demonstração..."
       puts ""
-      
+
       # Verificar se já existem dados
       if User.exists? && Transaction.exists?
         print "⚠️  Já existem dados no banco. Deseja continuar? (isso pode duplicar dados) [y/N]: "
         begin
           response = STDIN.gets.chomp.downcase
         rescue
-          response = 'n' # Default para ambientes não interativos
+          response = "n" # Default para ambientes não interativos
         end
-        unless ['y', 'yes', 's', 'sim'].include?(response)
+        unless [ "y", "yes", "s", "sim" ].include?(response)
           puts "❌ Operação cancelada."
           exit
         end
       end
-      
+
       # Carregar dados de demonstração
-      load Rails.root.join('db', 'seeds', 'demo_realistic.rb')
-      
+      load Rails.root.join("db", "seeds", "demo_realistic.rb")
+
       puts ""
       puts "✅ Dados de demonstração carregados com sucesso!"
       puts ""
@@ -40,12 +40,12 @@ namespace :db do
     desc "Reset database and load only essential data (no demo data)"
     task reset: :environment do
       puts "🔄 Resetando banco de dados..."
-      
-      Rake::Task['db:drop'].invoke
-      Rake::Task['db:create'].invoke
-      Rake::Task['db:migrate'].invoke
-      Rake::Task['db:seed'].invoke  # Só vai carregar dados essenciais
-      
+
+      Rake::Task["db:drop"].invoke
+      Rake::Task["db:create"].invoke
+      Rake::Task["db:migrate"].invoke
+      Rake::Task["db:seed"].invoke  # Só vai carregar dados essenciais
+
       puts "✅ Banco resetado com dados essenciais!"
       puts "💡 Para adicionar dados de demonstração: rails db:seed:demo"
     end
@@ -53,13 +53,13 @@ namespace :db do
     desc "Reset database and load demo data"
     task demo_full: :environment do
       puts "🔄 Resetando banco e carregando dados de demonstração..."
-      
-      Rake::Task['db:drop'].invoke
-      Rake::Task['db:create'].invoke
-      Rake::Task['db:migrate'].invoke
-      Rake::Task['db:seed'].invoke
-      Rake::Task['db:seed:demo'].invoke
-      
+
+      Rake::Task["db:drop"].invoke
+      Rake::Task["db:create"].invoke
+      Rake::Task["db:migrate"].invoke
+      Rake::Task["db:seed"].invoke
+      Rake::Task["db:seed:demo"].invoke
+
       puts "✅ Banco resetado com dados de demonstração completos!"
     end
   end
