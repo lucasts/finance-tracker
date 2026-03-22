@@ -214,7 +214,11 @@ end
 
 def load_accounts_with_balances
   all_accounts = current_user.accounts.includes(:account_type).to_a
-  return (@account_balances = {}) if all_accounts.empty?
+  if all_accounts.empty?
+    @accounts = []
+    @account_balances = {}
+    return
+  end
   
   # Get all account IDs for balance calculation
   ids = all_accounts.map(&:id)

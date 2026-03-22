@@ -124,8 +124,8 @@ RSpec.describe TransactionsController, type: :request do
       get new_transaction_path
       transaction = assigns(:transaction)
       expect(transaction).to be_a_new(Transaction)
-      expect(transaction.event_date).to eq(Date.current)
-      expect(transaction.payment_date).to eq(Date.current)
+      expect(transaction.event_date.to_date).to eq(Date.current)
+      expect(transaction.payment_date.to_date).to eq(Date.current)
       expect(transaction.recurrence_type).to eq('single')
     end
   end

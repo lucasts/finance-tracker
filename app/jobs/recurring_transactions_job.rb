@@ -12,7 +12,7 @@ class RecurringTransactionsJob < ApplicationJob
       
       # Generate transactions for the next period if not already exists
       if next_date && next_date <= 1.week.from_now
-        unless commitment.transactions.exists?(event_date: next_date)
+        unless commitment.transactions.where(event_date: next_date.all_day).exists?
           transaction = generate_transaction_for_commitment(commitment, next_date)
           if transaction.persisted?
             generated_count += 1

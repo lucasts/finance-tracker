@@ -176,7 +176,7 @@
  </thead>
  <tbody>
  <% @imported_transactions.each do |tx| %>
- <tr class="hover <%= if tx.possible_duplicate %> <%= if tx.transfer_candidate %>">
+ <tr class="hover<%= ' possible-duplicate' if tx.possible_duplicate %><%= ' transfer-candidate' if tx.transfer_candidate %>">
  <td>
  <div>
  <div><%= tx.line_number %></div>
