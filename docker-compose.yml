@@ -1,32 +1,36 @@
-version: '3.8'
+# Infrastructure-only compose for local development.
+# Ruby/Rails run on the host machine — only Postgres and Redis in Docker.
+#
+# Usage:
+#   docker compose up -d          # start infra
+#   bin/setup                     # install gems, prepare DB, start server
+#   bundle exec rspec             # run tests
+#
+# For a fully containerized environment, use docker-compose.local.yml instead.
 
 services:
-  db:
+  postgres:
     image: postgres:15
+    container_name: orzeny-postgres
     environment:
-      POSTGRES_DB: finance_tracker_production
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_DB: orzeny_development
     ports:
       - "5432:5432"
-
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/finance_tracker_production
-      - RAILS_ENV=production
-      - RAILS_SERVE_STATIC_FILES=true
-      - RAILS_LOG_TO_STDOUT=true
-      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
-      - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
-    depends_on:
-      - db
     volumes:
-      - ./storage:/app/storage
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7
+    container_name: orzeny-redis
+    ports:
+      - "6379:6379"
 
 volumes:
-  postgres_data:
+  pgdata:
