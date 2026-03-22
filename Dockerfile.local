@@ -2,7 +2,7 @@
 # Focado em rapidez de iteração: inclui toolchain completa, gems dev/test,
 # node deps completas e evita precompilar assets.
 
-ARG RUBY_VERSION=3.4.2
+ARG RUBY_VERSION=4.0.1
 FROM ruby:${RUBY_VERSION}
 
 # Variáveis úteis
