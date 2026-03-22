@@ -1,200 +1,142 @@
-# 🎯 Finance Tracker — Roadmap & Future Improvements
+# 🎯 Finance Tracker (Orzeny) — Roadmap
 
-## ✅ Current Status: **COMPLETE & PRODUCTION-READY**
+## ✅ Current Status
 
-The **Finance Tracker** is **100% functional** for family financial management with enterprise-grade quality:
+Core features are **complete and functional**: transactions with double-entry bookkeeping,
+credit card management, installment plans, recurring commitments, OFX/CSV import with
+dedup heuristics, reports/projections, and Sidekiq background automation.
 
-### ✅ Fully Implemented & Tested
-- ✅ **Transaction Management**: Complete system with temporal separation
-- ✅ **Credit Cards**: Full invoice control with automatic cycles
-- ✅ **Installments**: Plans with automatic generation of all payments
-- ✅ **Recurring Transactions**: Complete automation of fixed income/expenses
-- ✅ **Import/Reconciliation**: OFX and CSV with intelligent heuristics
-- ✅ **Reports & Analytics**: Interactive dashboards with charts and projections
-- ✅ **Background Automation**: Jobs processing via Sidekiq
-- ✅ **Quality Assurance**: 457+ RSpec tests + 90 Jest tests
-
-## 🚀 Future Enhancements (Optional)
-
-### 🔒 Advanced Security
-- [ ] Rate limiting (rack-attack)
-- [ ] Change auditing (paper_trail) for transaction history
-- [ ] Enhanced XSS sanitization
-- [ ] Two-factor authentication (2FA)
-- [ ] Advanced session management
-- [ ] API rate limiting and throttling
-
-### ⚡ Performance Optimization
-- [ ] Advanced dashboard caching strategies
-- [ ] Intelligent pagination for large datasets
-- [ ] Background asset optimization
-- [ ] Database query optimization and indexing
-- [ ] CDN integration for static assets
-- [ ] Redis caching for frequently accessed data
-
-### 🎨 User Experience Enhancements
-- [ ] Progressive Web App (PWA) support with offline mode
-- [ ] Push notifications for due dates and budget alerts
-- [ ] Native mobile application (React Native/Flutter)
-- [ ] Dark mode theme implementation
-- [ ] Customizable dashboard widgets
-- [ ] Advanced data visualization options
-
-### 📊 Analytics & Monitoring
-- [ ] Application monitoring (Sentry/Bugsnag)
-- [ ] User behavior analytics
-- [ ] Performance metrics and APM
-- [ ] Custom financial dashboards
-- [ ] Advanced reporting templates
-- [ ] Data export in multiple formats (Excel, PDF)
-
-### 🌐 Integration & Connectivity
-- [ ] Open Banking API integration (Brazilian banks)
-- [ ] WhatsApp notification integration
-- [ ] Email report automation
-- [ ] Integration with accounting software
-- [ ] Webhook support for external systems
-- [ ] REST API for third-party applications
-
-### 🏢 Enterprise Features
-- [ ] Multi-tenancy support for multiple users/families
-- [ ] Role-based access control and permissions
-- [ ] Complete REST API with authentication
-- [ ] Automated backup and disaster recovery
-- [ ] Advanced audit trails and compliance features
-- [ ] White-label customization options
-
-### 💡 Intelligence & Automation
-- [ ] Machine Learning for transaction categorization
-- [ ] Predictive analytics for spending patterns
-- [ ] Smart budget recommendations
-- [ ] Fraud detection algorithms
-- [ ] Automatic receipt processing (OCR)
-- [ ] Investment portfolio tracking integration
-
-### 🌎 Internationalization
-- [ ] Multi-currency support with real-time exchange rates
-- [ ] Support for other countries' banking practices
-- [ ] Additional language translations
-- [ ] Regional financial compliance features
-- [ ] Tax integration for multiple jurisdictions
-
-### 📱 Mobile & Accessibility
-- [ ] Enhanced mobile responsiveness
-- [ ] Voice interface integration
-- [ ] Improved accessibility features (beyond WCAG AA)
-- [ ] Mobile-specific optimizations
-- [ ] Offline transaction entry capabilities
-
-## 🔧 Technical Debt & Maintenance
-
-### ✅ Recently Completed (2025-08-09)
-Perf / Dashboard Optimization (Item 5):
-- Reduced Overview dashboard queries from ~220 to  < 40 (spec enforced)
-- Batched month aggregates & category ranking (in‑memory from preloaded dataset)
-- Preloaded credit statements (accounts + account_type + transactions) and consolidated stats computation
-- Batched account balances via grouped entries query
-- Added caching layer for 12‑month chart data (Rails.cache + in-request memoization)
-- Memoized RecurringProjectionService results per request to avoid duplicate projection generation
-- Added DB indexes: transactions(user_id, status, event_date) and entries(account_id, entry_type) to speed filtered range scans
-- Added request specs guarding: performance query ceiling, chart data caching (notification-driven), recurring projection memoization
-
-Follow-ups (optional):
-- [x] Add cache invalidation strategy (touch on transaction create/update affecting current or historical month)
-- [x] Tighten performance spec threshold further (e.g. <= 30) once stable
-- Add index on transactions(payment_date) if payment-centric queries grow
-- Introduce selective fragment caching for credit statement cards
-- Implement background warm-up job for chart cache (daily)
-- Instrument cache hits/misses (ActiveSupport::Notifications) e expor métricas
-- Monitor tempo de geração de build_chart_data (coletar p95)
-
-### 🆕 Importação – Próximos Passos (Idempotência & Deduplicação)
-- [ ] Heurística de deduplicação entre arquivos diferentes (fingerprint cruzado por external_id/amount/data + janela de tolerância)
-- [ ] Marcar visualmente ImportedTransactions suspeitas de duplicação antes da conciliação
-- [ ] Auto-sugerir associação (match) quando similaridade > limiar (ex: descrição + valor + ±2 dias)
-- [ ] UI de reimport: ao detectar arquivo já importado mostrar diff/resumo em vez de redirecionar direto
-- [ ] Relatório de duplicados ignorados (data, valor, motivo) exportável
-- [ ] Job periódico para recalcular fingerprints se a regra evoluir (versionar algoritmo)
-- [ ] Tornar tolerâncias configuráveis por usuário (valor absoluto, % e janela de dias)
-- [ ] Suporte a idempotência também para CSV (mesmo digest + fingerprint linha)
-- [ ] Testes: cenário parcial (um novo e um duplicado no mesmo arquivo), caso external_id ausente, caso valores arredondados
-- [ ] Métrica: contador de duplicados prevenidos por período para dashboard interno
-
-
-### Code Quality Improvements
-#### Projection Horizon Semantics (documentado 2025-08-09)
-Unificação aplicada:
-- Recorrentes & Parcelas: months_ahead > 0 agora corta exatamente em as_of.advance(months: n) (data exata), não até o fim do mês alvo.
-- months_ahead == 0 mantém comportamento de foco no mês corrente (até end_of_month).
-- MonthlyBalanceProjectionService: quando as_of == end_of_month nenhuma projeção futura (recorrente ou parcela) é adicionada; valores no próprio dia não contam como "futuros".
-Pendentes:
-- [ ] Confirmar se UX deseja opção alternativa (modo month_end) – se sim expor flag horizon_mode.
-- [ ] Atualizar qualquer documentação externa / help in-app mencionando horizonte.
-- [ ] Rever telas que exibem contagem de projeções para refletir mudança (especialmente se usuários esperavam mês cheio).
-
-- [ ] Consolidate legacy money parsing implementations
-- [ ] Reduce service pattern variations
-- [ ] Modernize deprecated concern usage
-- [ ] Standardize error handling patterns
-- [ ] Improve code documentation coverage
-
-### Infrastructure Modernization
-- [ ] Kubernetes deployment configurations
-- [ ] Advanced CI/CD pipeline optimization
-- [ ] Container security scanning
-- [ ] Performance monitoring dashboards
-- [ ] Automated security vulnerability scanning
-
-## 📈 Scalability Considerations
-
-### Performance Scaling
-- [ ] Database sharding strategies
-- [ ] Horizontal scaling architecture
-- [ ] Microservices extraction (if needed)
-- [ ] Advanced caching strategies
-- [ ] Load balancing optimization
-
-### Data Management
-- [ ] Data archiving strategies for old transactions
-- [ ] Advanced backup and recovery procedures
-- [ ] Data analytics warehouse integration
-- [ ] Real-time data synchronization
-- [ ] Data compliance and privacy enhancements
-
-## 🎯 Implementation Priority
-
-### **High Priority** (Next 6 months)
-1. PWA support for offline usage
-2. Enhanced security features (2FA, rate limiting)
-3. Advanced performance optimization
-4. Open Banking API integration
-
-### **Medium Priority** (6-12 months)
-1. Mobile native application
-2. Machine learning categorization
-3. Advanced analytics and reporting
-4. Multi-currency support
-
-### **Low Priority** (12+ months)
-1. Enterprise multi-tenancy
-2. White-label customization
-3. Microservices architecture
-4. Advanced compliance features
+Last active development: **January 2026**. Resumed: **March 2026**.
 
 ---
 
-## 🏆 **Current Achievement Status**
+## 🚨 Immediate — Fix & Stabilize (before any new work)
 
-**✅ Complete MVP** | **✅ Production Ready** | **✅ Enterprise Quality** | **✅ Comprehensive Testing** | **✅ Modern Architecture**
+### 1. Get test suite green again
+- [ ] Fix all failing RSpec tests (regressions accumulated while project was idle)
+- [ ] Ensure Docker environment builds cleanly (`docker compose -f docker-compose.local.yml up --build`)
+- [ ] Verify `bin/verify` passes inside container
 
-The Finance Tracker has successfully achieved **100% of core requirements** and is ready for production use. All future improvements are **optional enhancements** that can be implemented based on specific user needs and business requirements.
+### 2. Enable code quality tooling
+- [ ] Enable RuboCop in `bin/verify` and fix violations (currently commented out)
+- [ ] Enable Brakeman security scanning in `bin/verify` (currently commented out)
+- [ ] Configure SimpleCov with a minimum coverage threshold (currently unconfigured)
 
-### Success Metrics Achieved
-- ✅ **547+ total tests** (457 RSpec + 90 Jest) with comprehensive coverage
-- ✅ **Zero critical bugs** in production-ready codebase
-- ✅ **WCAG AA accessibility compliance** for inclusive design
-- ✅ **Sub-200ms average response times** for optimal performance
-- ✅ **Complete double-entry accuracy** for financial integrity
-- ✅ **Brazilian banking integration** with OFX/CSV support
+### 3. Strengthen test integrity
+- [ ] Add explicit double-entry balance assertion spec (`sum(debits) == sum(credits)` for every transaction)
+- [ ] Standardize spec language to English (some specs use Portuguese `it` descriptions)
+- [ ] Expand request/integration specs (14 request specs for 10 controllers — gaps in automation, reconciliation)
 
-The system is **stable, tested, and production-ready** with a clear roadmap for future enhancements.
+### 4. Update dependencies
+- [ ] Run `bundle update --conservative` for security patches (2 months stale)
+- [ ] Review gem changelogs for breaking changes (Rails 8.0.2, Devise 4.9.4, Sidekiq 8.0.4)
+
+---
+
+## 🔧 Technical Debt — Code Quality
+
+### Money concern consolidation
+- [ ] Consolidate 5 separate money concerns (MoneyConcern, MoneyParsing, MoneyNormalization, MoneyValidation, MoneyFormatting) into a cohesive module
+- [ ] Remove any legacy/duplicate money parsing paths
+
+### Projection horizon semantics
+Unificação aplicada (2025-08-09):
+- `months_ahead > 0` cuts at exact date, not end of target month.
+- `months_ahead == 0` focuses on current month (until end_of_month).
+- `MonthlyBalanceProjectionService`: when `as_of == end_of_month` no future projections added.
+
+Pending:
+- [ ] Confirm if UX needs alternative `month_end` horizon mode — if yes, expose `horizon_mode` flag
+- [ ] Update in-app help/docs mentioning horizon behavior
+- [ ] Review screens showing projection counts to reflect the change
+
+### Other code quality
+- [ ] Reduce service pattern variations (standardize constructor/call convention)
+- [ ] Standardize error handling patterns across services
+- [ ] Modernize deprecated concern usage
+
+---
+
+## 🔧 Technical Debt — Performance (follow-ups)
+
+Dashboard optimization completed 2025-08-09 (queries reduced from ~220 to <40).
+
+Remaining optional items:
+- [ ] Add index on `transactions(payment_date)` if payment-centric queries grow
+- [ ] Selective fragment caching for credit statement cards
+- [ ] Background warm-up job for chart cache (daily)
+- [ ] Instrument cache hits/misses via `ActiveSupport::Notifications`
+- [ ] Monitor `build_chart_data` generation time (p95)
+
+---
+
+## 🔧 Technical Debt — Import Pipeline
+
+### Dedup & idempotency improvements
+- [ ] Cross-file dedup heuristic (fingerprint cruzado por external_id/amount/date + tolerance window)
+- [ ] Visually flag suspected duplicate `ImportedTransactions` before reconciliation
+- [ ] Auto-suggest match when similarity > threshold (description + amount + ±2 days)
+- [ ] Reimport UI: show diff/summary when file already imported instead of direct redirect
+- [ ] Exportable report of ignored duplicates (date, amount, reason)
+- [ ] Periodic job to recalculate fingerprints if algorithm evolves (version the algorithm)
+- [ ] Make tolerances configurable per user (absolute value, %, day window)
+- [ ] CSV idempotency support (same digest + line fingerprint)
+- [ ] Tests: partial scenario (1 new + 1 duplicate in same file), missing external_id, rounded amounts
+- [ ] Metric: duplicates prevented counter per period for internal dashboard
+
+---
+
+## 🚀 Future Enhancements (Optional)
+
+### Security
+- [ ] Rate limiting (rack-attack)
+- [ ] Change auditing (paper_trail)
+- [ ] Two-factor authentication (2FA)
+
+### User Experience
+- [ ] Dark mode
+- [ ] PWA support with offline mode
+- [ ] Push notifications for due dates and budget alerts
+- [ ] Customizable dashboard widgets
+
+### Analytics & Monitoring
+- [ ] Application monitoring (Sentry/Bugsnag)
+- [ ] Data export in multiple formats (Excel, PDF)
+- [ ] Advanced reporting templates
+
+### Integration
+- [ ] Open Banking API integration (Brazilian banks)
+- [ ] Email report automation
+- [ ] REST API for third-party applications
+
+### Infrastructure
+- [ ] CI/CD pipeline (GitHub Actions)
+- [ ] Container security scanning
+- [ ] Automated security vulnerability scanning
+
+---
+
+## ✅ Completed Milestones
+
+### Performance optimization (2025-08-09)
+- Reduced overview dashboard queries from ~220 to <40 (spec enforced)
+- Batched month aggregates & category ranking (in-memory from preloaded dataset)
+- Added caching layer for 12-month chart data (Rails.cache + in-request memoization)
+- Memoized RecurringProjectionService results per request
+- Added DB indexes: `transactions(user_id, status, event_date)` and `entries(account_id, entry_type)`
+- Cache invalidation strategy (touch on transaction create/update)
+- Performance spec threshold tightened to <=30 queries
+
+### DiRams design system (Nov–Dec 2025)
+- Created custom DiRams design system replacing Tailwind/DaisyUI
+- Redesigned all pages: transactions, accounts, categories, overview, installment plans
+- Standardized all listing pages with table layout
+
+### Core features (through Aug 2025)
+- Complete double-entry bookkeeping system
+- Credit card statement management with Brazilian cycles
+- Recurring commitments (9 frequency types)
+- Installment plans (up to 120 installments)
+- OFX/CSV import with fingerprint-based dedup and transfer detection
+- Financial projections (monthly balance, recurring, installment horizon)
+- Dockerized local development environment
