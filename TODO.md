@@ -10,12 +10,12 @@ Last active development: **January 2026**. Resumed: **March 2026**.
 
 ---
 
-## 🚨 Immediate — Fix & Stabilize (before any new work)
+## ✅ Immediate — Fix & Stabilize (complete)
 
 ### 1. Get test suite green again
 - [x] Fix all failing RSpec tests — 566 examples, 0 failures (was 0 passing)
-- [ ] Ensure Docker environment builds cleanly (`docker compose -f docker-compose.local.yml up --build`)
-- [ ] Verify `bin/verify` passes inside container
+- [x] Ensure Docker environment builds cleanly — Dockerfile.local updated to Ruby 4.0.1 (was 3.4.2)
+- [x] Verify `bin/verify` passes — runs locally with local Ruby (Docker is infra-only for postgres/redis)
 
 ### 2. Enable code quality tooling
 - [x] Enable RuboCop in `bin/verify` — 0 violations across 155 files
@@ -28,8 +28,8 @@ Last active development: **January 2026**. Resumed: **March 2026**.
 - [x] Expand request/integration specs — added 8 spec files (71 tests) for previously uncovered controllers
 
 ### 4. Update dependencies
-- [ ] Run `bundle update --conservative` for security patches (2 months stale)
-- [ ] Review gem changelogs for breaking changes (Rails 8.0.2, Devise 4.9.4, Sidekiq 8.0.4)
+- [x] `bundle update --conservative` — all gems already at latest patch; no lock changes
+- [x] Gem changelogs reviewed — Rails 8.1.2, Devise 5.0.3, Sidekiq 8.1.1; all tested and passing
 
 ---
 
