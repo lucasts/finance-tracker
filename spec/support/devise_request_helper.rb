@@ -8,7 +8,7 @@ module DeviseRequestSpecHelper
       }
     }
   end
-  
+
   def logout_user
     delete destroy_user_session_path
   end

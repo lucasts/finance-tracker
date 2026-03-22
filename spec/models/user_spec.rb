@@ -2,16 +2,16 @@ require 'rails_helper'
 
 RSpec.describe User, type: :model do
   describe 'validations' do
-    it { should validate_presence_of(:email) }
-    it { should validate_uniqueness_of(:email).case_insensitive }
+    it { is_expected.to validate_presence_of(:email) }
+    it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
   end
 
   describe 'associations' do
-    it { should have_many(:accounts).dependent(:destroy) }
-    it { should have_many(:categories).dependent(:destroy) }
-    it { should have_many(:transactions).dependent(:destroy) }
-    it { should have_many(:installment_plans).dependent(:destroy) }
-    it { should have_many(:recurring_commitments).dependent(:destroy) }
+    it { is_expected.to have_many(:accounts).dependent(:destroy) }
+    it { is_expected.to have_many(:categories).dependent(:destroy) }
+    it { is_expected.to have_many(:transactions).dependent(:destroy) }
+    it { is_expected.to have_many(:installment_plans).dependent(:destroy) }
+    it { is_expected.to have_many(:recurring_commitments).dependent(:destroy) }
   end
 
   describe 'business methods' do
@@ -37,7 +37,7 @@ RSpec.describe User, type: :model do
           { account_id: create(:account, :income_source, user: user).id, entry_type: 'credit', amount: 1000 }
         ]
       )
-      
+
       CreateTransactionService.call(
         user: user,
         description: "Expense from checking",
@@ -52,7 +52,7 @@ RSpec.describe User, type: :model do
           { account_id: checking_account.id, entry_type: 'credit', amount: 300 }
         ]
       )
-      
+
       CreateTransactionService.call(
         user: user,
         description: "Expense from credit",
@@ -107,28 +107,28 @@ RSpec.describe User, type: :model do
 
     describe '#pending_transactions_count' do
       it 'counts pending transactions' do
-        create(:transaction, :pending, user: user, from_account: checking_account, 
+        create(:transaction, :pending, user: user, from_account: checking_account,
                category: expense_category, amount: 100, event_date: Date.tomorrow)
-        
+
         expect(user.pending_transactions_count).to eq(1)
       end
     end
 
     describe '#upcoming_payments' do
       it 'returns future payments' do
-        future_transaction = create(:transaction, :pending, user: user, 
+        future_transaction = create(:transaction, :pending, user: user,
                                    from_account: checking_account, category: expense_category,
                                    amount: 150, event_date: 1.week.from_now)
-        
+
         expect(user.upcoming_payments).to include(future_transaction)
       end
 
       it 'limits the number of results' do
         12.times do |i|
-          create(:transaction, :pending, user: user, from_account: checking_account, 
+          create(:transaction, :pending, user: user, from_account: checking_account,
                  category: expense_category, amount: 50, event_date: (i + 1).days.from_now)
         end
-        
+
         expect(user.upcoming_payments.count).to eq(10) # Default limit
         expect(user.upcoming_payments(5).count).to eq(5) # Custom limit
       end
@@ -151,44 +151,44 @@ RSpec.describe User, type: :model do
       account = create(:account, user: user)
       income_category = create(:category, :income, user: user)
       expense_category = create(:category, :expense, user: user)
-      
-      create(:transaction, :income, :confirmed, user: user, to_account: account, 
+
+      create(:transaction, :income, :confirmed, user: user, to_account: account,
              category: income_category, amount: 999999.99, event_date: Date.current)
-      create(:transaction, :expense, :confirmed, user: user, from_account: account, 
+      create(:transaction, :expense, :confirmed, user: user, from_account: account,
              category: expense_category, amount: 0.01, event_date: Date.current)
-      
+
       expect(user.monthly_balance).to be_within(0.01).of(999999.98)
     end
 
     it 'handles extreme dates' do
       account = create(:account, user: user)
       income_category = create(:category, :income, user: user)
-      
+
       # Very old transaction - should not affect current month
-      create(:transaction, :income, user: user, to_account: account, 
+      create(:transaction, :income, user: user, to_account: account,
              category: income_category, amount: 1000, event_date: Date.new(1900, 1, 1))
-      
+
       expect(user.monthly_income).to eq(0.0)
     end
   end
 
   describe 'scopes and filters' do
-    let(:user1) { create(:user, email: 'user1@test.com') }
-    let(:user2) { create(:user, email: 'user2@test.com') }
+    let(:first_user) { create(:user, email: 'user1@test.com') }
+    let(:second_user) { create(:user, email: 'user2@test.com') }
 
     it 'isolates data between users' do
-      account1 = create(:account, user: user1)
-      account2 = create(:account, user: user2)
-      category1 = create(:category, user: user1)
-      category2 = create(:category, user: user2)
-      
-      transaction1 = create(:transaction, user: user1, from_account: account1, category: category1)
-      transaction2 = create(:transaction, user: user2, from_account: account2, category: category2)
-      
-      expect(user1.transactions).to include(transaction1)
-      expect(user1.transactions).not_to include(transaction2)
-      expect(user2.transactions).to include(transaction2)
-      expect(user2.transactions).not_to include(transaction1)
+      account1 = create(:account, user: first_user)
+      account2 = create(:account, user: second_user)
+      category1 = create(:category, user: first_user)
+      category2 = create(:category, user: second_user)
+
+      transaction1 = create(:transaction, user: first_user, from_account: account1, category: category1)
+      transaction2 = create(:transaction, user: second_user, from_account: account2, category: category2)
+
+      expect(first_user.transactions).to include(transaction1)
+      expect(first_user.transactions).not_to include(transaction2)
+      expect(second_user.transactions).to include(transaction2)
+      expect(second_user.transactions).not_to include(transaction1)
     end
   end
 end

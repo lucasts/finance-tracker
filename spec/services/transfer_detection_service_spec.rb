@@ -13,7 +13,7 @@ RSpec.describe 'Transfer detection', type: :service do
     it 'detects transfer candidates with same amount and close dates' do
       session1 = create(:import_session, user: user, account: checking_account)
       session2 = create(:import_session, user: user, account: savings_account)
-      
+
       # Outgoing transfer from checking
       tx1 = create(:imported_transaction,
         import_session: session1,
@@ -21,7 +21,7 @@ RSpec.describe 'Transfer detection', type: :service do
         amount: -500.00,
         event_date: Date.new(2025, 1, 15)
       )
-      
+
       # Incoming transfer to savings
       tx2 = create(:imported_transaction,
         import_session: session2,
@@ -44,13 +44,13 @@ RSpec.describe 'Transfer detection', type: :service do
     it 'tolerates small amount differences (within 0.01)' do
       session1 = create(:import_session, user: user, account: checking_account)
       session2 = create(:import_session, user: user, account: savings_account)
-      
+
       tx1 = create(:imported_transaction,
         import_session: session1,
         amount: -100.00,
         event_date: Date.new(2025, 1, 15)
       )
-      
+
       tx2 = create(:imported_transaction,
         import_session: session2,
         amount: 99.99,  # 0.01 difference
@@ -66,13 +66,13 @@ RSpec.describe 'Transfer detection', type: :service do
     it 'tolerates date differences within 2 days' do
       session1 = create(:import_session, user: user, account: checking_account)
       session2 = create(:import_session, user: user, account: savings_account)
-      
+
       tx1 = create(:imported_transaction,
         import_session: session1,
         amount: -200.00,
         event_date: Date.new(2025, 1, 15)
       )
-      
+
       tx2 = create(:imported_transaction,
         import_session: session2,
         amount: 200.00,
@@ -88,13 +88,13 @@ RSpec.describe 'Transfer detection', type: :service do
     it 'does not detect transfers between different users' do
       session1 = create(:import_session, user: user, account: checking_account)
       session2 = create(:import_session, user: other_user, account: other_account)
-      
+
       tx1 = create(:imported_transaction,
         import_session: session1,
         amount: -300.00,
         event_date: Date.new(2025, 1, 15)
       )
-      
+
       tx2 = create(:imported_transaction,
         import_session: session2,
         amount: 300.00,
@@ -110,13 +110,13 @@ RSpec.describe 'Transfer detection', type: :service do
 
     it 'does not detect transfers in same account' do
       session = create(:import_session, user: user, account: checking_account)
-      
+
       tx1 = create(:imported_transaction,
         import_session: session,
         amount: -100.00,
         event_date: Date.new(2025, 1, 15)
       )
-      
+
       tx2 = create(:imported_transaction,
         import_session: session,
         amount: 100.00,
@@ -132,13 +132,13 @@ RSpec.describe 'Transfer detection', type: :service do
     it 'does not detect when amounts are too different' do
       session1 = create(:import_session, user: user, account: checking_account)
       session2 = create(:import_session, user: user, account: savings_account)
-      
+
       tx1 = create(:imported_transaction,
         import_session: session1,
         amount: -100.00,
         event_date: Date.new(2025, 1, 15)
       )
-      
+
       tx2 = create(:imported_transaction,
         import_session: session2,
         amount: 100.50,  # 0.50 difference (> 0.01)
@@ -154,13 +154,13 @@ RSpec.describe 'Transfer detection', type: :service do
     it 'does not detect when dates are too far apart' do
       session1 = create(:import_session, user: user, account: checking_account)
       session2 = create(:import_session, user: user, account: savings_account)
-      
+
       tx1 = create(:imported_transaction,
         import_session: session1,
         amount: -150.00,
         event_date: Date.new(2025, 1, 15)
       )
-      
+
       tx2 = create(:imported_transaction,
         import_session: session2,
         amount: 150.00,

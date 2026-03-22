@@ -34,7 +34,7 @@ RSpec.describe 'ImportSessions advanced dedup', type: :request do
     ]
     expect {
       post import_sessions_path, params: { import_session: { source_type: 'csv', account_id: account.id, file: upload_csv(second_csv, filename: 'second.csv') } }
-    }.to change { ImportSession.count }.by(1)
+    }.to change(ImportSession, :count).by(1)
 
     second_session = ImportSession.last
     # Desired (will FAIL initially): only the truly new line (Desc C) imported => 1
@@ -56,7 +56,7 @@ RSpec.describe 'ImportSessions advanced dedup', type: :request do
     ]
     expect {
       post import_sessions_path, params: { import_session: { source_type: 'csv', account_id: account.id, file: upload_csv(dup_csv, filename: 'second2.csv') } }
-    }.to change { ImportSession.count }.by(1)
+    }.to change(ImportSession, :count).by(1)
     second = ImportSession.last
     # Desired: no new imported_transactions (duplicate skipped)
     expect(second.imported_transactions.count).to eq(0)

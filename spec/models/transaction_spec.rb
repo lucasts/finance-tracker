@@ -8,22 +8,22 @@ RSpec.describe Transaction, type: :model do
   let(:category) { create(:category, user: user) }
 
   describe 'validations' do
-    it { should validate_presence_of(:description) }
-    it { should validate_presence_of(:amount) }
-    it { should validate_presence_of(:event_date) }
-    it { should validate_presence_of(:payment_date) }
-    it { should validate_presence_of(:transaction_type) }
-    
+    it { is_expected.to validate_presence_of(:description) }
+    it { is_expected.to validate_presence_of(:amount) }
+    it { is_expected.to validate_presence_of(:event_date) }
+    it { is_expected.to validate_presence_of(:payment_date) }
+    it { is_expected.to validate_presence_of(:transaction_type) }
+
     it 'validates transaction_type inclusion' do
       income_transaction = create(:transaction, :income, user: user)
       expect(income_transaction).to be_valid
-      
+
       expense_transaction = create(:transaction, :expense, user: user)
       expect(expense_transaction).to be_valid
-      
+
       transfer_transaction = create(:transaction, :transfer, user: user)
       expect(transfer_transaction).to be_valid
-      
+
       # Test that invalid transaction_type raises an error
       transaction = build(:transaction, :expense, user: user,
                          from_account: create(:account, user: user),
@@ -78,14 +78,14 @@ RSpec.describe Transaction, type: :model do
           { account_id: from_account.id, entry_type: 'credit', amount: 100 }
           # Missing debit entry
         ])
-        
+
         expect(transaction).not_to be_valid
         expect(transaction.errors[:base]).to include('É necessário informar conta de origem e destino para transferências')
       end
 
       it 'rejects transfer with same from_account and to_account' do
         account = create(:account, user: user)
-        transaction = Transaction.new(
+        transaction = described_class.new(
           transaction_type: 'transfer',
           user: user,
           category: nil,
@@ -97,14 +97,17 @@ RSpec.describe Transaction, type: :model do
         # Build two entries with the same account (which should be invalid)
         transaction.entries.build({ account_id: account.id, entry_type: 'debit', amount: 100 })
         transaction.entries.build({ account_id: account.id, entry_type: 'credit', amount: 100 })
-        
+
         expect(transaction).not_to be_valid
         expect(transaction.errors[:base]).to include('Conta de origem e destino não podem ser iguais em uma transferência')
       end
 
       it 'allows transfer with different accounts' do
-        transaction = create(:transaction, :transfer, user: user)
+        from_acc = create(:account, user: user)
+        to_acc = create(:account, user: user)
+        transaction = create(:transaction, :transfer, user: user, from_account: from_acc, to_account: to_acc)
         expect(transaction).to be_valid
+        expect(transaction.entries.map(&:account_id).uniq.count).to eq(2)
       end
     end
 
@@ -124,19 +127,19 @@ RSpec.describe Transaction, type: :model do
   end
 
   describe 'enums' do
-    it { should define_enum_for(:status).with_values(pending: 0, confirmed: 1, cancelled: 2) }
-    it { should define_enum_for(:recurrence_type).with_values(single: 0, recurring: 1, installment: 2) }
+    it { is_expected.to define_enum_for(:status).with_values(pending: 0, confirmed: 1, cancelled: 2) }
+    it { is_expected.to define_enum_for(:recurrence_type).with_values(single: 0, recurring: 1, installment: 2) }
   end
 
   describe 'associations' do
-    it { should belong_to(:user) }
-    it { should belong_to(:category).optional }
-    it { should belong_to(:credit_statement).optional }
-    it { should belong_to(:recurring_commitment).optional }
-    it { should belong_to(:installment_plan).optional }
-    it { should have_many(:entries) }
-    it { should have_many(:accounts).through(:entries) }
-    
+    it { is_expected.to belong_to(:user) }
+    it { is_expected.to belong_to(:category).optional }
+    it { is_expected.to belong_to(:credit_statement).optional }
+    it { is_expected.to belong_to(:recurring_commitment).optional }
+    it { is_expected.to belong_to(:installment_plan).optional }
+    it { is_expected.to have_many(:entries) }
+    it { is_expected.to have_many(:accounts).through(:entries) }
+
     # Additional association tests for comprehensive coverage
     it 'has many entries' do
       transaction = create(:transaction, user: user)
@@ -157,26 +160,26 @@ RSpec.describe Transaction, type: :model do
     let!(:confirmed_transaction) { create(:transaction, :confirmed, user: user) }
 
     it 'filters income transactions' do
-      expect(Transaction.income).to include(income_transaction)
-      expect(Transaction.income).not_to include(expense_transaction)
-      expect(Transaction.income).not_to include(transfer_transaction)
+      expect(described_class.income).to include(income_transaction)
+      expect(described_class.income).not_to include(expense_transaction)
+      expect(described_class.income).not_to include(transfer_transaction)
     end
 
     it 'filters expense transactions' do
-      expect(Transaction.expense).to include(expense_transaction)
-      expect(Transaction.expense).not_to include(income_transaction)
-      expect(Transaction.expense).not_to include(transfer_transaction)
+      expect(described_class.expense).to include(expense_transaction)
+      expect(described_class.expense).not_to include(income_transaction)
+      expect(described_class.expense).not_to include(transfer_transaction)
     end
 
     it 'filters transfer transactions' do
-      expect(Transaction.transfer).to include(transfer_transaction)
-      expect(Transaction.transfer).not_to include(income_transaction)
-      expect(Transaction.transfer).not_to include(expense_transaction)
+      expect(described_class.transfer).to include(transfer_transaction)
+      expect(described_class.transfer).not_to include(income_transaction)
+      expect(described_class.transfer).not_to include(expense_transaction)
     end
 
     it 'filters pending transactions' do
-      expect(Transaction.pending).to include(pending_transaction)
-      expect(Transaction.pending).not_to include(confirmed_transaction)
+      expect(described_class.pending).to include(pending_transaction)
+      expect(described_class.pending).not_to include(confirmed_transaction)
     end
 
     describe '.upcoming_payments' do
@@ -190,7 +193,7 @@ RSpec.describe Transaction, type: :model do
 
           result = described_class.where(user: user).upcoming_payments
 
-          expect(result).to eq([in_range_pending, in_range_confirmed])
+          expect(result).to eq([ in_range_pending, in_range_confirmed ])
           expect(result).not_to include(cancelled_in_range, past_transaction, distant_future)
         end
       end
@@ -264,7 +267,7 @@ RSpec.describe Transaction, type: :model do
 
   describe 'mutual exclusivity validations' do
     it 'allows single transaction without associations' do
-      transaction = create(:transaction, 
+      transaction = create(:transaction,
         :expense,  # This will include a proper expense category
         recurrence_type: 'single',
         recurring_commitment: nil,
@@ -275,7 +278,7 @@ RSpec.describe Transaction, type: :model do
     end
 
     it 'validates that recurring transaction must have recurring_commitment' do
-      transaction = build(:transaction, 
+      transaction = build(:transaction,
         recurrence_type: 'recurring',
         recurring_commitment: nil,
         user: user
@@ -285,7 +288,7 @@ RSpec.describe Transaction, type: :model do
     end
 
     it 'validates that installment transaction must have installment_plan' do
-      transaction = build(:transaction, 
+      transaction = build(:transaction,
         recurrence_type: 'installment',
         installment_plan: nil,
         user: user
@@ -296,7 +299,7 @@ RSpec.describe Transaction, type: :model do
 
     it 'prevents single transaction with associations' do
       plan = create(:installment_plan, user: user)
-      transaction = build(:transaction, 
+      transaction = build(:transaction,
         recurrence_type: 'single',
         installment_plan: plan,
         user: user
@@ -342,7 +345,7 @@ RSpec.describe Transaction, type: :model do
     end
 
     it 'atualiza status quando payment_date muda' do
-      transaction = create(:transaction, 
+      transaction = create(:transaction,
         payment_date: 1.week.ago,
         status: 'confirmed',
         user: user
@@ -352,7 +355,7 @@ RSpec.describe Transaction, type: :model do
     end
 
     it 'does not update status of cancelled transactions' do
-      transaction = create(:transaction, 
+      transaction = create(:transaction,
         payment_date: 1.week.ago,
         status: 'cancelled',
         user: user
@@ -364,7 +367,7 @@ RSpec.describe Transaction, type: :model do
 
   describe 'edge cases' do
     it 'aceita valores extremos' do
-      transaction = create(:transaction, 
+      transaction = create(:transaction,
         :expense,
         amount: 99_999_999.99,
         user: user
@@ -373,7 +376,7 @@ RSpec.describe Transaction, type: :model do
     end
 
     it 'aceita datas distantes no passado' do
-      transaction = create(:transaction, 
+      transaction = create(:transaction,
         :expense,
         event_date: Date.new(1900, 1, 1),
         payment_date: Date.new(1900, 1, 1),
@@ -383,7 +386,7 @@ RSpec.describe Transaction, type: :model do
     end
 
     it 'aceita datas distantes no futuro' do
-      transaction = create(:transaction, 
+      transaction = create(:transaction,
         :expense,
         event_date: Date.new(2099, 12, 31),
         payment_date: Date.new(2099, 12, 31),
@@ -394,7 +397,7 @@ RSpec.describe Transaction, type: :model do
 
     it 'accepts very long descriptions' do
       long_description = 'A' * 1000
-      transaction = create(:transaction, 
+      transaction = create(:transaction,
         :expense,
         description: long_description,
         user: user

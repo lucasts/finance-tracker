@@ -16,17 +16,18 @@ RSpec.describe 'Transactions', type: :request do
 
   context 'multi-user filter' do
     it 'user only sees their own transactions' do
-      # Example: create transaction from another user and ensure it doesn't appear
+      skip 'Full isolation coverage in transactions_controller_spec'
     end
   end
 
   context 'CRUD' do
     before { sign_in user }
+
     it 'creates, edits, deletes and views transaction' do
-      # Example: complete CRUD flow
+      skip 'Full CRUD coverage in transactions_controller_spec'
     end
 
-    it 'cria um parcelamento e garante status correto das parcelas' do
+    it 'creates an installment plan and ensures correct installment statuses' do
       bank_account = create(:account, :asset, user: user)
       expense_account = create(:account, :expense_destination, user: user)
       category = create(:category, :expense, user: user)

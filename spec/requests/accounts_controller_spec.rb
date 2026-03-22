@@ -39,8 +39,8 @@ RSpec.describe AccountsController, type: :request do
       end
 
       it 'prevents updating other users accounts' do
-        patch account_path(other_user_account), params: { 
-          account: { name: 'Hacked Account' } 
+        patch account_path(other_user_account), params: {
+          account: { name: 'Hacked Account' }
         }
         expect(response).to have_http_status(:not_found)
       end
@@ -53,8 +53,10 @@ RSpec.describe AccountsController, type: :request do
   end
 
   describe 'GET #index' do
-    let!(:checking_account) { create(:account, user: user, name: 'Checking') }
-    let!(:savings_account) { create(:account, user: user, name: 'Savings') }
+    let(:checking_account) { create(:account, user: user, name: 'Checking') }
+    let(:savings_account) { create(:account, user: user, name: 'Savings') }
+
+    before { checking_account; savings_account }
 
     it 'returns success' do
       get accounts_path
@@ -65,7 +67,7 @@ RSpec.describe AccountsController, type: :request do
       get accounts_path
       expect(response.body).to include('Checking')
       expect(response.body).to include('Savings')
-      
+
       # Should be ordered alphabetically
       checking_pos = response.body.index('Checking')
       savings_pos = response.body.index('Savings')
@@ -156,7 +158,7 @@ RSpec.describe AccountsController, type: :request do
         expect {
           post accounts_path, params: malicious_params
         }.to change(Account, :count).by(1)
-        
+
         account = Account.last
         expect(account.name).to eq("'; DROP TABLE accounts; --")
         expect(Account.count).to be > 0 # Table should still exist
@@ -259,10 +261,10 @@ RSpec.describe AccountsController, type: :request do
         expect {
           delete account_path(account)
         }.not_to change(Account, :count)
-        
+
         expect(response).to redirect_to(accounts_path)
         expect(flash[:alert]).to include('não pode ser removida')
-        expect(Transaction.exists?(transaction.id)).to be_truthy
+        expect(Transaction).to exist(transaction.id)
       end
     end
   end
@@ -277,12 +279,12 @@ RSpec.describe AccountsController, type: :request do
           account_type_id: account_type.id,
           user_id: other_user.id, # Should be ignored
           id: 999, # Should be ignored
-          created_at: Time.current, # Should be ignored
+          created_at: Time.current # Should be ignored
         }
       }
 
       post accounts_path, params: malicious_params
-      
+
       created_account = Account.last
       expect(created_account.user).to eq(user) # Not other_user
       expect(created_account.name).to eq('Safe Name')
@@ -319,11 +321,11 @@ RSpec.describe AccountsController, type: :request do
     it 'handles concurrent account creation' do
       # Simulate race condition
       allow_any_instance_of(Account).to receive(:save).and_return(false)
-      
+
       post accounts_path, params: {
         account: { name: 'Test', account_type_id: account_type.id }
       }
-      
+
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end

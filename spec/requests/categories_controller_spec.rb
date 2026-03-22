@@ -38,8 +38,8 @@ RSpec.describe CategoriesController, type: :request do
       end
 
       it 'prevents updating other users categories' do
-        patch category_path(other_user_category), params: { 
-          category: { name: 'Hacked Category' } 
+        patch category_path(other_user_category), params: {
+          category: { name: 'Hacked Category' }
         }
         expect(response).to have_http_status(:not_found)
       end
@@ -52,8 +52,10 @@ RSpec.describe CategoriesController, type: :request do
   end
 
   describe 'GET #index' do
-    let!(:food_category) { create(:category, user: user, name: 'Alimentação') }
-    let!(:transport_category) { create(:category, user: user, name: 'Transporte') }
+    let(:food_category) { create(:category, user: user, name: 'Alimentação') }
+    let(:transport_category) { create(:category, user: user, name: 'Transporte') }
+
+    before { food_category; transport_category }
 
     it 'returns success' do
       get categories_path
@@ -130,11 +132,11 @@ RSpec.describe CategoriesController, type: :request do
     end
 
     context 'duplicate names' do
-      let!(:existing_category) { create(:category, user: user, name: 'Duplicada') }
-      
+      before { create(:category, user: user, name: 'Duplicada') }
+
       it 'prevents duplicate category names for same user' do
         duplicate_params = { category: { name: 'Duplicada' } }
-        
+
         expect {
           post categories_path, params: duplicate_params
         }.not_to change(Category, :count)
@@ -143,7 +145,7 @@ RSpec.describe CategoriesController, type: :request do
       it 'allows same name for different users' do
         other_user_category = create(:category, user: other_user, name: 'Mesma Categoria')
         same_name_params = { category: { name: 'Mesma Categoria' } }
-        
+
         expect {
           post categories_path, params: same_name_params
         }.to change(Category, :count).by(1)
@@ -164,7 +166,7 @@ RSpec.describe CategoriesController, type: :request do
         expect {
           post categories_path, params: malicious_params
         }.to change(Category, :count).by(1)
-        
+
         category = Category.last
         expect(category.name).to eq("'; DROP TABLE categories; --")
         expect(Category.count).to be > 0 # Table should still exist
@@ -251,10 +253,10 @@ RSpec.describe CategoriesController, type: :request do
         expect {
           delete category_path(category)
         }.not_to change(Category, :count)
-        
+
         expect(response).to redirect_to(categories_path)
         expect(flash[:alert]).to include('não pode ser removida')
-        expect(Transaction.exists?(transaction.id)).to be_truthy
+        expect(Transaction).to exist(transaction.id)
       end
     end
   end
@@ -269,12 +271,12 @@ RSpec.describe CategoriesController, type: :request do
           description: 'Safe Description',
           user_id: other_user.id, # Should be ignored
           id: 999, # Should be ignored
-          created_at: Time.current, # Should be ignored
+          created_at: Time.current # Should be ignored
         }
       }
 
       post categories_path, params: malicious_params
-      
+
       created_category = Category.last
       expect(created_category.user).to eq(user) # Not other_user
       expect(created_category.name).to eq('Safe Name')
@@ -298,9 +300,9 @@ RSpec.describe CategoriesController, type: :request do
     it 'handles very long category names' do
       long_name = 'A' * 300
       long_params = { category: { name: long_name } }
-      
+
       post categories_path, params: long_params
-      
+
       if Category.last
         expect(Category.last.name.length).to be <= 255 # Assuming DB limit
       end
@@ -308,16 +310,16 @@ RSpec.describe CategoriesController, type: :request do
 
     it 'handles special characters in names' do
       special_params = {
-        category: { 
+        category: {
           name: 'Categoria com àçêntos & símbolos 123!@#',
           description: 'Тест кириллица 測試中文'
         }
       }
-      
+
       expect {
         post categories_path, params: special_params
       }.to change(Category, :count).by(1)
-      
+
       category = Category.last
       expect(category.name).to eq('Categoria com àçêntos & símbolos 123!@#')
     end
@@ -325,11 +327,11 @@ RSpec.describe CategoriesController, type: :request do
     it 'handles concurrent category creation' do
       # Simulate race condition
       allow_any_instance_of(Category).to receive(:save).and_return(false)
-      
+
       post categories_path, params: {
         category: { name: 'Test Category' }
       }
-      
+
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end

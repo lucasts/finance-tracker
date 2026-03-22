@@ -34,7 +34,7 @@ RSpec.describe 'ImportSessions idempotency', type: :request do
           file: uploaded_file(file_path)
         }
       }
-    }.not_to change { ImportSession.count }
+    }.not_to change(ImportSession, :count)
     expect(response).to redirect_to(import_session_path(first_session))
   end
 end

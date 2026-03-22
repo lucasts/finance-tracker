@@ -14,8 +14,8 @@ RSpec.describe 'ImportSessions possible duplicate highlighting', type: :request 
       raw_data: '{}',
       description: 'Compra Padaria',
       amount: 10.00,
-      event_date: Date.new(2025,1,5),
-      payment_date: Date.new(2025,1,5),
+      event_date: Date.new(2025, 1, 5),
+      payment_date: Date.new(2025, 1, 5),
       status: 'pending'
     )
     # One flagged
@@ -24,8 +24,8 @@ RSpec.describe 'ImportSessions possible duplicate highlighting', type: :request 
       raw_data: '{}',
       description: 'Compra Mercado',
       amount: 10.50,
-      event_date: Date.new(2025,1,6),
-      payment_date: Date.new(2025,1,6),
+      event_date: Date.new(2025, 1, 6),
+      payment_date: Date.new(2025, 1, 6),
       status: 'pending',
       possible_duplicate: true
     )

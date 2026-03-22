@@ -13,7 +13,8 @@ RSpec.describe 'Overview recurring projection memoization', type: :request do
   end
 
   it 'calls RecurringProjectionService only once per request context even if used twice' do
-    expect(RecurringProjectionService).to receive(:call).once.and_call_original
+    allow(RecurringProjectionService).to receive(:call).and_call_original
     get overview_index_path
+    expect(RecurringProjectionService).to have_received(:call).once
   end
 end

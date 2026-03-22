@@ -17,18 +17,18 @@ RSpec.describe RecurringTransactionsJob, type: :job do
   it 'generates transaction for recurring commitments with next occurrence' do
     expect {
       described_class.perform_now
-    }.to change { Transaction.count }.by(1)
+    }.to change(Transaction, :count).by(1)
   end
 
   it 'does not generate if transaction already exists for the date' do
     CreateTransactionService.call(
-      description: commitment.name, 
-      amount: 100, 
-      event_date: occurrence_date, 
-      payment_date: occurrence_date, 
-      user: user, 
-      category: category, 
-      recurring_commitment: commitment, 
+      description: commitment.name,
+      amount: 100,
+      event_date: occurrence_date,
+      payment_date: occurrence_date,
+      user: user,
+      category: category,
+      recurring_commitment: commitment,
       transaction_type: 'expense',
       recurrence_type: 'recurring',
       entries_attributes: [
@@ -38,6 +38,6 @@ RSpec.describe RecurringTransactionsJob, type: :job do
     )
     expect {
       described_class.perform_now
-    }.not_to change { Transaction.count }
+    }.not_to change(Transaction, :count)
   end
 end

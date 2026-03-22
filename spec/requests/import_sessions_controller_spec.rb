@@ -15,6 +15,7 @@ RSpec.describe ImportSessionsController, type: :request do
 
   describe 'GET #show' do
     let!(:session) { create(:import_session, user: user, account: account) }
+
     it 'returns success' do
       get import_session_path(session)
       expect(response).to have_http_status(:ok)

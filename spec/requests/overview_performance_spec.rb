@@ -21,7 +21,7 @@ RSpec.describe 'Overview performance', type: :request do
     end
   end
 
-  it 'limita número de queries ao carregar overview' do
+  it 'limits the number of queries when loading the overview' do
     query_count = 0
     subscriber = ActiveSupport::Notifications.subscribe('sql.active_record') do |*, payload|
       next if payload[:name] =~ /SCHEMA|TRANSACTION/ || payload[:cached]
@@ -32,7 +32,7 @@ RSpec.describe 'Overview performance', type: :request do
 
     ActiveSupport::Notifications.unsubscribe(subscriber)
 
-    # Intentional failing threshold for current (pre-optimization) implementation; adjust in refactor to pass
+  # Intentional failing threshold for current (pre-optimization) implementation; adjust in refactor to pass
   expect(query_count).to be <= 30
   end
 end

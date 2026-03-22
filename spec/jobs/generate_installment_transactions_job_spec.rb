@@ -11,7 +11,7 @@ RSpec.describe GenerateInstallmentTransactionsJob, type: :job do
   it 'generates installment transaction for active plans with pending installments' do
     expect {
       described_class.perform_now
-    }.to change { Transaction.count }.by(1)
+    }.to change(Transaction, :count).by(1)
   end
 
   it 'does not generate if all installments already exist' do
@@ -20,7 +20,7 @@ RSpec.describe GenerateInstallmentTransactionsJob, type: :job do
     end
     expect {
       described_class.perform_now
-    }.not_to change { Transaction.count }
+    }.not_to change(Transaction, :count)
   end
 
   it 'returns errors if there is a failure' do

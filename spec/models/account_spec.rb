@@ -5,14 +5,14 @@ RSpec.describe Account, type: :model do
   let(:account_type) { create(:account_type) }
 
   describe 'validations' do
-    it { should validate_presence_of(:name) }
+    it { is_expected.to validate_presence_of(:name) }
   end
 
   describe 'associations' do
-    it { should belong_to(:user) }
-    it { should belong_to(:account_type) }
-    it { should have_many(:transactions) }
-    it { should have_many(:import_sessions) }
+    it { is_expected.to belong_to(:user) }
+    it { is_expected.to belong_to(:account_type) }
+    it { is_expected.to have_many(:transactions) }
+    it { is_expected.to have_many(:import_sessions) }
   end
 
   describe 'edge cases' do
@@ -61,7 +61,7 @@ RSpec.describe Account, type: :model do
             { account_id: account.id, entry_type: 'debit', amount: 1000 }
           ]
         )
-        
+
         account.reload
         expect(account.balance).to eq(1000.0)
       end
@@ -80,7 +80,7 @@ RSpec.describe Account, type: :model do
             { account_id: other_account.id, entry_type: 'debit', amount: 300 }
           ]
         )
-        
+
         expect(account.balance).to eq(-300.0)
       end
 
@@ -97,7 +97,7 @@ RSpec.describe Account, type: :model do
             { account_id: account.id, entry_type: 'debit', amount: 500 }
           ]
         )
-        
+
         expect(account.balance).to eq(500.0)
       end
 
@@ -114,7 +114,7 @@ RSpec.describe Account, type: :model do
             { account_id: other_account.id, entry_type: 'debit', amount: 200 }
           ]
         )
-        
+
         expect(account.balance).to eq(-200.0)
       end
 
@@ -133,7 +133,7 @@ RSpec.describe Account, type: :model do
             { account_id: account.id, entry_type: 'debit', amount: 1000 }
           ]
         )
-        
+
         # Expense: -300
         CreateTransactionService.call(
           amount: 300,
@@ -148,7 +148,7 @@ RSpec.describe Account, type: :model do
             { account_id: other_account.id, entry_type: 'debit', amount: 300 }
           ]
         )
-        
+
         # Transfer in: +200
         CreateTransactionService.call(
           amount: 200,
@@ -162,7 +162,7 @@ RSpec.describe Account, type: :model do
             { account_id: account.id, entry_type: 'debit', amount: 200 }
           ]
         )
-        
+
         # Transfer out: -150
         CreateTransactionService.call(
           amount: 150,
@@ -176,7 +176,7 @@ RSpec.describe Account, type: :model do
             { account_id: other_account.id, entry_type: 'debit', amount: 150 }
           ]
         )
-        
+
         # Balance: 1000 - 300 + 200 - 150 = 750
         expect(account.balance).to eq(750.0)
       end
@@ -196,7 +196,7 @@ RSpec.describe Account, type: :model do
             { account_id: account.id, entry_type: 'debit', amount: 1000 }
           ]
         )
-        
+
         # Create pending expense transaction
         CreateTransactionService.call(
           amount: 300,
@@ -211,7 +211,7 @@ RSpec.describe Account, type: :model do
             { account_id: other_account.id, entry_type: 'debit', amount: 300 }
           ]
         )
-        
+
         # Only confirmed transaction should count
         expect(account.balance).to eq(1000.0)
       end
@@ -233,7 +233,7 @@ RSpec.describe Account, type: :model do
             { account_id: account.id, entry_type: 'debit', amount: 1000 }
           ]
         )
-        
+
         CreateTransactionService.call(
           amount: 300,
           event_date: Date.current,
@@ -247,7 +247,7 @@ RSpec.describe Account, type: :model do
             { account_id: other_account.id, entry_type: 'debit', amount: 300 }
           ]
         )
-        
+
         CreateTransactionService.call(
           amount: 200,
           event_date: Date.current,
@@ -260,7 +260,7 @@ RSpec.describe Account, type: :model do
             { account_id: account.id, entry_type: 'debit', amount: 200 }
           ]
         )
-        
+
         CreateTransactionService.call(
           amount: 150,
           event_date: Date.current,

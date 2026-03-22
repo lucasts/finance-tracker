@@ -15,13 +15,13 @@ RSpec.describe 'Transfer detection integration', type: :request do
     CSV
 
     # Import to checking account
-    session1 = create(:import_session, 
-      user: user, 
+    session1 = create(:import_session,
+      user: user,
       account: checking_account,
       raw_file: csv_content,
       source_type: 'csv'
     )
-    
+
     allow(CsvImportService).to receive(:call).and_return([
       {
         description: 'Transferência para poupança',

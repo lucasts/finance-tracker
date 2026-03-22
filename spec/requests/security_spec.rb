@@ -7,20 +7,20 @@ RSpec.describe 'Security', type: :request do
 
   it 'protects against SQL injection in transaction creation' do
     sign_in user
-    post transactions_path, params: { 
-      transaction: { 
-        amount: 100, 
+    post transactions_path, params: {
+      transaction: {
+        amount: 100,
         event_date: Date.today,
         payment_date: Date.today,
-        from_account_id: account.id, 
-        category_id: category.id, 
+        from_account_id: account.id,
+        category_id: category.id,
         description: "; DROP TABLE users; --",
         transaction_type: 'expense'
-      } 
+      }
     }
     # Pode ser redirect (sucesso) ou unprocessable_entity (validação falhou)
     expect(response).to have_http_status(:redirect).or have_http_status(:unprocessable_entity)
-    
+
     # Se foi criado, verificar que não há código malicioso
     if response.status == 302
       expect(Transaction.last.description).to eq("; DROP TABLE users; --")

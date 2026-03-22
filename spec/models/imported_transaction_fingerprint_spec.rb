@@ -34,7 +34,7 @@ RSpec.describe ImportedTransaction, '#fingerprint' do
       tx2 = create(:imported_transaction, base_attrs.merge(
         description: 'compra mercado sao paulo'
       ))
-      
+
       expect(tx1.fingerprint).to eq(tx2.fingerprint)
     end
   end

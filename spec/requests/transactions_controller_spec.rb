@@ -46,8 +46,8 @@ RSpec.describe TransactionsController, type: :request do
       end
 
       it 'prevents updating other users transactions' do
-        patch transaction_path(other_user_transaction), params: { 
-          transaction: { description: 'Hacked' } 
+        patch transaction_path(other_user_transaction), params: {
+          transaction: { description: 'Hacked' }
         }
         expect(response).to have_http_status(:not_found)
       end
@@ -198,8 +198,8 @@ RSpec.describe TransactionsController, type: :request do
 
     context 'SQL injection prevention' do
       let(:malicious_params) do
-        valid_params.deep_merge(transaction: { 
-          description: "'; DROP TABLE transactions; --" 
+        valid_params.deep_merge(transaction: {
+          description: "'; DROP TABLE transactions; --"
         })
       end
 
@@ -207,7 +207,7 @@ RSpec.describe TransactionsController, type: :request do
         expect {
           post transactions_path, params: malicious_params
         }.to change(Transaction, :count).by(1)
-        
+
         transaction = Transaction.last
         expect(transaction.description).to eq("'; DROP TABLE transactions; --")
         expect(Transaction.count).to be > 0 # Table should still exist
@@ -295,7 +295,7 @@ RSpec.describe TransactionsController, type: :request do
     end
 
     it 'maintains data isolation even with shared resource names' do
-      get transactions_path, params: { 
+      get transactions_path, params: {
         search: { category_name: category.name }
       }
       expect(response.body).not_to include(shared_category_name_transaction.description)
@@ -470,9 +470,9 @@ RSpec.describe TransactionsController, type: :request do
 
     describe 'PATCH #update transfer' do
       let!(:transfer_transaction) do
-        create(:transaction, :transfer, 
-               user: user, 
-               from_account: from_account, 
+        create(:transaction, :transfer,
+               user: user,
+               from_account: from_account,
                to_account: to_account,
                description: 'Original transfer',
                amount: 300.00)
@@ -534,9 +534,12 @@ RSpec.describe TransactionsController, type: :request do
     end
 
     describe 'Transfer display and filtering' do
-      let!(:income_transaction) { create(:transaction, :income, user: user, from_account: from_account, amount: 1000, event_date: Date.current) }
-      let!(:expense_transaction) { create(:transaction, :expense, user: user, from_account: from_account, amount: 200, event_date: Date.current) }
       let!(:transfer_transaction) { create(:transaction, :transfer, user: user, from_account: from_account, to_account: to_account, amount: 300, event_date: Date.current) }
+
+      before do
+        create(:transaction, :income, user: user, from_account: from_account, amount: 1000, event_date: Date.current)
+        create(:transaction, :expense, user: user, from_account: from_account, amount: 200, event_date: Date.current)
+      end
 
       it 'includes transfer transactions in index' do
         get transactions_path
