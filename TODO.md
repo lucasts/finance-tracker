@@ -36,8 +36,8 @@ Last active development: **January 2026**. Resumed: **March 2026**.
 ## 🔧 Technical Debt — Code Quality
 
 ### Money concern consolidation
-- [ ] Consolidate 5 separate money concerns (MoneyConcern, MoneyParsing, MoneyNormalization, MoneyValidation, MoneyFormatting) into a cohesive module
-- [ ] Remove any legacy/duplicate money parsing paths
+- [x] Consolidate 5 separate money concerns (MoneyConcern, MoneyParsing, MoneyNormalization, MoneyValidation, MoneyFormatting) into a cohesive module
+- [x] Remove any legacy/duplicate money parsing paths
 
 ### Projection horizon semantics
 Unificação aplicada (2025-08-09):

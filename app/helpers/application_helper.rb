@@ -15,7 +15,7 @@ module ApplicationHelper
   end
 
   def parse_money(value)
-    MoneyParsingConcern.parse_money_string(value)
+    MoneyConcern.parse_money_string(value)
   end
 
   def file_size_human(size_in_bytes)
