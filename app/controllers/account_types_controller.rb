@@ -1,5 +1,5 @@
 class AccountTypesController < ApplicationController
-  before_action :set_account_type, only: [:edit, :update, :destroy]
+  before_action :set_account_type, only: [ :edit, :update, :destroy ]
 
   def index
     @account_types = AccountType.order(:name)

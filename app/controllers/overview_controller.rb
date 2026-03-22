@@ -1,12 +1,12 @@
-require 'ostruct'
+require "ostruct"
 
 class OverviewController < ApplicationController
   include FinancialConstants
-  
+
   def index
-    @month = params[:month] || Date.today.strftime('%Y-%m')
+    @month = params[:month] || Date.today.strftime("%Y-%m")
     month_date = Date.strptime(@month, "%Y-%m")
-    
+
     # === MONTH SCOPES (single load to avoid N+1 / repeated aggregates) ===
     user_transactions = current_user_scope(Transaction)
     month_range = month_date.beginning_of_month..month_date.end_of_month
@@ -15,8 +15,8 @@ class OverviewController < ApplicationController
     @transactions = month_transactions
 
     # Compute income / expense totals in memory (already loaded)
-    income_transactions = month_transactions.select { |t| t.transaction_type == 'income' }
-    expense_transactions = month_transactions.select { |t| t.transaction_type == 'expense' }
+    income_transactions = month_transactions.select { |t| t.transaction_type == "income" }
+    expense_transactions = month_transactions.select { |t| t.transaction_type == "expense" }
     @income_total = FinancialConstants.safe_to_float(income_transactions.sum { |t| t.amount })
     @expense_total = FinancialConstants.safe_to_float(expense_transactions.sum { |t| t.amount })
     @balance = @income_total - @expense_total
@@ -38,25 +38,25 @@ class OverviewController < ApplicationController
 
     # === UPCOMING COMMITMENTS ===
     @upcoming = user_transactions.upcoming_payments(10)
-    
-    # === ANALYSIS AND PROJECTIONS ===
+
+  # === ANALYSIS AND PROJECTIONS ===
   @category_ranking = category_ranking(month_date, month_transactions: month_transactions)
     @projected_balance = projected_balance(@balance, @month)
     @balance_alert = balance_alert(@projected_balance)
-    
+
     # === AUTOMATIC PROJECTIONS BY CATEGORY ===
     @category_projections = generate_category_projections(month_date)
-    
-    # === CHART DATA ===
+
+  # === CHART DATA ===
   today = Date.today
   @month_end = Date.new(today.year, today.month, -1)
   @chart_options = chart_options(user_transactions: user_transactions)
-    
-    # === ADDITIONAL STATISTICS ===
+
+  # === ADDITIONAL STATISTICS ===
   @monthly_stats = monthly_statistics(month_date, month_transactions: month_transactions, user_transactions: user_transactions)
     @savings_rate = calculate_savings_rate(@income_total, @expense_total)
 
-    # === RECURRING COMMITMENTS PROJECTION ===
+  # === RECURRING COMMITMENTS PROJECTION ===
   @projected_transactions = recurring_projections(as_of: month_date)
 
   # === ACCOUNTS (batch balance computation to avoid per-account queries) ===
@@ -66,10 +66,10 @@ end
 
 def chart_options(user_transactions:)
   chart_data = generate_chart_data(user_transactions: user_transactions)
-  
+
   {
     chart: {
-      type: 'line',
+      type: "line",
       height: 350,
       stacked: false,
       toolbar: {
@@ -85,46 +85,46 @@ def chart_options(user_transactions:)
         }
       }
     },
-    colors: ['#10B981', '#EF4444', '#3B82F6'],
+    colors: [ "#10B981", "#EF4444", "#3B82F6" ],
     series: [
       {
-        name: 'Receitas',
-        type: 'column',
+        name: "Receitas",
+        type: "column",
         data: chart_data[:income_data]
       },
       {
-        name: 'Despesas',
-        type: 'column',
+        name: "Despesas",
+        type: "column",
         data: chart_data[:expense_data]
       },
       {
-        name: 'Saldo Acumulado',
-        type: 'line',
+        name: "Saldo Acumulado",
+        type: "line",
         data: chart_data[:balance_data]
       }
     ],
     stroke: {
-      width: [0, 0, 3],
-      curve: 'smooth'
+      width: [ 0, 0, 3 ],
+      curve: "smooth"
     },
     plotOptions: {
       bar: {
-        columnWidth: '60%',
+        columnWidth: "60%",
         dataLabels: {
-          position: 'top'
+          position: "top"
         }
       }
     },
     xaxis: {
       categories: chart_data[:categories],
       title: {
-        text: 'Mês'
+        text: "Mês"
       }
     },
     yaxis: [
       {
         title: {
-          text: 'Valores (R$)'
+          text: "Valores (R$)"
         }
       }
     ],
@@ -133,13 +133,13 @@ def chart_options(user_transactions:)
       intersect: false
     },
     legend: {
-      position: 'top',
-      horizontalAlign: 'left'
+      position: "top",
+      horizontalAlign: "left"
     },
     grid: {
-      borderColor: '#e7e7e7',
+      borderColor: "#e7e7e7",
       row: {
-        colors: ['#f3f3f3', 'transparent'],
+        colors: [ "#f3f3f3", "transparent" ],
         opacity: 0.5
       }
     },
@@ -152,7 +152,7 @@ def chart_options(user_transactions:)
           },
           plotOptions: {
             bar: {
-              columnWidth: '80%'
+              columnWidth: "80%"
             }
           }
         }
@@ -168,17 +168,17 @@ def load_credit_statements(month_date)
   # This shows either the current month's statement (if unpaid) or next month's statement (if current was paid)
   user_credit_accounts = current_user.accounts
     .joins(:account_type)
-    .where(account_types: { code: 'CREDIT_CARD' })
+    .where(account_types: { code: "CREDIT_CARD" })
     .pluck(:id)
-  
+
   return @credit_statements = [] if user_credit_accounts.empty?
-  
+
   # Get the most recent open statement for each account
   @credit_statements = CreditStatement
     .includes(:transactions, account: :account_type)
     .where(account_id: user_credit_accounts)
-    .where(status: 'open')
-    .order('accounts.name, credit_statements.due_on DESC')
+    .where(status: "open")
+    .order("accounts.name, credit_statements.due_on DESC")
     .group_by(&:account_id)
     .map { |_account_id, statements| statements.first }
     .compact
@@ -189,19 +189,19 @@ def monthly_statistics(month_date, month_transactions:, user_transactions:)
   prev_month = month_date - 1.month
   prev_range = prev_month.beginning_of_month..prev_month.end_of_month
   # Load previous month confirmed transactions once
-  prev_confirmed = user_transactions.where(event_date: prev_range, status: 'confirmed').to_a
-  prev_income = prev_confirmed.select { |t| t.transaction_type == 'income' }.sum(&:amount)
-  prev_expense = prev_confirmed.select { |t| t.transaction_type == 'expense' }.sum(&:amount)
+  prev_confirmed = user_transactions.where(event_date: prev_range, status: "confirmed").to_a
+  prev_income = prev_confirmed.select { |t| t.transaction_type == "income" }.sum(&:amount)
+  prev_expense = prev_confirmed.select { |t| t.transaction_type == "expense" }.sum(&:amount)
 
-  confirmed_month = month_transactions.select { |t| t.status == 'confirmed' }
+  confirmed_month = month_transactions.select { |t| t.status == "confirmed" }
   largest_expense = confirmed_month
-                    .select { |t| t.transaction_type == 'expense' }
+                    .select { |t| t.transaction_type == "expense" }
                     .max_by(&:amount)
   avg_amount = if confirmed_month.any?
                  confirmed_month.sum { |t| FinancialConstants.safe_to_float(t.amount) } / confirmed_month.size.to_f
-               else
+  else
                  0
-               end
+  end
 
   {
     income_growth: calculate_growth(@income_total, prev_income),
@@ -219,37 +219,37 @@ def load_accounts_with_balances
     @account_balances = {}
     return
   end
-  
+
   # Get all account IDs for balance calculation
   ids = all_accounts.map(&:id)
-  
+
   # Get recent transactions per account (last 90 days)
   recent_activity = Transaction
     .joins(:entries)
     .where(entries: { account_id: ids })
-    .where('transactions.event_date >= ?', 90.days.ago)
-    .group('entries.account_id')
+    .where("transactions.event_date >= ?", 90.days.ago)
+    .group("entries.account_id")
     .count
-  
+
   # Single grouped query for confirmed entries
   sums = Entry.joins(:transaction_record)
-              .where(account_id: ids, transactions: { status: 'confirmed' })
+              .where(account_id: ids, transactions: { status: "confirmed" })
               .group(:account_id, :entry_type)
               .sum(:amount)
-  
+
   # Calculate balances for all accounts
   @account_balances = {}
   all_accounts.each do |acc|
-    debit_total = FinancialConstants.safe_to_float(sums[[acc.id, 'debit']] || 0)
-    credit_total = FinancialConstants.safe_to_float(sums[[acc.id, 'credit']] || 0)
+    debit_total = FinancialConstants.safe_to_float(sums[[ acc.id, "debit" ]] || 0)
+    credit_total = FinancialConstants.safe_to_float(sums[[ acc.id, "credit" ]] || 0)
     balance = if acc.account_type&.asset_type?
                 debit_total - credit_total
-              else
+    else
                 credit_total - debit_total
-              end
+    end
     @account_balances[acc.id] = balance
   end
-  
+
   # Limit to 3 accounts with most recent activity
   @accounts = all_accounts
     .sort_by { |acc| -(recent_activity[acc.id] || 0) }
@@ -280,11 +280,11 @@ def generate_chart_data(user_transactions:)
 end
 
 def build_chart_data(user_transactions:)
-  ActiveSupport::Notifications.instrument('overview.build_chart_data') do
+  ActiveSupport::Notifications.instrument("overview.build_chart_data") do
   end_date = Date.today
   start_date = end_date - 11.months
   range = start_date.beginning_of_month..end_date.end_of_month
-  txs = user_transactions.where(status: 'confirmed', event_date: range).select(:id, :event_date, :amount, :transaction_type)
+  txs = user_transactions.where(status: "confirmed", event_date: range).select(:id, :event_date, :amount, :transaction_type)
   months = []
   income_data = []
   expense_data = []
@@ -292,11 +292,11 @@ def build_chart_data(user_transactions:)
   accumulated_balance = 0
   (0..11).each do |i|
     m_date = start_date + i.months
-    label = I18n.l(m_date, format: '%b/%y')
+    label = I18n.l(m_date, format: "%b/%y")
     month_range = m_date.beginning_of_month..m_date.end_of_month
     month_txs = txs.select { |t| t.event_date >= month_range.begin && t.event_date <= month_range.end }
-    income = month_txs.select { |t| t.transaction_type == 'income' }.sum { |t| FinancialConstants.safe_to_float(t.amount) }
-    expense = month_txs.select { |t| t.transaction_type == 'expense' }.sum { |t| FinancialConstants.safe_to_float(t.amount) }
+    income = month_txs.select { |t| t.transaction_type == "income" }.sum { |t| FinancialConstants.safe_to_float(t.amount) }
+    expense = month_txs.select { |t| t.transaction_type == "expense" }.sum { |t| FinancialConstants.safe_to_float(t.amount) }
     monthly_balance = income - expense
     accumulated_balance += monthly_balance
     months << label
@@ -312,21 +312,21 @@ end
 def category_ranking(month_date = nil, month_transactions: nil)
   month_date ||= Date.today
   if month_transactions
-    exp_confirmed = month_transactions.select { |t| t.transaction_type == 'expense' && t.status == 'confirmed' && t.category }
+    exp_confirmed = month_transactions.select { |t| t.transaction_type == "expense" && t.status == "confirmed" && t.category }
     grouped = Hash.new(0)
-    exp_confirmed.each { |t| grouped[[t.category.id, t.category.name]] += FinancialConstants.safe_to_float(t.amount) }
-    grouped.sort_by { |_k, v| -v }.first(5).map { |(id, name), amount| [OpenStruct.new(id: id, name: name), amount] }
+    exp_confirmed.each { |t| grouped[[ t.category.id, t.category.name ]] += FinancialConstants.safe_to_float(t.amount) }
+    grouped.sort_by { |_k, v| -v }.first(5).map { |(id, name), amount| [ OpenStruct.new(id: id, name: name), amount ] }
   else
     current_user_scope(Transaction)
       .expense
       .in_competence_month(month_date)
       .confirmed
       .joins(:category)
-      .group('categories.id, categories.name')
+      .group("categories.id, categories.name")
       .sum(:amount)
       .sort_by { |_key, amount| -amount }
       .first(5)
-      .map { |(id, name), amount| [OpenStruct.new(id: id, name: name), amount] }
+      .map { |(id, name), amount| [ OpenStruct.new(id: id, name: name), amount ] }
   end
 end
 
@@ -341,12 +341,12 @@ def projected_balance(current_balance, month)
 
   # Future transactions for current month (after today) - filtered by user
   future_transactions = current_user_scope(Transaction).where(
-    status: ["pending", "confirmed"],
+    status: [ "pending", "confirmed" ],
     event_date: (Date.current + 1.day)..end_of_month
   )
   future_grouped = future_transactions.group(:transaction_type).sum(:amount)
-  future_income = FinancialConstants.safe_to_float(future_grouped['income'] || 0)
-  future_expenses = FinancialConstants.safe_to_float(future_grouped['expense'] || 0)
+  future_income = FinancialConstants.safe_to_float(future_grouped["income"] || 0)
+  future_expenses = FinancialConstants.safe_to_float(future_grouped["expense"] || 0)
 
   # Include projected transactions (recurring commitments projection)
   projected_transactions = recurring_projections(as_of: month_date)
@@ -365,7 +365,7 @@ def projected_balance(current_balance, month)
   projected
 end
 
-# ...existing code...
+  # ...existing code...
 
   def balance_alert(projected_balance)
     if projected_balance < 0

@@ -2,17 +2,17 @@ class RecurringCommitment < ApplicationRecord
   include FinancialConstants
   include AmountNormalization
   include PaidAmountCalculations
-  
+
   # User association
   belongs_to :user
-  
+
   # Existing associations
   belongs_to :category
-  belongs_to :from_account, class_name: 'Account'
-  belongs_to :to_account, class_name: 'Account'
-  
+  belongs_to :from_account, class_name: "Account"
+  belongs_to :to_account, class_name: "Account"
+
   has_many :transactions, dependent: :restrict_with_error
-  
+
   enum :status, { active: 0, paused: 1, closed: 2 }
 
   validates :name, :category_id, :recurrence_frequency, :start_date, :status, presence: true
@@ -28,14 +28,14 @@ class RecurringCommitment < ApplicationRecord
   # Useful scopes
   scope :active_commitments, -> { where(status: :active) }
   scope :by_frequency, ->(freq) { where(recurrence_frequency: freq) }
-  scope :monthly_commitments, -> { where(recurrence_frequency: 'monthly') }
+  scope :monthly_commitments, -> { where(recurrence_frequency: "monthly") }
   scope :with_default_amount, -> { where.not(default_amount: nil) }
 
   # Commitments that are still in the active period
   scope :current_active, -> do
     where(status: :active)
-      .where('start_date <= ?', Date.current)
-      .where('end_date IS NULL OR end_date >= ?', Date.current)
+      .where("start_date <= ?", Date.current)
+      .where("end_date IS NULL OR end_date >= ?", Date.current)
   end
 
   # Next due date based on frequency
@@ -57,7 +57,7 @@ class RecurringCommitment < ApplicationRecord
   def average_amount
     return default_amount if transactions.empty? && default_amount.present?
 
-    confirmed_transactions = transactions.where(status: 'confirmed')
+    confirmed_transactions = transactions.where(status: "confirmed")
     return 0 if confirmed_transactions.empty?
 
     confirmed_transactions.average(:amount)&.round(2) || 0
@@ -65,7 +65,7 @@ class RecurringCommitment < ApplicationRecord
 
   # Total amount spent on this commitment
   def total_spent
-    confirmed_transactions = transactions.where(status: 'confirmed')
+    confirmed_transactions = transactions.where(status: "confirmed")
     confirmed_transactions.sum(:amount)&.round(2) || 0
   end
 
@@ -76,22 +76,22 @@ class RecurringCommitment < ApplicationRecord
 
   # Next expected transaction (if any)
   def next_expected_transaction
-    transactions.where('payment_date > ?', Date.current).order(:payment_date).first
+    transactions.where("payment_date > ?", Date.current).order(:payment_date).first
   end
 
   # Summary status of the commitment
   def summary_status
-    return 'expired' if end_date && end_date < Date.current
-    return 'inactive' unless active?
-    return 'not_started' if start_date > Date.current
+    return "expired" if end_date && end_date < Date.current
+    return "inactive" unless active?
+    return "not_started" if start_date > Date.current
 
     last_tx = last_transaction
     if last_tx
       next_due = next_occurrence_date(last_tx.payment_date)
-      return 'overdue' if next_due && next_due < Date.current
+      return "overdue" if next_due && next_due < Date.current
     end
 
-    'active'
+    "active"
   end
 
   # Get analysis for this commitment's spending pattern
@@ -106,7 +106,7 @@ class RecurringCommitment < ApplicationRecord
 
   # Check if this commitment generates variable expenses that should be analyzed
   def generates_variable_expenses?
-    FinancialConstants.variable_expense?(name) || 
+    FinancialConstants.variable_expense?(name) ||
       FinancialConstants.variable_expense?(category.name)
   end
 
@@ -125,23 +125,23 @@ class RecurringCommitment < ApplicationRecord
   def calculate_next_date_from(from_date)
     freq = (respond_to?(:frequency) ? frequency : recurrence_frequency).to_s
     case freq
-    when 'daily'
+    when "daily"
       from_date + 1.day
-    when 'weekly'
+    when "weekly"
   from_date.next_week(:monday)
-    when 'fortnightly'
+    when "fortnightly"
       from_date + 14.days
-    when 'monthly'
+    when "monthly"
       from_date + 1.month
-    when 'bimonthly'
+    when "bimonthly"
       from_date + 2.months
-    when 'quarterly'
+    when "quarterly"
       from_date + 3.months
-    when 'semiannual'
+    when "semiannual"
       from_date + 6.months
-    when 'annual', 'yearly'
+    when "annual", "yearly"
       from_date + 1.year
-    when 'biennial'
+    when "biennial"
       from_date + 2.years
     else
       # Fallback: monthly to avoid silent infinite loops
@@ -151,7 +151,7 @@ class RecurringCommitment < ApplicationRecord
 
   def accounts_must_be_different
     if from_account_id == to_account_id
-      errors.add(:to_account_id, 'não pode ser igual à conta de origem')
+      errors.add(:to_account_id, "não pode ser igual à conta de origem")
     end
   end
 end

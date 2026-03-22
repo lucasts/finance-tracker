@@ -57,7 +57,7 @@ class ImportDedupService
   private
 
   def preload_existing
-    @desc_bucket = Hash.new { |h,k| h[k] = [] }
+    @desc_bucket = Hash.new { |h, k| h[k] = [] }
     ImportedTransaction.joins(:import_session)
       .where(import_sessions: { account_id: @import_session.account_id })
       .select(:id, :amount, :event_date, :description)

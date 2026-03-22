@@ -23,7 +23,7 @@ class User < ApplicationRecord
   def total_balance
     # Sum balances from all asset accounts (user's actual accounts)
     accounts.joins(:account_type)
-            .where(account_types: { role: 'asset' })
+            .where(account_types: { role: "asset" })
             .sum(&:balance)
   end
 

@@ -17,27 +17,27 @@ class ImportedTransactionsController < ApplicationController
     rec_entry.user = current_user
     rec_entry.decided_at = Time.current
     rec_entry.decision_data = decision_data
-    rec_entry.transaction_id = params[:matched_transaction_id] if action == 'associate'
+    rec_entry.transaction_id = params[:matched_transaction_id] if action == "associate"
     rec_entry.audit_log = "#{action} por #{current_user.email} em #{Time.current}"
     rec_entry.save!
 
     created_transaction = nil
     # If creating new, create transaction in the system
-    if action == 'create_new'
+    if action == "create_new"
       # Determine accounts based on transaction type
       amount = FinancialConstants.safe_to_decimal(tx_params[:amount]).abs
       transaction_type = tx_params[:transaction_type]
       account_id = @imported_transaction.import_session.account_id
-      
+
       # Find or create appropriate external account
       external_account = Account.find_or_create_by(
         user: current_user,
-        name: transaction_type == 'income' ? 'Receitas Externas' : 'Gastos Externos',
-        account_type: AccountType.find_by(code: transaction_type == 'income' ? 'INCOME_SOURCE' : 'EXPENSE_DESTINATION')
+        name: transaction_type == "income" ? "Receitas Externas" : "Gastos Externos",
+        account_type: AccountType.find_by(code: transaction_type == "income" ? "INCOME_SOURCE" : "EXPENSE_DESTINATION")
       )
 
       # Set the correct account IDs
-      if transaction_type == 'income'
+      if transaction_type == "income"
         from_account_id = external_account.id
         to_account_id = account_id
       else
@@ -47,26 +47,26 @@ class ImportedTransactionsController < ApplicationController
 
       # Build entries based on transaction type
       entries_attributes = case transaction_type
-      when 'income'
+      when "income"
         [
-          { account_id: to_account_id, entry_type: 'debit', amount: amount },
-          { account_id: from_account_id, entry_type: 'credit', amount: amount }
+          { account_id: to_account_id, entry_type: "debit", amount: amount },
+          { account_id: from_account_id, entry_type: "credit", amount: amount }
         ]
-      when 'expense'
+      when "expense"
         [
-          { account_id: from_account_id, entry_type: 'debit', amount: amount },
-          { account_id: to_account_id, entry_type: 'credit', amount: amount }
+          { account_id: from_account_id, entry_type: "debit", amount: amount },
+          { account_id: to_account_id, entry_type: "credit", amount: amount }
         ]
-      when 'transfer'
+      when "transfer"
         [
-          { account_id: to_account_id, entry_type: 'debit', amount: amount },
-          { account_id: from_account_id, entry_type: 'credit', amount: amount }
+          { account_id: to_account_id, entry_type: "debit", amount: amount },
+          { account_id: from_account_id, entry_type: "credit", amount: amount }
         ]
       else
         # Default to expense pattern
         [
-          { account_id: from_account_id, entry_type: 'debit', amount: amount },
-          { account_id: to_account_id, entry_type: 'credit', amount: amount }
+          { account_id: from_account_id, entry_type: "debit", amount: amount },
+          { account_id: to_account_id, entry_type: "credit", amount: amount }
         ]
       end
 
@@ -92,7 +92,7 @@ class ImportedTransactionsController < ApplicationController
     if created_transaction
       redirect_to import_session_path(@import_session), notice: "Decisão de conciliação salva. <a href='#{transaction_path(created_transaction)}' target='_blank'>Ver transação criada</a>".html_safe
     else
-      redirect_to import_session_path(@import_session), notice: 'Decisão de conciliação salva.'
+      redirect_to import_session_path(@import_session), notice: "Decisão de conciliação salva."
     end
   end
 
@@ -103,7 +103,7 @@ class ImportedTransactionsController < ApplicationController
     @import_session = @imported_transaction.import_session
     # authorize! :manage, @import_session # Removido: só use se tiver CanCanCan/Pundit
     unless @import_session.user_id == current_user.id
-      render plain: 'Acesso negado', status: :forbidden
+      render plain: "Acesso negado", status: :forbidden
     end
   end
 end

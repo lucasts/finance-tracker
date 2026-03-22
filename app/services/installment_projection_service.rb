@@ -66,7 +66,7 @@ class InstallmentProjectionService
       installment_plan_id: plan.id,
       installment_number: number,
       projected: true,
-      projection_type: 'installment'
+      projection_type: "installment"
     }
   end
 end

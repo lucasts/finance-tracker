@@ -1,11 +1,11 @@
 class RecurringCommitmentsController < ApplicationController
-  before_action :set_recurring_commitment, only: [:show, :edit, :update, :destroy, :timeline, :toggle_active]
-  
+  before_action :set_recurring_commitment, only: [ :show, :edit, :update, :destroy, :timeline, :toggle_active ]
+
   def index
     @recurring_commitments = current_user_scope(RecurringCommitment).includes(:category, :transactions)
                                                .active
                                                .order(:name)
-    
+
     @commitment_summaries = @recurring_commitments.map do |commitment|
       {
         commitment: commitment,
@@ -17,63 +17,64 @@ class RecurringCommitmentsController < ApplicationController
       }
     end
   end
-  
+
   def show
     @recent_transactions = @recurring_commitment.transactions.order(event_date: :desc).limit(10)
     @next_transaction_date = calculate_next_transaction_date
     @total_generated = @recurring_commitment.transactions.sum(:amount)
   end
-  
+
   def new
     @recurring_commitment = current_user.recurring_commitments.build
     @accounts = current_user_scope(Account).all
     @categories = current_user_scope(Category).all
   end
-  
+
   def create
     @recurring_commitment = current_user.recurring_commitments.build(recurring_commitment_params)
-    
+
     if @recurring_commitment.save
-      redirect_to @recurring_commitment, notice: 'Compromisso recorrente criado com sucesso.'
+      redirect_to @recurring_commitment, notice: "Compromisso recorrente criado com sucesso."
     else
       @accounts = current_user_scope(Account).all
       @categories = current_user_scope(Category).all
       render :new, status: :unprocessable_entity
     end
   end
-  
+
   def edit
     @edit_strategies = %w[future_only all_transactions split_commitment]
     @accounts = current_user_scope(Account).all
     @categories = current_user_scope(Category).all
   end
-  
+
   def update
     # Check if this is an advanced edit request
-    if params[:recurring_commitment][:advanced_edit] == 'true'
+    if params[:recurring_commitment][:advanced_edit] == "true"
       handle_advanced_edit
     else
       handle_standard_edit
     end
   end
-  
+
   def toggle_active
-    @recurring_commitment.update!(active: !@recurring_commitment.active)
-    status = @recurring_commitment.active? ? 'ativado' : 'desativado'
-    redirect_to recurring_commitments_path, notice: "Compromisso #{status} com sucesso."
+    new_status = @recurring_commitment.active? ? :paused : :active
+    @recurring_commitment.update!(status: new_status)
+    status_label = @recurring_commitment.active? ? "ativado" : "desativado"
+    redirect_to recurring_commitments_path, notice: "Compromisso #{status_label} com sucesso."
   end
-  
+
   def timeline
     months_back = params[:months_back]&.to_i || 6
     months_forward = params[:months_forward]&.to_i || 12
-    
+
     start_date = Date.current - months_back.months
     end_date = Date.current + months_forward.months
-    
+
     transactions = @recurring_commitment.transactions
                                        .where(event_date: start_date..end_date)
                                        .order(:event_date)
-    
+
     timeline_data = transactions.map do |transaction|
       {
         id: transaction.id,
@@ -83,7 +84,7 @@ class RecurringCommitmentsController < ApplicationController
         type: transaction.transaction_type
       }
     end
-    
+
     render json: {
       commitment: {
         id: @recurring_commitment.id,
@@ -97,49 +98,49 @@ class RecurringCommitmentsController < ApplicationController
       }
     }
   end
-  
+
   def destroy
-    @recurring_commitment.update(status: 'inactive')
-    redirect_to recurring_commitments_path, notice: 'Recurring commitment deactivated.'
+    @recurring_commitment.update!(status: :closed)
+    redirect_to recurring_commitments_path, notice: "Recurring commitment deactivated."
   end
-  
+
   private
-  
+
   def handle_advanced_edit
-    edit_strategy = params[:recurring_commitment][:edit_strategy] || 'future_only'
+    edit_strategy = params[:recurring_commitment][:edit_strategy] || "future_only"
     effective_date = params[:recurring_commitment][:effective_date]&.to_date || Date.current
     new_attributes = recurring_commitment_params.except(:edit_strategy, :effective_date, :advanced_edit)
-    
+
     editor_service = RecurringCommitmentEditorUnifiedService.new(
       recurring_commitment: @recurring_commitment,
       edit_strategy: edit_strategy,
       effective_date: effective_date,
       new_attributes: new_attributes
     )
-    
+
     if editor_service.call
       success_message = case edit_strategy
-                       when 'future_only'
-                         'Compromisso atualizado. Mudanças aplicadas apenas às transações futuras.'
-                       when 'all_transactions'
-                         'Compromisso atualizado. Mudanças aplicadas a todas as transações.'
-                       when 'split_commitment'
-                         'Compromisso dividido com sucesso. Novo compromisso criado para as mudanças.'
-                       end
-      
+      when "future_only"
+                         "Compromisso atualizado. Mudanças aplicadas apenas às transações futuras."
+      when "all_transactions"
+                         "Compromisso atualizado. Mudanças aplicadas a todas as transações."
+      when "split_commitment"
+                         "Compromisso dividido com sucesso. Novo compromisso criado para as mudanças."
+      end
+
       redirect_to @recurring_commitment, notice: success_message
     else
       @edit_strategies = %w[future_only all_transactions split_commitment]
       @accounts = current_user_scope(Account).all
       @categories = current_user_scope(Category).all
-      flash.now[:alert] = editor_service.errors.full_messages.join(', ')
+      flash.now[:alert] = editor_service.errors.full_messages.join(", ")
       render :show, status: :unprocessable_entity
     end
   end
-  
+
   def handle_standard_edit
     if @recurring_commitment.update(recurring_commitment_params.except(:edit_strategy, :effective_date, :advanced_edit))
-      redirect_to @recurring_commitment, notice: 'Compromisso recorrente atualizado com sucesso.'
+      redirect_to @recurring_commitment, notice: "Compromisso recorrente atualizado com sucesso."
     else
       @edit_strategies = %w[future_only all_transactions split_commitment]
       @accounts = current_user_scope(Account).all
@@ -147,38 +148,51 @@ class RecurringCommitmentsController < ApplicationController
       render :edit, status: :unprocessable_entity
     end
   end
-  
+
   def set_recurring_commitment
     @recurring_commitment = current_user_scope(RecurringCommitment).find(params[:id])
   end
-  
+
   def recurring_commitment_params
     permitted = params.require(:recurring_commitment).permit(
       :name, :amount, :frequency, :start_date, :end_date, :transaction_type,
-      :account_id, :category_id, :notes, :active, :edit_strategy, :effective_date, :advanced_edit,
-      :from_account_id, :to_account_id
+      :notes, :active, :edit_strategy, :effective_date, :advanced_edit
     )
-    
+
+    [ :from_account_id, :to_account_id ].each do |field|
+      raw_id = params.dig(:recurring_commitment, field)
+      next if raw_id.blank?
+      account = current_user.accounts.find_by(id: raw_id)
+      raise ActionController::BadRequest, "Invalid account for #{field}" unless account
+      permitted[field] = account.id
+    end
+
+    if (raw_cat_id = params.dig(:recurring_commitment, :category_id)).present?
+      cat = current_user.categories.find_by(id: raw_cat_id)
+      raise ActionController::BadRequest, "Invalid category" unless cat
+      permitted[:category_id] = cat.id
+    end
+
     permitted[:amount] = RecurringCommitment.normalize_amount_param(permitted[:amount]) if permitted[:amount].present?
     permitted
   end
-  
+
   private
-  
+
   def calculate_next_transaction_date
     return nil unless @recurring_commitment.active?
-    
+
     last_transaction = @recurring_commitment.transactions.order(:event_date).last
     return @recurring_commitment.start_date unless last_transaction
-    
+
     case @recurring_commitment.recurrence_frequency
-    when 'daily'
+    when "daily"
       last_transaction.event_date + 1.day
-    when 'weekly'
+    when "weekly"
       last_transaction.event_date + 1.week
-    when 'monthly'
+    when "monthly"
       last_transaction.event_date + 1.month
-    when 'yearly'
+    when "yearly"
       last_transaction.event_date + 1.year
     end
   end

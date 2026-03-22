@@ -17,7 +17,7 @@ module MoneyValidationConcern
     # Extract currency symbol from string
     def extract_currency_symbol(value)
       return nil unless value.is_a?(String)
-      
+
       currency_match = value.match(/([R$\$€£¥]+)/)
       currency_match ? currency_match[1] : nil
     end

@@ -21,8 +21,7 @@
  <%= link_to 'Editar', edit_installment_plan_path(@installment_plan) %>
  <%= link_to @installment_plan.active? ? 'Desativar' : 'Ativar', 
  toggle_active_installment_plan_path(@installment_plan), 
- method: :patch,
-  %>
+ method: :patch %>
  <%= link_to 'Gerar Parcelas', generate_missing_installments_installment_plan_path(@installment_plan), 
  method: :post %>
  <%= link_to 'Voltar', installment_plans_path %>

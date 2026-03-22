@@ -33,11 +33,11 @@ class MonthlyBalanceProjectionService
   end
 
   def competence_projection
-    income_base = base_scope.income.where('event_date <= ?', @as_of).sum(:amount)
-    expense_base = base_scope.expense.where('event_date <= ?', @as_of).sum(:amount)
+    income_base = base_scope.income.where("event_date <= ?", @as_of).sum(:amount)
+    expense_base = base_scope.expense.where("event_date <= ?", @as_of).sum(:amount)
 
-    future_income_tx = base_scope.income.where('event_date > ?', @as_of)
-    future_expense_tx = base_scope.expense.where('event_date > ?', @as_of)
+    future_income_tx = base_scope.income.where("event_date > ?", @as_of)
+    future_expense_tx = base_scope.expense.where("event_date > ?", @as_of)
 
     projected_recurring = projected_recurring_expenses
     projected_installments = projected_installment_expenses
@@ -59,11 +59,11 @@ class MonthlyBalanceProjectionService
   end
 
   def cash_projection
-    income_base = payment_scope.income.where('payment_date <= ?', @as_of).sum(:amount)
-    expense_base = payment_scope.expense.where('payment_date <= ?', @as_of).sum(:amount)
+    income_base = payment_scope.income.where("payment_date <= ?", @as_of).sum(:amount)
+    expense_base = payment_scope.expense.where("payment_date <= ?", @as_of).sum(:amount)
 
-    future_income_tx = payment_scope.income.where('payment_date > ?', @as_of)
-    future_expense_tx = payment_scope.expense.where('payment_date > ?', @as_of)
+    future_income_tx = payment_scope.income.where("payment_date > ?", @as_of)
+    future_expense_tx = payment_scope.expense.where("payment_date > ?", @as_of)
 
     projected_recurring = projected_recurring_expenses
     projected_installments = projected_installment_expenses

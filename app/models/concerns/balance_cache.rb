@@ -15,7 +15,7 @@ module BalanceCache
 
   def update_account_balance!
     return unless account_id.present?
-    
+
     # Update the balance for the affected account
     account.update_balance_cache!
   end

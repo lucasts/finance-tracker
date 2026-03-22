@@ -5,7 +5,7 @@ class GenerateRecurringTransactionsJob < ApplicationJob
 
   def perform
     Rails.logger.info "Starting GenerateRecurringTransactionsJob for date: #{Date.current}"
-    
+
     generated_count = 0
     error_count = 0
 
@@ -15,7 +15,7 @@ class GenerateRecurringTransactionsJob < ApplicationJob
       # Determine transaction type from commitment or category
       transaction_type = determine_transaction_type(commitment)
       amount = commitment.default_amount || 0
-      
+
       if amount <= 0
         Rails.logger.warn "Invalid amount for commitment #{commitment.name}: #{amount}"
         next
@@ -23,26 +23,26 @@ class GenerateRecurringTransactionsJob < ApplicationJob
 
       # Build entries based on transaction type
       entries_attributes = case transaction_type
-      when 'income'
+      when "income"
         [
-          { account_id: commitment.to_account_id, entry_type: 'debit', amount: amount },
-          { account_id: commitment.from_account_id, entry_type: 'credit', amount: amount }
+          { account_id: commitment.to_account_id, entry_type: "debit", amount: amount },
+          { account_id: commitment.from_account_id, entry_type: "credit", amount: amount }
         ]
-      when 'expense'
+      when "expense"
         [
-          { account_id: commitment.from_account_id, entry_type: 'debit', amount: amount },
-          { account_id: commitment.to_account_id, entry_type: 'credit', amount: amount }
+          { account_id: commitment.from_account_id, entry_type: "debit", amount: amount },
+          { account_id: commitment.to_account_id, entry_type: "credit", amount: amount }
         ]
-      when 'transfer'
+      when "transfer"
         [
-          { account_id: commitment.to_account_id, entry_type: 'debit', amount: amount },
-          { account_id: commitment.from_account_id, entry_type: 'credit', amount: amount }
+          { account_id: commitment.to_account_id, entry_type: "debit", amount: amount },
+          { account_id: commitment.from_account_id, entry_type: "credit", amount: amount }
         ]
       else
         # Default to expense pattern
         [
-          { account_id: commitment.from_account_id, entry_type: 'debit', amount: amount },
-          { account_id: commitment.to_account_id, entry_type: 'credit', amount: amount }
+          { account_id: commitment.from_account_id, entry_type: "debit", amount: amount },
+          { account_id: commitment.to_account_id, entry_type: "credit", amount: amount }
         ]
       end
 
@@ -52,7 +52,7 @@ class GenerateRecurringTransactionsJob < ApplicationJob
         event_date: Date.current,
         payment_date: Date.current,
         transaction_type: transaction_type,
-        recurrence_type: 'recurring',
+        recurrence_type: "recurring",
         entries_attributes: entries_attributes,
         user: commitment.user,
         category: commitment.category,
@@ -68,7 +68,7 @@ class GenerateRecurringTransactionsJob < ApplicationJob
     end
 
     Rails.logger.info "GenerateRecurringTransactionsJob finished. Generated: #{generated_count}, Errors: #{error_count}"
-    
+
     {
       generated_count: generated_count,
       error_count: error_count,
@@ -81,9 +81,9 @@ class GenerateRecurringTransactionsJob < ApplicationJob
   def determine_transaction_type(commitment)
     # Use category type to determine transaction type
     if commitment.category&.income?
-      'income'
+      "income"
     else
-      'expense' # default to expense for recurring commitments
+      "expense" # default to expense for recurring commitments
     end
   end
 

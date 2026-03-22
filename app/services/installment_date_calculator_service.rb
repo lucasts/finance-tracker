@@ -8,14 +8,14 @@ class InstallmentDateCalculatorService
   FREQUENCIES = %w[daily weekly monthly quarterly yearly].freeze
 
   attribute :start_date, :date
-  attribute :recurrence_frequency, :string, default: 'monthly'
+  attribute :recurrence_frequency, :string, default: "monthly"
   attribute :installment_number, :integer
 
   validates :start_date, presence: true
   validates :recurrence_frequency, inclusion: { in: FREQUENCIES }
   validates :installment_number, presence: true, numericality: { greater_than: 0 }
 
-  def self.calculate_date(start_date, installment_number, frequency = 'monthly')
+  def self.calculate_date(start_date, installment_number, frequency = "monthly")
     calculator = new(
       start_date: start_date,
       installment_number: installment_number,
@@ -24,7 +24,7 @@ class InstallmentDateCalculatorService
     calculator.calculate_date
   end
 
-  def self.calculate_all_dates(start_date, total_installments, frequency = 'monthly')
+  def self.calculate_all_dates(start_date, total_installments, frequency = "monthly")
     (1..total_installments).map do |number|
       calculate_date(start_date, number, frequency)
     end
@@ -45,15 +45,15 @@ class InstallmentDateCalculatorService
     periods_to_add = installment_number - 1
 
     case recurrence_frequency
-    when 'daily'
+    when "daily"
       start_date + periods_to_add.days
-    when 'weekly'
+    when "weekly"
       start_date + periods_to_add.weeks
-    when 'monthly'
+    when "monthly"
       start_date + periods_to_add.months
-    when 'quarterly'
+    when "quarterly"
       start_date + (periods_to_add * 3).months
-    when 'yearly'
+    when "yearly"
       start_date + periods_to_add.years
     else
       # Default to monthly for unknown frequencies
@@ -75,14 +75,14 @@ class InstallmentDateCalculatorService
 
   def next_installment_date
     return nil unless valid?
-    
+
     self.installment_number += 1
     calculate_date
   end
 
   def previous_installment_date
     return nil unless valid? || installment_number <= 1
-    
+
     self.installment_number -= 1
     calculate_date
   end
@@ -90,11 +90,11 @@ class InstallmentDateCalculatorService
   # Calculate the period between installments
   def period_between_installments
     case recurrence_frequency
-    when 'daily' then 1.day
-    when 'weekly' then 1.week
-    when 'monthly' then 1.month
-    when 'quarterly' then 3.months
-    when 'yearly' then 1.year
+    when "daily" then 1.day
+    when "weekly" then 1.week
+    when "monthly" then 1.month
+    when "quarterly" then 3.months
+    when "yearly" then 1.year
     else 1.month
     end
   end
@@ -104,19 +104,19 @@ class InstallmentDateCalculatorService
     return false unless date >= start_date
 
     case frequency
-    when 'daily'
+    when "daily"
       true # Any date after start_date is valid for daily frequency
-    when 'weekly'
+    when "weekly"
       date.wday == start_date.wday
-    when 'monthly'
+    when "monthly"
       # Check if it's the same day of month (with adjustment for month-end)
       target_day = start_date.day
       date.day == target_day || (date == date.end_of_month && target_day > date.end_of_month.day)
-    when 'quarterly'
+    when "quarterly"
       # Same logic as monthly but check if months align with quarterly pattern
       months_diff = (date.year - start_date.year) * 12 + date.month - start_date.month
       months_diff % 3 == 0 && matches_day_of_month?(date, start_date)
-    when 'yearly'
+    when "yearly"
       date.month == start_date.month && matches_day_of_month?(date, start_date)
     else
       false
@@ -128,17 +128,17 @@ class InstallmentDateCalculatorService
     return nil if target_date < start_date
 
     case frequency
-    when 'daily'
+    when "daily"
       FinancialConstants.safe_to_integer(target_date - start_date) + 1
-    when 'weekly'
+    when "weekly"
       FinancialConstants.safe_to_integer((target_date - start_date) / 7) + 1
-    when 'monthly'
+    when "monthly"
       months_diff = (target_date.year - start_date.year) * 12 + target_date.month - start_date.month
       months_diff + 1
-    when 'quarterly'
+    when "quarterly"
       months_diff = (target_date.year - start_date.year) * 12 + target_date.month - start_date.month
       (months_diff / 3) + 1
-    when 'yearly'
+    when "yearly"
       target_date.year - start_date.year + 1
     else
       1

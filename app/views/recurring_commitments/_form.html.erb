@@ -228,8 +228,7 @@
 
  <!-- Action Buttons -->
  <div>
- <%= link_to recurring_commitment.persisted? ? recurring_commitment_path(recurring_commitment) : recurring_commitments_path, 
-  do %>
+ <%= link_to recurring_commitment.persisted? ? recurring_commitment_path(recurring_commitment) : recurring_commitments_path do %>
  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
  </svg>
@@ -237,8 +236,7 @@
  <% end %>
  
  <div>
- <%= form.submit recurring_commitment.persisted? ? 'Atualizar Compromisso' : 'Criar Compromisso', 
-  %>
+ <%= form.submit recurring_commitment.persisted? ? 'Atualizar Compromisso' : 'Criar Compromisso' %>
  </div>
  </div>
 <% end %>

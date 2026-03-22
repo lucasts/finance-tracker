@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Base service class to standardize service patterns across the application
-# 
+#
 # Usage patterns:
-# 
+#
 # 1. Simple services (recommended for most cases):
 #    class ExampleService < BaseService
 #      def self.call(**params)

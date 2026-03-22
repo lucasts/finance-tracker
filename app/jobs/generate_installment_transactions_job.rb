@@ -5,7 +5,7 @@ class GenerateInstallmentTransactionsJob < ApplicationJob
 
   def perform
     Rails.logger.info "Starting GenerateInstallmentTransactionsJob for date: #{Date.current}"
-    
+
     generated_count = 0
     error_count = 0
 
@@ -13,9 +13,9 @@ class GenerateInstallmentTransactionsJob < ApplicationJob
       next unless should_generate_installment?(plan, Date.current)
 
       # Determine transaction type - installments are usually expenses
-      transaction_type = 'expense' # InstallmentPlans are typically for expenses like purchases
+      transaction_type = "expense" # InstallmentPlans are typically for expenses like purchases
       amount = plan.installment_amount || 0
-      
+
       if amount <= 0
         Rails.logger.warn "Invalid amount for installment plan #{plan.name}: #{amount}"
         next
@@ -23,26 +23,26 @@ class GenerateInstallmentTransactionsJob < ApplicationJob
 
       # Build entries based on transaction type
       entries_attributes = case transaction_type
-      when 'income'
+      when "income"
         [
-          { account_id: plan.to_account_id, entry_type: 'debit', amount: amount },
-          { account_id: plan.from_account_id, entry_type: 'credit', amount: amount }
+          { account_id: plan.to_account_id, entry_type: "debit", amount: amount },
+          { account_id: plan.from_account_id, entry_type: "credit", amount: amount }
         ]
-      when 'expense'
+      when "expense"
         [
-          { account_id: plan.from_account_id, entry_type: 'debit', amount: amount },
-          { account_id: plan.to_account_id, entry_type: 'credit', amount: amount }
+          { account_id: plan.from_account_id, entry_type: "debit", amount: amount },
+          { account_id: plan.to_account_id, entry_type: "credit", amount: amount }
         ]
-      when 'transfer'
+      when "transfer"
         [
-          { account_id: plan.to_account_id, entry_type: 'debit', amount: amount },
-          { account_id: plan.from_account_id, entry_type: 'credit', amount: amount }
+          { account_id: plan.to_account_id, entry_type: "debit", amount: amount },
+          { account_id: plan.from_account_id, entry_type: "credit", amount: amount }
         ]
       else
         # Default to expense pattern
         [
-          { account_id: plan.from_account_id, entry_type: 'debit', amount: amount },
-          { account_id: plan.to_account_id, entry_type: 'credit', amount: amount }
+          { account_id: plan.from_account_id, entry_type: "debit", amount: amount },
+          { account_id: plan.to_account_id, entry_type: "credit", amount: amount }
         ]
       end
 
@@ -52,7 +52,7 @@ class GenerateInstallmentTransactionsJob < ApplicationJob
         event_date: Date.current,
         payment_date: plan.next_installment_date(plan.transactions.count + 1) || Date.current,
         transaction_type: transaction_type,
-        recurrence_type: 'installment',
+        recurrence_type: "installment",
         entries_attributes: entries_attributes,
         user: plan.user,
         category: plan.category,
@@ -71,7 +71,7 @@ class GenerateInstallmentTransactionsJob < ApplicationJob
     end
 
     Rails.logger.info "GenerateInstallmentTransactionsJob finished. Generated: #{generated_count}, Errors: #{error_count}"
-    
+
     {
       generated_count: generated_count,
       error_count: error_count,

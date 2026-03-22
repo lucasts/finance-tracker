@@ -27,15 +27,15 @@ class RecurringProjectionService
   # Determine next occurrence increment based on frequency
   def advance_date(date, frequency)
     case frequency
-    when 'daily' then date + 1.day
-    when 'weekly' then date + 1.week
-    when 'fortnightly' then date + 14.days
-    when 'monthly' then date + 1.month
-    when 'bimonthly' then date + 2.months
-    when 'quarterly' then date + 3.months
-    when 'semiannual' then date + 6.months
-    when 'annual', 'yearly' then date + 1.year
-    when 'biennial' then date + 2.years
+    when "daily" then date + 1.day
+    when "weekly" then date + 1.week
+    when "fortnightly" then date + 14.days
+    when "monthly" then date + 1.month
+    when "bimonthly" then date + 2.months
+    when "quarterly" then date + 3.months
+    when "semiannual" then date + 6.months
+    when "annual", "yearly" then date + 1.year
+    when "biennial" then date + 2.years
     else date + 1.month
     end
   end
@@ -61,7 +61,7 @@ class RecurringProjectionService
       break if commitment.default_amount.nil? && commitment.transactions.none? # nothing to project without amount baseline
       projections << build_projection_hash(commitment, current)
       current = advance_date(current, freq)
-    end
+  end
 
     projections
   end

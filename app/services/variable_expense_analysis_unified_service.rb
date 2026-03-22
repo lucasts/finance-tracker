@@ -10,7 +10,7 @@ class VariableExpenseAnalysisUnifiedService
   attribute :account_id, :integer
   attribute :start_date, :date, default: -> { 6.months.ago }
   attribute :end_date, :date, default: -> { Date.current }
-  attribute :analysis_type, :string, default: 'monthly'
+  attribute :analysis_type, :string, default: "monthly"
   attribute :timeframe_months, :integer, default: 12
 
   validates :user, presence: true
@@ -34,7 +34,7 @@ class VariableExpenseAnalysisUnifiedService
       recommendations: generate_recommendations
     }
   rescue StandardError => e
-    { success: false, errors: ["Analysis failed: #{e.message}"] }
+    { success: false, errors: [ "Analysis failed: #{e.message}" ] }
   end
 
   # Class method for simple category analysis (public API convenience method)
@@ -57,19 +57,19 @@ class VariableExpenseAnalysisUnifiedService
       start_date: 12.months.ago,
       end_date: Date.current
     )
-    
+
     result = service.call
     return 0 unless result[:success]
 
     # Use trend data to project future expense
     trend = result[:trends][:overall_trend]
     avg_monthly = result[:statistics][:monthly_average]
-    
+
     case trend
-    when 'increasing'
+    when "increasing"
       growth_factor = result[:trends][:growth_rate] || 0.05
       avg_monthly * (1 + growth_factor) * months_ahead
-    when 'decreasing'
+    when "decreasing"
       decline_factor = result[:trends][:decline_rate] || 0.05
       avg_monthly * (1 - decline_factor) * months_ahead
     else
@@ -85,7 +85,7 @@ class VariableExpenseAnalysisUnifiedService
       scope = scope.where(category_id: category_id) if category_id.present?
       if account_id.present?
         # Filter transactions that have entries from the specified account
-        scope = scope.joins(:entries).where(entries: { account_id: account_id, entry_type: 'credit' }).distinct
+        scope = scope.joins(:entries).where(entries: { account_id: account_id, entry_type: "credit" }).distinct
       end
       scope
     end
@@ -93,7 +93,7 @@ class VariableExpenseAnalysisUnifiedService
 
   def generate_summary
     transactions = base_transactions
-    
+
     {
       total_transactions: transactions.count,
       total_amount: transactions.sum(:amount),
@@ -103,8 +103,8 @@ class VariableExpenseAnalysisUnifiedService
         days: FinancialConstants.safe_to_integer((end_date - start_date)) + 1
       },
       filters: {
-        category: category_id ? Category.find(category_id).name : 'All categories',
-        account: account_id ? Account.find(account_id).name : 'All accounts'
+        category: category_id ? Category.find(category_id).name : "All categories",
+        account: account_id ? Account.find(account_id).name : "All accounts"
       }
     }
   end
@@ -112,11 +112,11 @@ class VariableExpenseAnalysisUnifiedService
   def calculate_statistics
     transactions = base_transactions
     amounts = transactions.pluck(:amount)
-    
+
     return {} if amounts.empty?
 
-    monthly_amounts = group_by_period(transactions, 'monthly').values
-    
+    monthly_amounts = group_by_period(transactions, "monthly").values
+
     {
       total_amount: amounts.sum,
       transaction_count: amounts.size,
@@ -130,7 +130,7 @@ class VariableExpenseAnalysisUnifiedService
   end
 
   def monthly_breakdown
-    group_by_period(base_transactions, 'monthly')
+    group_by_period(base_transactions, "monthly")
   end
 
   def calculate_trends
@@ -139,7 +139,7 @@ class VariableExpenseAnalysisUnifiedService
 
     amounts = monthly_data.values
     trend_direction = calculate_trend_direction(amounts)
-    
+
     {
       overall_trend: trend_direction,
       growth_rate: calculate_growth_rate(amounts),
@@ -152,11 +152,11 @@ class VariableExpenseAnalysisUnifiedService
   def calculate_projections
     trends = calculate_trends
     stats = calculate_statistics
-    
+
     return {} if trends.empty? || stats.empty?
 
     base_monthly = stats[:monthly_average]
-    
+
     {
       next_month: project_next_period(base_monthly, trends, 1),
       next_quarter: project_next_period(base_monthly, trends, 3),
@@ -171,7 +171,7 @@ class VariableExpenseAnalysisUnifiedService
 
     mean = FinancialConstants.safe_to_float(amounts.sum) / amounts.size
     variance = amounts.map { |amount| (amount - mean) ** 2 }.sum / amounts.size
-    
+
     {
       variance: variance,
       standard_deviation: Math.sqrt(variance),
@@ -184,36 +184,36 @@ class VariableExpenseAnalysisUnifiedService
     stats = calculate_statistics
     trends = calculate_trends
     variability = calculate_variability_metrics
-    
+
     recommendations = []
-    
+
     # High variability recommendation
-    if variability[:variability_level] == 'high'
+    if variability[:variability_level] == "high"
       recommendations << {
-        type: 'budget_control',
-        priority: 'high',
-        message: 'Esta categoria tem alta variabilidade. Considere estabelecer um orçamento mais rígido.',
-        action: 'Set monthly budget limit'
+        type: "budget_control",
+        priority: "high",
+        message: "Esta categoria tem alta variabilidade. Considere estabelecer um orçamento mais rígido.",
+        action: "Set monthly budget limit"
       }
     end
 
     # Increasing trend recommendation
-    if trends[:overall_trend] == 'increasing'
+    if trends[:overall_trend] == "increasing"
       recommendations << {
-        type: 'trend_alert',
-        priority: 'medium',
-        message: 'Gastos nesta categoria estão aumentando. Monitore de perto.',
-        action: 'Review spending patterns'
+        type: "trend_alert",
+        priority: "medium",
+        message: "Gastos nesta categoria estão aumentando. Monitore de perto.",
+        action: "Review spending patterns"
       }
     end
 
     # Low activity recommendation
     if stats[:transaction_count] < 5
       recommendations << {
-        type: 'data_quality',
-        priority: 'low',
-        message: 'Poucos dados para análise confiável. Continue coletando dados.',
-        action: 'Continue tracking'
+        type: "data_quality",
+        priority: "low",
+        message: "Poucos dados para análise confiável. Continue coletando dados.",
+        action: "Continue tracking"
       }
     end
 
@@ -224,21 +224,21 @@ class VariableExpenseAnalysisUnifiedService
 
   def end_date_after_start_date
     return unless start_date && end_date
-    errors.add(:end_date, 'must be after start date') if end_date <= start_date
+    errors.add(:end_date, "must be after start date") if end_date <= start_date
   end
 
   def group_by_period(transactions, period_type)
     case period_type
-    when 'daily'
+    when "daily"
       transactions.group_by { |t| t.event_date }
                   .transform_values { |txs| txs.sum(&:amount) }
-    when 'weekly'
+    when "weekly"
       transactions.group_by { |t| t.event_date.beginning_of_week }
                   .transform_values { |txs| txs.sum(&:amount) }
-    when 'monthly'
+    when "monthly"
       transactions.group_by { |t| t.event_date.beginning_of_month }
                   .transform_values { |txs| txs.sum(&:amount) }
-    when 'yearly'
+    when "yearly"
       transactions.group_by { |t| t.event_date.beginning_of_year }
                   .transform_values { |txs| txs.sum(&:amount) }
     else
@@ -254,40 +254,40 @@ class VariableExpenseAnalysisUnifiedService
 
   def calculate_standard_deviation(amounts)
     return 0 if amounts.size <= 1
-    
+
     mean = FinancialConstants.safe_to_float(amounts.sum) / amounts.size
     variance = amounts.map { |amount| (amount - mean) ** 2 }.sum / (amounts.size - 1)
     Math.sqrt(variance)
   end
 
   def calculate_trend_direction(amounts)
-    return 'stable' if amounts.size < 3
-    
+    return "stable" if amounts.size < 3
+
     first_half = amounts[0..amounts.size/2]
     second_half = amounts[amounts.size/2..-1]
-    
+
     first_avg = first_half.sum / first_half.size
     second_avg = second_half.sum / second_half.size
-    
+
     change_ratio = (second_avg - first_avg) / first_avg.abs if first_avg != 0
-    
+
     if change_ratio.nil? || change_ratio.abs < 0.1
-      'stable'
+      "stable"
     elsif change_ratio > 0
-      'increasing'
+      "increasing"
     else
-      'decreasing'
+      "decreasing"
     end
   end
 
   def calculate_growth_rate(amounts)
     return 0 if amounts.size < 2
-    
+
     first = amounts.first
     last = amounts.last
-    
+
     return 0 if first.zero?
-    
+
     (last - first) / first.abs
   end
 
@@ -298,7 +298,7 @@ class VariableExpenseAnalysisUnifiedService
 
   def calculate_volatility(amounts)
     return 0 if amounts.size < 2
-    
+
     mean = FinancialConstants.safe_to_float(amounts.sum) / amounts.size
     variance = amounts.map { |amount| (amount - mean) ** 2 }.sum / amounts.size
     Math.sqrt(variance) / mean
@@ -308,14 +308,14 @@ class VariableExpenseAnalysisUnifiedService
     # Simple seasonal pattern detection
     # More sophisticated analysis could be added here
     return {} if monthly_data.size < 12
-    
+
     months = monthly_data.keys.map(&:month)
     amounts = monthly_data.values
-    
+
     monthly_averages = amounts.each_with_index
                              .group_by { |_, i| months[i] }
                              .transform_values { |group| group.map(&:first).sum / group.size }
-    
+
     {
       peak_month: monthly_averages.max_by(&:last)&.first,
       low_month: monthly_averages.min_by(&:last)&.first,
@@ -325,9 +325,9 @@ class VariableExpenseAnalysisUnifiedService
 
   def project_next_period(base_amount, trends, months)
     case trends[:overall_trend]
-    when 'increasing'
+    when "increasing"
       base_amount * (1 + (trends[:growth_rate] || 0.05)) * months
-    when 'decreasing'
+    when "decreasing"
       base_amount * (1 - (trends[:decline_rate] || 0.05)) * months
     else
       base_amount * months
@@ -337,30 +337,30 @@ class VariableExpenseAnalysisUnifiedService
   def calculate_confidence_level(stats, trends)
     # Simple confidence calculation based on data quality
     confidence = 0.5 # base confidence
-    
+
     # More transactions = higher confidence
-    confidence += [stats[:transaction_count] / 50.0, 0.3].min
-    
+    confidence += [ stats[:transaction_count] / 50.0, 0.3 ].min
+
     # Lower volatility = higher confidence
     volatility = trends[:volatility] || 1.0
-    confidence += [(1 - volatility), 0.2].min
-    
+    confidence += [ (1 - volatility), 0.2 ].min
+
     # Cap at 100%
-    [confidence, 1.0].min
+    [ confidence, 1.0 ].min
   end
 
   def classify_variability(std_dev, mean)
-    return 'low' if mean.zero?
-    
+    return "low" if mean.zero?
+
     cv = std_dev / mean
-    
+
     case cv
     when 0..0.3
-      'low'
+      "low"
     when 0.3..0.7
-      'medium'
+      "medium"
     else
-      'high'
+      "high"
     end
   end
 end

@@ -1,5 +1,5 @@
 class AccountsController < ApplicationController
-  before_action :set_account, only: [:edit, :update, :destroy]
+  before_action :set_account, only: [ :edit, :update, :destroy ]
 
   def index
     @accounts = current_user_scope(Account).includes(:account_type).order(:name)

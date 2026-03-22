@@ -4,12 +4,12 @@
 # Centraliza chave e invalidação do cache de dados de gráfico (últimos 12 meses).
 # Evita duplicação de lógica de key e facilita evolução de versão.
 module ChartDataCache
-  VERSION = 'v1'
+  VERSION = "v1"
 
   module_function
 
   def key_for(user_id, today: Date.today)
-    ["chart-data-#{VERSION}", user_id, today.strftime('%Y-%m')]
+    [ "chart-data-#{VERSION}", user_id, today.strftime("%Y-%m") ]
   end
 
   def fetch(user_id, expires_in: 6.hours)

@@ -50,14 +50,6 @@
  <h3>🏦 Conta e Categoria</h3>
  
  <div>
- <%= form.label :account_id, "Conta", class: "label label-text font-semibold" %>
- <%= form.select :account_id, 
- options_from_collection_for_select(@accounts, :id, :name, installment_plan.account_id),
- { prompt: "Selecione uma conta" },
- { class: "select select-bordered w-full", required: true } %>
- </div>
-
- <div>
  <%= form.label :category_id, "Categoria", class: "label label-text font-semibold" %>
  <%= form.select :category_id, 
  options_from_collection_for_select(@categories, :id, :name, installment_plan.category_id),
@@ -65,16 +57,6 @@
  { class: "select select-bordered w-full", required: true } %>
  </div>
 
- <div>
- <%= form.label :transaction_type, "Tipo de Transação", class: "label label-text font-semibold" %>
- <%= form.select :transaction_type, 
- options_for_select([
- ['Despesa', 'expense'],
- ['Receita', 'income']
- ], installment_plan.transaction_type),
- { prompt: "Selecione o tipo" },
- { class: "select select-bordered w-full", required: true } %>
- </div>
  </div>
  </div>
  </div>
@@ -176,10 +158,8 @@
 
  <!-- Form Actions -->
  <div>
- <%= link_to 'Cancelar', installment_plan.persisted? ? installment_plan_path(installment_plan) : installment_plans_path, 
-  %>
- <%= form.submit installment_plan.persisted? ? 'Atualizar Parcelamento' : 'Criar Parcelamento', 
-  %>
+ <%= link_to 'Cancelar', installment_plan.persisted? ? installment_plan_path(installment_plan) : installment_plans_path %>
+ <%= form.submit installment_plan.persisted? ? 'Atualizar Parcelamento' : 'Criar Parcelamento' %>
  </div>
 <% end %>
 

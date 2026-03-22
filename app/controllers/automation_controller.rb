@@ -1,5 +1,5 @@
 class AutomationController < ApplicationController
-  before_action :set_date_range, only: [:index]
+  before_action :set_date_range, only: [ :index ]
 
   def index
     @recent_jobs = []
@@ -9,28 +9,28 @@ class AutomationController < ApplicationController
   def run_daily
     # To facilitate testing, allows execution with future date
     test_date = params[:test_date].present? ? Date.parse(params[:test_date]) : Date.current
-    AutomationJob.perform_later(['recurring', 'installments'], test_date)
+    AutomationJob.perform_later([ "recurring", "installments" ], test_date)
     redirect_to automation_index_path, notice: "Automação diária iniciada para data #{test_date}. Os resultados aparecerão em breve."
   end
 
   def run_recurring
     # To facilitate testing, allows execution with future date
     test_date = params[:test_date].present? ? Date.parse(params[:test_date]) : Date.current
-    AutomationJob.perform_later(['recurring'], test_date)
+    AutomationJob.perform_later([ "recurring" ], test_date)
     redirect_to automation_index_path, notice: "Geração de transações recorrentes iniciada para data #{test_date}."
   end
 
   def run_installments
     # To facilitate testing, allows execution with future date
     test_date = params[:test_date].present? ? Date.parse(params[:test_date]) : Date.current
-    AutomationJob.perform_later(['installments'], test_date)
+    AutomationJob.perform_later([ "installments" ], test_date)
     redirect_to automation_index_path, notice: "Geração de parcelas iniciada para data #{test_date}."
   end
-  
+
   # Preview of automations that will be executed for a specific date
   def preview
     @date = params[:date].present? ? Date.parse(params[:date]) : Date.current
-    
+
     @preview_results = {
       recurring_transactions: [],
       installment_transactions: []
@@ -38,13 +38,13 @@ class AutomationController < ApplicationController
 
     # Instantiate the job to use its methods (without executing it)
     recurring_job = GenerateRecurringTransactionsJob.new
-    
+
     # Check each active recurring commitment
     RecurringCommitment.where(status: :active).each do |commitment|
       # Check if the commitment should generate a transaction on this date
       should_generate = recurring_job.send(:should_generate_transaction?, commitment, @date)
       exists = recurring_job.send(:transaction_exists_for_date?, commitment, @date)
-      
+
       # Add information for display
       @preview_results[:recurring_transactions] << {
         id: commitment.id,
@@ -52,18 +52,18 @@ class AutomationController < ApplicationController
         should_generate: should_generate,
         already_exists: exists,
         frequency: commitment.recurrence_frequency,
-        generation_day: commitment.recurrence_frequency == 'monthly' ? commitment.start_date.day : nil,
+        generation_day: commitment.recurrence_frequency == "monthly" ? commitment.start_date.day : nil,
         start_date: commitment.start_date
       }
     end
 
     # Do the same for installments
     installment_job = GenerateInstallmentTransactionsJob.new
-    
+
     InstallmentPlan.where(status: :active).each do |plan|
       should_generate = installment_job.send(:should_generate_installment?, plan, @date)
       existing_count = plan.transactions.count
-      
+
       @preview_results[:installment_transactions] << {
         id: plan.id,
         name: plan.name,
@@ -74,7 +74,7 @@ class AutomationController < ApplicationController
         start_date: plan.starts_on
       }
     end
-    
+
     respond_to do |format|
       format.html
       format.json { render json: @preview_results }
@@ -84,7 +84,7 @@ class AutomationController < ApplicationController
   def status
     # In a real implementation, you would query the job status
     render json: {
-      status: 'completed',
+      status: "completed",
       last_run: Time.current,
       next_run: Time.current + 1.day,
       results: {

@@ -1,9 +1,9 @@
 class Account < ApplicationRecord
   include MoneyConcern
-  
+
   # User association
   belongs_to :user
-  
+
   # Existing associations
   belongs_to :account_type
   has_many :import_sessions, dependent: :nullify
@@ -43,32 +43,32 @@ class Account < ApplicationRecord
     # In production, we trust the cache
     # In development/test, we can validate occasionally
     return true if Rails.env.production?
-    
+
     # Validate cache consistency in non-production environments
-    cached_balance = self[:balance] || BigDecimal('0')
-    (cached_balance - calculate_balance_from_entries).abs < BigDecimal('0.01')
+    cached_balance = self[:balance] || BigDecimal("0")
+    (cached_balance - calculate_balance_from_entries).abs < BigDecimal("0.01")
   end
 
   # Helper methods for different transaction types
   def income_transactions
-    transactions.where(transaction_type: :income).joins(:entries).where(entries: { account_id: id, entry_type: 'debit' })
+    transactions.where(transaction_type: :income).joins(:entries).where(entries: { account_id: id, entry_type: "debit" })
   end
 
   def expense_transactions
-    transactions.where(transaction_type: :expense).joins(:entries).where(entries: { account_id: id, entry_type: 'credit' })
+    transactions.where(transaction_type: :expense).joins(:entries).where(entries: { account_id: id, entry_type: "credit" })
   end
 
   def transfers_in
     Transaction.where(id: entries.joins(:transaction_record).where(
-      transactions: { transaction_type: :transfer }, 
-      entry_type: 'debit'
+      transactions: { transaction_type: :transfer },
+      entry_type: "debit"
     ).select(:transaction_id))
   end
 
   def transfers_out
     Transaction.where(id: entries.joins(:transaction_record).where(
-      transactions: { transaction_type: :transfer }, 
-      entry_type: 'credit'
+      transactions: { transaction_type: :transfer },
+      entry_type: "credit"
     ).select(:transaction_id))
   end
 
@@ -76,8 +76,8 @@ class Account < ApplicationRecord
   def total_income_amount
     FinancialConstants.safe_to_float(
       entries.joins(:transaction_record).where(
-        transactions: { transaction_type: :income }, 
-        entry_type: 'debit'
+        transactions: { transaction_type: :income },
+        entry_type: "debit"
       ).sum(:amount)
     )
   end
@@ -85,8 +85,8 @@ class Account < ApplicationRecord
   def total_expense_amount
     FinancialConstants.safe_to_float(
       entries.joins(:transaction_record).where(
-        transactions: { transaction_type: :expense }, 
-        entry_type: 'credit'
+        transactions: { transaction_type: :expense },
+        entry_type: "credit"
       ).sum(:amount)
     )
   end
@@ -94,59 +94,59 @@ class Account < ApplicationRecord
   def net_transfer_amount
     transfers_in_amount = FinancialConstants.safe_to_float(
       entries.joins(:transaction_record).where(
-        transactions: { transaction_type: :transfer }, 
-        entry_type: 'debit'
+        transactions: { transaction_type: :transfer },
+        entry_type: "debit"
       ).sum(:amount)
     )
-    
+
     transfers_out_amount = FinancialConstants.safe_to_float(
       entries.joins(:transaction_record).where(
-        transactions: { transaction_type: :transfer }, 
-        entry_type: 'credit'
+        transactions: { transaction_type: :transfer },
+        entry_type: "credit"
       ).sum(:amount)
     )
-    
+
     transfers_in_amount - transfers_out_amount
   end
 
   # Credit card specific methods
   def credit_card?
-    account_type&.code == 'CREDIT_CARD'
+    account_type&.code == "CREDIT_CARD"
   end
 
   def ensure_credit_statement_for_period(period)
     return nil unless credit_card?
-    
+
     CreditStatementService.find_or_create_statement(self, period)
   end
 
   def create_future_statements(months_ahead = 12)
     return [] unless credit_card?
-    
+
     CreditStatementService.create_future_statements(self, months_ahead)
   end
 
   private
 
   def calculate_balance_from_entries
-    return BigDecimal('0') if account_type.nil?
-    
+    return BigDecimal("0") if account_type.nil?
+
     # In double-entry bookkeeping:
     # - Debit entries increase asset accounts and decrease liability accounts
     # - Credit entries decrease asset accounts and increase liability accounts
     # - For asset accounts: balance = debits - credits
     # - For liability accounts: balance = credits - debits
-    
+
     debit_total = entries.joins(:transaction_record).where(
-      transactions: { status: :confirmed }, 
-      entry_type: 'debit'
-    ).sum(:amount) || BigDecimal('0')
-    
+      transactions: { status: :confirmed },
+      entry_type: "debit"
+    ).sum(:amount) || BigDecimal("0")
+
     credit_total = entries.joins(:transaction_record).where(
-      transactions: { status: :confirmed }, 
-      entry_type: 'credit'
-    ).sum(:amount) || BigDecimal('0')
-    
+      transactions: { status: :confirmed },
+      entry_type: "credit"
+    ).sum(:amount) || BigDecimal("0")
+
     if account_type.asset_type?
       debit_total - credit_total
     else

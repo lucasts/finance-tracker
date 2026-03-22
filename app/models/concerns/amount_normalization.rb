@@ -3,21 +3,21 @@
 # Concern para normalização de valores monetários
 module AmountNormalization
   extend ActiveSupport::Concern
-  
+
   included do
     before_validation :normalize_amount_fields
   end
-  
+
   private
-  
+
   def normalize_amount_fields
     # Find all amount-related fields in the model
-    amount_fields = self.class.column_names.select { |col| col.include?('amount') || col == 'amount' }
-    
+    amount_fields = self.class.column_names.select { |col| col.include?("amount") || col == "amount" }
+
     amount_fields.each do |field|
       value = self.send(field)
       next if value.nil?
-      
+
       if value.is_a?(String) && value.present?
         # Use MoneyParsingConcern for consistent parsing
         begin
@@ -33,12 +33,12 @@ module AmountNormalization
       end
     end
   end
-  
+
   class_methods do
     # Class method to normalize amount parameters in controllers
     def normalize_amount_param(param_value)
       return param_value if param_value.nil?
-      
+
       if param_value.is_a?(String) && param_value.present?
         # Use MoneyParsingConcern for consistent parsing
         begin
