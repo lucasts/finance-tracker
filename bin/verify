@@ -7,15 +7,13 @@ command -v bundle >/dev/null || { echo "Bundler not installed" >&2; exit 1; }
 echo "==> Installing gems (if needed)"
 bundle check || bundle install --quiet
 
-# Future: add yarn/npm check if frontend grows beyond importmap
+echo "==> Running RuboCop"
+bundle exec rubocop
+
+echo "==> Running Brakeman"
+bundle exec brakeman -q -i config/brakeman.ignore
 
 echo "==> Running RSpec"
 bundle exec rspec --format progress "$@"
-
-# Hooks for future tools (uncomment as added)
-# echo "==> Running RuboCop"
-# bundle exec rubocop
-# echo "==> Running Brakeman"
-# bundle exec brakeman -q
 
 echo "==> All checks passed"

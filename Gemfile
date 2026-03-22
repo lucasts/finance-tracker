@@ -43,6 +43,9 @@ group :development, :test do
 end
 
 group :development do
+  gem "brakeman", require: false
+  gem "rubocop-rails-omakase", require: false
+  gem "rubocop-rspec", require: false
   gem "web-console"
 end
 

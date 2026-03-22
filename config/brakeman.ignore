@@ -1,0 +1,27 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Mass Assignment",
+      "warning_code": 70,
+      "fingerprint": "9f146a6ef4b4822f2f42b9221cb4202463218e5e634a2e8bee233e3511d37ccb",
+      "check_name": "PermitAttributes",
+      "message": "Potentially dangerous key allowed for mass assignment",
+      "file": "app/controllers/account_types_controller.rb",
+      "line": 43,
+      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
+      "code": "params.require(:account_type).permit(:code, :name, :role)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "AccountTypesController",
+        "method": "account_type_params"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "note": "AccountType#role is a validated accounting classification (asset/liability/equity/income/expense), not a user privilege field. AccountTypes are shared global config — no IDOR risk. Model validates inclusion in accounting role list."
+    }
+  ],
+  "updated": "2026-03-22 00:00:00 -0000",
+  "brakeman_version": "8.0.4"
+}
+
