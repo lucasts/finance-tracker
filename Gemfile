@@ -1,10 +1,9 @@
 source "https://rubygems.org"
 
-ruby "3.4.2"
+ruby "4.0.1"
 
 # Core Rails
-# Use edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.0"
+gem "rails", "~> 8.1.2"
 
 gem "apexcharts" # Charting
 
@@ -20,14 +19,15 @@ gem "puma", ">= 5.0" # Web server
 gem "redis", ">= 4.0.1" # Redis client
 gem "sidekiq" # Background jobs
 gem "sprockets-rails" # Asset pipeline
-gem "sqlite3", ">= 1.4" # Default DB for dev/test
+gem "pg", "~> 1.1" # PostgreSQL for all environments
 gem "stimulus-rails" # Stimulus JS
 gem "turbo-rails" # Hotwire Turbo
 
 gem "csv" # CSV parsing (required in Rails 8)
+gem "ostruct" # OpenStruct (removed from stdlib in Ruby 4.0)
 
-# PostgreSQL for preprod/production
-gem "pg", "~> 1.1", group: [:preprod, :production]
+# sqlite3 kept as optional dependency (no longer used for dev/test)
+# gem "sqlite3", ">= 1.4"
 
 # Windows/JRuby: timezone support
 gem "tzinfo-data", platforms: %i[ windows jruby ]
