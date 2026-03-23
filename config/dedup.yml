@@ -1,0 +1,31 @@
+# Dedup & import matching tolerance configuration.
+# These values drive ImportDedupService, ImportMatchingService, and TransferDetectionService.
+# Edit here to tune heuristics app-wide without code changes.
+#
+# All environments inherit from "default". Override per-environment as needed.
+
+default: &default
+  # Exact/tolerance duplicate detection (ImportDedupService rules 1 & 2)
+  exact_amount_tolerance: 0.01        # max amount diff to treat as exact dup
+  exact_date_tolerance_days: 1        # max date diff (days) for tolerance dup
+
+  # Similar/flag detection (ImportDedupService rule 3 — sets possible_duplicate: true)
+  similar_amount_tolerance: 2.00      # max amount diff to flag as possible_duplicate
+  similar_date_tolerance_days: 3      # max date diff (days) to flag as possible_duplicate
+
+  # ImportMatchingService — existing-transaction candidate suggestions
+  matching_amount_percentage: 0.05    # 5% of imported amount as matching tolerance
+  recurring_amount_tolerance: 0.10    # 10% tolerance for recurring commitment match
+
+  # TransferDetectionService
+  transfer_date_tolerance_days: 2     # max date diff (days) between transfer pair
+  transfer_amount_tolerance: 0.01     # max amount diff between transfer pair
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

@@ -8,8 +8,13 @@ class TransferDetectionService
   # - Different accounts belonging to same user
   # - Opposite signs preferred but not required
 
-  AMOUNT_TOLERANCE = BigDecimal("0.01")
-  DATE_TOLERANCE_DAYS = 2
+  def self.amount_tolerance
+    BigDecimal((Rails.application.config.dedup[:transfer_amount_tolerance] || FinancialConstants::TRANSFER_AMOUNT_TOLERANCE).to_s)
+  end
+
+  def self.date_tolerance_days
+    (Rails.application.config.dedup[:transfer_date_tolerance_days] || FinancialConstants::TRANSFER_DATE_TOLERANCE_DAYS).to_i
+  end
 
   def self.call(user:)
     new(user).process
@@ -70,18 +75,15 @@ class TransferDetectionService
 
       # Date proximity
       date_diff = (base_tx.event_date - candidate.event_date).abs
-      next false if date_diff > DATE_TOLERANCE_DAYS
+      next false if date_diff > self.class.date_tolerance_days
 
       true
     end
   end
 
   def amount_match?(amount1, amount2)
-    # Prefer opposite signs (transfer out vs transfer in)
     abs_amount1 = amount1.abs
     abs_amount2 = amount2.abs
-
-    # Check if amounts are within tolerance
-    (abs_amount1 - abs_amount2).abs <= AMOUNT_TOLERANCE
+    (abs_amount1 - abs_amount2).abs <= self.class.amount_tolerance
   end
 end

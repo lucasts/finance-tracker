@@ -11,15 +11,19 @@ class ImportMatchingService
   end
 
   def suggest_matches
+    cfg = Rails.application.config.dedup
+    amount_pct_tolerance = (cfg[:matching_amount_percentage] || FinancialConstants::AMOUNT_PERCENTAGE_TOLERANCE).to_f
+    date_tol_days        = (cfg[:similar_date_tolerance_days] || FinancialConstants::DATE_TOLERANCE_DAYS).to_i
+
     imported_amount = FinancialConstants.safe_to_decimal(@imported_transaction.amount).abs
-    amount_tolerance = [ FinancialConstants::AMOUNT_ABSOLUTE_TOLERANCE, imported_amount * FinancialConstants::AMOUNT_PERCENTAGE_TOLERANCE ].max
+    amount_tolerance = [ FinancialConstants::AMOUNT_ABSOLUTE_TOLERANCE, imported_amount * amount_pct_tolerance ].max
     imported_date = FinancialConstants.safe_to_date(@imported_transaction.event_date)
 
     candidates = Transaction.where(user_id: @imported_transaction.import_session.user_id)
       .where("ABS(amount - ?) <= ?", imported_amount, amount_tolerance)
       .where("event_date BETWEEN ? AND ?",
-        (imported_date - FinancialConstants::DATE_TOLERANCE_DAYS),
-        (imported_date + FinancialConstants::DATE_TOLERANCE_DAYS))
+        (imported_date - date_tol_days),
+        (imported_date + date_tol_days))
 
     desc = @imported_transaction.description.to_s.downcase
     desc_norm = desc.gsub(/[^a-z0-9]/, "")
@@ -43,11 +47,12 @@ class ImportMatchingService
 
     # Recurring: similarity + approximate value
     imported_amount = FinancialConstants.safe_to_decimal(@imported_transaction.amount)
+    recurring_tol = (cfg[:recurring_amount_tolerance] || FinancialConstants::RECURRING_AMOUNT_TOLERANCE).to_f
     recurring_match = RecurringCommitment.where(user_id: @imported_transaction.import_session.user_id)
       .where("LOWER(name) LIKE ?", "%#{desc[0, 8].downcase}%")
       .select do |rc|
         expected_amount = FinancialConstants.safe_to_decimal(rc.expected_amount)
-        tolerance = [ FinancialConstants::AMOUNT_ABSOLUTE_TOLERANCE, expected_amount * FinancialConstants::RECURRING_AMOUNT_TOLERANCE ].max
+        tolerance = [ FinancialConstants::AMOUNT_ABSOLUTE_TOLERANCE, expected_amount * recurring_tol ].max
         (expected_amount - imported_amount).abs <= tolerance
       end
       .first

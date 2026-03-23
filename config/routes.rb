@@ -48,6 +48,7 @@ Rails.application.routes.draw do
   resources :import_sessions, only: [ :index, :new, :create, :show ] do
     member do
       get :confirm
+      get :reimport_summary
       post :finalize
       post :batch_process_pending
     end

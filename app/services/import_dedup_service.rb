@@ -18,8 +18,11 @@ class ImportDedupService
   def initialize(import_session, parsed_transactions)
     @import_session = import_session
     @transactions = parsed_transactions || []
-    @amount_tolerance = BigDecimal(FinancialConstants::AMOUNT_ABSOLUTE_TOLERANCE.to_s)
-    @date_tolerance_days = 1
+    cfg = Rails.application.config.dedup
+    @amount_tolerance        = BigDecimal(cfg[:exact_amount_tolerance]&.to_s  || FinancialConstants::AMOUNT_ABSOLUTE_TOLERANCE.to_s)
+    @date_tolerance_days     = (cfg[:exact_date_tolerance_days]               || FinancialConstants::EXACT_DATE_TOLERANCE_DAYS).to_i
+    @similar_amount_tol      = BigDecimal(cfg[:similar_amount_tolerance]&.to_s || FinancialConstants::SIMILAR_AMOUNT_TOLERANCE.to_s)
+    @similar_date_tol_days   = (cfg[:similar_date_tolerance_days]             || FinancialConstants::DATE_TOLERANCE_DAYS).to_i
   end
 
   def process
@@ -92,8 +95,8 @@ class ImportDedupService
   def similar_to_bucket?(bucket, record)
     bucket.any? do |cand|
       next false unless cand.event_date && cand.amount && record.event_date && record.amount
-      (cand.event_date - record.event_date).abs <= FinancialConstants::DATE_TOLERANCE_DAYS &&
-        (BigDecimal(cand.amount.to_s) - BigDecimal(record.amount.to_s)).abs <= 2
+      (cand.event_date - record.event_date).abs <= @similar_date_tol_days &&
+        (BigDecimal(cand.amount.to_s) - BigDecimal(record.amount.to_s)).abs <= @similar_amount_tol
     end
   end
 
@@ -101,13 +104,15 @@ class ImportDedupService
   # when there exists ANY prior transaction (regardless of description) within similarity
   # date window and amount window. This broadens user visibility for potential duplicates
   # when description text changed substantially (e.g., institution formatting shifts).
+  # NOTE: record is excluded from the comparison to avoid self-matching after create_and_index.
   def similar_by_amount_date?(record)
     return false unless record.event_date && record.amount
     @desc_bucket.each_value do |arr|
       arr.each do |cand|
+        next if cand.id == record.id
         next unless cand.event_date && cand.amount
-        if (cand.event_date - record.event_date).abs <= FinancialConstants::DATE_TOLERANCE_DAYS &&
-           (BigDecimal(cand.amount.to_s) - BigDecimal(record.amount.to_s)).abs <= 2
+        if (cand.event_date - record.event_date).abs <= @similar_date_tol_days &&
+           (BigDecimal(cand.amount.to_s) - BigDecimal(record.amount.to_s)).abs <= @similar_amount_tol
           return true
         end
       end

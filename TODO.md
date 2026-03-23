@@ -9,27 +9,6 @@ dedup heuristics, reports/projections, and Sidekiq background automation.
 This is a **personal finance tool** — built for personal use, with plans to open source.
 
 
----
-
-## 🔧 Technical Debt — Performance (follow-ups)
-
-Dashboard optimization completed 2025-08-09 (queries reduced from ~220 to <40).
-
----
-
-## 🔧 Technical Debt — Import Pipeline
-
-### Dedup & idempotency improvements
-- [ ] Cross-file dedup heuristic (fingerprint cruzado por external_id/amount/date + tolerance window)
-- [ ] Visually flag suspected duplicate `ImportedTransactions` before reconciliation
-- [ ] Auto-suggest match when similarity > threshold (description + amount + ±2 days)
-- [ ] Reimport UI: show diff/summary when file already imported instead of direct redirect
-- [ ] Make dedup tolerances configurable (app-level config: absolute value, %, day window)
-- [ ] CSV idempotency support (same digest + line fingerprint)
-- [ ] Tests: partial scenario (1 new + 1 duplicate in same file), missing external_id, rounded amounts
-
----
-
 ## 🚀 Future Enhancements (Optional)
 
 ### User Experience
@@ -49,6 +28,25 @@ Dashboard optimization completed 2025-08-09 (queries reduced from ~220 to <40).
 ---
 
 ## 📦 Release Log
+
+### March 2026 — Dedup & idempotency improvements
+
+**Items that were already implemented (confirmed/documented):**
+- Cross-file dedup: `ImportDedupService` preloads all `ImportedTransactions` for the account across sessions — duplicates from any prior import are detected automatically.
+- Visual flag: `possible_duplicate` badge (⚠️ "Suspeita de duplicata") with tooltip shown on import session show view.
+- Auto-suggest match: `ImportMatchingService` returns up to 3 suggestion types (candidates, installment_plan, recurring_commitment) displayed as radio buttons in the reconciliation edit view.
+- CSV idempotency: `file_digest` (SHA-256) is computed before parsing; re-uploading any file (OFX or CSV) redirects to the summary of the existing session.
+
+**Items implemented in this commit:**
+- Added `config/dedup.yml` — app-level configurable tolerances for all dedup, matching, and transfer detection parameters (8 keys).
+- Added `config/initializers/dedup_config.rb` — loads YAML and exposes via `Rails.application.config.dedup`.
+- Refactored `ImportDedupService` to read tolerances from config; added `EXACT_DATE_TOLERANCE_DAYS` and `SIMILAR_AMOUNT_TOLERANCE` to `FinancialConstants` (previously hardcoded inline).
+- Refactored `ImportMatchingService` and `TransferDetectionService` to use config tolerances.
+- Fixed self-match bug in `ImportDedupService#similar_by_amount_date?` — newly-created record was being compared against itself after `create_and_index` added it to `@desc_bucket`, causing false `possible_duplicate` flags for records with no real near-match.
+- Added `GET /import_sessions/:id/reimport_summary` — shows original filename, session stats (total, conciliated, pending, duplicates, transfers) and action links instead of a plain flash redirect.
+- Added 11 new dedup unit tests: mixed batch (1 new + 1 dup), missing `external_id`, rounded amounts (<= tolerance treated as dup), cross-file explicit verification, boundary date and amount window edges.
+- Updated `spec/requests/import_sessions_idempotency_spec.rb` to expect `reimport_summary` redirect.
+- 618 examples, 0 failures.
 
 ### March 2026 — Add `transactions(payment_date)` index
 

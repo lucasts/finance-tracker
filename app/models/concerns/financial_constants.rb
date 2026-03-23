@@ -48,7 +48,11 @@ module FinancialConstants
   AMOUNT_ABSOLUTE_TOLERANCE = 0.01
   AMOUNT_PERCENTAGE_TOLERANCE = 0.05  # 5%
   RECURRING_AMOUNT_TOLERANCE = 0.10   # 10%
-  DATE_TOLERANCE_DAYS = 3
+  DATE_TOLERANCE_DAYS = 3             # similarity window (possible_duplicate flag)
+  EXACT_DATE_TOLERANCE_DAYS = 1       # strict window for exact/tolerance dedup
+  SIMILAR_AMOUNT_TOLERANCE = 2.00     # max amount diff for possible_duplicate flag
+  TRANSFER_DATE_TOLERANCE_DAYS = 2    # date window for transfer detection
+  TRANSFER_AMOUNT_TOLERANCE = 0.01    # amount tolerance for transfer detection
 
   # Variable expense categories that need analysis
   VARIABLE_EXPENSE_KEYWORDS = [

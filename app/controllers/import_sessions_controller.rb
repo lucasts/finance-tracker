@@ -23,7 +23,7 @@ class ImportSessionsController < ApplicationController
       digest = Digest::SHA256.hexdigest(content)
       existing = ImportSession.find_by(account_id: @import_session.account_id, file_digest: digest)
       if existing
-        redirect_to import_session_path(existing), notice: "Arquivo já havia sido importado anteriormente. Nenhuma nova transação criada." and return
+        redirect_to reimport_summary_import_session_path(existing) and return
       end
       @import_session.file_digest = digest
       if @import_session.save
@@ -54,6 +54,11 @@ class ImportSessionsController < ApplicationController
 
   def confirm
     @import_session = current_user.import_sessions.find(params[:id])
+  end
+
+  def reimport_summary
+    @import_session = current_user.import_sessions.find(params[:id])
+    @imported_transactions = @import_session.imported_transactions
   end
 
   def finalize

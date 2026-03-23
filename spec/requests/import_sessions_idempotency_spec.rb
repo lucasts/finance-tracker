@@ -25,7 +25,7 @@ RSpec.describe 'ImportSessions idempotency', type: :request do
     first_session = ImportSession.last
     expect(first_session.imported_transactions.count).to eq(2)
 
-    # Second import (same file) should redirect to first session instead of creating new one
+    # Second import (same file) should redirect to reimport_summary of first session
     expect {
       post import_sessions_path, params: {
         import_session: {
@@ -35,6 +35,6 @@ RSpec.describe 'ImportSessions idempotency', type: :request do
         }
       }
     }.not_to change(ImportSession, :count)
-    expect(response).to redirect_to(import_session_path(first_session))
+    expect(response).to redirect_to(reimport_summary_import_session_path(first_session))
   end
 end
