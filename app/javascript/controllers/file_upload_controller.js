@@ -114,18 +114,19 @@ export default class extends ApplicationController {
   // Create preview element for a file
   createPreviewElement(file, index) {
     const container = this.dom.createElement('div', {
-      className: 'file-preview-item flex items-center gap-3 p-3 bg-base-200 rounded-lg',
+      className: 'file-preview-item',
+      style: 'display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--color-base-200,#f5f5f4);border-radius:var(--border-radius-base,0.5rem)',
       dataset: { fileIndex: index }
     })
 
     // File icon or image preview
     const iconContainer = this.dom.createElement('div', {
-      className: 'flex-shrink-0'
+      style: 'flex-shrink:0;width:48px;height:48px'
     })
 
     if (file.type.startsWith('image/')) {
       const img = this.dom.createElement('img', {
-        className: 'w-12 h-12 object-cover rounded',
+        style: 'width:48px;height:48px;object-fit:cover;border-radius:0.25rem',
         alt: 'Preview da imagem'
       })
       
@@ -138,9 +139,9 @@ export default class extends ApplicationController {
       iconContainer.appendChild(img)
     } else {
       const icon = this.dom.createElement('div', {
-        className: 'w-12 h-12 bg-primary/10 rounded flex items-center justify-center'
+        style: 'width:48px;height:48px;background:rgba(232,135,69,0.1);border-radius:0.25rem;display:flex;align-items:center;justify-content:center'
       }, `
-        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg style="width:24px;height:24px;flex-shrink:0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
       `)
@@ -149,19 +150,19 @@ export default class extends ApplicationController {
 
     // File details
     const details = this.dom.createElement('div', {
-      className: 'flex-grow min-w-0'
+      style: 'flex:1;min-width:0'
     }, `
-      <div class="font-medium text-sm truncate" title="${file.name}">${file.name}</div>
-      <div class="text-xs text-base-content/60">${this.format.formatFileSize(file.size)}</div>
+      <div style="font-weight:500;font-size:0.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${this.dom.escapeHTML ? this.dom.escapeHTML(file.name) : file.name}">${this.dom.escapeHTML ? this.dom.escapeHTML(file.name) : file.name}</div>
+      <div style="font-size:0.75rem;color:var(--color-text-muted,#888)">${this.format.formatFileSize(file.size)}</div>
     `)
 
     // Remove button
     const removeBtn = this.dom.createElement('button', {
       type: 'button',
-      className: 'btn btn-ghost btn-sm btn-circle',
+      style: 'background:none;border:none;cursor:pointer;padding:0.25rem;border-radius:50%;flex-shrink:0',
       'aria-label': 'Remover arquivo'
     }, `
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
     `)
