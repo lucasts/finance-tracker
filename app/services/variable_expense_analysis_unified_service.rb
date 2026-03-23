@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Unified service for variable expense analysis
 # Consolidates VariableExpenseAnalysisService and VariableExpenseAnalyzerService
 class VariableExpenseAnalysisUnifiedService

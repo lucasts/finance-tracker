@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateTransactionService
   def self.call(description:, amount:, event_date:, payment_date:, transaction_type:, entries_attributes:, user:, category: nil, **other_params)
     transaction = user.transactions.new(

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Unified service for recurring commitment editing
 # Consolidates RecurringCommitmentEditService and RecurringCommitmentEditorService
 class RecurringCommitmentEditorUnifiedService

@@ -1,6 +1,11 @@
+# frozen_string_literal: true
+
 # Service to suggest heuristic matches for ImportedTransaction
 class ImportMatchingService
-  # Receives an ImportedTransaction and suggests possible matches
+  def self.call(imported_transaction:)
+    new(imported_transaction).suggest_matches
+  end
+
   def initialize(imported_transaction)
     @imported_transaction = imported_transaction
   end

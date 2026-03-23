@@ -56,6 +56,6 @@ class User < ApplicationRecord
   private
 
   def create_default_categories
-    DefaultCategoriesService.create_for_user(self)
+    DefaultCategoriesService.call(user: self)
   end
 end

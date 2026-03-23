@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class DefaultCategoriesService
-  def self.create_for_user(user)
+  def self.call(user:)
     return if Rails.env.test?
     new(user).create_default_categories
   end

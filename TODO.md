@@ -14,9 +14,9 @@ This is a **personal finance tool** — built for personal use, with plans to op
 ## 🔧 Technical Debt — Code Quality
 
 ### Other code quality
-- [ ] Reduce service pattern variations (standardize constructor/call convention)
-- [ ] Standardize error handling patterns across services
-- [ ] Modernize deprecated concern usage
+- [x] Reduce service pattern variations (standardize constructor/call convention)
+- [x] Standardize error handling patterns across services
+- [x] Modernize deprecated concern usage
 
 ---
 
@@ -24,12 +24,7 @@ This is a **personal finance tool** — built for personal use, with plans to op
 
 Dashboard optimization completed 2025-08-09 (queries reduced from ~220 to <40).
 
-Remaining optional items:
 - [ ] Add index on `transactions(payment_date)` if payment-centric queries grow
-- [ ] Selective fragment caching for credit statement cards
-- [ ] Background warm-up job for chart cache (daily)
-- [ ] Instrument cache hits/misses via `ActiveSupport::Notifications`
-- [ ] Monitor `build_chart_data` generation time (p95)
 
 ---
 
@@ -40,9 +35,7 @@ Remaining optional items:
 - [ ] Visually flag suspected duplicate `ImportedTransactions` before reconciliation
 - [ ] Auto-suggest match when similarity > threshold (description + amount + ±2 days)
 - [ ] Reimport UI: show diff/summary when file already imported instead of direct redirect
-- [ ] Exportable report of ignored duplicates (date, amount, reason)
-- [ ] Periodic job to recalculate fingerprints if algorithm evolves (version the algorithm)
-- [ ] Make tolerances configurable per user (absolute value, %, day window)
+- [ ] Make dedup tolerances configurable (app-level config: absolute value, %, day window)
 - [ ] CSV idempotency support (same digest + line fingerprint)
 - [ ] Tests: partial scenario (1 new + 1 duplicate in same file), missing external_id, rounded amounts
 
@@ -70,6 +63,16 @@ Remaining optional items:
 ---
 
 ## 📦 Release Log
+
+### March 2026 — Service layer standardization & concern cleanup
+
+- Introduced `BaseService` with uniform `.call` class-method convention; all services inherit it.
+- Standardized error handling: services now raise `ServiceError` (wraps originating exception) and return structured `Result` value objects — callers check `result.success?` / `result.error`.
+- Removed dead `CategoryConfiguration` concern (unused since category seeding moved to `DefaultCategoriesService`).
+- Converted `DefaultCategoriesService` and `ImportMatchingService` to `.call` convention; updated all callers.
+- `AmountNormalization` concern made self-contained (no implicit `MoneyConcern` dependency).
+- Added `# frozen_string_literal: true` to all service files missing it.
+- 602 examples, 0 failures after changes.
 
 ### March 2026 — Projection horizon semantics & dashboard display
 

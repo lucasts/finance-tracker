@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Centralized service for installment date calculations
 # Eliminates duplicated logic across controllers and jobs
 class InstallmentDateCalculatorService

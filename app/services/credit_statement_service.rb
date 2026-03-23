@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Service to handle credit card statement creation and management
 # Ensures statements exist for transactions and handles bulk operations
 class CreditStatementService

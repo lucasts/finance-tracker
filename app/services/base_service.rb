@@ -1,46 +1,64 @@
 # frozen_string_literal: true
 
-# Base service class to standardize service patterns across the application
+# Base class documenting canonical service patterns used across the application.
 #
-# Usage patterns:
+# == Constructor/call convention ==
 #
-# 1. Simple services (recommended for most cases):
-#    class ExampleService < BaseService
-#      def self.call(**params)
-#        new(**params).execute
-#      end
+# All services expose a single class-level entry point:
 #
-#      private
+#   SomeService.call(keyword: args)
 #
-#      def initialize(**params)
-#        @params = params
-#      end
+# Pattern 1 — Simple services (most common):
 #
-#      def execute
-#        # implementation
-#      end
-#    end
+#   class ExampleService < BaseService
+#     def self.call(user:, **params)
+#       new(user: user, **params).execute
+#     end
 #
-# 2. Callback services:
-#    class CallbackService < BaseService
-#      def self.call(object:, operation:)
-#        new(object).send("execute_#{operation}")
-#      end
+#     private
 #
-#      def initialize(object)
-#        @object = object
-#      end
+#     def initialize(user:, **params)
+#       @user   = user
+#       @params = params
+#     end
 #
-#      def execute_after_save
-#        # implementation
-#      end
-#    end
+#     def execute
+#       # ...
+#     end
+#   end
 #
-# 3. Utility services (class methods only):
-#    For mathematical calculations, date utilities, etc.
-#    No inheritance needed, just class methods.
+# Pattern 2 — Callback dispatch (used where operation varies at call-time):
+#
+#   class CallbackService < BaseService
+#     def self.call(object:, operation:)
+#       new(object).send("execute_#{operation}")
+#     end
+#
+#     def execute_after_save; end
+#     def execute_before_save; end
+#   end
+#
+# Pattern 3 — Utility (pure class methods, no instance needed):
+#   No inheritance required; just define class methods directly.
+#
+# == Error handling conventions ==
+#
+# Choose the pattern that best matches the service's responsibility:
+#
+# A. Raise exceptions — for unrecoverable external/parse failures:
+#      raise StandardError, "Invalid input: #{reason}"
+#    Callers must rescue. Use for: OFX/CSV parse errors, fatal config problems.
+#
+# B. Return the ActiveRecord model — for single-model persistence services:
+#      return transaction   # caller checks transaction.errors.any?
+#    Rails-idiomatic. Use for: CreateTransactionService.
+#
+# C. Return a result hash — for multi-step operations with multiple failure modes:
+#      { success: true/false, errors: [], result: object }
+#    Explicit contract. Use for: RecurringCommitmentEditorUnifiedService,
+#    VariableExpenseAnalysisUnifiedService.
+#
+# Each service should document in its class comment which pattern it uses.
 #
 class BaseService
-  # Placeholder for shared service logic if needed in the future
-  # Currently serves as documentation and namespace
 end

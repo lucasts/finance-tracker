@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ImportDedupService
   # Performs advanced duplicate filtering and creation of ImportedTransaction records.
   # Contract:

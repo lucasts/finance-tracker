@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe DefaultCategoriesService, type: :service do
-  describe '.create_for_user' do
+  describe '.call' do
     context 'when creating default categories for a new user' do
       let(:user) { create(:user) }
 
@@ -14,18 +14,18 @@ RSpec.describe DefaultCategoriesService, type: :service do
 
       it 'creates expense categories with descriptions' do
         expect {
-          described_class.create_for_user(user)
+          described_class.call(user: user)
         }.to change { user.categories.expense.count }.from(0).to(11)
       end
 
       it 'creates income categories with descriptions' do
         expect {
-          described_class.create_for_user(user)
+          described_class.call(user: user)
         }.to change { user.categories.income.count }.from(0).to(3)
       end
 
       it 'creates categories with proper descriptions' do
-        described_class.create_for_user(user)
+        described_class.call(user: user)
 
         habitacao = user.categories.find_by(name: 'Habitação')
         expect(habitacao).to be_present
@@ -39,12 +39,12 @@ RSpec.describe DefaultCategoriesService, type: :service do
       end
 
       it 'does not create duplicate categories' do
-        # Primeiro chamada
-        described_class.create_for_user(user)
+        # Primeira chamada
+        described_class.call(user: user)
         initial_count = user.categories.count
 
         # Segunda chamada não deve criar duplicatas
-        described_class.create_for_user(user)
+        described_class.call(user: user)
         expect(user.categories.count).to eq(initial_count)
       end
     end
@@ -59,7 +59,7 @@ RSpec.describe DefaultCategoriesService, type: :service do
 
       it 'does not create categories to avoid test conflicts' do
         expect {
-          described_class.create_for_user(user)
+          described_class.call(user: user)
         }.not_to change { user.categories.count }
       end
     end

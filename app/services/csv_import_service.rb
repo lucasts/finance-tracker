@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Service to import and parse CSV files
 require "csv"
 

@@ -3,7 +3,7 @@ class ImportedTransactionsController < ApplicationController
   before_action :set_imported_transaction
 
   def edit
-    @matches = ImportMatchingService.new(@imported_transaction).suggest_matches
+    @matches = ImportMatchingService.call(imported_transaction: @imported_transaction)
     # Individual reconciliation screen
   end
 

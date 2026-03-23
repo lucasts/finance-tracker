@@ -30,7 +30,7 @@ RSpec.describe ImportedTransactionsController, type: :request do
   end
 
   describe "GET /import_sessions/:id/imported_transactions/:id/edit" do
-    before { allow(ImportMatchingService).to receive(:new).and_return(double(suggest_matches: {})) }
+    before { allow(ImportMatchingService).to receive(:call).and_return({}) }
 
     it "returns http success" do
       get edit_import_session_imported_transaction_path(import_session, imported_transaction)

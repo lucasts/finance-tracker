@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TransferDetectionService
   # Detects potential transfers between accounts for the same user
   # Heuristics:
