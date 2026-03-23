@@ -1,376 +1,240 @@
-<div>
- <!-- Header -->
- <div>
- <div>
- <ul>
- <li><%= link_to "Importações", import_sessions_path, class: "link link-hover" %></li>
- <li><%= link_to @import_session.original_filename, import_session_path(@import_session), class: "link link-hover" %></li>
- <li>Conciliação</li>
- </ul>
- </div>
- <h1>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
- </svg>
- Conciliação de Transação
- </h1>
- <p>Linha <%= @imported_transaction.line_number %> • Analise e decida o que fazer com esta transação</p>
- </div>
+<section class="reconciliation-page">
+  <!-- Breadcrumbs -->
+  <ul class="breadcrumbs">
+    <li><%= link_to "Importações", import_sessions_path %></li>
+    <li><%= link_to @import_session.original_filename, import_session_path(@import_session) %></li>
+    <li>Conciliação</li>
+  </ul>
 
- <div>
- <!-- Coluna esquerda: Dados importados -->
- <div>
- <!-- Card da transação importada -->
- <div>
- <div>
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
- </svg>
- Transação Importada
- <div>Linha <%= @imported_transaction.line_number %></div>
- </div>
- 
- <div>
- <div>
- <div>
- <label>Descrição</label>
- <div>
- <div><%= @imported_transaction.description %></div>
- </div>
- </div>
- <div>
- <label>Valor</label>
- <div>
- <div>
- <%= format_money(@imported_transaction.amount) %>
- </div>
- </div>
- </div>
- </div>
- 
- <div>
- <div>
- <label>Data do Evento</label>
- <div>
- <div>
- <%= l(@imported_transaction.event_date, format: :long) if @imported_transaction.event_date %>
- </div>
- </div>
- </div>
- <div>
- <label>Data de Pagamento</label>
- <div>
- <div>
- <%= l(@imported_transaction.payment_date, format: :long) if @imported_transaction.payment_date %>
- </div>
- </div>
- </div>
- </div>
- </div>
- </div>
- </div>
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <h1>Conciliação de Transação</h1>
+      <p>Linha <%= @imported_transaction.line_number %> · Analise e decida o que fazer com esta transação</p>
+    </div>
+  </header>
 
- <!-- Sugestões do sistema -->
- <div>
- <div>
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
- </svg>
- Sugestões Inteligentes
- </div>
+  <div class="reconciliation-grid">
+    <!-- Coluna esquerda: Dados importados -->
+    <div class="left-column">
+      <!-- Card da transação importada -->
+      <div class="detail-card">
+        <h2>
+          Transação Importada
+          <span class="line-badge">Linha <%= @imported_transaction.line_number %></span>
+        </h2>
 
- <!-- Alertas de padrões encontrados -->
- <% if @matches[:installment_plan] %>
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
- </svg>
- <div>
- <h3>Parcelamento Detectado!</h3>
- <div>Possível parcela do plano: <strong><%= @matches[:installment_plan].name %></strong></div>
- </div>
- </div>
- <% end %>
+        <div class="imported-fields">
+          <div class="field-row">
+            <div class="field-group">
+              <label>Descrição</label>
+              <div class="field-value"><%= @imported_transaction.description %></div>
+            </div>
+            <div class="field-group">
+              <label>Valor</label>
+              <div class="field-value amount"><%= format_money(@imported_transaction.amount) %></div>
+            </div>
+          </div>
 
- <% if @matches[:recurring_commitment] %>
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
- </svg>
- <div>
- <h3>Compromisso Recorrente Detectado!</h3>
- <div>Possível ocorrência do compromisso: <strong><%= @matches[:recurring_commitment].name %></strong></div>
- </div>
- </div>
- <% end %>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Data do Evento</label>
+              <div class="field-value"><%= l(@imported_transaction.event_date, format: :long) if @imported_transaction.event_date %></div>
+            </div>
+            <div class="field-group">
+              <label>Data de Pagamento</label>
+              <div class="field-value"><%= l(@imported_transaction.payment_date, format: :long) if @imported_transaction.payment_date %></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
- <!-- Transações similares -->
- <% if @matches[:candidates].present? %>
- <div>
- <h4>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
- </svg>
- Transações Existentes Similares
- </h4>
- <div>
- <% @matches[:candidates].each do |tx| %>
- <div
- onclick="selectTransaction(<%= tx.id %>)"
- id="tx-<%= tx.id %>">
- <div>
- <div>
- <div><%= tx.description %></div>
- <div>
- <%= l(tx.event_date, format: :short) if tx.event_date %> •
- <span>
- <%= format_money(tx.amount) %>
- </span>
- <% if tx.category %>
- • <span><%= tx.category.name %></span>
- <% end %>
- </div>
- </div>
- <input type="radio" name="matched_transaction_id" value="<%= tx.id %>">
- </div>
- </div>
- <% end %>
- </div>
- </div>
- <% else %>
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
- </svg>
- <div>Nenhuma transação similar encontrada</div>
- </div>
- <% end %>
- </div>
- </div>
+      <!-- Sugestões do sistema -->
+      <div class="detail-card">
+        <h2>Sugestões Inteligentes</h2>
 
- <!-- Dados originais (expansível) -->
- <div>
- <input type="checkbox" /> 
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
- </svg>
- Dados Técnicos
- </div>
- <div> 
- <div>
- <pre><%= JSON.pretty_generate(@imported_transaction.parsed_data || {}) rescue @imported_transaction.raw_data %></pre>
- </div>
- </div>
- </div>
- </div>
+        <% if @matches[:installment_plan] %>
+          <div class="suggestion-alert">
+            <strong>Parcelamento Detectado!</strong>
+            <span>Possível parcela do plano: <strong><%= @matches[:installment_plan].name %></strong></span>
+          </div>
+        <% end %>
 
- <!-- Coluna direita: Formulário de conciliação -->
- <div>
- <%= form_with model: @imported_transaction, url: import_session_imported_transaction_path(@import_session, @imported_transaction), method: :put, local: true, html: { class: "space-y-6", data: { controller: "imported-transaction-form" } } do |f| %>
- 
- <!-- Ações de conciliação -->
- <div>
- <div>
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
- </svg>
- Ação de Conciliação
- </div>
- 
- <div>
- <label>
- <div>
- <input type="radio" name="reconciliation_action" value="create_new" checked>
- <div>
- <div>Criar Nova Transação</div>
- <div>Adiciona uma nova transação ao sistema</div>
- </div>
- <div>Recomendado</div>
- </div>
- </label>
+        <% if @matches[:recurring_commitment] %>
+          <div class="suggestion-alert">
+            <strong>Compromisso Recorrente Detectado!</strong>
+            <span>Possível ocorrência do compromisso: <strong><%= @matches[:recurring_commitment].name %></strong></span>
+          </div>
+        <% end %>
 
- <% if @matches[:candidates].present? %>
- <label>
- <div>
- <input type="radio" name="reconciliation_action" value="associate">
- <div>
- <div>Associar à Existente</div>
- <div>Vincula a uma transação já cadastrada</div>
- </div>
- <div>Match encontrado</div>
- </div>
- </label>
- <% end %>
+        <% if @matches[:candidates].present? %>
+          <div class="candidates-section">
+            <h3>Transações Existentes Similares</h3>
+            <div class="candidates-list">
+              <% @matches[:candidates].each do |tx| %>
+                <label class="candidate-card" id="tx-<%= tx.id %>" for="match-<%= tx.id %>">
+                  <div class="candidate-info">
+                    <div class="candidate-desc"><%= tx.description %></div>
+                    <div class="candidate-meta">
+                      <%= l(tx.event_date, format: :short) if tx.event_date %> ·
+                      <span class="candidate-amount"><%= format_money(tx.amount) %></span>
+                      <% if tx.category %>
+                        · <span><%= tx.category.name %></span>
+                      <% end %>
+                    </div>
+                  </div>
+                  <input type="radio" name="matched_transaction_id" value="<%= tx.id %>" id="match-<%= tx.id %>">
+                </label>
+              <% end %>
+            </div>
+          </div>
+        <% else %>
+          <div class="empty-suggestions">
+            <span>Nenhuma transação similar encontrada</span>
+          </div>
+        <% end %>
+      </div>
 
- <label>
- <div>
- <input type="radio" name="reconciliation_action" value="ignore">
- <div>
- <div>Ignorar</div>
- <div>Não processa esta linha</div>
- </div>
- </div>
- </label>
- </div>
- </div>
- </div>
+      <!-- Dados originais (expansível) -->
+      <details class="detail-card raw-data-section">
+        <summary>Dados Técnicos</summary>
+        <div class="raw-data-content">
+          <pre><%= JSON.pretty_generate(@imported_transaction.parsed_data || {}) rescue @imported_transaction.raw_data %></pre>
+        </div>
+      </details>
+    </div>
 
- <!-- Edição de dados -->
- <div>
- <div>
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
- </svg>
- Editar Dados da Transação
- </div>
- 
- <div>
- <div>
- <%= f.label :description, class: "label" do %>
- <span>Descrição</span>
- <% end %>
- <%= f.text_field :description, 
- value: @imported_transaction.description, 
- class: "input input-bordered w-full", 
- placeholder: "Descrição da transação..." %>
- </div>
+    <!-- Coluna direita: Formulário de conciliação -->
+    <div class="right-column">
+      <%= form_with model: @imported_transaction, url: import_session_imported_transaction_path(@import_session, @imported_transaction), method: :put, local: true, html: { class: "form", data: { controller: "imported-transaction-form" } } do |f| %>
 
- <div>
- <div data-controller="currency">
- <%= f.label :amount, class: "label" do %>
- <span>Valor</span>
- <% end %>
- <%= f.text_field :amount,
- value: number_with_precision(@imported_transaction.amount.abs, precision: 2, delimiter: '.', separator: ','),
- class: "input input-bordered w-full text-lg font-bold",
- placeholder: "0,00",
- data: {
- controller: "currency-input currency-validation",
- currency_input_target: "input",
- currency_validation_target: "input helper",
- imported_transaction_form_target: "amount",
- action: "input->imported-transaction-form#handleAmountChange"
- } %>
- <label>
- <span 
- data-currency-helper
- data-imported-transaction-form-target="amountHelper">
- Informe o valor da transação
- </span>
- </label>
- </div>
+        <!-- Ações de conciliação -->
+        <div class="detail-card">
+          <h2>Ação de Conciliação</h2>
 
- <div>
- <%= f.label :transaction_type, class: "label" do %>
- <span>Tipo</span>
- <% end %>
- <%= f.select :transaction_type, 
- [['Receita', 'income'], ['Despesa', 'expense'], ['Transferência', 'transfer']], 
- { selected: @imported_transaction.transaction_type || 'expense' }, 
- { class: "select select-bordered w-full" } %>
- </div>
- </div>
+          <div class="action-options">
+            <label class="action-option">
+              <input type="radio" name="reconciliation_action" value="create_new" checked>
+              <div class="action-option-content">
+                <div class="action-option-title">Criar Nova Transação</div>
+                <div class="action-option-desc">Adiciona uma nova transação ao sistema</div>
+              </div>
+              <span class="action-option-badge recommended">Recomendado</span>
+            </label>
 
- <div>
- <div>
- <%= f.label :event_date, class: "label" do %>
- <span>Data do Evento</span>
- <% end %>
- <%= f.date_field :event_date, 
- value: @imported_transaction.event_date, 
- class: "input input-bordered w-full" %>
- </div>
+            <% if @matches[:candidates].present? %>
+              <label class="action-option">
+                <input type="radio" name="reconciliation_action" value="associate">
+                <div class="action-option-content">
+                  <div class="action-option-title">Associar à Existente</div>
+                  <div class="action-option-desc">Vincula a uma transação já cadastrada</div>
+                </div>
+                <span class="action-option-badge match">Match encontrado</span>
+              </label>
+            <% end %>
 
- <div>
- <%= f.label :payment_date, class: "label" do %>
- <span>Data do Pagamento</span>
- <% end %>
- <%= f.date_field :payment_date, 
- value: @imported_transaction.payment_date, 
- class: "input input-bordered w-full" %>
- </div>
- </div>
+            <label class="action-option">
+              <input type="radio" name="reconciliation_action" value="ignore">
+              <div class="action-option-content">
+                <div class="action-option-title">Ignorar</div>
+                <div class="action-option-desc">Não processa esta linha</div>
+              </div>
+            </label>
+          </div>
+        </div>
 
- <div>
- <%= f.label :category_id, class: "label" do %>
- <span>Categoria</span>
- <% end %>
- <%= f.collection_select :category_id, 
- current_user.categories, :id, :name, 
- { prompt: 'Selecione uma categoria...' }, 
- { class: "select select-bordered w-full" } %>
- </div>
- </div>
- </div>
- </div>
+        <!-- Edição de dados -->
+        <div class="detail-card">
+          <h2>Editar Dados da Transação</h2>
 
- <!-- Botões de ação -->
- <div>
- <div>
- <div>
- <%= link_to import_session_path(@import_session) do %>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
- </svg>
- Cancelar
- <% end %>
- 
- <%= f.submit "Salvar Decisão", 
-  
- data: { 
- confirm: "Confirma a decisão de conciliação? Esta ação não pode ser desfeita facilmente." 
- } do %>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
- </svg>
- Confirmar Conciliação
- <% end %>
- </div>
- </div>
- </div>
- <% end %>
- </div>
- </div>
-</div>
+          <fieldset class="form-fieldset">
+            <div class="form-field">
+              <%= f.label :description, "Descrição" %>
+              <%= f.text_field :description,
+                  value: @imported_transaction.description,
+                  placeholder: "Descrição da transação..." %>
+            </div>
 
-<!-- Script para melhorar interação -->
+            <div class="field-row">
+              <div class="form-field" data-controller="currency">
+                <%= f.label :amount, "Valor" %>
+                <%= f.text_field :amount,
+                    value: number_with_precision(@imported_transaction.amount.abs, precision: 2, delimiter: '.', separator: ','),
+                    placeholder: "0,00",
+                    data: {
+                      controller: "currency-input currency-validation",
+                      currency_input_target: "input",
+                      currency_validation_target: "input helper",
+                      imported_transaction_form_target: "amount",
+                      action: "input->imported-transaction-form#handleAmountChange"
+                    } %>
+                <small data-currency-helper data-imported-transaction-form-target="amountHelper">Informe o valor da transação</small>
+              </div>
+
+              <div class="form-field">
+                <%= f.label :transaction_type, "Tipo" %>
+                <%= f.select :transaction_type,
+                    [['Receita', 'income'], ['Despesa', 'expense'], ['Transferência', 'transfer']],
+                    { selected: @imported_transaction.transaction_type || 'expense' } %>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="form-field">
+                <%= f.label :event_date, "Data do Evento" %>
+                <%= f.date_field :event_date, value: @imported_transaction.event_date %>
+              </div>
+
+              <div class="form-field">
+                <%= f.label :payment_date, "Data do Pagamento" %>
+                <%= f.date_field :payment_date, value: @imported_transaction.payment_date %>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <%= f.label :category_id, "Categoria" %>
+              <%= f.collection_select :category_id,
+                  current_user.categories, :id, :name,
+                  { prompt: 'Selecione uma categoria...' } %>
+            </div>
+          </fieldset>
+        </div>
+
+        <!-- Botões de ação -->
+        <footer class="form-actions">
+          <%= f.submit "Confirmar Conciliação", class: "btn-primary",
+              data: { confirm: "Confirma a decisão de conciliação? Esta ação não pode ser desfeita facilmente." } %>
+          <%= link_to "Cancelar", import_session_path(@import_session), class: "btn-secondary" %>
+        </footer>
+      <% end %>
+    </div>
+  </div>
+</section>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
- // Auto-select associate action when clicking on a similar transaction
- const transactionCards = document.querySelectorAll('[id^="tx-"]');
- const associateRadio = document.querySelector('input[value="associate"]');
- 
- // Highlight selected transaction
- const transactionRadios = document.querySelectorAll('input[name="matched_transaction_id"]');
- transactionRadios.forEach(radio => {
- radio.addEventListener('change', function() {
- transactionCards.forEach(card => card.classList.remove('ring-2', 'ring-info', 'bg-info/5'));
- if (this.checked) {
- const selectedCard = document.getElementById('tx-' + this.value);
- if (selectedCard) {
- selectedCard.classList.add('ring-2', 'ring-info', 'bg-info/5');
- }
- if (associateRadio) associateRadio.checked = true;
- }
- });
- });
+  const associateRadio = document.querySelector('input[value="associate"]');
+  const transactionRadios = document.querySelectorAll('input[name="matched_transaction_id"]');
+
+  transactionRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll('.candidate-card').forEach(card => card.classList.remove('selected'));
+      if (this.checked) {
+        const selectedCard = document.getElementById('tx-' + this.value);
+        if (selectedCard) selectedCard.classList.add('selected');
+        if (associateRadio) associateRadio.checked = true;
+      }
+    });
+  });
 });
 
 function selectTransaction(transactionId) {
- const radio = document.querySelector(`input[value="${transactionId}"]`);
- const associateRadio = document.querySelector('input[value="associate"]');
- 
- if (radio) {
- radio.checked = true;
- radio.dispatchEvent(new Event('change'));
- }
- if (associateRadio) {
- associateRadio.checked = true;
- }
+  const radio = document.querySelector(`input[value="${transactionId}"]`);
+  if (radio) {
+    radio.checked = true;
+    radio.dispatchEvent(new Event('change'));
+  }
+  const associateRadio = document.querySelector('input[value="associate"]');
+  if (associateRadio) associateRadio.checked = true;
 }
 </script>
