@@ -11,15 +11,6 @@ This is a **personal finance tool** — built for personal use, with plans to op
 
 ---
 
-## 🔧 Technical Debt — Code Quality
-
-### Other code quality
-- [x] Reduce service pattern variations (standardize constructor/call convention)
-- [x] Standardize error handling patterns across services
-- [x] Modernize deprecated concern usage
-
----
-
 ## 🔧 Technical Debt — Performance (follow-ups)
 
 Dashboard optimization completed 2025-08-09 (queries reduced from ~220 to <40).
@@ -47,15 +38,12 @@ Dashboard optimization completed 2025-08-09 (queries reduced from ~220 to <40).
 - [ ] Dark mode
 - [ ] PWA support with offline mode
 - [ ] Push notifications for due dates and budget alerts
-- [ ] Customizable dashboard widgets
 
 ### Analytics & Reporting
 - [ ] Data export in multiple formats (Excel, PDF)
-- [ ] Advanced reporting templates
 
 ### Integration
 - [ ] Open Banking API integration (Brazilian banks)
-- [ ] Email report automation
 
 ### Infrastructure
 - [ ] CI/CD pipeline (GitHub Actions)
