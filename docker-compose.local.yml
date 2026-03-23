@@ -1,54 +1,6 @@
-# Local container orchestration file. Uses Rails RAILS_ENV=development but keeps
-# the filename *local* to differentiate from preprod/production compose files.
+# Local infrastructure only. Rails, Sidekiq and asset watchers run natively on the host via bin/dev.
+# Usage: docker compose -f docker-compose.local.yml up -d
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.local
-    container_name: finance_tracker_app
-    command: bash -c "rm -f tmp/pids/server.pid && RAILS_ENV=development bin/rails db:prepare && bin/dev"
-    environment:
-      RAILS_ENV: development
-      NODE_ENV: development
-      REDIS_URL: redis://redis:6379/1
-      DATABASE_URL: postgres://postgres:postgres@db:5432/orzeny_development
-      MAILCATCHER_SMTP_ADDRESS: mailcatcher
-      MAILCATCHER_SMTP_PORT: 1025
-    tty: true
-    stdin_open: true
-    ports:
-      - "3000:3000"
-    volumes:
-      - .:/app:cached
-      - bundle_cache:/usr/local/bundle
-      - node_modules:/app/node_modules
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      mailcatcher:
-        condition: service_started
-
-  sidekiq:
-    build:
-      context: .
-      dockerfile: Dockerfile.local
-    container_name: finance_tracker_sidekiq
-    command: bundle exec sidekiq
-    environment:
-      RAILS_ENV: development
-      REDIS_URL: redis://redis:6379/1
-      DATABASE_URL: postgres://postgres:postgres@db:5432/orzeny_development
-    volumes:
-      - .:/app:cached
-      - bundle_cache:/usr/local/bundle
-      - node_modules:/app/node_modules
-    depends_on:
-      - app
-      - redis
-      - db
-
   db:
     image: postgres:15
     container_name: finance_tracker_db
@@ -72,15 +24,5 @@ services:
     ports:
       - "6379:6379"
 
-  mailcatcher:
-    image: sj26/mailcatcher:latest
-    container_name: finance_tracker_mailcatcher
-    command: mailcatcher --no-quit --foreground --ip=0.0.0.0
-    ports:
-      - "1080:1080"
-      - "1025:1025"
-
 volumes:
   pg_data:
-  bundle_cache:
-  node_modules:
