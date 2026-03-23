@@ -28,6 +28,7 @@
 @import "components/month_navigation.css";
 @import "components/financial_summary.css";
 @import "components/footer.css";
+@import "components/flash.css";
 
 /* Page-specific stylesheets */
 @import "pages/transactions.css";
@@ -37,6 +38,7 @@
 @import "pages/overview.css"; /* Updated 2025-12-02 */
 @import "pages/installment_plans.css"; /* Updated 2025-12-03 */
 @import "pages/credit_statements.css"; /* Updated 2025-12-03 */
+@import "pages/import_sessions.css";
 
 /* Application-specific overrides and customizations */
 /* ============================================ */

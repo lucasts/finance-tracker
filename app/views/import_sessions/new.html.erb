@@ -1,151 +1,74 @@
-<div>
- <!-- Header -->
- <div>
- <h1>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
- </svg>
- Nova Importação de Extrato
- </h1>
- <p>Importe extratos bancários em formato OFX ou CSV para conciliação automática</p>
- </div>
+<section class="form-page">
+  <header class="form-header">
+    <h1>Nova Importação de Extrato</h1>
+    <p>Importe extratos bancários em formato OFX ou CSV para conciliação automática</p>
+  </header>
 
- <!-- Card principal -->
- <div>
- <div>
- <%= form_with model: @import_session, url: import_sessions_path, local: true, html: { multipart: true, class: "space-y-6", role: "form", "aria-label" => "Formulário de importação de extrato bancário" } do |f| %>
- 
- <!-- Tipo de arquivo -->
- <div>
- <%= f.label :source_type, class: "label", for: "import_session_source_type" do %>
- <span>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
- </svg>
- Tipo de arquivo
- </span>
- <% end %>
- <%= f.select :source_type, 
- [['OFX (Open Financial Exchange)', 'ofx'], ['CSV (Comma Separated Values)', 'csv']], 
- { prompt: 'Selecione o tipo de arquivo...' }, 
- { 
- id: "import_session_source_type",
- class: "select select-bordered w-full", 
- required: true,
- "aria-label" => "Tipo de arquivo do extrato",
- "aria-describedby" => "source-type-help",
- "aria-required" => "true"
- } %>
- <div>
- <span id="source-type-help">
- OFX é o formato padrão dos bancos. CSV requer mapeamento de campos.
- </span>
- </div>
- </div>
+  <%= form_with model: @import_session, url: import_sessions_path, local: true, html: { multipart: true, class: "form", role: "form", "aria-label" => "Formulário de importação de extrato bancário" } do |f| %>
+    <% if @import_session.errors.any? %>
+      <article class="form-errors">
+        <h2><%= pluralize(@import_session.errors.count, "erro") %> <%= @import_session.errors.count == 1 ? "impediu" : "impediram" %> a importação:</h2>
+        <ul>
+          <% @import_session.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </article>
+    <% end %>
 
- <!-- Conta destino -->
- <div>
- <%= f.label :account_id, class: "label", for: "import_session_account_id" do %>
- <span>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
- </svg>
- Conta destino
- </span>
- <% end %>
- <%= f.collection_select :account_id, 
- current_user.accounts, :id, :name, 
- { prompt: 'Selecione a conta...' }, 
- { 
- id: "import_session_account_id",
- class: "select select-bordered w-full", 
- required: true,
- "aria-label" => "Conta bancária de destino para importação",
- "aria-describedby" => "account-help",
- "aria-required" => "true"
- } %>
- <div>
- <span id="account-help">
- Conta onde as transações serão importadas
- </span>
- </div>
- </div>
+    <fieldset class="form-fieldset">
+      <div class="form-field">
+        <%= f.label :source_type, "Tipo de arquivo" %>
+        <%= f.select :source_type,
+            [['OFX (Open Financial Exchange)', 'ofx'], ['CSV (Comma Separated Values)', 'csv']],
+            { prompt: 'Selecione o tipo de arquivo...' },
+            { id: "import_session_source_type", required: true } %>
+        <small>OFX é o formato padrão dos bancos. CSV requer mapeamento de campos.</small>
+      </div>
 
- <!-- Upload do arquivo -->
- <div>
- <%= f.label :file, class: "label", for: "import_session_file" do %>
- <span>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
- </svg>
- Arquivo de extrato
- </span>
- <% end %>
- <div 
- data-controller="file-upload"
- data-file-upload-allowed-types-value='[".ofx", ".csv", ".txt"]'
- data-file-upload-max-size-value="10485760"
- data-file-upload-show-preview-value="true">
- <%= f.file_field :file, 
- id: "import_session_file",
- class: "file-input file-input-bordered w-full", 
- accept: ".ofx,.csv,.txt", 
- required: true,
- "aria-label" => "Selecionar arquivo de extrato bancário",
- "aria-describedby" => "file-help",
- "aria-required" => "true",
- data: { 
- file_upload_target: "input"
- } %>
- <div data-file-upload-target="preview" role="status" aria-live="polite">
- <!-- Preview content will be populated by controller -->
- </div>
- <div data-file-upload-target="error" role="alert" aria-live="assertive">
- <!-- Error messages will be populated by controller -->
- </div>
- </div>
- <div>
- <span id="file-help">
- Formatos aceitos: .ofx, .csv, .txt (máx. 10MB)
- </span>
- </div>
- </div>
+      <div class="form-field">
+        <%= f.label :account_id, "Conta destino" %>
+        <%= f.collection_select :account_id,
+            current_user.accounts, :id, :name,
+            { prompt: 'Selecione a conta...' },
+            { id: "import_session_account_id", required: true } %>
+        <small>Conta onde as transações serão importadas</small>
+      </div>
 
- <!-- Info card -->
- <div>
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
- </svg>
- <div>
- <h3>Dica</h3>
- <div>
- <p>• <strong>OFX:</strong> Baixe diretamente do seu banco (mais preciso)</p>
- <p>• <strong>CSV:</strong> Exporte do Excel ou sistema bancário</p>
- <p>• Exemplo de CSV disponível <%= link_to "aqui", "/import_example.csv", class: "link link-primary", target: "_blank" %></p>
- </div>
- </div>
- </div>
+      <div class="form-field">
+        <%= f.label :file, "Arquivo de extrato" %>
+        <div data-controller="file-upload"
+             data-file-upload-allowed-types-value='[".ofx", ".csv", ".txt"]'
+             data-file-upload-max-size-value="10485760"
+             data-file-upload-show-preview-value="true">
+          <%= f.file_field :file,
+              id: "import_session_file",
+              accept: ".ofx,.csv,.txt",
+              required: true,
+              data: { file_upload_target: "input" } %>
+          <div data-file-upload-target="preview" role="status" aria-live="polite"></div>
+          <div data-file-upload-target="error" role="alert" aria-live="assertive"></div>
+        </div>
+        <small>Formatos aceitos: .ofx, .csv, .txt (máx. 10MB)</small>
+      </div>
+    </fieldset>
 
- <!-- Botões de ação -->
- <div>
- <%= link_to "Cancelar", import_sessions_path %>
- <%= f.submit "Iniciar Importação", 
-  
- data: { 
- confirm: "Confirma a importação do arquivo selecionado?",
- loading: "Processando arquivo...",
- file_upload_target: "submit",
- action: "click->file-upload#handleSubmit"
- } %>
- </div>
- <% end %>
- </div>
- </div>
+    <aside class="form-tip">
+      <h3>Dica</h3>
+      <p><strong>OFX:</strong> Baixe diretamente do seu banco (mais preciso)</p>
+      <p><strong>CSV:</strong> Exporte do Excel ou sistema bancário</p>
+      <p>Exemplo de CSV disponível <%= link_to "aqui", "/import_example.csv", target: "_blank" %></p>
+    </aside>
 
- <!-- Link de volta -->
- <div>
- <%= link_to import_sessions_path, class: "link link-hover text-base-content/70" do %>
- ← Voltar para importações
- <% end %>
- </div>
-</div>
+    <footer class="form-actions">
+      <%= f.submit "Iniciar Importação", class: "btn-primary",
+          data: {
+            confirm: "Confirma a importação do arquivo selecionado?",
+            loading: "Processando arquivo...",
+            file_upload_target: "submit",
+            action: "click->file-upload#handleSubmit"
+          } %>
+      <%= link_to "Cancelar", import_sessions_path, class: "btn-secondary" %>
+    </footer>
+  <% end %>
+</section>

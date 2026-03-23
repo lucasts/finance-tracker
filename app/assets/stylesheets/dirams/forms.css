@@ -327,6 +327,33 @@
   box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.12), var(--shadow-inset);
 }
 
+/* Tip / info aside within forms */
+.form-tip {
+  background: rgba(232, 135, 69, 0.06);
+  border: var(--border-width-thin) solid rgba(232, 135, 69, 0.18);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.form-tip h3 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.form-tip p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--spacing-1) 0;
+  line-height: 1.5;
+}
+
+.form-tip p:last-child {
+  margin-bottom: 0;
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */
