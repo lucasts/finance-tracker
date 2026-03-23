@@ -15,8 +15,6 @@ This is a **personal finance tool** — built for personal use, with plans to op
 
 Dashboard optimization completed 2025-08-09 (queries reduced from ~220 to <40).
 
-- [ ] Add index on `transactions(payment_date)` if payment-centric queries grow
-
 ---
 
 ## 🔧 Technical Debt — Import Pipeline
@@ -51,6 +49,12 @@ Dashboard optimization completed 2025-08-09 (queries reduced from ~220 to <40).
 ---
 
 ## 📦 Release Log
+
+### March 2026 — Add `transactions(payment_date)` index
+
+- Added composite index `(user_id, payment_date)` on `transactions` to support payment-centric queries without full-table scans.
+- Migration: `20260322000000_add_payment_date_index_to_transactions.rb`.
+- 602 examples, 0 failures.
 
 ### March 2026 — Service layer standardization & concern cleanup
 
