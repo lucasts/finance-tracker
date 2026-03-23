@@ -329,6 +329,23 @@ RSpec.describe CsvImportService, type: :service do
         expect(result[0][:description]).to eq('TEST PURCHASE')
         expect(result[0][:transaction_type]).to eq('expense')
       end
+
+      it 'handles lancamento header with cedilla stripped by encoding (lanamento)' do
+        csv = "data,lanamento,valor\n2025-12-01,ENCODING TEST,15.00"
+        result = described_class.new(csv).parse
+        expect(result.length).to eq(1)
+        expect(result[0][:description]).to eq('ENCODING TEST')
+        expect(result[0][:transaction_type]).to eq('expense')
+      end
+
+      it 'handles content with BOM stripped and cedilla mangled' do
+        csv = "data,lanamento,valor\r\n2025-12-02,IOF COMPRA,1.47\r\n2025-11-10,PAGAMENTO EFETUADO,-156.97"
+        result = described_class.new(csv).parse
+        expect(result.length).to eq(2)
+        expect(result[0][:description]).to eq('IOF COMPRA')
+        expect(result[0][:transaction_type]).to eq('expense')
+        expect(result[1][:transaction_type]).to eq('income')
+      end
     end
 
     context 'delimiter auto-detection edge cases' do

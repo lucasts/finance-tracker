@@ -126,6 +126,7 @@ app/
 ### **File Import System**
 - **OFX Parser** — Custom Ruby implementation (`lib/ofx_simple_parser.rb`)
 - **CSV Processing** — Flexible header detection and data mapping
+- **CSV Variants** — Supports standard headers, headerless semicolon bank exports (`DD/MM/YYYY;descricao;valor`) and credit-card bill CSV (`data,lançamento,valor`) with fallback handling for BOM and stripped cedilla headers (`lancamento`/`lanamento`)
 - **Reconciliation Engine** — Fuzzy matching algorithms for transaction identification
 - **Duplicate Detection** — Advanced heuristic engine (description normalization + temporal & monetary tolerances + similarity flagging)
 

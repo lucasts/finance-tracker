@@ -26,7 +26,7 @@
 - **Smart Status**: Automatic updates based on dates (pending/confirmed)
 
 ### 📥 Import and Reconciliation
-- **Multiple Formats**: Support for OFX and CSV
+- **Multiple Formats**: Support for OFX and CSV (including headerless bank CSV and credit card bills with `data,lançamento,valor`)
 - **Smart Reconciliation**: Heuristics based on amount + description + date (±3 days)
 - **Batch Processing**: Import sessions with state control
 - **Duplicate Detection**: Anti-duplication system with memory

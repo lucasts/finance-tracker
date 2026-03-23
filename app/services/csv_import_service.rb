@@ -16,7 +16,8 @@ class CsvImportService
   def parse
     return [] if @file_content.to_s.strip.empty?
 
-    lines = @file_content.to_s.strip.lines.reject { |l| l.strip.empty? }
+    sanitized = @file_content.to_s.sub(/\A\xEF\xBB\xBF/, "").strip
+    lines = sanitized.lines.reject { |l| l.strip.empty? }
 
     if headerless_semicolon_format?(lines)
       parse_headerless_semicolon(lines)
@@ -31,16 +32,18 @@ class CsvImportService
 
   # Detects credit card CSV exports with "lançamento" header:
   #   data,lançamento,valor
+  # Also matches "lancamento" (no cedilla) and "lanamento" (cedilla stripped by
+  # binary-to-UTF-8 encoding in the controller).
   def credit_card_csv_format?(lines)
     header = lines.first.to_s.strip.downcase
-    header.match?(/\blan[çc]amento\b/)
+    header.match?(/\blan[çc]?amento\b/)
   end
 
   def parse_credit_card_csv(lines)
     content = lines.join
     csv = CSV.parse(content, headers: true, col_sep: ",")
 
-    desc_key = csv.headers.find { |h| h&.match?(/lan[çc]amento/i) }
+    desc_key = csv.headers.find { |h| h&.match?(/lan[çc]?amento/i) }
 
     transactions = []
     csv.each_with_index do |row, idx|
