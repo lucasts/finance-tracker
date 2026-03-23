@@ -38,7 +38,7 @@
 - **Ruby on Rails 8.0** with modern patterns
 - **PostgreSQL** with double-entry system
 - **Sidekiq** for background jobs
-- **457+ RSpec tests** passing
+- **618+ RSpec tests** passing
 - **Devise** for authentication
 
 ### Modernized Frontend
@@ -48,79 +48,76 @@
 - **WCAG AA** compliance
 - **Optimized performance** (lazy loading, smart cache)
 
-## 🚀 Quick Start
+## 🚀 Rodando localmente
 
-### Full Container Local (Recommended for Clean Host)
+A stack de desenvolvimento roda **Ruby/Rails diretamente no host**. Apenas PostgreSQL e Redis sobem via Docker.
+
+### Pré-requisitos
+- Ruby (versão em `.ruby-version`)
+- Node.js / Yarn
+- Docker (somente para pg + redis)
+
+### 1. Suba os serviços de infraestrutura
+
 ```bash
-# Build and start full local environment (Rails + Postgres + Redis + Sidekiq + MailCatcher)
-docker compose -f docker-compose.local.yml up --build
-
-# (First run) It will run db:prepare automatically via startup command
-
-# Open app
-open http://localhost:3000  # (macOS) or just visit in browser
-
-# Run RSpec tests inside container
-docker compose -f docker-compose.local.yml exec app bundle exec rspec
-
-# Run a single spec
-docker compose -f docker-compose.local.yml exec app bundle exec rspec spec/models/transaction_spec.rb
-
-# Run frontend (Jest) tests
-docker compose -f docker-compose.local.yml exec app yarn test
-
-# Tail logs (useful services)
-docker compose -f docker-compose.local.yml logs -f app
-docker compose -f docker-compose.local.yml logs -f sidekiq
-
-# Rebuild after Gemfile changes
-docker compose -f docker-compose.local.yml build app sidekiq
-
-# Stop and remove containers (data in volumes persists)
-docker compose -f docker-compose.local.yml down
-
-# Stop and also remove persistent volumes (DB reset)
-docker compose -f docker-compose.local.yml down -v
+# Inicia somente PostgreSQL e Redis em background
+docker compose -f docker-compose.local.yml up db redis -d
 ```
 
-Nota: o ambiente local utiliza a imagem construída a partir de `Dockerfile.local` (focada em velocidade de desenvolvimento, inclui gems e dependências de teste) enquanto preprod/produção usam pipelines distintas com otimizações próprias.
+Portas mapeadas no host:
+- PostgreSQL: `5432`
+- Redis: `6379`
 
-Ports used locally:
-- App: http://localhost:3000
-- PostgreSQL: 5432 (container) — mapped to host 5432
-- Redis: 6379
-- MailCatcher UI: http://localhost:1080 (SMTP in 1025)
+### 2. Setup inicial (primeira vez)
 
-Environment defaults (development):
-- `DATABASE_URL=postgres://postgres:postgres@db:5432/orzeny_development`
-- `REDIS_URL=redis://redis:6379/1`
-- Hot reload via bind-mount volume `.:/app`
-
-To reset database quickly:
 ```bash
-docker compose -f docker-compose.local.yml exec app bin/rails db:drop db:create db:migrate
-```
-
-### Development Setup
-```bash
-# Complete initial setup
+# Instala gems, prepara banco e inicia o servidor
 ./bin/setup
+```
 
-# Development server
+### 3. Desenvolvimento do dia-a-dia
+
+```bash
+# Inicia Rails + Sidekiq + asset watcher
 ./bin/dev
 
-# Run tests
-bundle exec rspec    # Backend (457+ tests)
-yarn test           # Frontend (90 tests)
+# Acesse em http://localhost:3000
 ```
 
-### Environment Variables (.env.example)
-Um arquivo unificado `.env.example` lista todas as variáveis possíveis (desenvolvimento, preprod e produção). Para começar rapidamente:
+### Testes
+
+```bash
+bundle exec rspec        # suite completa
+bundle exec rspec spec/models/transaction_spec.rb  # arquivo específico
+bundle exec rspec spec/models/transaction_spec.rb:42  # exemplo específico
+bin/verify               # rspec + rubocop + brakeman (pre-commit check)
+```
+
+### Variáveis de ambiente
+
+Copie o `.env.example` e ajuste se necessário:
 ```bash
 cp .env.example .env.local
-# (Edite conforme necessário: DATABASE_URL, SECRET_KEY_BASE se quiser customizar)
 ```
-O script `bin/containers` carrega automaticamente `.env.local` se existir.
+
+Valores padrão esperados com Docker local:
+```
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/orzeny_development
+REDIS_URL=redis://localhost:6379/1
+```
+
+### Reset do banco
+
+```bash
+bin/rails db:drop db:create db:migrate db:seed
+```
+
+### Parar os serviços Docker
+
+```bash
+docker compose -f docker-compose.local.yml down          # para (dados persistem)
+docker compose -f docker-compose.local.yml down -v       # para e apaga volumes
+```
 
 ### Demo Data
 The default setup loads only essential data. For demonstrations with realistic data:
@@ -160,7 +157,7 @@ Complete environment that simulates production with all services:
 ## 🧪 Quality and Testing
 
 ### Test Coverage
-- ✅ **Backend**: 457+ RSpec tests covering models, controllers, services, and jobs
+- ✅ **Backend**: 618+ RSpec tests covering models, controllers, services, and jobs
 - ✅ **Frontend**: 90 Jest tests covering services and Stimulus controllers
 - ✅ **Integration**: Complete end-to-end flows
 - ✅ **Performance**: Optimized Web Vitals metrics
@@ -244,7 +241,7 @@ RAILS_MASTER_KEY=your_master_key_here
 - **Deploy**: Production-ready with complete documentation
 
 ### 📈 Success Metrics
-- ✅ **457+** backend tests passing
+- ✅ **618+** backend tests passing
 - ✅ **90** frontend tests passing
 - ✅ **100%** features implemented
 - ✅ **A+** accessibility grade
