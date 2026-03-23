@@ -324,6 +324,152 @@
   margin-left: var(--spacing-2);
 }
 
+/* ============================================
+   PROJECTED BALANCE (Left Column)
+   ============================================ */
+
+.overview-page article.projected-balance-overview header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.overview-page .projection-hint {
+  cursor: help;
+  font-size: var(--font-size-base);
+  opacity: 0.7;
+}
+
+.overview-page .projected-balance-value {
+  text-align: center;
+  padding: var(--spacing-4) 0;
+}
+
+.overview-page .projected-balance-value data {
+  font-size: var(--font-size-2xl, 1.5rem);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.overview-page .projected-balance-value data.positive {
+  color: var(--color-success);
+}
+
+.overview-page .projected-balance-value data.negative {
+  color: var(--color-error);
+}
+
+.overview-page .balance-alert {
+  padding: var(--spacing-3);
+  background: rgba(217, 83, 79, 0.08);
+  border: var(--border-width-thin) solid rgba(217, 83, 79, 0.2);
+  border-radius: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  text-align: center;
+}
+
+/* ============================================
+   CATEGORY PROJECTIONS SECTION
+   ============================================ */
+
+.overview-page .category-projections-section {
+  margin-bottom: var(--spacing-8);
+}
+
+.overview-page article.category-projections-overview {
+  background: linear-gradient(180deg, var(--color-white) 0%, #f9f9f8 100%);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: 6px;
+  padding: var(--spacing-5);
+  box-shadow: 0 2px 4px rgba(65, 65, 65, 0.08),
+              0 1px 2px rgba(65, 65, 65, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.overview-page article.category-projections-overview header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-3);
+  border-bottom: var(--border-width-thin) solid var(--color-border-light);
+}
+
+.overview-page article.category-projections-overview h3 {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.overview-page .category-projections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.overview-page .category-projection-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-bottom: var(--border-width-thin) solid var(--color-border-light);
+}
+
+.overview-page .category-projection-item:last-child {
+  border-bottom: none;
+}
+
+.overview-page .category-projection-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  flex: 1;
+}
+
+.overview-page .category-projection-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.overview-page .category-projection-bar {
+  height: 4px;
+  background: var(--color-border-light);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.overview-page .category-projection-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  border-radius: 2px;
+  transition: width var(--transition-normal);
+}
+
+.overview-page .category-projection-amounts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.overview-page .category-spent {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.overview-page .category-projected-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Tables (legacy - can be removed if not used) */
 .overview-page section.overview-details table {
   width: 100%;

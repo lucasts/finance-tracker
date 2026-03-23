@@ -12,7 +12,11 @@ class RecurringProjectionService
   def initialize(months_ahead: DEFAULT_HORIZON_MONTHS, as_of: Date.today)
     @as_of = as_of
   horizon_date = as_of.advance(months: months_ahead)
-  # If horizon is same month (months_ahead == 0) use end_of_month for richer short projections
+  # Horizon semantics (exact-date mode — decided 2025-08, confirmed 2026-03):
+  #   months_ahead > 0  → exact day boundary (e.g. Mar 15 + 3 months = Jun 15)
+  #   months_ahead == 0 → current month focus (end_of_month)
+  # A month_end rounding mode was evaluated and rejected for consistency.
+  # See docs/TECHNICAL_SPECIFICATION.md § Projection Services Architecture.
   horizon_date = as_of.end_of_month if months_ahead.zero?
   @horizon_end = horizon_date.end_of_day
   end

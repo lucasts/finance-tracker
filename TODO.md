@@ -6,49 +6,12 @@ Core features are **complete and functional**: transactions with double-entry bo
 credit card management, installment plans, recurring commitments, OFX/CSV import with
 dedup heuristics, reports/projections, and Sidekiq background automation.
 
-Last active development: **January 2026**. Resumed: **March 2026**.
+This is a **personal finance tool** — built for personal use, with plans to open source.
 
----
-
-## ✅ Immediate — Fix & Stabilize (complete)
-
-### 1. Get test suite green again
-- [x] Fix all failing RSpec tests — 566 examples, 0 failures (was 0 passing)
-- [x] Ensure Docker environment builds cleanly — Dockerfile.local updated to Ruby 4.0.1 (was 3.4.2)
-- [x] Verify `bin/verify` passes — runs locally with local Ruby (Docker is infra-only for postgres/redis)
-
-### 2. Enable code quality tooling
-- [x] Enable RuboCop in `bin/verify` — 0 violations across 155 files
-- [x] Enable Brakeman security scanning in `bin/verify` — 0 warnings; 3 IDOR vulnerabilities fixed
-- [x] Configure SimpleCov with 90% minimum coverage threshold (guarded by COVERAGE/CI env vars)
-
-### 3. Strengthen test integrity
-- [x] Add explicit double-entry balance assertion spec — 10 tests in double_entry_integrity_spec.rb
-- [x] Standardize spec language to English — all Portuguese descriptions translated
-- [x] Expand request/integration specs — added 8 spec files (71 tests) for previously uncovered controllers
-
-### 4. Update dependencies
-- [x] `bundle update --conservative` — all gems already at latest patch; no lock changes
-- [x] Gem changelogs reviewed — Rails 8.1.2, Devise 5.0.3, Sidekiq 8.1.1; all tested and passing
 
 ---
 
 ## 🔧 Technical Debt — Code Quality
-
-### Money concern consolidation
-- [x] Consolidate 5 separate money concerns (MoneyConcern, MoneyParsing, MoneyNormalization, MoneyValidation, MoneyFormatting) into a cohesive module
-- [x] Remove any legacy/duplicate money parsing paths
-
-### Projection horizon semantics
-Unificação aplicada (2025-08-09):
-- `months_ahead > 0` cuts at exact date, not end of target month.
-- `months_ahead == 0` focuses on current month (until end_of_month).
-- `MonthlyBalanceProjectionService`: when `as_of == end_of_month` no future projections added.
-
-Pending:
-- [ ] Confirm if UX needs alternative `month_end` horizon mode — if yes, expose `horizon_mode` flag
-- [ ] Update in-app help/docs mentioning horizon behavior
-- [ ] Review screens showing projection counts to reflect the change
 
 ### Other code quality
 - [ ] Reduce service pattern variations (standardize constructor/call convention)
@@ -82,16 +45,10 @@ Remaining optional items:
 - [ ] Make tolerances configurable per user (absolute value, %, day window)
 - [ ] CSV idempotency support (same digest + line fingerprint)
 - [ ] Tests: partial scenario (1 new + 1 duplicate in same file), missing external_id, rounded amounts
-- [ ] Metric: duplicates prevented counter per period for internal dashboard
 
 ---
 
 ## 🚀 Future Enhancements (Optional)
-
-### Security
-- [ ] Rate limiting (rack-attack)
-- [ ] Change auditing (paper_trail)
-- [ ] Two-factor authentication (2FA)
 
 ### User Experience
 - [ ] Dark mode
@@ -99,44 +56,72 @@ Remaining optional items:
 - [ ] Push notifications for due dates and budget alerts
 - [ ] Customizable dashboard widgets
 
-### Analytics & Monitoring
-- [ ] Application monitoring (Sentry/Bugsnag)
+### Analytics & Reporting
 - [ ] Data export in multiple formats (Excel, PDF)
 - [ ] Advanced reporting templates
 
 ### Integration
 - [ ] Open Banking API integration (Brazilian banks)
 - [ ] Email report automation
-- [ ] REST API for third-party applications
 
 ### Infrastructure
 - [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Container security scanning
-- [ ] Automated security vulnerability scanning
 
 ---
 
-## ✅ Completed Milestones
+## 📦 Release Log
 
-### Performance optimization (2025-08-09)
-- Reduced overview dashboard queries from ~220 to <40 (spec enforced)
-- Batched month aggregates & category ranking (in-memory from preloaded dataset)
-- Added caching layer for 12-month chart data (Rails.cache + in-request memoization)
-- Memoized RecurringProjectionService results per request
-- Added DB indexes: `transactions(user_id, status, event_date)` and `entries(account_id, entry_type)`
-- Cache invalidation strategy (touch on transaction create/update)
-- Performance spec threshold tightened to <=30 queries
+### March 2026 — Projection horizon semantics & dashboard display
 
-### DiRams design system (Nov–Dec 2025)
-- Created custom DiRams design system replacing Tailwind/DaisyUI
-- Redesigned all pages: transactions, accounts, categories, overview, installment plans
-- Standardized all listing pages with table layout
+**Projection horizon decision:**
+- Confirmed exact-date mode as the only horizon mode; `month_end` rounding rejected for consistency.
+  `months_ahead > 0` → `as_of + N months` (exact day). `months_ahead == 0` → `end_of_month`.
+  Documented in `docs/TECHNICAL_SPECIFICATION.md` § Projection Services Architecture and inline service comments.
 
-### Core features (through Aug 2025)
-- Complete double-entry bookkeeping system
-- Credit card statement management with Brazilian cycles
-- Recurring commitments (9 frequency types)
-- Installment plans (up to 120 installments)
-- OFX/CSV import with fingerprint-based dedup and transfer detection
-- Financial projections (monthly balance, recurring, installment horizon)
-- Dockerized local development environment
+**Dashboard improvements:**
+- `@projected_balance` and `@balance_alert` now displayed on the overview dashboard (were computed but hidden).
+- `@category_projections` section added to the dashboard with per-category spend-vs-projection bar.
+- Projection tooltips added on overview, reports, and recurring commitment show views explaining the 3-month exact-date horizon.
+
+**Docs:**
+- `docs/CURRENT_PRODUCT_DEFINITION.md` — Projections section expanded with horizon and alert details.
+- `docs/TECHNICAL_SPECIFICATION.md` — New § Projection Services Architecture with service table and design rationale.
+
+### March 2026 — Fix & stabilize, code quality tooling, test integrity
+
+- Fixed all failing RSpec tests — 566 → 0 failures.
+- Updated Dockerfile.local to Ruby 4.0.1 (was 3.4.2); `bin/verify` green locally.
+- Enabled RuboCop in `bin/verify` — 0 violations across 155 files.
+- Enabled Brakeman in `bin/verify` — 0 warnings; fixed 3 IDOR vulnerabilities.
+- Configured SimpleCov with 90% minimum coverage threshold (guarded by `COVERAGE`/`CI` env vars).
+- Added explicit double-entry balance assertion spec (10 tests in `double_entry_integrity_spec.rb`).
+- Standardized all spec descriptions to English.
+- Added 8 new request/integration spec files (71 tests) for previously uncovered controllers.
+- `bundle update --conservative` — no lock changes; Rails 8.1.2, Devise 5.0.3, Sidekiq 8.1.1.
+- Consolidated 5 separate money concerns into a cohesive module; removed duplicate parsing paths.
+
+### August 2025 — Performance optimization
+
+- Reduced overview dashboard queries from ~220 to <40 (spec enforced at ≤30).
+- Batched month aggregates & category ranking (in-memory from preloaded dataset).
+- Added caching layer for 12-month chart data (`Rails.cache` + in-request memoization).
+- Memoized `RecurringProjectionService` results per request.
+- Added DB indexes: `transactions(user_id, status, event_date)` and `entries(account_id, entry_type)`.
+- Cache invalidation via `touch` on transaction create/update.
+- Unified projection horizon semantics across all projection services.
+
+### Nov–Dec 2025 — DiRams design system
+
+- Created custom DiRams design system replacing Tailwind/DaisyUI.
+- Redesigned all pages: transactions, accounts, categories, overview, installment plans.
+- Standardized all listing pages with table layout.
+
+### Through Aug 2025 — Core features
+
+- Complete double-entry bookkeeping system.
+- Credit card statement management with Brazilian cycles.
+- Recurring commitments (9 frequency types).
+- Installment plans (up to 120 installments).
+- OFX/CSV import with fingerprint-based dedup and transfer detection.
+- Financial projections (monthly balance, recurring, installment horizon).
+- Dockerized local development environment.

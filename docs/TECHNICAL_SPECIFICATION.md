@@ -223,7 +223,41 @@ potential_transfer_with_id BIGINT NULL
 - **Color Contrast** — Minimum 4.5:1 ratio for normal text, 3:1 for large text
 - **Focus Management** — Clear focus indicators and logical tab order
 
-## 📊 What's Special Here
+## � Projection Services Architecture
+
+### Overview
+
+The projection system generates non-persisted future transaction data to help users forecast their financial position. All projection services follow a unified **horizon semantics** established in August 2025.
+
+### Horizon Semantics (exact-date mode)
+
+The system uses a single, consistent horizon mode: **exact-date**.
+
+- **`months_ahead > 0`**: The horizon end date is calculated as `as_of.advance(months: months_ahead)`. This produces an exact-day boundary — e.g., if `as_of = March 15` and `months_ahead = 3`, the horizon is **June 15**, not June 30.
+- **`months_ahead == 0`**: The horizon end date is `as_of.end_of_month`. This provides a "current month focus" — projecting only within the remaining days of the current month.
+
+**Design decision**: A `month_end` alternative mode (rounding up to end of target month) was evaluated and rejected. Exact-date is more predictable for financial forecasting and avoids the inconsistency where "3 months" would mean variable durations depending on the current day of month.
+
+### Services
+
+| Service | Default Horizon | Purpose | Used By |
+|---------|----------------|---------|---------|
+| `RecurringProjectionService` | 3 months | Projects future transactions from active recurring commitments | OverviewController, ReportsController, recurring show view |
+| `InstallmentProjectionService` | 6 months | Projects unpaid installments from active plans | OverviewController (via `projected_balance`), MonthlyBalanceProjectionService |
+| `MonthlyBalanceProjectionService` | Current month | Dual-perspective (competence vs cash) balance projection | Available for future use |
+| `CategoryProjectionCalculator` | 3 months (backward) | Computes per-category average spending over historical window | OverviewController |
+
+### Key Behaviors
+
+1. **`MonthlyBalanceProjectionService`**: When `as_of == end_of_month`, both `projected_recurring_expenses` and `projected_installment_expenses` return 0 (no future days remaining in the month).
+
+2. **Competence vs Cash separation**: `MonthlyBalanceProjectionService` maintains dual scopes — `event_date` for competence perspective, `payment_date` for cash perspective — with projections summed into both.
+
+3. **Memoization**: `RecurringProjectionService` results are cached per-request in `OverviewController` to avoid redundant computation across `@projected_transactions` and `projected_balance`.
+
+4. **User isolation**: `RecurringProjectionService` and `InstallmentProjectionService` query all active commitments/plans (not user-scoped). User isolation happens at the controller level via `current_user_scope`.
+
+## �📊 What's Special Here
 
 1. **Smart Import Engine** — Automatically categorizes and deduplicates imported transactions
 2. **Credit Card Intelligence** — Understands Brazilian credit card cycles and statements

@@ -82,6 +82,24 @@
         </div>
       <% end %>
     </article>
+
+    <!-- Projected Balance -->
+    <article class="projected-balance-overview">
+      <header>
+        <h3>Saldo Projetado</h3>
+        <span class="projection-hint" title="Projeção baseada em transações confirmadas, compromissos recorrentes e parcelas futuras.">🔮</span>
+      </header>
+      <div class="projected-balance-value">
+        <data class="<%= @projected_balance >= 0 ? 'positive' : 'negative' %>">
+          <%= format_money(@projected_balance) %>
+        </data>
+      </div>
+      <% if @balance_alert %>
+        <div class="balance-alert">
+          <span><%= @balance_alert %></span>
+        </div>
+      <% end %>
+    </article>
   </div>
 
   <!-- Right Column -->
@@ -153,4 +171,32 @@
     </article>
   </div>
 </section>
+
+<!-- Category Projections -->
+<% if @category_projections.present? %>
+<section class="category-projections-section">
+  <article class="category-projections-overview">
+    <header>
+      <h3>Projeção por Categoria</h3>
+      <span class="projection-hint" title="Média de gastos dos últimos 3 meses por categoria, comparada com o mês atual.">🔮</span>
+    </header>
+    <div class="category-projections-list">
+      <% @category_projections.each do |proj| %>
+        <div class="category-projection-item">
+          <div class="category-projection-info">
+            <span class="category-projection-name"><%= proj[:category].name %></span>
+            <div class="category-projection-bar">
+              <div class="category-projection-fill" style="width: <%= [proj[:percentage_used], 100].min %>%"></div>
+            </div>
+          </div>
+          <div class="category-projection-amounts">
+            <data class="category-spent"><%= format_money(proj[:current_spent]) %></data>
+            <span class="category-projected-label">de <%= format_money(proj[:projected]) %></span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </article>
+</section>
+<% end %>
 </div>

@@ -15,7 +15,10 @@ class InstallmentProjectionService
     @as_of = as_of
     horizon_date = as_of.advance(months: months_ahead)
   @months_ahead = months_ahead
-  # Horizon semantics: months_ahead 0 => end of current month; otherwise exact day-of-month advance
+  # Horizon semantics (exact-date mode — decided 2025-08, confirmed 2026-03):
+  #   months_ahead > 0  → exact day boundary (e.g. Jan 15 + 6 months = Jul 15)
+  #   months_ahead == 0 → current month focus (end_of_month)
+  # See docs/TECHNICAL_SPECIFICATION.md § Projection Services Architecture.
   @horizon_end = (months_ahead.zero? ? as_of.end_of_month : horizon_date)
   end
 
