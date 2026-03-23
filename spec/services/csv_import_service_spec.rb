@@ -198,5 +198,165 @@ RSpec.describe CsvImportService, type: :service do
         expect(result[2][:line_number]).to eq(3)
       end
     end
+
+    context 'with semicolon-delimited headerless bank export (Brazilian format)' do
+      let(:bank_export) do
+        "21/11/2025;REND PAGO APLIC AUT MAIS;0,04\n" \
+        "21/11/2025;CEEE      0000050970208;-336,68\n" \
+        "27/11/2025;REMUNERACAO/SALARIO;28546,15"
+      end
+
+      it 'auto-detects semicolon delimiter and parses all rows' do
+        result = described_class.new(bank_export).parse
+        expect(result.length).to eq(3)
+      end
+
+      it 'extracts description from second column' do
+        result = described_class.new(bank_export).parse
+        expect(result[0][:description]).to eq('REND PAGO APLIC AUT MAIS')
+        expect(result[1][:description]).to eq('CEEE      0000050970208')
+        expect(result[2][:description]).to eq('REMUNERACAO/SALARIO')
+      end
+
+      it 'parses Brazilian-format amounts (comma decimal separator)' do
+        result = described_class.new(bank_export).parse
+        expect(result[0][:amount]).to eq(BigDecimal('0.04'))
+        expect(result[1][:amount]).to eq(BigDecimal('336.68'))
+        expect(result[2][:amount]).to eq(BigDecimal('28546.15'))
+      end
+
+      it 'parses DD/MM/YYYY dates into event_date and payment_date' do
+        result = described_class.new(bank_export).parse
+        expect(result[0][:event_date]).to eq('2025-11-21')
+        expect(result[0][:payment_date]).to eq('2025-11-21')
+        expect(result[2][:event_date]).to eq('2025-11-27')
+      end
+
+      it 'infers transaction type from sign' do
+        result = described_class.new(bank_export).parse
+        expect(result[0][:transaction_type]).to eq('income')
+        expect(result[1][:transaction_type]).to eq('expense')
+        expect(result[2][:transaction_type]).to eq('income')
+      end
+
+      it 'numbers lines correctly' do
+        result = described_class.new(bank_export).parse
+        expect(result[0][:line_number]).to eq(1)
+        expect(result[1][:line_number]).to eq(2)
+        expect(result[2][:line_number]).to eq(3)
+      end
+
+      it 'stores raw data' do
+        result = described_class.new(bank_export).parse
+        expect(result[0][:raw_data]).to be_present
+      end
+    end
+
+    context 'with credit card CSV format (lançamento header)' do
+      let(:credit_card_csv) do
+        "data,lançamento,valor\n" \
+        "2025-12-02,IOF COMPRA INTERNACIONA,1.47\n" \
+        "2025-12-01,BACKBLAZE INC,41.64\n" \
+        "2025-11-30,Google One,9.99\n" \
+        "2025-11-18,AMAZON SERVICOS DE VAR,0.99\n" \
+        "2025-11-14,NETFLIX ENTRETENIMENTO,44.9\n" \
+        "2025-11-10,PAGAMENTO EFETUADO,-156.97"
+      end
+
+      it 'auto-detects credit card CSV format and parses all rows' do
+        result = described_class.new(credit_card_csv).parse
+        expect(result.length).to eq(6)
+      end
+
+      it 'extracts description from lançamento column' do
+        result = described_class.new(credit_card_csv).parse
+        expect(result[0][:description]).to eq('IOF COMPRA INTERNACIONA')
+        expect(result[1][:description]).to eq('BACKBLAZE INC')
+        expect(result[4][:description]).to eq('NETFLIX ENTRETENIMENTO')
+        expect(result[5][:description]).to eq('PAGAMENTO EFETUADO')
+      end
+
+      it 'parses amounts correctly' do
+        result = described_class.new(credit_card_csv).parse
+        expect(result[0][:amount]).to eq(BigDecimal('1.47'))
+        expect(result[1][:amount]).to eq(BigDecimal('41.64'))
+        expect(result[4][:amount]).to eq(BigDecimal('44.9'))
+        expect(result[5][:amount]).to eq(BigDecimal('156.97'))
+      end
+
+      it 'treats positive values as expenses (credit card charges)' do
+        result = described_class.new(credit_card_csv).parse
+        expect(result[0][:transaction_type]).to eq('expense')
+        expect(result[1][:transaction_type]).to eq('expense')
+        expect(result[2][:transaction_type]).to eq('expense')
+      end
+
+      it 'treats negative values as income (payments/credits)' do
+        result = described_class.new(credit_card_csv).parse
+        expect(result[5][:transaction_type]).to eq('income')
+      end
+
+      it 'parses ISO dates into event_date and payment_date' do
+        result = described_class.new(credit_card_csv).parse
+        expect(result[0][:event_date]).to eq('2025-12-02')
+        expect(result[0][:payment_date]).to eq('2025-12-02')
+        expect(result[5][:event_date]).to eq('2025-11-10')
+      end
+
+      it 'numbers lines correctly' do
+        result = described_class.new(credit_card_csv).parse
+        expect(result[0][:line_number]).to eq(1)
+        expect(result[5][:line_number]).to eq(6)
+      end
+
+      it 'stores raw data and parsed_data' do
+        result = described_class.new(credit_card_csv).parse
+        expect(result[0][:raw_data]).to be_present
+        parsed = JSON.parse(result[0][:raw_data])
+        expect(parsed["lançamento"]).to eq('IOF COMPRA INTERNACIONA')
+        expect(result[0][:parsed_data]).to be_a(Hash)
+      end
+
+      it 'defaults status to pending' do
+        result = described_class.new(credit_card_csv).parse
+        result.each { |t| expect(t[:status]).to eq('pending') }
+      end
+
+      it 'handles lancamento header without cedilla' do
+        csv = "data,lancamento,valor\n2025-12-01,TEST PURCHASE,25.00"
+        result = described_class.new(csv).parse
+        expect(result.length).to eq(1)
+        expect(result[0][:description]).to eq('TEST PURCHASE')
+        expect(result[0][:transaction_type]).to eq('expense')
+      end
+    end
+
+    context 'delimiter auto-detection edge cases' do
+      it 'still handles comma-delimited files with headers' do
+        csv = "data,valor,descricao,categoria,status,tipo,parcela\n" \
+              "2025-06-01,3000.00,Salary,Trabalho,confirmed,income,"
+        result = described_class.new(csv).parse
+        expect(result.length).to eq(1)
+        expect(result[0][:description]).to eq('Salary')
+        expect(result[0][:amount]).to eq(BigDecimal('3000.00'))
+      end
+
+      it 'handles semicolon file with trailing blank lines' do
+        csv = "01/01/2026;PIX TRANSF LUCAS TEI;-2100,00\n\n"
+        result = described_class.new(csv).parse
+        expect(result.length).to eq(1)
+        expect(result[0][:description]).to eq('PIX TRANSF LUCAS TEI')
+        expect(result[0][:amount]).to eq(BigDecimal('2100.00'))
+      end
+
+      it 'handles semicolon file with a single line' do
+        csv = "05/12/2025;DEB AUTOR SPORT CLUB INT;-9,00"
+        result = described_class.new(csv).parse
+        expect(result.length).to eq(1)
+        expect(result[0][:description]).to eq('DEB AUTOR SPORT CLUB INT')
+        expect(result[0][:amount]).to eq(BigDecimal('9.00'))
+        expect(result[0][:event_date]).to eq('2025-12-05')
+      end
+    end
   end
 end

@@ -14,16 +14,131 @@ class CsvImportService
   end
 
   def parse
-    # Fallback: single-line CSV without headers, only if not obviously malformed
-    if @file_content.to_s.strip.empty?
-      return []
+    return [] if @file_content.to_s.strip.empty?
+
+    lines = @file_content.to_s.strip.lines.reject { |l| l.strip.empty? }
+
+    if headerless_semicolon_format?(lines)
+      parse_headerless_semicolon(lines)
+    elsif credit_card_csv_format?(lines)
+      parse_credit_card_csv(lines)
+    else
+      parse_standard_csv(lines)
     end
-    lines = @file_content.to_s.lines
+  end
+
+  private
+
+  # Detects credit card CSV exports with "lançamento" header:
+  #   data,lançamento,valor
+  def credit_card_csv_format?(lines)
+    header = lines.first.to_s.strip.downcase
+    header.match?(/\blan[çc]amento\b/)
+  end
+
+  def parse_credit_card_csv(lines)
+    content = lines.join
+    csv = CSV.parse(content, headers: true, col_sep: ",")
+
+    desc_key = csv.headers.find { |h| h&.match?(/lan[çc]amento/i) }
+
+    transactions = []
+    csv.each_with_index do |row, idx|
+      description = row[desc_key]&.strip.presence
+      amount = parse_amount(row["valor"])
+
+      # Credit card: positive = expense (charge), negative = payment (credit)
+      transaction_type = if amount && amount < 0
+        "income"
+      else
+        "expense"
+      end
+
+      transactions << {
+        line_number: idx + 1,
+        external_id: nil,
+        raw_data: row.to_h.to_json,
+        description: description,
+        amount: amount&.abs,
+        event_date: row["data"],
+        payment_date: row["data"],
+        transaction_type: transaction_type,
+        status: "pending",
+        parsed_data: row.to_h
+      }
+    end
+
+    transactions
+  end
+
+  # Detects headerless semicolon-delimited bank exports like:
+  #   21/11/2025;REND PAGO APLIC AUT MAIS;0,04
+  def headerless_semicolon_format?(lines)
+    sample = lines.first.to_s.strip
+    return false if sample.empty?
+
+    # Must contain semicolons and first field must look like DD/MM/YYYY
+    sample.include?(";") && sample.split(";").first.strip.match?(%r{\A\d{2}/\d{2}/\d{4}\z})
+  end
+
+  def parse_headerless_semicolon(lines)
+    transactions = []
+
+    lines.each_with_index do |line, idx|
+      fields = line.strip.split(";", 3)
+      next if fields.size < 3
+
+      raw_date = fields[0].strip
+      description = fields[1].strip
+      raw_amount = fields[2].strip
+
+      amount = parse_amount(raw_amount)
+      iso_date = parse_brazilian_date(raw_date)
+
+      transaction_type = if amount && amount < 0
+        "expense"
+      elsif amount && amount > 0
+        "income"
+      else
+        "expense"
+      end
+
+      transactions << {
+        line_number: idx + 1,
+        external_id: nil,
+        raw_data: { data: raw_date, descricao: description, valor: raw_amount }.to_json,
+        description: description.presence,
+        amount: amount&.abs,
+        event_date: iso_date,
+        payment_date: iso_date,
+        transaction_type: transaction_type,
+        status: "pending",
+        parsed_data: { "data" => raw_date, "descricao" => description, "valor" => raw_amount }
+      }
+    end
+
+    transactions
+  end
+
+  def parse_brazilian_date(date_str)
+    return nil if date_str.nil? || date_str.strip.empty?
+    if date_str.match?(%r{\A\d{2}/\d{2}/\d{4}\z})
+      day, month, year = date_str.split("/")
+      "#{year}-#{month}-#{day}"
+    else
+      date_str
+    end
+  end
+
+  def parse_standard_csv(lines)
+    content = lines.join
+
+    # Single-line fallback (not standard CSV)
     if lines.size == 1 && lines.first !~ /^data,valor/i && lines.first.count('"') % 2 == 0
       return [ {
         line_number: 1,
         external_id: nil,
-        raw_data: @file_content.strip,
+        raw_data: content.strip,
         description: nil,
         amount: nil,
         event_date: nil,
@@ -33,7 +148,8 @@ class CsvImportService
         parsed_data: {}
       } ]
     end
-    csv = CSV.parse(@file_content, headers: true, col_sep: ",")
+
+    csv = CSV.parse(content, headers: true, col_sep: ",")
 
     # Analyze file patterns to determine normalization strategy
     analysis = analyze_file_patterns(csv)
