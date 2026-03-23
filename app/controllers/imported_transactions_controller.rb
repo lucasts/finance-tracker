@@ -33,7 +33,7 @@ class ImportedTransactionsController < ApplicationController
       external_account = Account.find_or_create_by(
         user: current_user,
         name: transaction_type == "income" ? "Receitas Externas" : "Gastos Externos",
-        account_type: AccountType.find_by(code: transaction_type == "income" ? "INCOME_SOURCE" : "EXPENSE_DESTINATION")
+        account_type: AccountType.find_by(code: transaction_type == "income" ? "REVENUE" : "EXPENSE")
       )
 
       # Set the correct account IDs
@@ -80,9 +80,14 @@ class ImportedTransactionsController < ApplicationController
         transaction_type: transaction_type,
         entries_attributes: entries_attributes
       )
-      rec_entry.linked_transaction = t
-      rec_entry.save!
-      created_transaction = t
+      if t.persisted?
+        rec_entry.linked_transaction = t
+        rec_entry.save!
+        created_transaction = t
+      else
+        redirect_to edit_import_session_imported_transaction_path(@import_session, @imported_transaction),
+          alert: "Erro ao criar transação: #{t.errors.full_messages.join(', ')}" and return
+      end
     end
 
     # Force update of imported_transaction status
