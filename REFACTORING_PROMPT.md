@@ -1,99 +1,99 @@
-# ✅ SISTEMA ESTABILIZADO - Refactoring Concluído
+# ✅ SYSTEM STABILIZED - Refactoring Complete
 
-## 📋 STATUS ATUAL
-O **Orzeny Finance Tracker** está com a arquitetura **estabilizada e funcional**. O sistema demonstrou **robustez completa** com:
+## 📋 CURRENT STATUS
+The **Orzeny Finance Tracker** architecture is **stabilized and functional**. The system has demonstrated **complete robustness** with:
 
-- ✅ **457+ testes RSpec** passando (100% cobertura crítica)
-- ✅ **90 testes Jest** passando (frontend completo)
-- ✅ **Zero bugs críticos** conhecidos
-- ✅ **Performance otimizada** em produção
-- ✅ **Arquitetura consistente** Rails 8.0 + Stimulus
+- ✅ **457+ RSpec tests** passing (100% critical coverage)
+- ✅ **90 Jest tests** passing (complete frontend)
+- ✅ **Zero known critical bugs**
+- ✅ **Optimized performance** in production
+- ✅ **Consistent architecture** Rails 8.0 + Stimulus
 
-## 🎯 DECISÃO TÉCNICA: MANTER ESTABILIDADE
+## 🎯 TECHNICAL DECISION: MAINTAIN STABILITY
 
-### 💡 Princípio "Se Funciona, Não Mexe"
-O sistema está **100% funcional** para seu propósito. Embora existam algumas **duplicações menores** e **código legado**, a **estabilidade operacional** tem prioridade sobre "limpeza perfeita".
+### 💡 Principle: "If It Works, Don't Touch It"
+The system is **100% functional** for its purpose. Although there are some **minor duplications** and **legacy code**, **operational stability** takes priority over "perfect cleanup."
 
-### 🔒 Código Legacy Funcional
-- **BalanceCalculations**: Embora deprecated, não causa problemas
-- **Money Parsing**: Múltiplas implementações garantem fallbacks robustos  
-- **Services**: Variações de pattern atendem cenários específicos
-- **Concerns**: Duplicações menores vs risco de quebrar funcionalidades
+### 🔒 Functional Legacy Code
+- **BalanceCalculations**: Although deprecated, it causes no problems
+- **Money Parsing**: Multiple implementations ensure robust fallbacks
+- **Services**: Pattern variations address specific scenarios
+- **Concerns**: Minor duplications vs. the risk of breaking functionality
 
-## ⚠️ RECOMENDAÇÕES DE REFACTORING
+## ⚠️ REFACTORING RECOMMENDATIONS
 
-### 🚫 **NÃO RECOMENDADO** (Alto Risco)
-- Remover código deprecated que ainda é referenciado
-- Consolidar money parsing (múltiplos fallbacks funcionais)
-- Mudanças arquiteturais em models críticos
-- Refactoring de concerns fundamentais
+### 🚫 **NOT RECOMMENDED** (High Risk)
+- Removing deprecated code that is still referenced
+- Consolidating money parsing (multiple functional fallbacks)
+- Architectural changes to critical models
+- Refactoring core concerns
 
-### ✅ **SEGURO PARA FUTURO** (Baixo Risco)
-- Adicionar novos testes sem tocar código existente
-- Melhorar documentação e comentários
-- Otimizar performance sem alterar lógica
-- Adicionar features sem modificar base
+### ✅ **SAFE FOR THE FUTURE** (Low Risk)
+- Adding new tests without touching existing code
+- Improving documentation and comments
+- Optimizing performance without changing logic
+- Adding features without modifying the base
 
-## 🎯 FOCO RECOMENDADO
+## 🎯 RECOMMENDED FOCUS
 
-Em vez de refactoring interno, priorizar:
+Instead of internal refactoring, prioritize:
 
-### 📈 **Expansão de Funcionalidades**
+### 📈 **Feature Expansion**
 - PWA support
 - Mobile app
-- API REST
-- Integrações bancárias
+- REST API
+- Bank integrations
 
-### 🔒 **Melhorias de Segurança**
+### 🔒 **Security Improvements**
 - Rate limiting
 - 2FA
 - Audit logs
-- Backup automático
+- Automatic backup
 
-### ⚡ **Otimizações de Performance**
-- Caching estratégico
+### ⚡ **Performance Optimizations**
+- Strategic caching
 - Database optimization
 - Asset optimization
 - CDN integration
 
 ---
 
-## 📊 CONCLUSÃO
+## 📊 CONCLUSION
 
-**Status**: ✅ **Sistema Estável e Pronto para Produção**
+**Status**: ✅ **Stable System, Ready for Production**
 
-O **Orzeny Finance Tracker** tem qualidade **enterprise-grade** e está pronto para uso em produção. Refactoring interno seria **prematuro** e poderia introduzir **riscos desnecessários**.
+**Orzeny Finance Tracker** has **enterprise-grade** quality and is ready for production use. Internal refactoring would be **premature** and could introduce **unnecessary risks**.
 
-**Recomendação**: **Manter estabilidade atual** e focar em **expansão funcional** e **melhorias de performance** não-invasivas.
+**Recommendation**: **Maintain current stability** and focus on **functional expansion** and non-invasive **performance improvements**.
 
 ---
 
 *"Premature optimization is the root of all evil" - Donald Knuth*  
-*"If it works, don't break it" - Engenharia de Software*
+*"If it works, don't break it" - Software Engineering*
 
-### 3. PADRONIZAR Conversões de Tipo
-**Problema:** `.to_f`, `.to_i`, `.to_d` espalhados sem normalização
-**Arquivos afetados:**
+### 3. STANDARDIZE Type Conversions
+**Problem:** `.to_f`, `.to_i`, `.to_d` scattered around without normalization
+**Affected files:**
 - `app/controllers/overview_controller.rb`
 - `app/controllers/reports_controller.rb`
 - `app/controllers/transactions_controller.rb`
 - `app/controllers/installment_plans_controller.rb`
 
-**Ação:**
+**Action:**
 ```ruby
-# 1. Criar MoneyConversionService ou adicionar ao FinancialConstants
-# 2. Métodos:
+# 1. Create MoneyConversionService or add to FinancialConstants
+# 2. Methods:
 #    - safe_to_decimal(value)
 #    - safe_to_float(value)  
 #    - safe_to_integer(value)
-# 3. Substituir todas as conversões manuais por estes métodos
-# 4. Adicionar validação e tratamento de erro centralizado
+# 3. Replace all manual conversions with these methods
+# 4. Add centralized validation and error handling
 
-# Exemplo de refatoração:
-# ANTES:
+# Refactoring example:
+# BEFORE:
 projected_income = projected_transactions.select { |t| t[:amount].to_f > 0 }.sum { |t| t[:amount].to_f }
 
-# DEPOIS:
+# AFTER:
 projected_income = projected_transactions
   .select { |t| FinancialConstants.safe_to_decimal(t[:amount]) > 0 }
   .sum { |t| FinancialConstants.safe_to_decimal(t[:amount]) }
@@ -101,78 +101,78 @@ projected_income = projected_transactions
 
 ---
 
-## ⚠️ TAREFAS ALTAS (Prioridade 2)
+## ⚠️ HIGH-PRIORITY TASKS (Priority 2)
 
-### 4. DECIDIR Estratégia de Balance
-**Problema:** Coluna `balance` existe mas método calcula dinamicamente
-**Arquivo:** `db/migrate/20250720002320_add_balance_to_accounts.rb`
-**Ação:**
+### 4. DECIDE Balance Strategy
+**Problem:** The `balance` column exists, but the method computes it dynamically
+**File:** `db/migrate/20250720002320_add_balance_to_accounts.rb`
+**Action:**
 ```ruby
-# OPÇÃO A (Recomendada): Usar coluna cached balance
-# 1. Atualizar Account#balance para usar coluna cached
-# 2. Adicionar callback para atualizar balance quando entries mudam
-# 3. Criar migration para popular balance inicial
-# 4. Adicionar validação de consistência
+# OPTION A (Recommended): Use the cached balance column
+# 1. Update Account#balance to use the cached column
+# 2. Add a callback to update balance when entries change
+# 3. Create a migration to populate the initial balance
+# 4. Add a consistency check
 
-# OPÇÃO B: Remover coluna balance
-# 1. Criar migration para remover coluna
-# 2. Manter cálculo dinâmico atual
-# 3. Considerar performance em grandes volumes
+# OPTION B: Remove the balance column
+# 1. Create a migration to remove the column
+# 2. Keep the current dynamic calculation
+# 3. Consider performance at large volumes
 
-# Implementar callback system:
+# Implement the callback system:
 # - Entry.after_save -> Account.update_balance!
 # - Entry.after_destroy -> Account.update_balance!
 # - Transaction status change -> Account.update_balance!
 ```
 
-### 5. REMOVER Legacy dos Import Services
-**Arquivos:**
-- `app/services/ofx_import_service.rb` (linhas 95-121)
-- `app/services/csv_import_service.rb` (linhas 107-132)
+### 5. REMOVE Legacy Code from the Import Services
+**Files:**
+- `app/services/ofx_import_service.rb` (lines 95-121)
+- `app/services/csv_import_service.rb` (lines 107-132)
 
-**Ação:**
+**Action:**
 ```ruby
-# 1. Remover estratégias :legacy_ofx e :legacy_inference
-# 2. Modernizar lógica de normalização para usar MoneyParsingConcern
-# 3. Consolidar estratégias em métodos mais robustos
-# 4. Adicionar testes para cobertura completa
-# 5. Atualizar documentação de formatos suportados
+# 1. Remove the :legacy_ofx and :legacy_inference strategies
+# 2. Modernize normalization logic to use MoneyParsingConcern
+# 3. Consolidate strategies into more robust methods
+# 4. Add tests for full coverage
+# 5. Update documentation of supported formats
 
-# Remover blocos:
+# Remove blocks:
 when :legacy_ofx
   # Keep legacy behavior for compatibility
 when :legacy_inference  
   # No clear pattern, use legacy logic
 ```
 
-### 6. REMOVER Transaction Legacy Methods
-**Arquivo:** `app/models/transaction.rb:261`
-**Problema:** Métodos mantidos apenas para compatibilidade
-**Ação:**
+### 6. REMOVE Transaction Legacy Methods
+**File:** `app/models/transaction.rb:261`
+**Problem:** Methods kept only for compatibility
+**Action:**
 ```ruby
-# 1. Identificar todos os métodos marcados como legacy
-# 2. Verificar se ainda há uso na aplicação (grep)
-# 3. Se não há uso, remover completamente
-# 4. Se há uso, refatorar para usar nova implementação
-# 5. Remover comentários "Legacy method kept for backward compatibility"
+# 1. Identify all methods marked as legacy
+# 2. Check whether they're still used in the application (grep)
+# 3. If unused, remove completely
+# 4. If used, refactor to use the new implementation
+# 5. Remove "Legacy method kept for backward compatibility" comments
 ```
 
 ---
 
-## 📋 TAREFAS MÉDIAS (Prioridade 3)
+## 📋 MEDIUM-PRIORITY TASKS (Priority 3)
 
-### 7. PADRONIZAR Service Pattern
-**Problema:** Services com interfaces inconsistentes
-**Ação:**
+### 7. STANDARDIZE the Service Pattern
+**Problem:** Services with inconsistent interfaces
+**Action:**
 ```ruby
-# 1. Padronizar todos os services para usar:
-#    - self.call(...) como método principal
-#    - initialize(params) quando necessário
-#    - Retorno consistente (Success/Error objects ou ActiveRecord)
-# 2. Criar BaseService se necessário
-# 3. Documentar padrão no README
+# 1. Standardize all services to use:
+#    - self.call(...) as the main method
+#    - initialize(params) when needed
+#    - Consistent return values (Success/Error objects or ActiveRecord)
+# 2. Create BaseService if needed
+# 3. Document the pattern in the README
 
-# Exemplo de padronização:
+# Standardization example:
 class ExampleService
   def self.call(**params)
     new(**params).execute
@@ -190,161 +190,161 @@ class ExampleService
 end
 ```
 
-### 8. REFATORAR Money Parsing Concern
-**Arquivo:** `app/models/concerns/money_parsing_concern.rb` (136+ linhas)
-**Problema:** Concern muito grande com múltiplas responsabilidades
-**Ação:**
+### 8. REFACTOR the Money Parsing Concern
+**File:** `app/models/concerns/money_parsing_concern.rb` (136+ lines)
+**Problem:** Concern too large, with multiple responsibilities
+**Action:**
 ```ruby
-# 1. Quebrar em concerns menores:
-#    - MoneyParsingConcern: apenas parsing
-#    - MoneyFormattingConcern: apenas formatação  
-#    - MoneyValidationConcern: validações específicas
-# 2. Manter interface pública consistente
-# 3. Melhorar documentação e exemplos
-# 4. Adicionar testes unitários específicos
+# 1. Split into smaller concerns:
+#    - MoneyParsingConcern: parsing only
+#    - MoneyFormattingConcern: formatting only
+#    - MoneyValidationConcern: specific validations
+# 2. Keep the public interface consistent
+# 3. Improve documentation and examples
+# 4. Add specific unit tests
 ```
 
-### 9. REMOVER Alias Methods Desnecessários
-**Arquivo:** `app/models/account.rb:97-99`
+### 9. REMOVE Unnecessary Alias Methods
+**File:** `app/models/account.rb:97-99`
 ```ruby
-# REMOVER:
+# REMOVE:
 alias_method :total_income, :total_income_amount
 alias_method :total_expenses, :total_expense_amount  
 alias_method :net_transfers, :net_transfer_amount
 
-# AÇÃO:
-# 1. Escolher um nome padrão para cada método
-# 2. Refatorar todos os usos para o nome escolhido
-# 3. Remover os aliases
-# 4. Atualizar testes se necessário
+# ACTION:
+# 1. Choose a standard name for each method
+# 2. Refactor all usages to the chosen name
+# 3. Remove the aliases
+# 4. Update tests if needed
 ```
 
-### 10. LIMPAR Recurring Projection Service
-**Arquivo:** `app/services/recurring_projection_service.rb:44`
-**Problema:** Comentário sobre compatibilidade legacy
-**Ação:**
+### 10. CLEAN UP the Recurring Projection Service
+**File:** `app/services/recurring_projection_service.rb:44`
+**Problem:** Comment about legacy compatibility
+**Action:**
 ```ruby
-# Remover linha:
-from_account_id: commitment.from_account_id, # Para compatibilidade legacy
+# Remove line:
+from_account_id: commitment.from_account_id, # For legacy compatibility
 
-# E verificar se from_account_id ainda é necessário ou se pode usar from_account
+# And check whether from_account_id is still needed or from_account can be used instead
 ```
 
 ---
 
-## 🧹 TAREFAS BAIXAS (Prioridade 4)
+## 🧹 LOW-PRIORITY TASKS (Priority 4)
 
-### 11. VERIFICAR Helpers Não Utilizados
-**Arquivos para verificar:**
+### 11. CHECK FOR Unused Helpers
+**Files to check:**
 - `app/helpers/account_types_helper.rb`
 - `app/helpers/accounts_helper.rb`
 - `app/helpers/categories_helper.rb`
 - `app/helpers/credit_statements_helper.rb`
 
-**Ação:**
+**Action:**
 ```bash
-# 1. Para cada helper, verificar uso:
+# 1. For each helper, check usage:
 grep -r "AccountTypesHelper\|account_types_helper" app/ spec/
 grep -r "AccountsHelper\|accounts_helper" app/ spec/
 grep -r "CategoriesHelper\|categories_helper" app/ spec/
 grep -r "CreditStatementsHelper\|credit_statements_helper" app/ spec/
 
-# 2. Se não há uso, remover arquivo
-# 3. Se há uso mínimo, considerar mover para ApplicationHelper
+# 2. If unused, remove the file
+# 3. If minimally used, consider moving it to ApplicationHelper
 ```
 
-### 12. REMOVER Channels se Não Utilizados
-**Arquivos:**
+### 12. REMOVE Channels If Unused
+**Files:**
 - `app/channels/application_cable/`
-**Ação:**
+**Action:**
 ```ruby
-# 1. Verificar se WebSockets/ActionCable são necessários
-# 2. Se não, remover:
+# 1. Check whether WebSockets/ActionCable are needed
+# 2. If not, remove:
 #    - app/channels/
 #    - config/cable.yml
-#    - Referências em application.rb
-# 3. Se manter, configurar adequadamente
+#    - References in application.rb
+# 3. If keeping it, configure it properly
 ```
 
-### 13. LIMPAR OFX Parser
-**Arquivo:** `lib/ofx_simple_parser.rb`
-**Problema:** Código com conversões redundantes
-**Ação:**
+### 13. CLEAN UP the OFX Parser
+**File:** `lib/ofx_simple_parser.rb`
+**Problem:** Code with redundant conversions
+**Action:**
 ```ruby
-# Linha 32-39: Lógica redundante de conversão
-# Simplificar para usar MoneyParsingConcern
-# Remover conversões duplas de BigDecimal -> Float -> BigDecimal
+# Lines 32-39: Redundant conversion logic
+# Simplify to use MoneyParsingConcern
+# Remove double BigDecimal -> Float -> BigDecimal conversions
 ```
 
 ---
 
-## 🔧 INSTRUÇÕES DE EXECUÇÃO
+## 🔧 EXECUTION INSTRUCTIONS
 
-### Ordem de Execução Recomendada:
+### Recommended Execution Order:
 
-1. **Primeiro** - Execute tarefas CRÍTICAS (1-3) em ordem
-2. **Segundo** - Execute tarefas ALTAS (4-6) 
-3. **Terceiro** - Execute tarefas MÉDIAS (7-10)
-4. **Quarto** - Execute tarefas BAIXAS (11-13)
+1. **First** - Execute CRITICAL tasks (1-3) in order
+2. **Second** - Execute HIGH-priority tasks (4-6)
+3. **Third** - Execute MEDIUM-priority tasks (7-10)
+4. **Fourth** - Execute LOW-priority tasks (11-13)
 
-### Antes de Cada Mudança:
+### Before Each Change:
 ```bash
-# 1. Execute testes para confirmar estado atual
+# 1. Run tests to confirm the current state
 bundle exec rspec
 
 ```
 
-### Após Cada Mudança:
+### After Each Change:
 ```bash
-# 1. Execute testes para validar mudanças
+# 1. Run tests to validate changes
 bundle exec rspec
 
-# 2. Verifique se a aplicação inicia
+# 2. Verify the application starts
 
-# 3. Faça commit das mudanças
+# 3. Commit the changes
 git add -A && git commit -m "Refactor: [describe what was changed]"
 ```
 
-### Validação Final:
+### Final Validation:
 ```bash
-# 1. Testes completos
+# 1. Full test suite
 bundle exec rspec --format progress
 
-# 2. Verificação de código
+# 2. Code check
 rubocop app/ lib/
 
-# 3. Análise de segurança (se disponível)
+# 3. Security analysis (if available)
 bundle exec brakeman
 
-# 4. Verificação de performance básica
+# 4. Basic performance check
 ./bin/rails console
-# Testar Account.first.balance performance
+# Test Account.first.balance performance
 ```
 
 ---
 
-## 📊 MÉTRICAS DE SUCESSO
+## 📊 SUCCESS METRICS
 
-Após completar todas as tarefas:
+After completing all tasks:
 
-✅ **Eliminar 100%** do código marcado como deprecated/legacy  
-✅ **Reduzir duplicação** de money parsing para 1 implementação principal  
-✅ **Padronizar** todas as conversões de tipo através de métodos centralizados  
-✅ **Manter 100%** de cobertura de testes (457/457 passing)  
-✅ **Melhorar consistência** arquitetural em services e concerns  
-✅ **Remover** todo código não utilizado identificado  
+✅ **Eliminate 100%** of code marked as deprecated/legacy  
+✅ **Reduce duplication** of money parsing down to 1 main implementation  
+✅ **Standardize** all type conversions through centralized methods  
+✅ **Maintain 100%** test coverage (457/457 passing)  
+✅ **Improve architectural consistency** across services and concerns  
+✅ **Remove** all identified unused code  
 
 ---
 
-## 🎯 RESULTADO ESPERADO
+## 🎯 EXPECTED OUTCOME
 
-Uma aplicação com:
-- **Zero código legacy** ou deprecated
-- **Arquitetura consistente** em toda a aplicação  
-- **Parsing de moeda unificado** e robusto
-- **Services padronizados** seguindo mesmo pattern
-- **Performance otimizada** com balance strategy definida
-- **Codebase mais limpo** e fácil de manter
-- **Testes 100% funcionais** validando todas as mudanças
+An application with:
+- **Zero legacy** or deprecated code
+- **Consistent architecture** throughout the application  
+- **Unified, robust currency parsing**
+- **Standardized services** following the same pattern
+- **Optimized performance** with a defined balance strategy
+- **Cleaner codebase**, easier to maintain
+- **100% functional tests** validating every change
 
-Execute este prompt **passo a passo**, validando cada mudança com testes antes de prosseguir para a próxima tarefa.
+Execute this prompt **step by step**, validating each change with tests before moving on to the next task.

@@ -1,38 +1,38 @@
 # DiRams Design System
 
-Sistema de design inspirado nos princípios de design industrial de Dieter Rams.
+Design system inspired by Dieter Rams' industrial design principles.
 
 ![Calc](image.png)
 ![alt text](image-1764427309748.png)
 
-## Princípios
+## Principles
 
-1. **Elementos HTML semânticos primeiro** - Usar `<section>`, `<article>`, `<header>`, `<footer>`, `<mark>`, `<data>`, etc.
-2. **Classes apenas onde necessário** - Evitar "sopa de classes" utilitárias
-3. **CSS contextual** - Estilos baseados em hierarquia e estrutura
-4. **"Weniger, aber besser"** - Menos, mas melhor
+1. **Semantic HTML elements first** - Use `<section>`, `<article>`, `<header>`, `<footer>`, `<mark>`, `<data>`, etc.
+2. **Classes only where necessary** - Avoid utility "class soup"
+3. **Contextual CSS** - Styles based on hierarchy and structure
+4. **"Weniger, aber besser"** - Less, but better
 
-## Paleta de Cores (DiRams Authentic)
+## Color Palette (DiRams Authentic)
 
-### Base (Terrosa & Atemporal)
-- **Soft Linen** `#E6E2D8` - Background bege claro quente
-- **Alabaster Grey** `#E1E0DE` - Elementos secundários, bordas
-- **Off-White** `#fafaf8` - Surface branco quente para cards
-- **Gunmetal** `#414141` - Texto principal cinza metálico
+### Base (Earthy & Timeless)
+- **Soft Linen** `#E6E2D8` - Light warm beige background
+- **Alabaster Grey** `#E1E0DE` - Secondary elements, borders
+- **Off-White** `#fafaf8` - Warm white surface for cards
+- **Gunmetal** `#414141` - Main text, metallic gray
 
-### Acentos Braun
-- **Toasted Almond** `#E88745` - Laranja terroso (primário)
-  - Hover: `#d67435` - Mais escuro
-- **Dusty Olive** `#6A7E64` - Verde oliva militar (success)
-  - Light: `#89a584` - Mais claro
-- **Error Red** `#d9534f` - Vermelho terroso
-- **Warning Amber** `#e8a75e` - Âmbar suave
+### Braun Accents
+- **Toasted Almond** `#E88745` - Earthy orange (primary)
+  - Hover: `#d67435` - Darker
+- **Dusty Olive** `#6A7E64` - Military olive green (success)
+  - Light: `#89a584` - Lighter
+- **Error Red** `#d9534f` - Earthy red
+- **Warning Amber** `#e8a75e` - Soft amber
 
-### Cinzas (escala completa)
+### Grays (full scale)
 ```css
---color-gunmetal: #414141     /* Texto */
+--color-gunmetal: #414141     /* Text */
 --color-soft-linen: #E6E2D8   /* Background */
---color-alabaster: #E1E0DE    /* Bordas */
+--color-alabaster: #E1E0DE    /* Borders */
 --color-gray-700: #5a5a5a
 --color-gray-600: #787878
 --color-gray-500: #9a9a9a
@@ -41,7 +41,7 @@ Sistema de design inspirado nos princípios de design industrial de Dieter Rams.
 --color-white: #fafaf8        /* Off-white */
 ```
 
-## Sombras (quentes e sutis)
+## Shadows (warm and subtle)
 
 ```css
 --shadow-inset: inset 0 1px 3px rgba(65, 65, 65, 0.08)
@@ -50,37 +50,37 @@ Sistema de design inspirado nos princípios de design industrial de Dieter Rams.
 --shadow-md: 0 2px 8px rgba(65, 65, 65, 0.10), 0 4px 12px rgba(65, 65, 65, 0.06)
 --shadow-lg: 0 4px 16px rgba(65, 65, 65, 0.10), 0 8px 24px rgba(65, 65, 65, 0.06)
 ```
-*Sombras com tom de gunmetal para harmonizar com a paleta terrosa.*
+*Shadows tinted with gunmetal to harmonize with the earthy palette.*
 
 ## Border Radius
 
 ```css
---border-radius-sm: 3px      /* Inputs e botões */
---border-radius-base: 6px    /* Padrão - cards */
---border-radius-lg: 12px     /* Cards grandes (não usado atualmente) */
---border-radius-full: 9999px /* Badges circulares */
+--border-radius-sm: 3px      /* Inputs and buttons */
+--border-radius-base: 6px    /* Default - cards */
+--border-radius-lg: 12px     /* Large cards (not currently used) */
+--border-radius-full: 9999px /* Circular badges */
 ```
 
-## Estrutura de Arquivos
+## File Structure
 
 ```
 app/assets/stylesheets/
-├── application.css          # Entry point (apenas imports)
+├── application.css          # Entry point (imports only)
 ├── dirams/
-│   ├── variables.css       # Design tokens (139 linhas)
-│   ├── reset.css           # Base semântica (212 linhas)
-│   ├── layout.css          # Navegação e estrutura (54 linhas)
-│   ├── components.css      # Botões, forms, tables (106 linhas)
-│   └── utilities.css       # Apenas .sr-only (17 linhas)
+│   ├── variables.css       # Design tokens (139 lines)
+│   ├── reset.css           # Semantic base (212 lines)
+│   ├── layout.css          # Navigation and structure (54 lines)
+│   ├── components.css      # Buttons, forms, tables (106 lines)
+│   └── utilities.css       # .sr-only only (17 lines)
 └── pages/
-    └── transactions.css    # Estilos específicos da página (407 linhas)
+    └── transactions.css    # Page-specific styles (407 lines)
 ```
 
-**Total: 935 linhas de CSS**
+**Total: 935 lines of CSS**
 
-## Exemplo de Uso
+## Usage Example
 
-### ✅ Correto (Semântico)
+### ✅ Correct (Semantic)
 ```html
 <section class="summary">
   <article class="metric income">
@@ -90,7 +90,7 @@ app/assets/stylesheets/
 </section>
 ```
 
-### ❌ Evitar (Sopa de classes)
+### ❌ Avoid (Class Soup)
 ```html
 <div class="grid grid-4 gap-4 mb-6">
   <div class="card bg-white p-5 rounded-lg shadow-base">
@@ -100,17 +100,17 @@ app/assets/stylesheets/
 </div>
 ```
 
-## Componentes
+## Components
 
-### Botões
+### Buttons
 
-**Primário (Toasted Almond)**
+**Primary (Toasted Almond)**
 - Background: `#E88745`
 - Hover: `#d67435`
 - Text: `#fafaf8` (off-white)
 - Shadow: `var(--shadow-base)`
 
-**Secundário (Off-White)**
+**Secondary (Off-White)**
 - Background: `#fafaf8`
 - Hover: `#E6E2D8` (soft linen)
 - Text: `#414141` (gunmetal)
@@ -118,15 +118,15 @@ app/assets/stylesheets/
 
 ### Badges
 
-**Circulares com paleta Braun (cores semânticas padronizadas):**
-- **Income/Receita**: `#6A7E64` (dusty olive) com background `rgba(106, 126, 100, 0.12)`
-  - Usado em: Categories, Account Types (role: income), Transaction amounts
-- **Expense/Despesa**: `#d9534f` (error red) com background `rgba(217, 83, 79, 0.12)`
-  - Usado em: Categories, Account Types (role: expense), Transaction amounts
-- **Transfer/Transferência**: `#c68a42` (warning amber escurecido) com background `rgba(232, 167, 94, 0.12)`
-  - Usado em: Categories (transfer), Transaction cards
-- **Asset/Ativo** (neutro): `#c68a42` (warning amber escurecido) com background `rgba(232, 167, 94, 0.12)`
-  - Usado em: Account Types (role: asset), Account type badges
+**Circular, using the Braun palette (standardized semantic colors):**
+- **Income/Receita**: `#6A7E64` (dusty olive) with background `rgba(106, 126, 100, 0.12)`
+  - Used in: Categories, Account Types (role: income), Transaction amounts
+- **Expense/Despesa**: `#d9534f` (error red) with background `rgba(217, 83, 79, 0.12)`
+  - Used in: Categories, Account Types (role: expense), Transaction amounts
+- **Transfer/Transferência**: `#c68a42` (darkened warning amber) with background `rgba(232, 167, 94, 0.12)`
+  - Used in: Categories (transfer), Transaction cards
+- **Asset/Ativo** (neutral): `#c68a42` (darkened warning amber) with background `rgba(232, 167, 94, 0.12)`
+  - Used in: Account Types (role: asset), Account type badges
 
 ### Cards
 
@@ -135,18 +135,18 @@ app/assets/stylesheets/
 - Border-radius: `6px`
 - Shadow: `var(--shadow-base)`
 
-## Referências Visuais
+## Visual References
 
 ### Braun Vintage Aesthetic
-Design terroso e atemporal inspirado nos produtos Braun dos anos 60-80:
-- Cores quentes e naturais
-- Laranja terroso como ponto de atenção
-- Verde oliva militar característico
-- Texturas suaves e elegantes
+Earthy, timeless design inspired by Braun products from the 60s-80s:
+- Warm, natural colors
+- Earthy orange as the focal accent
+- Signature military olive green
+- Soft, elegant textures
 
-### Paleta Autêntica
-- **Toasted Almond**: Laranja Braun clássico
-- **Soft Linen**: Background bege quente
-- **Dusty Olive**: Verde militar icônico
-- **Alabaster Grey**: Cinza alabastro para elementos secundários
-- **Gunmetal**: Cinza metálico para texto
+### Authentic Palette
+- **Toasted Almond**: Classic Braun orange
+- **Soft Linen**: Warm beige background
+- **Dusty Olive**: Iconic military green
+- **Alabaster Grey**: Alabaster gray for secondary elements
+- **Gunmetal**: Metallic gray for text
