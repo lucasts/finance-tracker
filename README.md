@@ -48,75 +48,75 @@
 - **WCAG AA** compliance
 - **Optimized performance** (lazy loading, smart cache)
 
-## 🚀 Rodando localmente
+## 🚀 Running Locally
 
-A stack de desenvolvimento roda **Ruby/Rails diretamente no host**. Apenas PostgreSQL e Redis sobem via Docker.
+The development stack runs **Ruby/Rails directly on the host**. Only PostgreSQL and Redis run via Docker.
 
-### Pré-requisitos
-- Ruby (versão em `.ruby-version`)
+### Prerequisites
+- Ruby (version in `.ruby-version`)
 - Node.js / Yarn
-- Docker (somente para pg + redis)
+- Docker (only for pg + redis)
 
-### 1. Suba os serviços de infraestrutura
+### 1. Start the Infrastructure Services
 
 ```bash
-# Inicia somente PostgreSQL e Redis em background
+# Starts only PostgreSQL and Redis in the background
 docker compose -f docker-compose.local.yml up db redis -d
 ```
 
-Portas mapeadas no host:
+Ports mapped on the host:
 - PostgreSQL: `5432`
 - Redis: `6379`
 
-### 2. Setup inicial (primeira vez)
+### 2. Initial Setup (First Time)
 
 ```bash
-# Instala gems, prepara banco e inicia o servidor
+# Installs gems, prepares the database, and starts the server
 ./bin/setup
 ```
 
-### 3. Desenvolvimento do dia-a-dia
+### 3. Day-to-Day Development
 
 ```bash
-# Inicia Rails + Sidekiq + asset watcher
+# Starts Rails + Sidekiq + asset watcher
 ./bin/dev
 
-# Acesse em http://localhost:3000
+# Access at http://localhost:3000
 ```
 
-### Testes
+### Tests
 
 ```bash
-bundle exec rspec        # suite completa
-bundle exec rspec spec/models/transaction_spec.rb  # arquivo específico
-bundle exec rspec spec/models/transaction_spec.rb:42  # exemplo específico
+bundle exec rspec        # full suite
+bundle exec rspec spec/models/transaction_spec.rb  # specific file
+bundle exec rspec spec/models/transaction_spec.rb:42  # specific example
 bin/verify               # rspec + rubocop + brakeman (pre-commit check)
 ```
 
-### Variáveis de ambiente
+### Environment Variables
 
-Copie o `.env.example` e ajuste se necessário:
+Copy `.env.example` and adjust as needed:
 ```bash
 cp .env.example .env.local
 ```
 
-Valores padrão esperados com Docker local:
+Default values expected with local Docker:
 ```
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/orzeny_development
 REDIS_URL=redis://localhost:6379/1
 ```
 
-### Reset do banco
+### Database Reset
 
 ```bash
 bin/rails db:drop db:create db:migrate db:seed
 ```
 
-### Parar os serviços Docker
+### Stop the Docker Services
 
 ```bash
-docker compose -f docker-compose.local.yml down          # para (dados persistem)
-docker compose -f docker-compose.local.yml down -v       # para e apaga volumes
+docker compose -f docker-compose.local.yml down          # stops (data persists)
+docker compose -f docker-compose.local.yml down -v       # stops and removes volumes
 ```
 
 ### Demo Data
