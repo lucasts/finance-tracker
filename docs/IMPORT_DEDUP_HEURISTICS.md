@@ -3,7 +3,7 @@
 This document describes the advanced duplicate filtering applied when importing transactions (CSV / OFX).
 
 ## Goals
-* Prevent creation of duplicate imported lines arising from re‑exported files or bank adjustments.
+* Prevent creation of duplicate imported lines arising from re-exported files or bank adjustments.
 * Be tolerant to minor date slips and rounding (R$0.01) so near duplicates are suppressed automatically.
 * Surface likely duplicates (similar) to the user for manual review without blocking import.
 
@@ -23,9 +23,9 @@ This document describes the advanced duplicate filtering applied when importing 
 If none of the duplicate rules apply, the record is created normally.
 
 ## Rationale
-* 1‑day slip & 0.01 difference covers timezone posting delays and rounding adjustments.
-* 3‑day similarity window aligns with broader posting delays; R$2 difference filters noise while still surfacing manual review candidates.
-* One‑edit distance catches accent / encoding losses (e.g., `ALMOÇO` vs `ALMOO`).
+* 1-day slip & 0.01 difference covers timezone posting delays and rounding adjustments.
+* 3-day similarity window aligns with broader posting delays; R$2 difference filters noise while still surfacing manual review candidates.
+* One-edit distance catches accent / encoding losses (e.g., `ALMOÇO` vs `ALMOO`).
 
 ## Configurable Tolerances
 
@@ -55,7 +55,7 @@ Unit specs (`spec/services/import_dedup_service_spec.rb`) cover:
 * Tolerance duplicate suppression.
 * Approximate description duplicate.
 * Similar flag behavior.
-* Non‑duplicate when description distance > 1 (still flagged similar via fallback rule if within similarity window for date & amount).
+* Non-duplicate when description distance > 1 (still flagged similar via fallback rule if within similarity window for date & amount).
 * **Mixed batch**: 1 new + 1 duplicate in the same import call.
 * **Missing external_id**: dedup functions normally without an `external_id`.
 * **Rounded amounts**: amounts within `exact_amount_tolerance` (e.g., 50.004 vs 50.00) are treated as duplicates.
@@ -63,4 +63,4 @@ Unit specs (`spec/services/import_dedup_service_spec.rb`) cover:
 * **Boundary dates**: exactly `similar_date_tolerance_days` triggers flag; one day beyond does not.
 * **Amount boundary**: amount diff > `similar_amount_tolerance` suppresses the `possible_duplicate` flag.
 
-Request specs ensure end‑to‑end dedup and idempotency (same file re-upload → redirects to reimport summary, no new session created).
+Request specs ensure end-to-end dedup and idempotency (same file re-upload → redirects to reimport summary, no new session created).

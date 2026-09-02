@@ -1,38 +1,38 @@
-# 💰 Finance Tracker
+# Finance Tracker
 
 **Complete family financial management system** with competence vs cash flow separation, advanced credit card control, automated recurring transactions, and intelligent financial projections.
 
-## 🎯 Key Features
+## Key Features
 
-### ✨ Advanced Transaction Management
+### Advanced Transaction Management
 - **Temporal Separation**: Clear distinction between event date and payment date
 - **Credit Cards**: Complete invoice control with automatic closing and due dates
 - **Smart Installments**: Installment plans with automatic generation of all payments
 - **Recurring Transactions**: Complete automation of fixed income and expenses (salary, rent, etc.)
 - **Transfers**: Complete system between accounts with validations
 
-### 📊 Analytics and Reports
+### Analytics and Reports
 - **Real Cash Flow**: Accurate view of available money
 - **Competence vs Cash**: Separate reports for different analyses
 - **Future Projections**: End-of-month forecasts based on recurring commitments
 - **Interactive Dashboards**: Multiple data visualizations with charts
 - **Rankings**: Analysis by category, account, and period
 
-### 🤖 Intelligent Automation
+### Intelligent Automation
 - **Background Jobs**: Automatic processing via Sidekiq
 - **Recurring Generation**: Automatic creation of monthly/annual transactions
 - **Installment Processing**: Automatic activation of future installments
 - **Automatic Invoices**: Calculation and automatic association of card values
 - **Smart Status**: Automatic updates based on dates (pending/confirmed)
 
-### 📥 Import and Reconciliation
+### Import and Reconciliation
 - **Multiple Formats**: Support for OFX and CSV (including headerless bank CSV and credit card bills with `data,lançamento,valor`)
 - **Smart Reconciliation**: Heuristics based on amount + description + date (±3 days)
 - **Batch Processing**: Import sessions with state control
 - **Duplicate Detection**: Anti-duplication system with memory
 - **Complete Audit**: Detailed history of all reconciliations
 
-## 🏗️ Technical Architecture
+## Technical Architecture
 
 ### Robust Backend
 - **Ruby on Rails 8.0** with modern patterns
@@ -48,7 +48,7 @@
 - **WCAG AA** compliance
 - **Optimized performance** (lazy loading, smart cache)
 
-## 🚀 Running Locally
+## Running Locally
 
 The development stack runs **Ruby/Rails directly on the host**. Only PostgreSQL and Redis run via Docker.
 
@@ -154,21 +154,21 @@ Complete environment that simulates production with all services:
 - MailCatcher (port 1080)
 - Rails App (port 3001)
 
-## 🧪 Quality and Testing
+## Quality and Testing
 
 ### Test Coverage
-- ✅ **Backend**: 618+ RSpec tests covering models, controllers, services, and jobs
-- ✅ **Frontend**: 90 Jest tests covering services and Stimulus controllers
-- ✅ **Integration**: Complete end-to-end flows
-- ✅ **Performance**: Optimized Web Vitals metrics
+- **Backend**: 618+ RSpec tests covering models, controllers, services, and jobs
+- **Frontend**: 90 Jest tests covering services and Stimulus controllers
+- **Integration**: Complete end-to-end flows
+- **Performance**: Optimized Web Vitals metrics
 
 ### Quality Standards
-- ✅ **WCAG AA** compliance (accessibility)
-- ✅ **Double-entry** correct accounting
-- ✅ **Zero** known data inconsistencies
-- ✅ **Security**: Robust validations and authorizations
+- **WCAG AA** compliance (accessibility)
+- **Double-entry** correct accounting
+- **Zero** known data inconsistencies
+- **Security**: Robust validations and authorizations
 
-## 🤖 Operational Automation
+## Operational Automation
 
 ### Background Jobs
 ```ruby
@@ -188,7 +188,7 @@ AutomationJob.perform_later
 - **Invoices**: Automatically created for credit cards
 - **Status**: Automatically updated based on dates
 
-## 🚀 Production Deployment
+## Production Deployment
 
 ### Heroku (Recommended)
 ```bash
@@ -223,7 +223,7 @@ SECRET_KEY_BASE=your_secret_key_here
 RAILS_MASTER_KEY=your_master_key_here
 ```
 
-## 📖 Documentation
+## Documentation
 
 - **[Product Definition](docs/CURRENT_PRODUCT_DEFINITION.md)** - Complete functional specification
 - **[Technical Specification](docs/TECHNICAL_SPECIFICATION.md)** - Technical architecture overview
@@ -231,24 +231,24 @@ RAILS_MASTER_KEY=your_master_key_here
 - **[Pre-production Setup](PREPROD.md)** - Development environment
 - **[TODO/Roadmap](TODO.md)** - Future improvements
 
-## 📊 Project Status
+## Project Status
 
-### ✅ Completely Implemented
+### Completely Implemented
 - **Financial Core**: All features implemented and tested
 - **Modern Frontend**: Responsive and accessible interface
 - **Automation**: Background jobs and processing functional
 - **Quality**: Robust tests with high coverage
 - **Deploy**: Production-ready with complete documentation
 
-### 📈 Success Metrics
-- ✅ **618+** backend tests passing
-- ✅ **90** frontend tests passing
-- ✅ **100%** features implemented
-- ✅ **A+** accessibility grade
-- ✅ **0** known critical bugs
+### Success Metrics
+- **618+** backend tests passing
+- **90** frontend tests passing
+- **100%** features implemented
+- **A+** accessibility grade
+- **0** known critical bugs
 
 ---
 
-**✅ Complete MVP** | **✅ Pre-production Environment** | **✅ Operational Automation** | **✅ Modernized Frontend** | **✅ Enterprise Quality**
+**Complete MVP** | **Pre-production Environment** | **Operational Automation** | **Modernized Frontend** | **Enterprise Quality**
 
 The **Finance Tracker** is a complete family financial management system **ready for production**.

@@ -1,10 +1,10 @@
 # Finance Tracker — Enhanced Technical Specification
 
-## 🚀 What is this?
+## What is this?
 
 A personal finance management application built for Brazilian financial practices. Think "Notion for your money" — with double-entry bookkeeping, credit card cycle management, and automated transaction categorization.
 
-## ⚡ Core Tech Stack
+## Core Tech Stack
 
 ### **Backend**
 - **Rails 8.0** + **Ruby 3.4** — Modern Rails with all the latest features
@@ -25,7 +25,7 @@ A personal finance management application built for Brazilian financial practice
 - **ESLint + Prettier** — Code quality and formatting consistency
 - **Comprehensive test coverage** — Controllers, models, services, and JS components
 
-## 🏗️ Architecture Decisions
+## Architecture Decisions
 
 ### **Financial Data Model**
 
@@ -97,7 +97,7 @@ A personal finance management application built for Brazilian financial practice
 - Brazilian currency formatting (R$)
 - OFX import support for local banks
 
-## 📁 Code Organization
+## Code Organization
 
 ```
 app/
@@ -121,7 +121,7 @@ app/
 - **Chart Rendering** — Interactive financial charts with ApexCharts
 - **Table Filtering** — Advanced search and filter capabilities
 
-## 🔧 Integration Capabilities
+## Integration Capabilities
 
 ### **File Import System**
 - **OFX Parser** — Custom Ruby implementation (`lib/ofx_simple_parser.rb`)
@@ -137,17 +137,17 @@ The import pipeline applies layered rules (implemented in `ImportDedupService`) 
 |-------|------|----------------------------------|--------|
 | 1 | Exact Duplicate | Same normalized description AND same date AND amount diff ≤ 0.01 | Skip (not created) |
 | 2 | Tolerance Duplicate | Same normalized description AND date diff ≤ 1 day AND amount diff ≤ 0.01 | Skip |
-| 3 | Similar (Flag) | (a) Same (or 1‑edit) normalized description AND date diff ≤ 3 days AND amount diff ≤ 2.00 OR (b) any prior txn (even >1 edit away) within those date & amount windows | Create + `possible_duplicate = true` |
+| 3 | Similar (Flag) | (a) Same (or 1-edit) normalized description AND date diff ≤ 3 days AND amount diff ≤ 2.00 OR (b) any prior txn (even >1 edit away) within those date & amount windows | Create + `possible_duplicate = true` |
 | 4 | Approximate Description | 1 edit (insert/substitute) difference is treated as same description for rules above | Included in same description bucket |
 
 Key implementation details:
 - Normalization collapses whitespace, lowercases, strips accents (`I18n.transliterate`).
-- One‑edit distance check avoids full Levenshtein cost for short strings.
+- One-edit distance check avoids full Levenshtein cost for short strings.
 - Fallback similarity (3a/3b) broadens coverage when banks radically change wording.
 - Amount tolerance constant: `FinancialConstants::AMOUNT_ABSOLUTE_TOLERANCE` (currently 0.01).
 - Date similarity horizon: `FinancialConstants::DATE_TOLERANCE_DAYS` (currently 3).
 
-Why this matters: prevents silent duplication in re‑imports while preserving user control over ambiguous near‑matches (flag instead of suppress). Future enhancements: configurable tolerances, metrics, bulk resolution UI, adaptive heuristics.
+Why this matters: prevents silent duplication in re-imports while preserving user control over ambiguous near-matches (flag instead of suppress). Future enhancements: configurable tolerances, metrics, bulk resolution UI, adaptive heuristics.
 
 #### Transfer Detection System
 The import pipeline automatically identifies potential transfers between user accounts using heuristic matching (implemented in `TransferDetectionService`):
@@ -181,7 +181,7 @@ potential_transfer_with_id BIGINT NULL
 - **Statement Automation** — Credit card cycle processing
 - **Validation Pipeline** — Multi-layer data validation and sanitization
 
-## 🔐 Security & Data Protection
+## Security & Data Protection
 
 ### **Application Security**
 - **Authentication** — Devise-based user session management
@@ -196,7 +196,7 @@ potential_transfer_with_id BIGINT NULL
 - **Standard Rails Security** — CSRF protection, parameter filtering
 - **No Sensitive Logging** — Financial amounts excluded from logs
 
-## 🚀 Deployment & Operations
+## Deployment & Operations
 
 ### **Infrastructure Compatibility**
 - **Container Ready** — Docker configuration for consistent deployment
@@ -210,7 +210,7 @@ potential_transfer_with_id BIGINT NULL
 - **Memory Management** — Efficient Ruby memory usage patterns
 - **Response Times** — Optimized for sub-200ms average response times
 
-## 🎨 Frontend Implementation
+## Frontend Implementation
 
 ### **User Experience Technology**
 - **Responsive Design** — Mobile-first approach with progressive enhancement
@@ -224,7 +224,7 @@ potential_transfer_with_id BIGINT NULL
 - **Color Contrast** — Minimum 4.5:1 ratio for normal text, 3:1 for large text
 - **Focus Management** — Clear focus indicators and logical tab order
 
-## � Projection Services Architecture
+## Projection Services Architecture
 
 ### Overview
 
@@ -258,7 +258,7 @@ The system uses a single, consistent horizon mode: **exact-date**.
 
 4. **User isolation**: `RecurringProjectionService` and `InstallmentProjectionService` query all active commitments/plans (not user-scoped). User isolation happens at the controller level via `current_user_scope`.
 
-## �📊 What's Special Here
+## What's Special Here
 
 1. **Smart Import Engine** — Automatically categorizes and deduplicates imported transactions
 2. **Credit Card Intelligence** — Understands Brazilian credit card cycles and statements
