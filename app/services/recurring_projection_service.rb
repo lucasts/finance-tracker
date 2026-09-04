@@ -16,7 +16,7 @@ class RecurringProjectionService
   #   months_ahead > 0  → exact day boundary (e.g. Mar 15 + 3 months = Jun 15)
   #   months_ahead == 0 → current month focus (end_of_month)
   # A month_end rounding mode was evaluated and rejected for consistency.
-  # See docs/TECHNICAL_SPECIFICATION.md § Projection Services Architecture.
+  # See docs/PROJECTION_SERVICES.md, Decision 1 (horizon semantics).
   horizon_date = as_of.end_of_month if months_ahead.zero?
   @horizon_end = horizon_date.end_of_day
   end

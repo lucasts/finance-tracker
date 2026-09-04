@@ -32,7 +32,7 @@ Finance Tracker is a comprehensive personal finance management system that provi
 
 ### 📈 **Financial Insights & Projections**
 - Monthly dashboard with income, expenses, and net flow analysis
-- End-of-month cash projection based on confirmed transactions, recurring commitments (3-month horizon), and installment plans (6-month horizon)
+- Projected balance after all commitments inside the horizon: the month's transactions plus recurring commitments (3-month horizon) and installment plans (6-month horizon). See `PROJECTION_SERVICES.md`
 - Projected balance display with alerts for negative or low balance
 - Per-category spending projection based on 3-month historical average
 - Category-based spending analysis and trends

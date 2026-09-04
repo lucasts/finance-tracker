@@ -18,7 +18,7 @@ class InstallmentProjectionService
   # Horizon semantics (exact-date mode — decided 2025-08, confirmed 2026-03):
   #   months_ahead > 0  → exact day boundary (e.g. Jan 15 + 6 months = Jul 15)
   #   months_ahead == 0 → current month focus (end_of_month)
-  # See docs/TECHNICAL_SPECIFICATION.md § Projection Services Architecture.
+  # See docs/PROJECTION_SERVICES.md, Decision 1 (horizon semantics).
   @horizon_end = (months_ahead.zero? ? as_of.end_of_month : horizon_date)
   end
 
