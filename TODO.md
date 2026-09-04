@@ -9,6 +9,11 @@ dedup heuristics, reports/projections, and Sidekiq background automation.
 This is a **personal finance tool** — built for personal use, with plans to open source.
 
 
+## 🐛 Known Issues
+
+### Projected balance double-counts this month's future transactions
+- [ ] `OverviewController#projected_balance` adds `future_transactions` (tomorrow through end of month, pending/confirmed) on top of `@balance`, which already sums every transaction of the month by `event_date` with no date or status filter. A pending expense later this month is subtracted twice. Fix: build the base from realized transactions (`event_date <= today`) or drop the second sum, and add a request spec with one pending future transaction. Context: `docs/PROJECTION_SERVICES.md`, "What follows".
+
 ## 🚀 Future Enhancements (Optional)
 
 ### User Experience
